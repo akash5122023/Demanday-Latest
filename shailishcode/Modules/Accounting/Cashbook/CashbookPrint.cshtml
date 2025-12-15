@@ -1,0 +1,147 @@
+﻿@model AdvanceCRM.Accounting.CashbookReportData
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+    tr, td {
+        page-break-inside: auto;
+        page-break-after: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #d3d3d3; 
+        font-size: 16px; 
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 12px; 
+    }
+
+    .company-box {
+        width: 50%;
+        text-align: center;
+        height: 80px; 
+    }
+
+    .side-box {
+        width: 25%;
+        text-align: center;
+        height: 80px; 
+    }
+
+    .signature-box {
+        height: 100px; 
+        vertical-align: bottom;
+    }
+</style>
+
+<script type="text/javascript">
+
+    var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+    var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function toWords(num) {
+        if ((num = num.toString()).length > 9) return 'overflow';
+        n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return; var str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only ' : '';
+        return str.trim();
+    }
+</script>
+
+<body>
+    <table>
+        <tr>
+            <td align="center">
+                <h3>
+                    @(Model.Cash.Type.Value == (AdvanceCRM.Masters.TransactionTypeMaster)1 ? "Receipt" : "Voucher")
+                </h3>
+            </td>
+        </tr>
+    </table>
+    @{ double amt = 0; }
+    <table>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td class="side-box">
+                            @if (Model.Company.Logo != null)
+                            {
+                                <img src="~/upload/@Model.Company.Logo"/>
+                            }
+                        </td>
+                        <td class="company-box">
+                            <h4><strong>@Model.Company.Name</strong></h4> 
+                            @if (Model.Company.Slogan != null)
+                            {
+                                @Model.Company.Slogan <br />
+                            }
+                            @Model.Company.Address <br />
+                            @Model.Company.Phone
+                        </td>
+                        <td class="side-box">
+                            <strong>@(Model.Cash.Type.Value == (AdvanceCRM.Masters.TransactionTypeMaster)1 ? "Receipt No:" : "Voucher No:")</strong> @Model.Cash.Id<br />
+                            <strong>Date:</strong> @Model.Cash.Date.ToDateFormat()
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Particulars</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            @Model.Cash.Head1
+                            @if ((Model.Cash.Head1 == "Sundry debtors") || (Model.Cash.Head1 == "Sundry creditors"))
+                            {
+                                <br /><strong>Name:</strong> @Model.Cash.ContactsName
+                            }
+                        </td>
+                        <td>@Model.Cash.Type</td>
+                        <td>
+                            @{ amt = Model.Cash.Type.Value == (AdvanceCRM.Masters.TransactionTypeMaster)1 ? Model.Cash.CashIn ?? 0 : Model.Cash.CashOut ?? 0; }
+                            @amt
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td colspan="3" bgcolor="gray">
+                            <strong>Total in Words:</strong>
+                            <script>document.write(toWords(@Convert.ToInt32(amt)))</script>
+                            &nbsp;Only
+                        </td>
+                    </tr>
+                    @if (Model.Cash.Narration != null)
+                    {
+                        <tr>
+                            <td colspan="3" bgcolor="gray">
+                                <strong>Narration:</strong> @Model.Cash.Narration
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td align="center" class="signature-box"><br /><br /><br /><strong>Authorized Sign</strong></td>
+                        <td align="center" class="signature-box"><br /><br /><br /><strong>Accountant</strong></td>
+                        <td align="center" class="signature-box"><br /><br /><br /><strong>Received From/By</strong></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>

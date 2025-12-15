@@ -1,0 +1,59 @@
+﻿
+<h4>List : <strong>@ViewBag.ListObject.Name</strong></h4>
+<br />
+<table class="table table-user-information">
+    <tbody>
+        <tr>
+            <td>
+                <strong>From Name</strong>
+            </td>
+            <td>@ViewBag.ListObject.CampaignDefaults.FromName</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>From Email</strong>
+            </td>
+            <td>@ViewBag.ListObject.CampaignDefaults.FromEmail</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Permission Reminder</strong>
+            </td>
+            <td>
+                @ViewBag.ListObject.PermissionReminder
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>Country</strong></td>
+            <td>@ViewBag.ListObject.Contact.Country</td>
+        </tr>
+        <tr>
+            <td><strong>State</strong></td>
+            <td>@ViewBag.ListObject.Contact.State</td>
+        </tr>
+        <tr>
+            <td><strong>City</strong></td>
+            <td>@ViewBag.ListObject.Contact.City</td>
+        </tr>
+        <tr>
+            <td><strong>Address</strong></td>
+            <td>@ViewBag.ListObject.Contact.Address1</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Zip</strong>
+            </td>
+            <td>@ViewBag.ListObject.Contact.Zip</td>
+        </tr>
+
+        @if (ViewBag.ListObject.Contact.Phone != "")
+        {
+        <tr>
+            <td><strong>Phone No</strong></td>
+            <td>@ViewBag.ListObject.Contact.Phone</td>
+        </tr>
+        }
+
+    </tbody>
+</table>

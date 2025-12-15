@@ -1,0 +1,188 @@
+﻿@using AdvanceCRM.Products
+@model AdvanceCRM.Reports.InventoryReportModel
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    Branchwise Stock Report
+</div>
+
+<table style="width:100%; border:groove" , border="1">
+    <tr>
+        <th>Sr. No.</th>
+        <th>Product</th>
+        <th>Branch</th>
+        <th>Quantity</th>
+        <th>Avg Value</th>
+    </tr>
+
+    @{
+        int cnt = 1;
+        double pqty = 0, sqty = 0, prqty = 0, srqty = 0, cqty = 0, qty = 0, stfqty = 0, sttqty = 0, gqty = 0;
+    }
+
+    @foreach (var item in Model.Products)
+    {
+        foreach (var branch in Model.AllBranch)
+        {
+            double avgsum = 0;
+            sqty = 0; // reset inside branch loop
+
+            pqty = (double)Model.PurchaseProducts
+            .Where(y => y.ProductsName == item.Name && y.PurchaseBranchId == branch.Id)
+            .Sum(x => x.Quantity);
+
+            var bomEntries = Model.BomProducts?
+            .Where(b => b.ProductsName == item.Name)
+            ?? Enumerable.Empty<BomProductsRow>();
+
+            if (bomEntries.Any()) // Product is BOM (assembly)
+            {
+                // Total BOM sold qty for this branch
+                double totalBomSoldQty = (double)Model.SalesProducts
+                .Where(sp => sp.ProductsName == item.Name && sp.SalesBranchId == branch.Id)
+                .Sum(sp => sp.Quantity);
+
+                // For each raw material in BOM
+                foreach (var child in bomEntries)
+                {
+                    // Quantity of raw material consumed = BOM sold qty × quantity per BOM
+                    double childQty = totalBomSoldQty * (double)child.Quantity;
+
+                    // Deduct from raw material (child) stock
+                    sqty += childQty;
+                }
+            }
+            else
+            {
+                // Normal (non-BOM) product sales per branch
+                sqty = (double)Model.SalesProducts
+                .Where(y => y.ProductsName == item.Name && y.SalesBranchId == branch.Id)
+                .Sum(x => x.Quantity);
+            }
+
+            prqty = (double)Model.PurchaseReturnProducts
+            .Where(y => y.ProductsName == item.Name && y.PurchaseReturnBranchId == branch.Id)
+            .Sum(x => x.Quantity);
+
+            srqty = (double)Model.SalesReturnProducts
+            .Where(y => y.ProductsName == item.Name && y.SalesReturnBranchId == branch.Id)
+            .Sum(x => x.Quantity);
+
+            cqty = (double)Model.ChallanProducts
+            .Where(y => y.ProductsName == item.Name && y.ChallanBranchId == branch.Id)
+            .Sum(x => x.Quantity);
+
+            stfqty = (double)Model.StockTransferFrom
+            .Where(y => y.ProductsName == item.Name && y.StockTransferFromBranchId == branch.Id)
+            .Sum(x => x.Quantity);
+
+            sttqty = (double)Model.StockTransferTo
+            .Where(y => y.ProductsName == item.Name && y.StockTransferToBranchId == branch.Id)
+            .Sum(x => x.Quantity);
+
+            gqty = (double)(Model.GrnProducts?
+            .Where(y => y.ProductsName == item.Name && y.BranchId == branch.Id)
+            .Sum(x => (double?)x.ReceivedQuantity) ?? 0);
+
+            qty = (pqty + srqty + sttqty + gqty) - (sqty + prqty + cqty + stfqty);
+
+            if (pqty > 0)
+            {
+                avgsum = (double)Model.PurchaseProducts
+                .Where(y => y.ProductsName == item.Name && y.PurchaseBranchId == branch.Id)
+                .Average(x => x.Price);
+            }
+
+            if (qty != 0)
+            {
+                <tr>
+                    <td>@cnt</td>
+                    <td>@item.Name</td>
+                    <td>@branch.Branch</td>
+                    <td style="text-align:right">@qty</td>
+                    <td style="text-align:right">
+                        @{
+                            double amt = avgsum * qty;
+                        }
+                        @amt.ToString("#,##0.00")
+                    </td>
+                </tr>
+
+                cnt++;
+            }
+        }
+    }
+</table>
+
+<div class="footer-note">
+    <em>Report generated automatically. Powered by Bizplus CRM.</em>
+</div>

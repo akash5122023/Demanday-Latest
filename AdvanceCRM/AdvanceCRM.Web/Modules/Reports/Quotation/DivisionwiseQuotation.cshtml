@@ -1,0 +1,154 @@
+﻿@model AdvanceCRM.Reports.QuotationReportModel
+@using AdvanceCRM.Quotation
+
+@*<strong>Divisionwise Quotation </strong>
+    &nbsp;&nbsp; - &nbsp;&nbsp; <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat()
+    <hr />
+    <table style="width:100%; border:groove" , border="1">
+        <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">Division</th><th style="text-align:center">Quantity</th><th style="text-align:center">Amount</th></tr>
+
+        @{ int cnt = 1;}
+
+        @foreach (var item in Model.Products.Select(x => x.ProductsDivisionId).Distinct())
+        {
+            <tr>
+                <td style="text-align:center; width:10%">
+                    @cnt
+                </td>
+
+                <td style="width:50%">
+                    @foreach (var pd in Model.Divisions)
+                    {
+                        if (Html.DisplayFor(x => item).ToString() == pd.Id.ToString())
+                        {
+                            <text> &nbsp;&nbsp;@pd.ProductsDivision </text>
+                        }
+                    }
+                </td>
+
+                <td style="width:20%; text-align:center">
+                    &nbsp;&nbsp;@Model.Products.Where(y => y.ProductsDivisionId.ToString() == Html.DisplayFor(x => item).ToString()).Sum(y => y.Quantity.Value)
+                </td>
+                <td style="width:20%; text-align:right">
+                    &nbsp;&nbsp;@Model.Products.Where(y => y.ProductsDivisionId.ToString() == Html.DisplayFor(x => item).ToString()).Sum(y => (double)y.LineTotal) &nbsp;&nbsp;
+                </td>
+            </tr>
+            cnt = cnt + 1;
+        }
+    </table>*@
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    Divisionwise Quotation
+</div>
+
+<div style="font-size: 14px; margin-bottom: 5px;">
+    <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() &nbsp;
+    <strong>To:</strong> @Model.Request.DateTo.ToDateFormat()
+</div>
+
+<table style="width:100%; border:groove" , border="1">
+    <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">Division</th><th style="text-align:center">Quantity</th><th style="text-align:center">Amount</th></tr>
+
+    @{ int cnt = 1;}
+
+    @foreach (var item in Model.Products.Select(x => x.ProductsDivisionId).Distinct())
+    {
+        <tr>
+            <td style="text-align:center; width:10%">
+                @cnt
+            </td>
+
+            <td style="width:50%">
+                @foreach (var pd in Model.Divisions)
+                {
+                    if (Html.DisplayFor(x => item).ToString() == pd.Id.ToString())
+                    {
+                        <text> &nbsp;&nbsp;@pd.ProductsDivision </text>
+                    }
+                }
+            </td>
+
+            <td style="width:20%; text-align:center">
+                &nbsp;&nbsp;@Model.Products.Where(y => y.ProductsDivisionId.ToString() == Html.DisplayFor(x => item).ToString()).Sum(y => y.Quantity.Value)
+            </td>
+            <td style="width:20%; text-align:right">
+                &nbsp;&nbsp;@Model.Products.Where(y => y.ProductsDivisionId.ToString() == Html.DisplayFor(x => item).ToString()).Sum(y => (double)y.LineTotal) &nbsp;&nbsp;
+            </td>
+        </tr>
+        cnt = cnt + 1;
+    }
+</table>
+
+<div class="footer-note">
+    <em>Report generated automatically. Powered by BizPlus ERP.</em>
+</div>

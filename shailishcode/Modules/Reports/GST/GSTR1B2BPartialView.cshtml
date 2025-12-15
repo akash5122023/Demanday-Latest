@@ -1,0 +1,203 @@
+﻿
+@model AdvanceCRM.Modules.Reports.GST.GSTR1PageModel
+@inject ITextLocalizer localizer
+
+<table class="table table-bordered table-condensed table-striped table-hover" style="width:100%">
+    <thead style="width:100%">
+        <tr style="height:40px; background-color:lightgrey;">
+            <th style="width:10%">GSTIN/UIN of Recipient</th>
+            <th style="width:10%">Receiver Name</th>
+            <th style="width:5%">Invoice No</th>
+            <th style="width:10%">Invoice Date</th>
+            <th style="width:10%">Invoice Value</th>
+            <th style="width:10%">Place Of Supply</th>
+            <th style="width:5%">Reverse Charge</th>
+            <th style="width:5%">Invoice Type</th>
+            <th style="width:2%">E-Commerce GSTIN</th>
+            <th style="width:5%">Rate</th>
+            <th style="width:2%">Applicable % of Tax Rate</th>
+            <th style="width:2%">Taxable Value</th>
+            <th style="width:4%">Cess Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var line in Model.SalesList)
+        {
+            foreach (var com in Model.CompanyList.Where(x => x.Id == line.CompanyId))
+            {
+                int comstate = (int)com.StateId;
+
+
+                foreach (var item in Model.SalesProductList.Where(x => x.SalesId == line.Id).GroupBy(y => y.Percentage1))
+                {
+
+                    <tr>
+                        <td style="width:10%">
+                            @line.ContactsGstin
+                        </td>
+                        <td style="width:10%">
+                            @line.ContactsName
+
+                        </td>
+                        <td style="width:5%">
+                            @if (line.InvoiceNo.HasValue)
+                            {
+                                var val = line.Date.Value.Year.ToString() + "/" + line.InvoiceNo.ToString();
+                                @val
+                            }
+                            else
+                            {
+                                var val = line.Date.Value.Year.ToString() + "/" + line.Id.ToString();
+                                @val
+                            }
+                        </td>
+                        <td style="width:10%">
+                            @line.Date.Value.ToString("dd-MMM-yyyy")
+
+                        </td>
+                        <td style="width:10%">
+                            @line.Total.Value.ToString("#,##0.00")
+                        </td>
+                        <td style="width:10%">
+                            @if (line.ContactsStateId.HasValue)
+                            {
+                                @Model.StateList.FirstOrDefault(x => x.Id == line.ContactsStateId).State
+                            }
+                            @*else
+                                {
+                                    @line.ContactsStateId
+                            }*@
+
+                        </td>
+                        <td style="width:5%">
+                            @if (line.ReverseCharge.HasValue)
+                            {
+                                if (line.ReverseCharge == true)
+                                {
+                                    <text>Y</text>
+                                }
+                                else
+                                {
+                                    <text>N</text>
+                                }
+                            }
+                        </td>
+                        <td style="width:5%">
+                            @if (line.InvoiceType.HasValue)
+                            {
+                                var type = line.InvoiceType.Value.GetText(localizer);
+                                <text> @type </text>
+                            }
+                        </td>
+                        <td style="width:5%">
+                            @if (!line.ContactsEComGstin.IsNullOrEmpty())
+                            {
+                                <text> @line.ContactsEComGstin </text>
+                            }
+                        </td>
+                        <td style="width:10%">
+                            @if (item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1 < 1)
+                            {
+                                @item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1
+                            }
+                            else
+                            {
+                                double t1 = ((double)@item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1) + ((double)@item.FirstOrDefault(x => x.SalesId == line.Id).Percentage2);
+
+                                @t1.ToString("#,##0.00");
+
+                            }
+                        </td>
+                        <td></td>
+                        <td>
+                            @item.Sum(x => x.GrandTotal).Value.ToString("#,##0.00")
+                        </td>
+                        <td></td>
+                    </tr>
+                }
+
+                foreach (var item in Model.SalesProductList.Where(x => x.SalesId == line.Id))
+                {
+                    double ptotal = 0; 
+                    double txamt1 = 0; 
+                    double txamt2 = 0; 
+                    double txtotamt = 0; 
+                    <tr style="height:40px; background-color:antiquewhite;">
+                        <td>@item.ProductsName</td>
+                        <td>@item.Price</td>
+                        <td>@item.Discount</td>
+                        <td>@item.Quantity</td>
+
+
+                        <td>
+                            @if (item.Discount != 0)
+                            {
+                                ptotal = ((double)@item.Price * (double)@item.Quantity);
+                                double dis = ((double)@item.Price * (double)@item.Quantity * (double)@item.Discount) / 100;
+                                ptotal = (ptotal - dis);
+                                @ptotal.ToString("#,##0.00");
+                            }
+                            else
+                            {
+                                ptotal = ((double)@item.Price * (double)@item.Quantity);
+                                @ptotal.ToString("#,##0.00");
+                            }
+
+                        </td>
+
+                        <td>
+                            @if (comstate == line.ContactsStateId)
+                            {
+                                @item.TaxType1 @item.Percentage1
+                            }
+
+                        </td>
+                        <td>
+                            @if (comstate == line.ContactsStateId)
+                            {
+                                txamt1 = ptotal * ((double)item.Percentage1 / 100);
+                                @txamt1.ToString("#,##0.00");
+                            }
+                        </td>
+                        <td>
+                            @if (comstate == line.ContactsStateId)
+                            {
+                                @item.TaxType2 @item.Percentage2
+                            }
+                        </td>
+                        <td>
+                            @if (comstate == line.ContactsStateId)
+                            {
+                                txamt2 = ptotal * ((double)item.Percentage2 / 100);
+                                @txamt2.ToString("#,##0.00");
+                            }
+                        </td>
+                        <td>
+                            @if (comstate != line.ContactsStateId)
+                            {
+                                double per = (double)item.Percentage1 + (double)item.Percentage2;
+                                @per.ToString("#,##0.00");
+                            }
+                        </td>
+                        <td>
+                            @if (comstate != line.ContactsStateId)
+                            {
+                                txtotamt = ptotal * (((double)item.Percentage1 + (double)item.Percentage2) / 100);
+                                @txtotamt.ToString("#,##0.00");
+                            }
+                        </td>
+                        <td>
+                            @{
+                                var totp = ptotal + txamt1 + txamt2 + txtotamt;
+                                @totp.ToString("#,##0.00");
+                            }
+                        </td>
+                        <td></td>
+                    </tr>
+                }
+
+            }
+        }
+    </tbody>
+</table>

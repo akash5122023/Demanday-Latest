@@ -1,0 +1,75 @@
+﻿@model AdvanceCRM.Reports.EnquiryReportModel
+
+
+<strong>Enquiry Statistics </strong>
+    &nbsp;&nbsp; - &nbsp;&nbsp; <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat()
+
+
+    @{ int cnt = 1; double a = 0; double openAmt = 0; double closeamt = 0; double wonamt = 0; double allamt = 0; double lostamt = 0; double hotamt = 0; double warmamt = 0; double coldamt = 0;}
+
+
+    @foreach (var item in Model.TotEnq) { allamt += (double)item.Total; }
+    @foreach (var item in Model.Open) { openAmt += (double)item.Total; }
+    @foreach (var item in Model.Closed) { closeamt += (double)item.Total; }
+    @foreach (var item in Model.Won) { wonamt += (double)item.Total; }
+    @foreach (var item in Model.Lost) { lostamt += (double)item.Total; }
+    @foreach (var item in Model.Hot) { hotamt += (double)item.Total; }
+    @foreach (var item in Model.Warm) { warmamt += (double)item.Total; }
+    @foreach (var item in Model.Cold) { coldamt += (double)item.Total; }
+    @foreach (var item in Model.TotEnq.Select(x => x.Source).Distinct())
+    { a += 1; }
+
+    <table style="width:100%; border:groove" , border="1" align="center">
+        <tr><td><strong> Statistics: </strong></td></tr>
+
+        <tr>
+            <th style="text-align:center"><strong> Total Enquiries</strong> </th>
+            <td style="text-align:center">  @Model.TotEnq.Count </td>
+            <td style="text-align:center">  @allamt </td>
+        </tr>
+        <tr>
+            <th style="text-align:center"><strong> Open Enquiries</strong> </th>
+            <td style="text-align:center">  @Model.Open.Count </td>
+            <td style="text-align:center">  @openAmt </td>
+        </tr>
+        <tr>
+            <th style="text-align:center" rowspan="2"><strong> Closed Enquiries</strong>  </th>
+            <td style="text-align:center">            Won  :@Model.Won.Count        </td>
+            <td style="text-align:center">            Won  :@wonamt        </td>
+        </tr>
+        <tr>
+            <td style="text-align:center">            Lost :@Model.Lost.Count        </td>
+            <td style="text-align:center">            Lost :@lostamt        </td>
+        </tr>
+        <tr>
+            <th style="text-align:center"><strong> HOT </strong></th>
+            <td style="text-align:center">  @Model.Hot.Count  </td>
+            <td style="text-align:center"> @hotamt </td>
+        </tr>
+        <tr>
+            <th style="text-align:center"><strong> Warm</strong></th>
+            <td style="text-align:center"> @Model.Warm.Count  </td>
+            <td style="text-align:center"> @warmamt </td>
+        </tr>
+        <tr>
+            <th style="text-align:center"><strong> Cold</strong> </th>
+            <td style="text-align:center"> @Model.Cold.Count </td>
+            <td style="text-align:center"> @coldamt </td>
+        </tr>
+        <tr>
+            <th style="text-align:center" rowspan=@a><strong> Source</strong> </th>
+            @foreach (var item in Model.TotEnq.Select(x => x.Source).Distinct())
+            {
+
+                <td colspan=@a>
+                    @Html.DisplayFor(x => item) = @Model.TotEnq.Where(y => y.Source == Html.DisplayFor(x => item).ToString()).Count()
+                </td>
+            }
+        <tr>
+        </tr>
+        </tr>
+
+    </table>
+
+
+  

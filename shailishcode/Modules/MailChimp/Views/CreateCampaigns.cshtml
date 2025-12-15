@@ -1,0 +1,207 @@
+﻿@model AdvanceCRM.Modules.MailChimp.Models.ModelCampaign
+@{
+    ViewBag.Title = "CreateCampaigns";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-select.css" rel="stylesheet" />
+<style>
+    .kv-reqd {
+        color: red;
+        font-family: monospace;
+        font-weight: normal;
+    }
+</style>
+<!-- jQuery -->
+
+<script src="~/Scripts/bootstrap-select.js"></script>
+<script type="text/javascript">
+    function GetListVal(selectObject) {
+        var id = selectObject.value;
+        $.ajax({
+            type: "GET",
+            async:true,
+            dataType: 'json',
+            url: '@Url.Action("GetDefaultCampaign", "MailChimp")',
+            data: { id: id },
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $('#FromName').val(data.CampaignDefaults.FromName);
+                $('#ReplyTo').val(data.CampaignDefaults.FromEmail);
+            }
+        })
+    }
+    $(document).ready(function () {
+        jQuery.validator.addMethod("aFunction",
+        function (value, element) {
+            if (value == "none")
+                return false;
+            else
+                return true;
+        },
+        "Please select value");
+        $('#CampaignFormId').validate({
+            errorClass: 'help-block animation-slideDown', // You can change the animation class for a different entrance animation - check animations page
+            errorElement: 'div',
+            errorPlacement: function (error, e) {
+                e.parents('.form-group > div').append(error);
+            },
+            highlight: function (e) {
+
+                $(e).closest('.form-group').removeClass('has-success has-error').addClass('has-error');
+                $(e).closest('.help-block').remove();
+            },
+            success: function (e) {
+                e.closest('.form-group').removeClass('has-success has-error');
+                e.closest('.help-block').remove();
+            },
+            rules: {
+                ListId: "required",
+                Title: "required",
+                SubjectLine: {
+                    required: true
+                },
+                FromName: {
+                    required: true
+                },
+
+                ReplyTo: {
+                    required: true,
+                    email: true
+                },
+                TemplateId:
+                    {
+                        required: true,
+                        aFunction: true
+                    }
+            },
+            // Specify the validation error messages
+            messages: {
+                Title: "Please enter campaign name",
+                SubjectLine: "Please enter subject",
+                FromName: "Please enter from name",
+                ReplyTo: "Please enter a valid email address"
+            }
+            //submitHandler: function (form) {
+            //    form.submit();
+            //}
+        });
+
+    });
+</script>
+
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">Create Campaigns</div></div>
+    <br />
+
+    @using (Html.BeginForm("CreateCampaigns", "MailChimp", FormMethod.Post, new { @id = "CampaignFormId", @class = "form-horizontal", role = "form" }))
+    {
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Id, new { @class = "form-control" })
+
+
+    <div class="container">
+        <form>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3 id_listval">
+                    <label for="LabelforList" class="col-form-label">Choose List<span class="kv-reqd">*</span></label>
+                    <select class="selectpicker bs-select form-control"
+                            name="ListId"
+                            id="ListId"
+                            data-show-subtext="true"
+                            data-live-search="true"
+                            required
+                            title="Select List"
+                            onchange="GetListVal(this)">
+                        @foreach (var item in ViewBag.ListData)
+                                {
+                        <option value="@item.Id">
+                            @item.Name
+                        </option>
+                                }
+                    </select>
+                    <input type="hidden" name="SearchButton" value="true">
+                    @Html.ValidationMessageFor(m => m.ListId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <script type="text/javascript">
+                function SetListVal() {
+                    $("div.id_listval select").val('@Model.ListId');
+                }
+                SetListVal();
+            </script>
+
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforCampaignName" class="col-form-label">Campaign Name <span class="kv-reqd">*</span> </label>
+                    @Html.TextBoxFor(model => model.Title, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforEmailSubject" class="col-form-label">Email Subject<span class="kv-reqd">*</span></label>
+                    @Html.TextBoxFor(model => model.SubjectLine, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.SubjectLine, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelFromName" class="col-form-label">From Name<span class="kv-reqd">*</span></label>
+                    @Html.TextBoxFor(model => model.FromName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.FromName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforEmailAddress" class="col-form-label">From email Address<span class="kv-reqd">*</span></label>
+                    @Html.TextBoxFor(model => model.ReplyTo, new { @class = "form-control", @type = "email" })
+                    @Html.ValidationMessageFor(m => m.ReplyTo, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3 id_100">
+                    <label for="LabelforTemplate" class="col-form-label">Choose Template <span class="kv-reqd">*</span></label>
+
+                    <select class="selectpicker bs-select form-control"
+                            name="TemplateId" id="TemplateId"
+                            data-show-subtext="true"
+                            data-live-search="true" title="Select Template">
+                        @foreach (var item in ViewBag.TemplateData)
+                                {
+                        <option value="@item.Id">
+                            @item.Name
+                        </option>
+                                }
+                    </select>
+                    <input type="hidden" name="SearchButton" value="true">
+                    @Html.ValidationMessageFor(m => m.TemplateId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <script type="text/javascript">
+                function SetTemplateVal() {
+                    $("div.id_100 select").val('@Model.TemplateId');
+                }
+                SetTemplateVal();
+            </script>
+
+            @*<div class="col-sm-2 col-md-2 col-lg-2">
+                   <button type="button" class="btn btn-block navbar-btn" title="Create Template" onclick="location.href = 'https://us16.admin.mailchimp.com/templates/'">Create Template</button>
+                </div>*@
+            <div class="form-group row">
+                <div class="offset-sm-2 col-sm-10">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-primary" title="Cancel" onclick="location.href = '@Url.Action("SentCampaigns", "MailChimp")';">Cancel</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    }
+</div>
+
+
+
+

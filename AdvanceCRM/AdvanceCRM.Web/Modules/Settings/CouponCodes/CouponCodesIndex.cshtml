@@ -1,0 +1,13 @@
+@inject Serenity.ITextLocalizer Localizer
+@{
+     ViewData["Title"] = Localizer.Get("Db.Settings.CouponCode.EntityPlural");
+}
+
+<div id="CouponGrid"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Settings.CouponCodeGrid($('#CouponGrid')).init();
+        Q.initFullHeightGridPage($('#CouponGrid'));
+    });
+</script>

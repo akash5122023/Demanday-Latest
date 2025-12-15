@@ -1,0 +1,18 @@
+﻿@inject Serenity.ITextLocalizer Localizer
+@using Microsoft.AspNetCore.Http
+@{
+     ViewData["Title"] = Localizer.Get("Db.Contacts.Contacts.EntityPlural");
+}
+@section Head {
+    <script>var CKEDITOR_BASEPATH = '@Url.Content("~/Scripts/ckeditor/")';</script>
+    @Html.ScriptBundle("CKEditor")
+}
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Contacts.ContactsGrid($('#GridDiv'), {}).init();
+
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });
+</script>

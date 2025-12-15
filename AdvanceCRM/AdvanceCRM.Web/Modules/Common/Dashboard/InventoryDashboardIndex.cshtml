@@ -1,0 +1,176 @@
+@model AdvanceCRM.Common.InventoryDashboardPageModel
+@using System.Linq
+@{
+    ViewData["Title"] = "Inventory Dashboard";
+}
+
+@section Head {
+    @Html.StyleBundle("Pages/InventoryDashboard")
+    @Html.ScriptBundle("Pages/InventoryDashboard")
+
+    <style>
+        .table-custom-bg {
+            background-color: #f5f5f5;
+        }
+
+        .table-custom th, .table-custom td {
+            color: #333;
+        }
+
+        .table-custom thead {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .table-custom-striped tbody tr:nth-of-type(odd) {
+            background-color: #e0f7fa;
+        }
+
+        .table-custom-striped tbody tr:nth-of-type(even) {
+            background-color: #ffffff;
+        }
+    </style>
+}
+
+@if (!Model.InventoryDataAvailable)
+{
+    <div class="alert alert-warning">
+        Inventory data is currently unavailable. Once the Inventory table is created or synchronized, the dashboard metrics will appear here.
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                <h3>₹@Model.TotalInventoryValue.ToString("N2")</h3>
+                <p>Total Inventory Value</p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-bag"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-yellow">
+            <div class="inner">
+                <h3>@Model.LowStockItems.Count.ToString()</h3>
+                <p>Low Stock Items</p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-alert-circled"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-red">
+            <div class="inner">
+                <h3>@Model.OverstockItems.Count.ToString()</h3>
+                <p>Overstock Items</p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-stats-bars"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-light-blue">
+            <div class="inner">
+                <h3>@((Model.LowStockItems.Count + Model.OverstockItems.Count).ToString())</h3>
+                <p>Total Products</p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-pricetag"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Low Stock Items</h4>
+        <table class="table table-bordered table-hover table-custom table-custom-striped">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Code</th>
+                    <th>Quantity</th>
+                    <th>Min Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.LowStockItems)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Code</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.MinimumStock</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Overstock Items</h4>
+        <table class="table table-bordered table-hover table-custom table-custom-striped">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Code</th>
+                    <th>Quantity</th>
+                    <th>Max Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OverstockItems)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Code</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.MaximumStock</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <h4>Stock By Branch</h4>
+        <table class="table table-bordered table-hover table-custom table-custom-striped">
+            <thead>
+                <tr>
+                    <th>Branch</th>
+                    <th>Total Quantity</th>
+                    <th>Total Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.StockByBranch.Any())
+                {
+                    foreach (var branch in Model.StockByBranch)
+                    {
+                        var totalQuantity = branch.Value.Sum(item => item.Quantity);
+                        var totalValue = branch.Value.Sum(item => item.TotalValue);
+
+                        <tr>
+                            <td>@branch.Key</td>
+                            <td>@totalQuantity</td>
+                            <td>₹@totalValue.ToString("N2")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No inventory quantities are available to summarize by branch.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

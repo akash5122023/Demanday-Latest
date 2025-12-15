@@ -1,0 +1,142 @@
+@model AdvanceCRM.Administration.Pages.TenantLicensePageModel
+@using System
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "Client License Monitor";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+
+    var generatedOn = DateTime.Now;
+    var filterTerm = Model?.FilterTerm;
+    var filterStatus = Model?.FilterStatus;
+    string? statusLabel = null;
+    if (!string.IsNullOrWhiteSpace(filterStatus))
+    {
+        statusLabel = string.Equals(filterStatus, "expired", StringComparison.OrdinalIgnoreCase)
+            ? "Expired"
+            : "Active";
+    }
+}
+
+<div class="tenant-license-print tenant-license-page">
+    <div class="tenant-license-print__header">
+        <div>
+            <h2 class="page-title">Client License Monitor</h2>
+            @if (!string.IsNullOrWhiteSpace(filterTerm) || !string.IsNullOrWhiteSpace(statusLabel))
+            {
+                <div class="tenant-license-print__filters">
+                    <span>Filters applied:</span>
+                    <ul>
+                        @if (!string.IsNullOrWhiteSpace(filterTerm))
+                        {
+                            <li><strong>Search:</strong> @filterTerm</li>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(statusLabel))
+                        {
+                            <li><strong>Status:</strong> @statusLabel</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+        <div class="tenant-license-print__meta">
+            <span>Generated on: @generatedOn.ToString("dd MMM yyyy HH:mm")</span>
+        </div>
+    </div>
+
+    @{
+        var previousFlag = ViewData["TenantLicenseTableIsPrint"];
+        ViewData["TenantLicenseTableIsPrint"] = true;
+    }
+    @Html.Partial(MVC.Views.Administration.TenantLicense._TenantLicenseTable, Model)
+    @{
+        ViewData["TenantLicenseTableIsPrint"] = previousFlag;
+    }
+</div>
+
+@section Head {
+    <style>
+        body {
+            padding: 30px;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #212529;
+        }
+
+        .tenant-license-print__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tenant-license-print__meta {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: right;
+        }
+
+        .tenant-license-print__filters {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .tenant-license-print__filters ul {
+            margin: 0.25rem 0 0;
+            padding-left: 1.2rem;
+        }
+
+        .tenant-license-print__filters li {
+            margin-bottom: 0.1rem;
+        }
+
+        .tenant-license-table-container {
+            margin-top: 0.5rem;
+        }
+
+        .tenant-license-table {
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .tenant-license-table tr.expired {
+            background-color: #f8d7da;
+        }
+
+        .tenant-license-table .tenant-name {
+            font-weight: 600;
+        }
+
+        .tenant-license-table .tenant-subdomain {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .tenant-license-table .badge {
+            font-size: 0.85rem;
+        }
+
+        .tenant-license-table .text-muted {
+            color: #6c757d !important;
+        }
+
+        .tenant-license-table .badge-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .tenant-license-table .badge-info {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+
+        @@media print {
+            body {
+                padding: 0.5in;
+            }
+
+            .tenant-license-print__header {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+}

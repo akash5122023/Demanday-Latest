@@ -1,0 +1,1839 @@
+﻿@model AdvanceCRM.Common.AccountsDashboardPageModel
+
+<div class="row">
+    @{var str = "0.00";}
+    @if (Model.TotalEnquiry > 0)
+    {
+
+        <div class="col-lg-6">
+            <div class="box box-primary collapsed-box" style='background: WhiteSmoke;'>
+                <div class="box-header">
+                    <i class="fa fa-group"></i>
+                    <h3 class="box-title">Enquiry</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+
+                    <div class="col-lg-12" id="EnqList">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Total     :  @Model.TotalEnquiry</h3>
+
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            <div class="box-body">
+                                <ul class="todo-list">
+                                    <li style='background: lightgrey;'>
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td width="10%" style='text-align:center;'>
+                                                    <span class="text"><strong>No</strong> </span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Date</strong></span>
+                                                </td>
+                                                <td width="20%" style='text-align:center;'>
+                                                    <span class="text"><strong>Value</strong></span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Representative</strong></span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </li>
+                                    @if (Model.TotalEnquiryList.Count() > 0)
+                                    {
+                                        foreach (var item in Model.TotalEnquiryList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Enquiry/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+                                    }
+
+                                </ul>
+                            </div><!-- /.box-body -->
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="EnqWon">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Won    :  @Model.EnquiryWon</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.EnquiryWonList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.EnquiryWonList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Enquiry/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="EnqLost">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Lost   :  @Model.EnquiryLost</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.EnquiryLostList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.EnquiryLostList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Enquiry/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }<!-- /.box-body -->
+                        </div><!-- /.box -->
+                    </div>
+
+
+
+
+
+
+
+
+                    @*<br /><br />
+                    <div class="col-lg-12" id="EnqOpen">
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Open   :  @Model.EnquiryStatusOpen</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div>
+                            @if (Model.EnquiryStatusOpenList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.EnquiryStatusOpenList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Enquiry/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>*@
+
+                    @*<br /><br />
+                    <div class="col-lg-12" id="EnqClosed">
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Closed    :  @Model.EnquiryStatusClosed</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div>
+                            @if (Model.EnquiryStatusClosedList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.EnquiryStatusClosedList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Enquiry/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>*@
+
+                    @*<br /><br />
+                    <div class="col-lg-12" id="EnqPending">
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Pending    :  @Model.EnquiryStatusPending</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div>
+                            @if (Model.EnquiryStatusPendingList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.EnquiryStatusPendingList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Enquiry/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>*@
+
+
+                </div>
+
+
+
+            </div>
+        </div>
+    }
+    @if (Model.TotalQuotation > 0)
+    {
+        <div class="col-lg-6">
+            <div class="box box-primary collapsed-box" style='background: WhiteSmoke;'>
+                <div class="box-header">
+                    <i class="fa fa-file-text"></i>
+                    <h3 class="box-title">Quotation</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+
+                    <div class="col-lg-12" id="QuotList">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Total     :  @Model.TotalQuotation</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            <div class="box-body">
+                                <ul class="todo-list">
+                                    <li style='background: lightgrey;'>
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td width="10%" style='text-align:center;'>
+                                                    <span class="text"><strong>No</strong> </span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Date</strong></span>
+                                                </td>
+                                                <td width="20%" style='text-align:center;'>
+                                                    <span class="text"><strong>Value</strong></span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Representative</strong></span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </li>
+                                    @if (Model.TotalQuotationList.Count() > 0)
+                                    {
+                                        foreach (var item in Model.TotalQuotationList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Quotation/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text" style='text-align:center;'>@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+                                    }
+
+                                </ul>
+                            </div><!-- /.box-body -->
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="QuotWon">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Won    :  @Model.QuotationWon</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.QuotationWonList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.QuotationWonList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Quotation/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="QuotLost">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Lost   :  @Model.QuotationLost</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.QuotationLostList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.QuotationLostList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Quotation/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }<!-- /.box-body -->
+                        </div><!-- /.box -->
+                    </div>
+
+                    @*<br /><br />
+                    <div class="col-lg-12" id="QuotOpen">
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Open   :  @Model.QuotationStatusOpen</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div>
+                            @if (Model.QuotationStatusOpenList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.QuotationStatusOpenList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Quotation/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>*@
+
+                    @*<br /><br />
+                    <div class="col-lg-12" id="QuotClosed">
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Closed    :  @Model.QuotationStatusClosed</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div>
+                            @if (Model.QuotationStatusClosedList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.QuotationStatusClosedList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Quotation/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>*@
+
+                    @*<br /><br />
+                    <div class="col-lg-12" id="QuotPending">
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Pending    :  @Model.QuotationStatusPending</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div>
+                            @if (Model.QuotationStatusPendingList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.QuotationStatusPendingList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:location.href = '/Quotation/#edit/@item.Id'">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>*@
+
+
+                </div>
+
+            </div>
+        </div>
+    }
+
+</div>
+<div class="row">
+    @if (Model.TotalSales > 0)
+    {
+        <div class="col-lg-6">
+            <div class="box box-primary collapsed-box" style='background: WhiteSmoke;'>
+
+                <div class="box-header">
+                    <i class="icon icon-docs"></i>
+                    <h3 class="box-title"> Sales</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+
+                    <div class="col-lg-12" id="SalList">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Total     :  @Model.TotalSales</h3>
+
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            <div class="box-body">
+                                <ul class="todo-list">
+                                    <li style='background: lightgrey;'>
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td width="10%" style='text-align:center;'>
+                                                    <span class="text"><strong>No</strong> </span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Date</strong></span>
+                                                </td>
+                                                <td width="20%" style='text-align:center;'>
+                                                    <span class="text"><strong>Value</strong></span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Representative</strong></span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </li>
+                                    @if (Model.TotalSalesList.Count() > 0)
+                                    {
+                                        foreach (var item in Model.TotalSalesList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+                                    }
+
+                                </ul>
+                            </div><!-- /.box-body -->
+                        </div><!-- /.box -->
+                    </div>
+                    <br /><br />
+                    <div class="col-lg-12" id="SalOpen">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Open   :  @Model.SalesStatusOpen</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.SalesStatusOpenList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.SalesStatusOpenList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="SalClosed">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Closed    :  @Model.SalesStatusClosed</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.SalesStatusClosedList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.SalesStatusClosedList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">@item.Total.Value.ToString("#,##0.00")</span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="SalPending">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Pending    :  @Model.SalesStatusPending</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.SalesStatusPendingList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.SalesStatusPendingList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+
+                    <br /><br />
+                    <div class="col-lg-12" id="SalCash">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Cash    :  @Model.SalesCashCount</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.SalesCashList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.SalesCashList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="SalCredit">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Credit   :  @Model.SalesCreditCount</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.SalesCreditList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Value</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.SalesCreditList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">
+                                                                @if (item.Total.HasValue == true)
+                                                                {
+                                                                    @item.Total.Value.ToString("#,##0.00")
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @str;
+                                                                }
+                                                            </span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }<!-- /.box-body -->
+                        </div><!-- /.box -->
+                    </div>
+
+
+                </div>
+
+
+
+            </div>
+        </div>
+
+    }
+
+    @if (Model.TotalCMSList.Count() > 0)
+    {
+
+        <div class="col-lg-6">
+            <div class="box box-primary collapsed-box" style='background: WhiteSmoke;'>
+                <div class="box-header">
+                    <i class="fa fa-support"></i>
+                    <h3 class="box-title">CMS</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+
+                    <div class="col-lg-12" id="CMCTotalList">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Total     :  @Model.TotalCMSList.Count()</h3>
+
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            <div class="box-body">
+                                <ul class="todo-list">
+                                    <li style='background: lightgrey;'>
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td width="10%" style='text-align:center;'>
+                                                    <span class="text"><strong>No</strong> </span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Date</strong></span>
+                                                </td>
+                                                <td width="20%" style='text-align:center;'>
+                                                    <span class="text"><strong>Product</strong></span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Representative</strong></span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </li>
+                                    @if (Model.TotalCMSList.Count() > 0)
+                                    {
+                                        foreach (var item in Model.TotalCMSList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text">@item.ProductsName</span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedToUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+                                    }
+
+                                </ul>
+                            </div><!-- /.box-body -->
+                        </div><!-- /.box -->
+                    </div>
+                    <br /><br />
+                    <div class="col-lg-12" id="CMSOpen">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Open   :  @Model.CMSStatusOpenList.Count()</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.CMSStatusOpenList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Product</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.CMSStatusOpenList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text">@item.ProductsName</span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedToUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="CMSClosed">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Closed    :  @Model.CMSStatusClosedList.Count()</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.CMSStatusClosedList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Product</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.CMSStatusClosedList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text">@item.ProductsName</span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedToUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="CMSPending">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Pending    :  @Model.CMSStatusPendingList.Count()</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.CMSStatusPendingList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Product</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.CMSStatusPendingList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Id</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.Date.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text">@item.ProductsName</span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedToUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    }
+
+</div>
+<div class="row">
+    @if (Model.TotalAMCList.Count() > 0)
+    {
+        <div class="col-lg-6">
+            <div class="box box-primary collapsed-box" style='background: WhiteSmoke;'>
+                <div class="box-header">
+                    <i class="fa fa-file-code-o"></i>
+                    <h3 class="box-title">AMC</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+
+                    <div class="col-lg-12" id="CMCTotalList">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Total     :  @Model.TotalAMCList.Count()</h3>
+
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            <div class="box-body">
+                                <ul class="todo-list">
+                                    <li style='background: lightgrey;'>
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td width="10%" style='text-align:center;'>
+                                                    <span class="text"><strong>No</strong> </span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Expected Date</strong></span>
+                                                </td>
+                                                <td width="20%" style='text-align:center;'>
+                                                    <span class="text"><strong>Visit Details</strong></span>
+                                                </td>
+                                                <td width="30%" style='text-align:center;'>
+                                                    <span class="text"><strong>Representative</strong></span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </li>
+                                    @if (Model.TotalAMCList.Count() > 0)
+                                    {
+                                        foreach (var item in Model.TotalAMCList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.AMCId', false)">@item.AMCId</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.VisitDate.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text">@item.VisitDetails</span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedToUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+                                    }
+
+                                </ul>
+                            </div><!-- /.box-body -->
+                        </div><!-- /.box -->
+                    </div>
+                    <br /><br />
+                    <div class="col-lg-12" id="AMCOpen">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Open   :  @Model.AMCVisitsOpenList.Count()</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.AMCVisitsOpenList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Expected Date</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.AMCVisitsOpenList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.AMCId', false)">@item.AMCId</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.VisitDate.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedToUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="AMCClosed">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Closed    :  @Model.AMCVisitsClosedList.Count()</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.AMCVisitsClosedList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="25%" style='text-align:center;'>
+                                                        <span class="text"><strong>Expected Date</strong></span>
+                                                    </td>
+                                                    <td width="25%" style='text-align:center;'>
+                                                        <span class="text"><strong>Completion Date</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Visit Details</strong></span>
+                                                    </td>
+                                                    <td width="20%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.AMCVisitsClosedList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.AMCId', false)">@item.AMCId</a></span>
+                                                        </td>
+                                                        <td width="25%" style='text-align:center;'>
+                                                            <span class="text">@item.VisitDate.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="25%" style='text-align:center;'>
+                                                            <span class="text">@item.CompletionDate.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text">@item.VisitDetails</span>
+                                                        </td>
+                                                        <td width="20%">
+                                                            <span class="text pull-right">@item.AssignedToUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+
+                    <br /><br />
+                    <div class="col-lg-12" id="AMCPending">
+                        <!-- TO DO List -->
+                        <div class="box box-primary collapsed-box">
+                            <div class="box-header">
+                                <i class="ion ion-clipboard"></i>
+                                <h3 class="box-title">Pending    :  @Model.AMCVisitsPendingList.Count()</h3>
+                                <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                            </div><!-- /.box-header -->
+                            @if (Model.AMCVisitsPendingList.Count() > 0)
+                            {
+                                <div class="box-body">
+                                    <ul class="todo-list">
+                                        <li style='background: lightgrey;'>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td width="10%" style='text-align:center;'>
+                                                        <span class="text"><strong>No</strong> </span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Expected Date</strong></span>
+                                                    </td>
+                                                    <td width="30%" style='text-align:center;'>
+                                                        <span class="text"><strong>Representative</strong></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </li>
+
+                                        @foreach (var item in Model.AMCVisitsPendingList)
+                                        {
+                                            <li>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        <td width="10%">
+                                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.AMCId', false)">@item.AMCId</a></span>
+                                                        </td>
+                                                        <td width="30%" style='text-align:center;'>
+                                                            <span class="text">@item.VisitDate.Value.ToString("dd-MMM-yyyy")</span>
+                                                        </td>
+                                                        <td width="30%">
+                                                            <span class="text pull-right">@item.AssignedToUsername</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div><!-- /.box-body -->
+                                <!-- /.box-body -->
+                            }
+                        </div><!-- /.box -->
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+
+    }
+</div>

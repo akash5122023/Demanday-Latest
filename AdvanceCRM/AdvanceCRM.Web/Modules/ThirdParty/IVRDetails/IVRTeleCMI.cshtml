@@ -1,0 +1,152 @@
+﻿@model  AdvanceCRM.Modules.ThirdParty.IVRDetails.IVRTeleCMIModel
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "IVR TeleCMI";
+}
+@section Head {
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css" />
+    <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+    <script src="~/Scripts/jquery.icheck.min.js"></script>
+    <script src="~/Scripts/adminlte/demo.js"></script>
+}
+<script type="text/javascript">
+   function NewEnquiry() {
+       Q.initFullHeightGridPage($('#DivId'));
+       new AdvanceCRM.Enquiry.EnquiryDialog().loadNewAndOpenDialog();
+   }
+
+   function LoadData() {
+       $.ajax({
+           url: '@Url.Action("LoadTeleCMIData", "IVR")?StartDate=' + encodeURIComponent($('#@Html.IdFor(m=> m.StartDate)').val()) + '&EndDate=' + encodeURIComponent($('#@Html.IdFor(m=> m.EndDate)').val()) + '&Type=' + $("#ListId").val(),
+                   type: 'GET',
+                   data: "",
+                   contentType: 'application/json; charset=utf-8',
+                   success: function (data) {
+                       $("#DivId").html(data);
+                   },
+                        error: function (jqXHR, exception) {
+                            var msg = '';
+                            if (jqXHR.status === 0) {
+                                msg = 'Not connect.\n Verify Network.';
+                            } else if (jqXHR.status == 404) {
+                                msg = 'Requested page not found. [404]';
+                            } else if (jqXHR.status == 500) {
+                                msg = 'Internal Server Error [500].';
+                            } else if (exception === 'parsererror') {
+                                msg = 'Requested JSON parse failed.';
+                            } else if (exception === 'timeout') {
+                                msg = 'Time out error.';
+                            } else if (exception === 'abort') {
+                                msg = 'Ajax request aborted.';
+                            } else {
+                                msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                            }
+                            toastr.error(msg);
+                   }
+               });
+
+   }
+
+   $(function () {
+
+       $('input[name="DateRange"]').daterangepicker({
+            locale: {
+                format: 'DD/MM/YYYY'
+            },
+            startDate: $('#@Html.IdFor(m=> m.StartDate)').val(),
+            endDate: $('#@Html.IdFor(m=> m.EndDate)').val()
+       });
+
+       $('input[name="DateRange"]').on('apply.daterangepicker', function (ev, picker) {
+               $("#StartDate").val(picker.startDate.format('DD/MM/YYYY'));
+               $("#EndDate").val(picker.endDate.format('DD/MM/YYYY'));
+           $(this).val($("#StartDate").val() + ' - ' + $("#EndDate").val());
+           LoadData();
+       });
+
+       $("#ListId").on('change', function () {
+           $("#ListId").val(this.value);
+
+           if ($("#ListId").val() == "")
+               return;
+
+           LoadData();
+       });
+   });
+</script>
+@section ContentHeader {
+    <h1>@ViewData["Title"]</h1>
+}
+<div class="row">
+    <!-- /.col -->
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                @*
+                    <h3 class="box-title">Inbox</h3>
+                *@
+                <div class="row col-md-12">
+                    <div class="col-md-3">
+                        <div class="box-tools">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-phone"></i>
+                                    </div>
+                                    <select class="form-control select2" id="ListId">
+                                        <option selected="selected" value="1">Incomming Answered</option>
+                                        <option value="2">Incoming Missed</option>
+                                        <option value="3">Outgoing Answered</option>
+                                        <option value="4">Outgoing Missed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="box-tools">
+                            <!-- Date range -->
+                            <div class="form-group">
+                                @*<label>Date range:</label>*@
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control pull-right" name="DateRange">
+                                </div>
+                                <!-- /.input group -->
+                            </div>
+                            <!-- /.form group -->
+                            <!-- Date and time range -->
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                    <div class="has-feedback">
+                        <div class="form-group-sm  pull-right">
+                            <button class="btn btn-default" id="launchEnquiry" onclick="NewEnquiry();">Launch Enquiry <i class="fa fa-arrow-circle-right"></i></button>
+                            <a href="~/IVRAgent" target="_blank" class="button btn btn-default">Agent Login <i class="fa fa-user-circle"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-tools -->
+            </div>
+            <!-- /.box-header -->
+            @using (Html.BeginForm("Index", "IVR", FormMethod.Get))
+            {
+                @Html.HiddenFor(x => x.EndDate)
+                @Html.HiddenFor(x => x.StartDate)
+                @Html.HiddenFor(x => x.Type)
+                @Html.HiddenFor(x => x.Page)
+                <div id="DivId">
+                    @Html.Partial(MVC.Views.ThirdParty.IVRDetails.IVRTeleCMIData, Model)
+                    <!-- /.box-body -->
+                </div>
+            }
+        </div>
+        <!-- /. box -->
+    </div>
+    <!-- /.col -->
+</div>
+<!-- /.row -->

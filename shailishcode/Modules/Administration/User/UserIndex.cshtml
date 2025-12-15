@@ -1,0 +1,20 @@
+﻿
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "User";
+}
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Administration.UserGrid($('#GridDiv'), {
+        });
+
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });
+</script>
+
+<div class="alert alert-info alert-dismissable">
+    <strong style="color:red">*Note: While adding new user, if no upper level hierarchy is applicable then select admin as default(Level 5 is the top most in hierarchy)</strong>
+</div>

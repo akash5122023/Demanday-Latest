@@ -1,0 +1,33 @@
+﻿{
+  "Base": [
+    "~/Content/font-open-sans-base64.css",
+    "~/Content/font-awesome.min.css",
+    "~/Content/simple-line-icons.css",
+    "~/Content/ionicons.min.css",
+    "~/Content/aristo/aristo.css",
+    "~/Content/bootstrap.min.css",
+    "~/Content/bootstrap-switch/bootstrap3/bootstrap-switch.min.css",
+    "~/Content/css/select2.css",
+    "~/Content/pace/themes/pace-theme-bounce.css",
+    "~/Content/toastr.css",
+    "~/Content/slick.grid.css",
+    "~/Content/serenity/serenity.css",
+    "~/Scripts/vegas/vegas.min.css"
+  ],
+  "Site": [
+    "~/Content/jquery.fileupload.css",
+    "~/Content/introjs/introjs.css",
+    "~/Content/colorbox/jquery.colorbox.css",
+    "~/Content/site/site.css",
+    "~/Modules/_Ext/ExtStyles.css",
+    "~/Modules/_Ext/ExtSkins.css"
+  ],
+  "Pages/Dashboard": [
+    "~/Content/iCheck/flat/blue.css",
+    "~/Scripts/morris/morris.css",
+    "~/Scripts/jvectormap/jquery-jvectormap-1.2.2.css",
+    "~/Scripts/datepicker/datepicker3.css",
+    "~/Scripts/daterangepicker/daterangepicker-bs3.css",
+    "~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css"
+  ]
+}

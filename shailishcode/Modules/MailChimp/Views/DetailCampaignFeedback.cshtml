@@ -1,0 +1,21 @@
+﻿@model MailChimp.Net.Models.Feedback
+@{
+    ViewBag.Title = $"Feedback Details for campaign ID {Model.CampaignId}";
+}
+
+<h2>Details of Feedback </h2>
+
+<dl class="row">
+    <dt class="col-md-3 text-right"> Feedback Id</dt>
+    <dd class="col-md-9">@Model.FeedbackId</dd>
+
+    <dt class="col-md-3 text-right">Created At</dt>
+    <dd class="col-md-9">@Model.CreatedAt</dd>
+
+    <dt class="col-md-3 text-right">Created By</dt>
+    <dd class="col-md-9">@Model.CreatedBy</dd>
+
+    <dt class="col-md-3 text-right">Message</dt>
+    <dd class="col-md-9">@Model.Message</dd>
+</dl>
+

@@ -1,0 +1,296 @@
+﻿@model AdvanceCRM.Sales.SalesReturnReportData
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    #datatable {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #datatable td, #datatable th {
+            border: 1px solid #ddd;
+            padding: 2px
+        }
+
+    header {
+        padding: 10px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #AAAAAA;
+    }
+
+    #logo {
+        float: left;
+        margin-top: 8px;
+    }
+
+    #company {
+        width: 50%;
+        float: right;
+        text-align: right;
+    }
+
+    #client {
+        border-left: 6px solid #0087C3;
+    }
+</style>
+
+<script type="text/javascript">
+    var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+    var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function toWords(num) {
+        if ((num = num.toString()).length > 9) return 'overflow';
+        n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return; var str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only ' : '';
+        return str.trim();
+    }
+</script>
+
+<body style="align-self:stretch; align-items:center; align-items:center">
+    <table style="width: 100% " border="0">
+        @if (Model.Company.HeaderImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%">
+                    <img src="~/upload/@Model.Company.DcHeaderImage" height="@Model.Company.DcHeaderHeight" width="@Model.Company.DcHeaderWidth" />
+                </td>
+            </tr>
+        }
+     @*    @if (!string.IsNullOrEmpty(Model.Company?.HeaderImage) &&
+        Model.Company?.HeaderHeight != null &&
+        Model.Company?.HeaderWidth != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%">
+                    <img src="~/upload/@Model.Company.HeaderImage"
+                         height="@Model.Company.HeaderHeight"
+                         width="@Model.Company.HeaderWidth" />
+                </td>
+            </tr>
+        } *@
+
+
+    </table>
+    @if (Model.Company.HeaderContent != null)
+    {
+        @Html.Raw(Model.Company.DcHeaderContent);
+    }
+
+   @*  @if (!string.IsNullOrWhiteSpace(Model?.Company?.HeaderContent))
+    {
+        @Html.Raw(Model.Company.HeaderContent)
+    } *@
+
+    <header class="clearfix">
+        @if (Model.Company != null && Model.Company.CompanyDetails != null && Model.Company.CompanyDetails == true)
+        {
+            if (Model.Company.Logo != null)
+            {
+                <div id="logo">
+                    <img src="~/upload/@Model.Company.Logo" height="@Model.Company.LogoHeight" width="@Model.Company.LogoWidth" />
+                </div>
+            }
+            <div id="company">
+                <h4 class="name">@Model.Company.Name</h4>
+                <div>@Model.Company.Address</div>
+                <div>@Model.Company.Phone</div>
+                <div>GSTIN: @Model.Company.GSTIN</div>
+                <div>PAN No: @Model.Company.PANNo</div>
+            </div>
+        }
+    </header>
+
+    @if (Model.Company.HeaderContent != null)
+    {
+        @Html.Raw(Model.Company.HeaderContent)
+        ;
+    }
+   @*  @{
+        string dcContent = null;
+        if (Model != null && Model.Company != null)
+        {
+            dcContent = Model.Company.DcHeaderContent;
+        }
+    }
+
+    @if (!string.IsNullOrWhiteSpace(dcContent))
+    {
+        @Html.Raw(dcContent)
+    } *@
+
+  
+    <table style="width:100%">
+        <tr>
+            <td>
+                <table style="width: 100%; border-collapse: collapse;" id="client">
+                    <tr>
+                        <td valign="top" style="width: 30%; padding: 10px;">
+                            <strong>Invoice No:</strong> @Model.Company.ChallanPrefix@Model.SalesReturn.Date?.Year.ToString()/@Model.SalesReturn.InvoiceNo@Model.Company.ChallanSuffix
+                            <br />
+                            <strong>Date:</strong> @Model.SalesReturn.Date?.ToString("dd MMM yyyy")
+                            <br />
+                            <strong>Name:</strong> @Model.SalesReturn.ContactsName
+                            <br />
+                            <strong>Phone:</strong> @Model.SalesReturn.ContactsPhone
+
+                            @if (Model.SalesReturn.ContactsGstin != null)
+                            {
+                                <br />
+                                <strong>GSTIN:</strong> @Model.SalesReturn.ContactsGstin
+                            }
+                            @if (Model.SalesReturn.ContactsPanNo != null)
+                            {
+                                <br />
+                                <strong>PAN No:</strong> @Model.SalesReturn.ContactsPanNo
+                            }
+                        </td>
+                        <td align="right" style="width: 30%; padding: 10px; vertical-align: middle;">
+                            <h3 style="margin: 0;">Sales Return</h3>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        @* Products *@
+        <tr>
+            <td colspan="8" align="center" class="bg-gray-light">
+                &nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+                    <tr>
+                        <td align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;HSN&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Product&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Rate&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Qty&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Tax&nbsp;</strong></td>
+                        <td align="center"><strong>Total</strong></td>
+                    </tr>
+                    @{
+                        int srno = 1;
+                        decimal Total = 0;
+                        decimal TotalTax = 0;
+                    }
+                    @foreach (var qp in Model.SalesReturnProducts)
+                    {
+                        // Convert Percentage1 and Percentage2 from double to decimal
+                        decimal percentage1 = (decimal)(qp.Percentage1 ?? 0);
+                        decimal percentage2 = (decimal)(qp.Percentage2 ?? 0);
+
+                        // Calculate tax amount using Percentage1 and Percentage2
+                        decimal taxAmount = (percentage1 + percentage2) * (decimal)(qp.Price ?? 0) * (decimal)(qp.Quantity ?? 0) / 100;
+
+                        <tr>
+                            <td align="center">@srno</td>
+                            <td align="left">&nbsp;@qp.ProductsHsn</td>
+                            <td align="left" style="padding:3px;">
+                                &nbsp;@qp.ProductsName<br />
+                                <span style="white-space: pre-line; font-size:smaller"><i>@qp.Description</i></span>
+                                @if (qp.Serial != null)
+                                {
+                                    <span style="white-space: pre-line; font-size:smaller">
+                                        <i>SN: @qp.Serial</i>
+                                    </span>
+                                }
+                            </td>
+                            <td align="right">&nbsp;@qp.Price?.ToString("#,##0.00")&nbsp;</td>
+                            <td align="center">@qp.Quantity&nbsp;</td>
+                            <td align="right">&nbsp;@taxAmount.ToString("#,##0.00")&nbsp;</td>
+                            <td align="right">@qp.LineTotal?.ToString("#,##0.00")&nbsp;</td>
+                            @{
+                                Total = Total + (qp.LineTotal ?? 0);
+                                TotalTax = TotalTax + taxAmount;
+                                srno++;
+                            }
+                        </tr>
+                    }
+
+                    @{int diff = 7 - srno; }
+
+                    @for (int i = diff; i > 0; i--)
+                    {
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <td colspan="7" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">
+                            &nbsp;
+                        </td>
+                    </tr>
+
+                    @* Total *@
+                    <tr>
+                        <td colspan="6" align="right"><strong> Total:&nbsp;</strong></td>
+                        <td align="right"><strong>@Total.ToString("#,##0.00")&nbsp;</strong></td>
+                    </tr>
+
+                    @* Total Tax *@
+                    <tr>
+                        <td colspan="6" align="right"><strong> Total Tax:&nbsp;</strong></td>
+                        <td align="right"><strong>@TotalTax.ToString("#,##0.00")&nbsp;</strong></td>
+                    </tr>
+
+                    @* Grand Total *@
+                    <tr>
+                        <td colspan="6" align="right"><strong> Grand Total:&nbsp;</strong></td>
+                        <td align="right"><strong>@Total.ToString("#,##0.00")&nbsp;</strong></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="7" bgcolor="wheat">
+                            <strong> &nbsp; Total in Words:</strong>
+                            <script>document.write(toWords(@Convert.ToInt32((Total))))</script>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    @if (Model.Company.DcFooterContent != null)
+    {
+        @Html.Raw(Model.Company.DcFooterContent);
+    }
+
+    <table style="width: 100% " border="0">
+        @if (Model.Company.DcFooterImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%">
+                    <img src="~/upload/@Model.Company.DcFooterImage" height="@Model.Company.DcFooterHeight" width="@Model.Company.DcFooterWidth" />
+                </td>
+            </tr>
+        }
+    </table>
+</body>

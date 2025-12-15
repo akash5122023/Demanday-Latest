@@ -1,0 +1,88 @@
+﻿@model AdvanceCRM.Reports.InventoryReportModel
+
+<div style="font-family: Arial, sans-serif; padding: 20px; color: #333; position: relative; max-width: 100%; box-sizing: border-box;">
+    <!-- BizPlus Reports link at the top right corner -->
+    <div style="position: absolute; top: 20px; right: 20px;">
+        <a href="https://www.bizpluscrm.com/" target="_blank" style="color: #000; text-decoration: none;">
+            www.bizpluscrm.com
+        </a>
+    </div>
+
+    <h2 style="text-align: center; color: #222;">GRN Report</h2>
+
+    <hr style="border: 1px solid #ccc;" />
+
+    @if (Model.Grn != null && Model.Grn.Any() && Model.GrnProducts != null)
+    {
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #333; font-family: Arial, sans-serif;">
+            <thead>
+                <tr style="background-color: #f0f0f0; border-bottom: 2px solid #ddd;">
+                    <th style="padding: 12px; text-align: center;">Sr. No.</th>
+                    <th style="padding: 12px; text-align: center;">Date</th>
+                    <th style="padding: 12px; text-align: center;">Status</th>
+                    <th style="padding: 12px; text-align: center;">Contact Name</th>
+                    <th style="padding: 12px; text-align: center;">PO No.</th>
+                    <th style="padding: 12px; text-align: center;">PO Date</th>
+                    <th style="padding: 12px; text-align: center;">Invoice No.</th>
+                    <th style="padding: 12px; text-align: center;">Invoice Date</th>
+                    <th style="padding: 12px; text-align: center;">Product</th>
+                    <th style="padding: 12px; text-align: center;">Ordered Qty</th>
+                    <th style="padding: 12px; text-align: center;">Received Qty</th>
+                    <th style="padding: 12px; text-align: center;">Extra Qty</th>
+                    <th style="padding: 12px; text-align: center;">Rejected Qty</th>
+                    <th style="padding: 12px; text-align: center;">Pending Qty</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int cnt = 1;
+                    foreach (var item in Model.GrnProducts)
+                    {
+                        // Find the corresponding GRN record for this product
+                        var grnRecord = Model.Grn.FirstOrDefault(g => g.Id == item.GrnId) ?? Model.Grn.First();
+                        var pendingQuantity = item.OrderQuantity - item.ReceivedQuantity;
+                        <tr style="border-bottom: 1px solid #eee; background-color: @(cnt % 2 == 0 ? "#fafafa" : "#fff");">
+                            <td style="padding: 10px; text-align: center;">@cnt</td>
+                            @*<td style="padding: 10px; text-align: center;">@grnRecord.GrnDate</td>*@
+                            <td style="padding: 10px; text-align: center;">
+                                @if (grnRecord.GrnDate != null)
+                                {
+                                    @(((DateTime)grnRecord.GrnDate).ToString("dd/MM/yyyy"))
+                                }
+                            </td>
+                            <td style="padding: 10px; text-align: center;">@grnRecord.Status</td>
+                            <td style="padding: 10px; text-align: center;">@grnRecord.ContactsName</td>
+                            <td style="padding: 10px; text-align: center;">@grnRecord.Po</td>
+                            <td style="padding: 10px; text-align: center;">
+                                @if (grnRecord.PoDate != null)
+                                {
+                                    @(((DateTime)grnRecord.PoDate).ToString("dd/MM/yyyy"))
+                                }
+                            </td>
+                            <td style="padding: 10px; text-align: center;">@grnRecord.InvoiceNo</td>
+                            <td style="padding: 10px; text-align: center;">
+                                @if (grnRecord.InvoiceDate != null)
+                                {
+                                    @(((DateTime)grnRecord.InvoiceDate).ToString("dd/MM/yyyy"))
+                                }
+                            </td>
+                            <td style="padding: 10px; text-align: center;">@item.ProductsName</td>
+                            <td style="padding: 10px; text-align: center;">@item.OrderQuantity</td>
+                            <td style="padding: 10px; text-align: center;">@item.ReceivedQuantity</td>
+                            <td style="padding: 10px; text-align: center;">@item.ExtraQuantity</td>
+                            <td style="padding: 10px; text-align: center;">@item.RejectedQuantity</td>
+                            <td style="padding: 10px; text-align: center; color: @(pendingQuantity > 0 ? "red" : "green"); font-weight: @(pendingQuantity > 0 ? "bold" : "normal");">
+                                @pendingQuantity
+                            </td>
+                        </tr>
+                        cnt++;
+                    }
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="text-align: center; color: #666; font-style: italic;">No GRN data available</p>
+    }
+</div>

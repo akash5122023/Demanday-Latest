@@ -1,0 +1,57 @@
+﻿namespace AdvanceCRM.Common {
+
+    export interface ExcelExportOptions {
+        grid: Serenity.DataGrid<any, any>;
+        service: string;
+        onViewSubmit: () => boolean;
+        title?: string;
+        hint?: string;
+        separator?: boolean;
+    }
+
+    export namespace ExcelExportHelper {
+
+        export function createToolButton(options: ExcelExportOptions): Serenity.ToolButton {
+
+            return {
+                hint: Q.coalesce(options.hint, 'Excel'),
+                title: Q.coalesce(options.title, ''),
+                cssClass: 'export-xlsx-button',
+                onClick: function () {
+                    if (!options.onViewSubmit()) {
+                        return;
+                    }
+
+                    let grid = options.grid;
+
+                    var request = Q.deepClone(grid.getView().params) as Serenity.ListRequest;
+                    request.Take = 0;
+                    request.Skip = 0;
+                    var sortBy = grid.getView().sortBy;
+                    if (sortBy) {
+                        request.Sort = sortBy;
+                    }
+
+                    request.IncludeColumns = [];
+                    (request as any).ExportColumns = [];
+                    let columns = grid.getGrid().getColumns();
+                    for (let column of columns) {
+                        const columnKey = column.id || column.field;
+                        if (!columnKey) {
+                            continue;
+                        }
+
+                        if (columnKey.length > 1 && columnKey.charAt(0) === '_' && columnKey.charAt(1) === '_') {
+                            continue;
+                        }
+
+                        request.IncludeColumns.push(columnKey);
+                        (request as any).ExportColumns.push(columnKey);
+                    }
+                    Q.postToService({ service: options.service, request: request, target: '_blank' });
+                },
+                separator: options.separator
+            };
+        }
+    }
+}

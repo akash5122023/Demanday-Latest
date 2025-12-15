@@ -1,0 +1,178 @@
+﻿using Serenity;
+using Serenity.ComponentModel;
+using Serenity.Data;
+using System;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.IO;
+
+namespace AdvanceCRM.Demanday.Forms
+{
+    [FormScript("Demanday.DemandayContacts")]
+    [BasedOnRow(typeof(DemandayContactsRow), CheckNames = true)]
+    public class DemandayContactsForm
+    {
+        //public String AgentsName { get; set; }
+        //public String TlName { get; set; }
+        //public String CampaignId { get; set; }
+        //public String CompanyName { get; set; }
+        //public String FirstName { get; set; }
+        //public String LastName { get; set; }
+        //public String Domain { get; set; }
+        //public String JobLevel { get; set; }
+        //public String JobFunctionRole { get; set; }
+        //public String Title { get; set; }
+        //public String Email { get; set; }
+        //public String WorkPhone { get; set; }
+        //public String AlternativeNumber { get; set; }
+        //public String Street { get; set; }
+        //public String City { get; set; }
+        //public String State { get; set; }
+        //public String ZipCode { get; set; }
+        //public String Country { get; set; }
+        //public String Continents { get; set; }
+        //public Int32 CompanyEmployeeSize { get; set; }
+        //public String Industry { get; set; }
+        //public Decimal Revenue { get; set; }
+        //public String ProfileLink { get; set; }
+        //public String CompanyLink { get; set; }
+        //public String RevenueLink { get; set; }
+        //public String ProspectUrl { get; set; }
+        //public String EmailFormat { get; set; }
+        //public String AdressLink { get; set; }
+        //public String Tenurity { get; set; }
+        //public String Code { get; set; }
+        //public String Link { get; set; }
+        //public String Md5 { get; set; }
+        //public String Slot { get; set; }
+        //public String PrimaryReason { get; set; }
+        //public String Category { get; set; }
+        //public String Comments { get; set; }
+        //public String QaStatus { get; set; }
+        //public String DeliveryStatus { get; set; }
+        //public String AgentName { get; set; }
+        //public String QaName { get; set; }
+        //public DateTime CallDate { get; set; }
+        //public DateTime DateAudited { get; set; }
+        //public DateTime DeliveryDate { get; set; }
+        //public String Source { get; set; }
+        //public String VerificationMode { get; set; }
+        //public String Asset1 { get; set; }
+        //public String Asset2 { get; set; }
+        //public Int32 OwnerId { get; set; }
+        [Category("Account Information")]
+        //[HalfWidth]
+        //public string AccountID { get; set; }
+        [HalfWidth]
+        public string Slot { get; set; }
+        //[HalfWidth]
+        //public string CampaignID { get; set; }
+
+        [Category("Contact Information")]
+        [HalfWidth]
+        public string FirstName { get; set; }
+        [HalfWidth]
+        public string LastName { get; set; }
+        [HalfWidth]
+        public string Domain { get; set; }
+        [HalfWidth]
+        public string Title { get; set; }
+        [HalfWidth]
+        public string JobLevel { get; set; }
+        [HalfWidth]
+        public string JobFunctionRole { get; set; }
+        [HalfWidth]
+        public string Email { get; set; }
+        [HalfWidth]
+        public string WorkPhone { get; set; }
+        [HalfWidth]
+        public string AlternativeNumber { get; set; }
+
+        [Category("Company Information")]
+        [HalfWidth]
+        public string CompanyName { get; set; }
+        [HalfWidth]
+        public string Industry { get; set; }
+        [HalfWidth]
+        public decimal? Revenue { get; set; }
+
+        [HalfWidth, DisplayName("Employee Size")]
+        public int? CompanyEmployeeSize { get; set; }
+
+        [Category("Address Information")]
+        [FullWidth]
+        public string Street { get; set; }
+        [OneThirdWidth]
+        public string City { get; set; }
+        [OneThirdWidth]
+        public string State { get; set; }
+        [OneThirdWidth]
+        public string ZipCode { get; set; }
+        [HalfWidth]
+        public string Country { get; set; }
+        [HalfWidth]
+        public string Continents { get; set; }
+
+        [Category("Links & References")]
+        [HalfWidth]
+        public string ProfileLink { get; set; }
+        [HalfWidth]
+        public string CompanyLink { get; set; }
+        [HalfWidth]
+        public string RevenueLink { get; set; }
+        [HalfWidth]
+        public string AdressLink { get; set; }
+        [HalfWidth]
+        public string ProspectUrl { get; set; }
+        [HalfWidth]
+        public string EmailFormat { get; set; }
+        [HalfWidth]
+        public string Link { get; set; }
+
+        [Category("Status & Dates")]
+        [OneThirdWidth]
+        public string QaStatus { get; set; }
+        [OneThirdWidth]
+        public string DeliveryStatus { get; set; }
+        [OneThirdWidth]
+        public string Category { get; set; }
+        [OneThirdWidth, DateTimeEditor]
+        public DateTime? CallDate { get; set; }
+        [OneThirdWidth, DateTimeEditor]
+        public DateTime? DateAudited { get; set; }
+        [OneThirdWidth, DateTimeEditor]
+        public DateTime? DeliveryDate { get; set; }
+
+        [Category("Team & Representatives")]
+        [OneThirdWidth]
+        public string AgentName { get; set; }
+        [OneThirdWidth]
+        public string QaName { get; set; }
+        [OneThirdWidth]
+        public string TlName { get; set; }
+
+        [Category("Additional Details")]
+        [HalfWidth]
+        public string PrimaryReason { get; set; }
+        [FullWidth, TextAreaEditor(Rows = 3)]
+        public string Comments { get; set; }
+        [HalfWidth]
+        public string Source { get; set; }
+        [HalfWidth]
+        public string VerificationMode { get; set; }
+        [HalfWidth]
+        public string Asset1 { get; set; }
+        [HalfWidth]
+        public string Asset2 { get; set; }
+        [HalfWidth]
+        public string Tenurity { get; set; }
+        [HalfWidth]
+        public string Code { get; set; }
+        [HalfWidth]
+        public string Md5 { get; set; }
+
+        [Category("Representatives")]
+        [HalfWidth]
+        public Int32 OwnerId { get; set; }
+    }
+}

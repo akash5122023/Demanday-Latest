@@ -1,0 +1,21 @@
+﻿@model AdvanceCRM.Reports.EnquiryReportModel
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "CEO Report";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+}
+
+<body>
+    <table style="width:100%; border:groove;">
+        <tr>
+            <td align="center">
+                <h3 style="text-decoration-color:burlywood">@Model.Company.Name</h3>
+                <h4>@Model.Company.Address</h4>
+                <h5>@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>    
+    {
+        @Html.Partial(MVC.Views.Reports.CEO.CEOReport, Model);
+    }
+</body>

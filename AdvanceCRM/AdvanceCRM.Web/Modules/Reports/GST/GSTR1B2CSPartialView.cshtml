@@ -1,0 +1,73 @@
+﻿@model AdvanceCRM.Modules.Reports.GST.GSTR1B2CSPageModel
+@inject ITextLocalizer localizer
+
+<table class="table table-bordered table-condensed table-striped table-hover" style="width:100%">
+    <thead style="width:100%">
+        <tr style="height:40px; background-color:lightgrey;">
+            @*<th style="width:5%">ID</th>*@
+            <th style="width:5%">Type</th>
+            <th style="width:20%">Place Of Supply</th>
+            <th style="width:10%">Rate</th>
+            <th style="width:20%">Applicable % of Tax Rate</th>
+            <th style="width:20%">Taxable Value</th>
+            <th style="width:10%">Cess Amount</th>
+            <th style="width:20%">E-Commerce GSTIN</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var line in Model.SalesList)
+        {
+            foreach (var item in Model.SalesProductList.Where(x => x.SalesId == line.Id).GroupBy(y => y.Percentage1))
+            {
+                if ((line.ContactsGstin.IsNullOrEmpty()))
+                {
+        <tr>
+            @*<td style="width:5%">ID=@line.Id</td>*@
+
+            <td style="width:5%">
+                @if (line.EcomType.HasValue)
+                            {
+                                var type = line.EcomType.Value.GetText(localizer);
+                <text> @type </text>
+                            }
+
+            </td>
+
+            <td style="width:20%">
+                @if (line.ContactsStateId.HasValue)
+                            {
+                @Model.StateList.FirstOrDefault(x => x.Id == line.ContactsStateId).State
+                            }
+            </td>
+            <td style="width:10%">
+                @if (item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1 < 1)
+                            {
+                @item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1
+                            }
+                            else
+                            {
+                                double t1 = ((double)@item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1) + ((double)@item.FirstOrDefault(x => x.SalesId == line.Id).Percentage2);
+
+                @t1.ToString("#,##0.00");
+
+                            }
+            </td>
+            <td style="width:20%"></td>
+            <td style="width:20%">
+                @item.Sum(x => x.GrandTotal).Value.ToString("#,##0.00")
+            </td>
+            <td style="width:10%"></td>
+            <td style="width:20%">
+                @if (!line.ContactsEComGstin.IsNullOrEmpty())
+                            {
+                <text> @line.ContactsEComGstin </text>
+                            }
+            </td>
+
+        </tr>
+                }
+
+            }
+        }
+    </tbody>
+</table>

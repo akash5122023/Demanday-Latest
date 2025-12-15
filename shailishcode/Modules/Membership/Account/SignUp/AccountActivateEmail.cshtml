@@ -1,0 +1,27 @@
+﻿@model AdvanceCRM.Membership.ActivateEmailModel
+
+<html>
+<head>
+    <title>Activate your BizplusERP account</title>
+</head>
+<body>
+    <p>@Model.DisplayName,</p>
+
+    <p>Your BizplusERP tenant is ready. Use the link below to access your portal:</p>
+
+    <p><a href="@Model.LoginUrl">@Model.LoginUrl</a></p>
+
+    <p>Your login details are:</p>
+
+    <ul>
+        <li>Portal URL: <a href="@Model.TenantUrl">@Model.TenantUrl</a></li>
+        <li>Username: @Model.AdminUsername</li>
+        <li>Password: @Model.AdminPassword</li>
+    </ul>
+
+    <p>If you did not initiate this request, please contact our support team immediately.</p>
+
+    <p>Thanks,<br />
+    The "BizplusERP" Team</p>
+</body>
+</html>

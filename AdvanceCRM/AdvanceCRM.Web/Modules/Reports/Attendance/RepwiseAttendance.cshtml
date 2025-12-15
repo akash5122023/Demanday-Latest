@@ -1,0 +1,278 @@
+﻿@model AdvanceCRM.Reports.AttendanceReportModel
+
+@*<div style="text-align: center">
+        <h3>Representativewise Attendance </h3>
+        <h5><strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() <strong> To:</strong> @Model.Request.DateTo.ToDateFormat()</h5>
+        <h4>
+            <strong>Representative: </strong> @Model.User.DisplayName
+            (@Model.User.DisplayName)
+        </h4>
+    </div>
+
+        <hr />
+        <table style="width:100%; border:groove" , border="1">
+            <tr>
+                <th style="text-align:center">Sr. No.</th>
+                <th style="text-align:center">Date</th>
+                <th style="text-align:center">Punch In</th>
+                <th style="text-align:center">Punch Out</th>
+                <th style="text-align:center">Total Time</th>
+                <th style="text-align:center">Total Distance</th>
+            </tr>
+
+            @{ int cnt = 1; double tTime = 0; double tDays = 0; double tkm = 0;}
+
+            @foreach (var item in Model.Attendance)
+            {
+               // tTime = 0;
+                // var intime=
+                // tkm = 0;
+
+                // tDays = (double)Model.Attendance.Where(y => y.DisplayName == item.DisplayName).Count();
+                // tkm=(double)Model.Attendance.
+
+                //  lst = Model.Attendance.Where(z => z.NameDisplayName == item.DisplayName).Where(x => x.Type.Value.GetText() == "In")();
+
+                //foreach (var itm in Model.Attendance)
+                //{
+                //    //  var totlkm = Model.Attendance.where(z => z.Distance.value == itm.Distance.Value).Where(x => x.NameDisplayName == item.DisplayName);
+                //var inTime = Model.Attendance.
+
+                //var outTime = Model.Attendance.Where(z => z.PunchOut.Value.ToShortDateString() == itm.PunchOut.Value.ToShortDateString());
+
+                //    if (inTime.Count() > 0)
+                //    {
+                //        if (outTime.Count() > 0)
+                //        {
+                //            tTime = tTime + (outTime.FirstOrDefault().PunchOut.Value.Subtract(inTime.FirstOrDefault().PunchIn.Value).TotalMinutes);
+                //        }
+                //    }
+                //    //tkm = (double)Model.Attendance.Sum(x => x.Distance);
+                //}
+
+                <tr>
+                    <td style="text-align:center; width:10%">
+                        @cnt
+                    </td>
+
+                    <td style="text-align: center">
+                        &nbsp;&nbsp;@item.DateNTime.Value.ToString("dd/MM/yyyy")
+                    </td>
+                    <td style="text-align: center">
+                        &nbsp;&nbsp;@item.PunchIn.Value.ToString("HH:mm:ss")
+                    </td>
+                    <td style="text-align: center">
+                        &nbsp;&nbsp;@item.PunchOut.Value.ToString("HH:mm:ss")
+                    </td>
+                    <td align="center">
+
+
+                        @(((item.PunchOut.Value.Subtract(item.PunchIn.Value).TotalMinutes) / 60).ToString("####.00")) Hrs. &nbsp;&nbsp;
+                    </td>
+
+                    <td align="center">
+                        &nbsp;&nbsp; @item.Distance km &nbsp;&nbsp;
+                    </td>
+                </tr>
+
+                cnt = cnt + 1;
+                tTime = tTime + Convert.ToDouble((item.PunchOut.Value.Subtract(item.PunchIn.Value).TotalMinutes) / 60);
+
+            }
+            <tr>
+                <td style="text-align:center; width:10%">
+                </td>
+
+                <td style="text-align: center">
+                    <strong> Total Days Present = @(cnt-1)</strong>
+                </td>
+                <td style="text-align: center">
+                </td>
+                <td style="text-align: center">
+                </td>
+                <td align="center">
+                    <strong> @tTime Hrs</strong>
+
+                </td>
+                <td align="center">
+                    <strong>
+                        @Model.Attendance.Where(y => y.DateNTime >= Model.Request.DateFrom && y.DateNTime <= Model.Request.DateTo && y.Name == Model.Request.Representative).Sum(y => y.Distance) Km
+                    </strong>
+                </td>
+            </tr>
+        </table>*@
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        /* text-align: center;*/
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        /*text-align: center;*/
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        /* text-align: center;
+        */
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    Representativewise Attendance
+</div>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat()
+    <strong> To:</strong> @Model.Request.DateTo.ToDateFormat()<br />
+    <strong>Representative: </strong> @Model.User.DisplayName
+    (@Model.User.DisplayName)
+</div>
+
+<table style="width:100%; border:groove" , border="1">
+    <tr>
+        <th style="text-align:center">Sr. No.</th>
+        <th style="text-align:center">Date</th>
+        <th style="text-align:center">Punch In</th>
+        <th style="text-align:center">Punch Out</th>
+        <th style="text-align:center">Total Time</th>
+        <th style="text-align:center">Total Distance</th>
+    </tr>
+
+    @{ int cnt = 1; double tTime = 0; double tDays = 0; double tkm = 0;}
+
+    @foreach (var item in Model.Attendance)
+    {
+        // tTime = 0;
+        // var intime=
+        // tkm = 0;
+
+        // tDays = (double)Model.Attendance.Where(y => y.DisplayName == item.DisplayName).Count();
+        // tkm=(double)Model.Attendance.
+
+        //  lst = Model.Attendance.Where(z => z.NameDisplayName == item.DisplayName).Where(x => x.Type.Value.GetText() == "In")();
+
+        //foreach (var itm in Model.Attendance)
+        //{
+        //    //  var totlkm = Model.Attendance.where(z => z.Distance.value == itm.Distance.Value).Where(x => x.NameDisplayName == item.DisplayName);
+        //var inTime = Model.Attendance.
+
+        //var outTime = Model.Attendance.Where(z => z.PunchOut.Value.ToShortDateString() == itm.PunchOut.Value.ToShortDateString());
+
+        //    if (inTime.Count() > 0)
+        //    {
+        //        if (outTime.Count() > 0)
+        //        {
+        //            tTime = tTime + (outTime.FirstOrDefault().PunchOut.Value.Subtract(inTime.FirstOrDefault().PunchIn.Value).TotalMinutes);
+        //        }
+        //    }
+        //    //tkm = (double)Model.Attendance.Sum(x => x.Distance);
+        //}
+
+        <tr>
+            <td style="text-align:center; width:10%">
+                @cnt
+            </td>
+
+            <td style="text-align: center">
+                &nbsp;&nbsp;@item.DateNTime.Value.ToString("dd/MM/yyyy")
+            </td>
+            <td style="text-align: center">
+                &nbsp;&nbsp;@item.PunchIn.Value.ToString("HH:mm:ss")
+            </td>
+            <td style="text-align: center">
+                &nbsp;&nbsp;@item.PunchOut.Value.ToString("HH:mm:ss")
+            </td>
+            <td align="center">
+
+
+                @(((item.PunchOut.Value.Subtract(item.PunchIn.Value).TotalMinutes) / 60).ToString("####.00")) Hrs. &nbsp;&nbsp;
+            </td>
+
+            <td align="center">
+                &nbsp;&nbsp; @item.Distance km &nbsp;&nbsp;
+            </td>
+        </tr>
+
+        cnt = cnt + 1;
+        tTime = tTime + Convert.ToDouble((item.PunchOut.Value.Subtract(item.PunchIn.Value).TotalMinutes) / 60);
+
+    }
+    <tr>
+        <td style="text-align:center; width:10%">
+        </td>
+
+        <td style="text-align: center">
+            <strong> Total Days Present = @(cnt-1)</strong>
+        </td>
+        <td style="text-align: center">
+        </td>
+        <td style="text-align: center">
+        </td>
+        <td align="center">
+            <strong> @tTime Hrs</strong>
+
+        </td>
+        <td align="center">
+            <strong>
+                @Model.Attendance.Where(y => y.DateNTime >= Model.Request.DateFrom && y.DateNTime <= Model.Request.DateTo && y.Name == Model.Request.Representative).Sum(y => y.Distance) Km
+            </strong>
+        </td>
+    </tr>
+</table>
+

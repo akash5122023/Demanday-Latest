@@ -1,0 +1,106 @@
+﻿.
+
+@model AdvanceCRM.Common.TeamDashboardPageModel
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageId"] = "Dashboard";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css">
+    <link rel="stylesheet" href="~/Scripts/morris/morris.css">
+    <script src="~/Scripts/raphael/raphael-min.js"></script>
+    <script src="~/Scripts/morris/morris.min.js"></script>
+
+
+    <script src="~/amcharts/amcharts.js"></script>
+    <script src="~/amcharts/plugins/responsive/responsive.min.js"></script>
+    <link rel="stylesheet" href="~/amcharts/plugins/export/export.css" type="text/css" media="all" />
+    <script src="~/amcharts/themes/light.js"></script>
+
+    <style type="text/css">
+        .select2-container, .select2-container * {
+            box-sizing: border-box;
+        }
+    </style>
+}
+
+@section ContentHeader {
+    <h1 class="col-lg-6 col-xs-6">Team @Localizer.Get("Navigation.Dashboard")<small>@Html.Raw(Texts.Site.Dashboard.ContentDescription)</small> </h1>
+    <div class="row">
+        <!-- Left col -->
+        <div class="col-md-12">
+            <div class="form-group col-lg-6 col-xs-6">
+                <label for="LabelforList" class="col-form-label">Select Team<span class="kv-reqd">*</span></label>
+                <select class="filter" id="type_filter" multiple="multiple" style="width: 100% !important;">
+                    @foreach (var d in Model.Users)
+                    {
+                        <option value="@d.UserId">@d.DisplayName</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group col-lg-4">
+                <label for="LabelforList" class="col-form-label">Select Status<span class="kv-reqd">*</span></label>
+
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <i class="fa fa-user-circle"></i>
+                    </div>
+                    <select class="selectpicker form-control"
+                            name="ListId"
+                            id="ListId"
+                            data-show-subtext="true"
+                            data-live-search="true"
+                            required title="Select Status">
+
+                        <option>Open</option>
+                        <option>Close</option>
+
+                    </select>
+                    <input type="hidden" name="SearchButton" value="true">
+                </div><!-- /.input group -->
+
+            </div>
+            </div>
+}
+
+<div id="DivId">
+    @Html.Partial(MVC.Views.Common.Dashboard.TeamDashboardData, Model)
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#type_filter").select2({
+            placeholder: "Filter Users",
+            allowClear: true
+        });
+
+        $('.filter').on('change', function (e) {
+            var stat = 0;
+            if ($("#ListId").val() == "Open") {
+                stat = 1;
+            }
+            else {
+                stat = 2;
+            }
+
+            $("#DivId").load('@Url.Action("GetData", "TeamDashboard")?users=' + JSON.stringify(e.val) +'&Status='+stat, function (data) {
+                })
+        });
+
+        $("#ListId").on('change', function (e) {
+            var stat = 0;
+            if (JSON.stringify(e.val) == "")
+                return;
+
+            if ($("#ListId").val() == "Open") {
+                stat = 1;
+            }
+            else {
+                stat = 2;
+            }
+            $("#DivId").load('@Url.Action("GetData", "TeamDashboard")?users=' + JSON.stringify(e.val) +'&Status='+stat, function (data) {
+                })
+        });
+    });
+</script>

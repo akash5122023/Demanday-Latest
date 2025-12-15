@@ -1,0 +1,187 @@
+﻿@model AdvanceCRM.Services.CMSReportData
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+</style>
+
+<script type="text/javascript">
+
+    var th = ['', 'Thousand', 'Million', 'Billion', 'Trillion'];
+
+    var dg = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+
+    var tn = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+
+    var tw = ['Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function toWords(s) {
+        s = s.toString();
+        s = s.replace(/[\, ]/g, '');
+        if (s != parseFloat(s)) return 'not a number';
+        var x = s.indexOf('.');
+        if (x == -1) x = s.length;
+        if (x > 15) return 'too big';
+        var n = s.split('');
+        var str = '';
+        var sk = 0;
+        for (var i = 0; i < x; i++) {
+            if ((x - i) % 3 == 2) {
+                if (n[i] == '1') {
+                    str += tn[Number(n[i + 1])] + ' ';
+                    i++;
+                    sk = 1;
+                } else if (n[i] != 0) {
+                    str += tw[n[i] - 2] + ' ';
+                    sk = 1;
+                }
+            } else if (n[i] != 0) {
+                str += dg[n[i]] + ' ';
+                if ((x - i) % 3 == 0) str += 'Hundred ';
+                sk = 1;
+            }
+            if ((x - i) % 3 == 1) {
+                if (sk) str += th[(x - i - 1) / 3] + ' ';
+                sk = 0;
+            }
+        }
+        if (x != s.length) {
+            var y = s.length;
+            str += 'point ';
+            for (var i = x + 1; i < y; i++) str += dg[n[i]] + ' ';
+        }
+        return (str.replace(/\s+/g, ' ')).concat('Only/-');
+    }
+</script>
+
+<body style="align-self:stretch; align-items:center; align-items:center">
+    <table style="width:100%" border="0">
+        <tr>
+            <td align="center" style="border:outset; width:100%"><h4> CMS Receipt </h4></td>
+        </tr>
+    </table>
+    <table style="width:100%" border="1">
+        <tr>
+            <td>
+                <table style="width:100%; border-collapse:collapse" border="1" cellpadding="25" cellspacing="10">
+                    @{
+                        int dealerdetails = Model.Company.DealerInCms ?? 0;
+                    }
+                    <tr>
+                        <td align="center" style="width:20%">
+                            &nbsp;
+                            @if (Model.Company.Logo != null)
+                            {
+                                <img src="~/upload/@Model.Company.Logo" height="@Model.Company.LogoHeight.Value.ToString()" width="@Model.Company.LogoWidth.Value.ToString()" />
+                            }
+                            &nbsp;
+                        </td>
+
+                        <td align="center" style="width:40%">
+                            <h5><strong>@Model.Company.Name</strong></h5>
+                            @if (Model.Company.Slogan != null)
+                            {
+                                @Model.Company.Slogan
+                                <br />
+                            }
+                            @Model.Company.Address
+                            <br />
+                            @Model.Company.Phone
+                        </td>
+                        <td align="left" style="width:40%">
+                            <strong>&nbsp; CMS No </strong>: @DateTime.Now.Year/@Model.CMS.CMSNo , <strong> Date </strong>: @Model.CMS.Date.Value.ToShortDateString()<br />
+                            <strong>&nbsp; Name </strong>
+                            : @Model.CMS.ContactsName<br />
+                            <strong>&nbsp; Phone </strong>: @Model.CMS.ContactsPhone<br />
+                            <strong>&nbsp; Address </strong>: @Model.CMS.ContactsAddress
+                        </td>
+                    </tr>
+                    @if (dealerdetails == 1)
+                    {
+                        <tr>
+                            <td align="left" colspan="3" style="width:100%">
+                                <strong>&nbsp; Dealer Name </strong>
+                                : @Model.CMS.DealerDealerName<br />
+                                <strong>&nbsp; Phone </strong>: @Model.CMS.DealerPhone<br />
+                                <strong>&nbsp; Address </strong>: @Model.CMS.DealerAddress
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table style="width:100%; border:outset" border="1">
+                    <tr>
+                        <td style="width:25%" align="right">Product:&nbsp;</td>
+                        <td>&nbsp;@Model.CMS.ProductsName</td>
+                    </tr>
+                    <tr>
+                        <td style="width:25%" align="right">Quantity:&nbsp;</td>
+                        <td>&nbsp;@Model.CMS.Qty</td>
+                    </tr>
+                    <tr>
+                        <td style="width:25%" align="right">Complaint details:&nbsp;</td>
+                        <td>&nbsp;@Model.CMS.ComplaintComplaintType</td>
+                    </tr>
+                    <tr>
+                        <td style="width:25%" align="right">Type:&nbsp;</td>
+                        <td>&nbsp;@Model.CMS.Category</td>
+                    </tr>
+                    <tr>
+                        <td style="width:25%" align="right">Charge:&nbsp;</td>
+                        <td>&nbsp;@Model.CMS.Amount/-</td>
+                    </tr>
+                    <tr>
+                        <td style="width:25%" align="right">Representative Name:&nbsp;</td>
+                        <td>&nbsp;@Model.CMS.Representative</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        @if (Model.modtype != "CMS")
+        {
+            <tr>
+                <td>
+                    <table style="width:100%; border:outset;" border=1>
+                        <tr>
+                            <td align="center"><br /><br /><br />Engineer's Sign</td>
+                            <td align="center"><br /><br /><br />Customer's Sign</td>
+                            <td align="center"><br /><br /><br />Authorised Sign</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        }
+    </table>
+
+    @* Terms *@
+    @*<br />*@
+    @*@if (Model.QuotationTerms.Count > 0)
+        {
+            <h5>Terms &amp; Condition's</h5>
+            <table cellpadding="100" cellspacing="100" border="1" style="width:100%">
+                @{ int Tsrno = 1;}
+                @foreach (var qt in Model.QuotationTerms)
+                {
+                    <tr>
+                        <td align="Left">@Tsrno.&nbsp;@qt.TermsM</td>
+                        @{Tsrno++; }
+                    </tr>
+                }
+            </table>
+        }*@
+</body>

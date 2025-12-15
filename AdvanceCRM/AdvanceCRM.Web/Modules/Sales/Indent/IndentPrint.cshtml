@@ -1,0 +1,236 @@
+﻿@model AdvanceCRM.Sales.IndentReportData
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    #datatable {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #datatable td, #datatable th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+    header {
+        padding: 10px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #AAAAAA;
+    }
+
+    #logo {
+        float: left;
+        margin-top: 8px;
+    }
+
+    #company {
+        width: 50%;
+        float: right;
+        text-align: right;
+    }
+
+    #client {
+        border-left: 6px solid #0087C3;
+    }
+
+    /* Column width styles */
+    .sr-no-column {
+        width: 8%;
+        text-align: center;
+    }
+
+    .product-column {
+        width: 60%;
+    }
+
+    .qty-column {
+        width: 12%;
+        text-align: center;
+    }
+
+    .remarks-column {
+        width: 20%;
+    }
+</style>
+
+<body style="align-self:stretch; align-items:center;">
+    <table style="width:100%" border="0">
+        @if (Model.Company.DcHeaderContent != null && Model.Company.DcHeaderHeight.HasValue && Model.Company.DcHeaderWidth.HasValue)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%">
+                    <img src="~/upload/@Model.Company.DcHeaderImage"
+                         height="@Model.Company.DcHeaderHeight.Value.ToString()"
+                         width="@Model.Company.DcHeaderHeight.Value.ToString()" />
+                </td>
+            </tr>
+        }
+    </table>
+
+    @if (Model.Company.DcHeaderContent != null)
+    {
+        @Html.Raw(Model.Company.DcHeaderContent)
+        ;
+    }
+
+    <header class="clearfix">
+        @if (Model.Company.CompanyDetails != null && Model.Company.CompanyDetails == true)
+        {
+            if (Model.Company.Logo != null)
+            {
+                <div id="logo">
+                    <img src="~/upload/@Model.Company.Logo"
+                         height="@Model.Company.LogoHeight.Value.ToString()"
+                         width="@Model.Company.LogoWidth.Value.ToString()" />
+                </div>
+            }
+            <div id="company">
+                <h4 class="name">@Model.Company.Name</h4>
+                <div>@Model.Company.Address</div>
+                <div>@Model.Company.Phone</div>
+                @if (!string.IsNullOrEmpty(Model.Company.GSTIN))
+                {
+                    <div>GSTIN: @Model.Company.GSTIN</div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Company.PANNo))
+                {
+                    <div>PAN No: @Model.Company.PANNo</div>
+                }
+            </div>
+        }
+    </header>
+
+    <table style="width:100%">
+        <tr>
+            <td>
+                <table style="width: 100%; border-collapse: collapse;" id="client">
+                    <tr>
+                        <td valign="top" style="width: 30%; padding: 10px;">
+                            <strong>Indent No:</strong> @Model.Indent.Id
+                            <br />
+                            <strong>Date:</strong> @Model.Indent.Date.Value.ToString("dd MMM yyyy")
+                            <br />
+                            <strong>Name:</strong> @Model.Indent.ContactsName
+                            <br />
+                            <strong>Phone:</strong> @Model.Indent.ContactsPhone
+                            <br />
+                            @if (!string.IsNullOrWhiteSpace(Model.Indent.InvoiceNo))
+                            {
+                                <strong>Invoice No:</strong> 
+                                @Model.Indent.InvoiceNo
+                            
+                                <br />
+                            }
+                        </td>
+                        <td align="right" style="width: 30%; padding: 10px; vertical-align: middle;">
+                            <h3 style="margin: 0;">Indent</h3>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="4" align="center" class="bg-gray-light">
+                &nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table cellpadding="8" cellspacing="0" style="width:100%" id="datatable">
+                    <tr>
+                        <th class="sr-no-column">Sr. No.</th>
+                        <th class="product-column">Product</th>
+                        <th class="qty-column">Quantity</th>
+                        <th class="remarks-column">Remarks</th>
+                    </tr>
+
+                    @{
+                        int srno = 1;
+                    }
+                    @foreach (var qp in Model.Products)
+                    {
+                        <tr>
+                            <td class="sr-no-column">@srno</td>
+                            <td class="product-column">
+                                @qp.ProductsName
+                                @*@if (!string.IsNullOrEmpty(qp.Description))
+                                    {
+                                        <br /><span style="font-size: smaller; font-style: italic;">@qp.Description</span>
+                                    }*@
+                            </td>
+                            <td class="qty-column">@(qp.Quantity.HasValue? qp.Quantity.Value.ToString() : "0")</td>
+                            <td class="remarks-column">@qp.Description</td>
+                        </tr>
+                        srno++;
+                    }
+
+                    @{
+                        int diff = 7 - srno;
+                        if (diff > 0)
+                        {
+                            for (int i = 0; i < diff; i++)
+                            {
+                                <tr>
+                                    <td class="sr-no-column">&nbsp;</td>
+                                    <td class="product-column">&nbsp;</td>
+                                    <td class="qty-column">&nbsp;</td>
+                                    <td class="remarks-column">&nbsp;</td>
+                                </tr>
+                            }
+                        }
+                    }
+
+                    <tr>
+                        <td colspan="4" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">
+                            &nbsp;
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    @if (Model.Template != null && Model.Template.TermsConditions != null)
+    {
+        <h5>Terms &amp; Conditions</h5>
+        <table cellpadding="8" cellspacing="0" border="1" style="width:100%">
+            <tr>
+                <td><span style="white-space: pre-line">@Model.Template.TermsConditions</span></td>
+            </tr>
+        </table>
+    }
+
+    @if (Model.Company.DcFooterContent != null)
+    {
+        @Html.Raw(Model.Company.DcFooterContent)
+        ;
+    }
+
+    <table style="width: 100%" border="0">
+        @if (Model.Company.DcFooterImage != null && Model.Company.DcFooterHeight.HasValue && Model.Company.DcFooterWidth.HasValue)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%">
+                    <img src="~/upload/@Model.Company.DcFooterImage"
+                         height="@Model.Company.DcFooterHeight.Value.ToString()"
+                         width="@Model.Company.DcFooterWidth.Value.ToString()" />
+                </td>
+            </tr>
+        }
+    </table>
+</body>

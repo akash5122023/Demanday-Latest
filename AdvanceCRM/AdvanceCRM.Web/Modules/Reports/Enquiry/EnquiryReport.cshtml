@@ -1,0 +1,50 @@
+﻿@model AdvanceCRM.Reports.EnquiryReportModel
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "Enquiry Report";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+}
+
+<body>
+    <table style="width:100%; border:groove;">
+        <tr>
+            <td align="center">
+                <h3 style="text-decoration-color:burlywood">@Model.Company.Name</h3>
+                <h4>@Model.Company.Address</h4>
+                <h5>@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>
+    @if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.Customerwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Enquiry.CustomerwiseEnquiry, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.Divisionwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Enquiry.DivisionwiseEnquiry, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.LostReasons)
+    {
+        @Html.Partial(MVC.Views.Reports.Enquiry.LostEnquiryReasons, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.Mediawise)
+    {
+        @Html.Partial(MVC.Views.Reports.Enquiry.MediawiseEnquiry, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.Productwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Enquiry.ProductwiseEnquiry, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.Representativewise)
+    {
+        @Html.Partial(MVC.Views.Reports.Enquiry.RepwiseEnquiry, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.Detailed)
+    {
+        @Html.Partial(MVC.Views.Reports.Enquiry.EnquiryDetailReport, Model);
+    }
+    else
+    {
+        @Html.Partial(MVC.Views.Reports.Enquiry.EnquiryStatistics, Model);
+    }
+</body>

@@ -1,0 +1,672 @@
+﻿@model AdvanceCRM.Modules.Premium.RepresentativePerformancePageModel
+@{
+    ViewBag.Title = "RepresentativePerformanceDashboard";
+}
+
+<h2>Representative Performance</h2>
+
+<!-- Styles -->
+<style>
+    #RepresentativeEnquiry {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #RepresentativeQuotation {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #RepresentativeSales {
+        width: 100%;
+        height: 300px;
+        font-size: 11px;
+    }
+</style>
+
+
+
+
+<link rel="stylesheet" href="~/Scripts/daterangepicker/daterangepicker-bs3.css" />
+<link rel="stylesheet" href="~/Content/iCheck/all.css" />
+<link rel="stylesheet" href="~/Scripts/colorpicker/bootstrap-colorpicker.min.css" />
+<link rel="stylesheet" href="~/Scripts/timepicker/bootstrap-timepicker.min.css" />
+
+
+<script src="~/Scripts/input-mask/jquery.inputmask.js"></script>
+<script src="~/Scripts/input-mask/jquery.inputmask.date.extensions.js"></script>
+<script src="~/Scripts/input-mask/jquery.inputmask.extensions.js"></script>
+<script src="~/Scripts/daterangepicker/moment.min.js"></script>
+<script src="~/Scripts/daterangepicker/daterangepicker.js"></script>
+
+<script src="~/Scripts/colorpicker/bootstrap-colorpicker.min.js"></script>
+<script src="~/Scripts/timepicker/bootstrap-timepicker.min.js"></script>
+<script src="~/Scripts/jquery.icheck.min.js"></script>
+<script src="~/Scripts/adminlte/demo.js"></script>
+
+
+
+<!-- Resources -->
+<script src="~/amcharts/amcharts.js"></script>
+@*3D Cylinder Chart,Stacked bar chart with negative values,Column and Line mix,Reversed Value Axis*@
+<script src="~/amcharts/serial.js"></script>
+<script src="~/amcharts/plugins/export/export.min.js"></script>
+<link href="~/amcharts/plugins/export/export.css" rel="stylesheet" />
+<script src="~/amcharts/themes/light.js"></script>
+<script src="~/amcharts/plugins/responsive/responsive.min.js"></script>
+
+
+<!-- Resources -->
+@*<script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    3D Cylinder Chart,Stacked bar chart with negative values,Column and Line mix,Reversed Value Axis,Multiple Value Axes,Line with different colors for ups and downs,Simple Column Chart,3D Stacked Column Chart,Column chart with images on top
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
+    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
+    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>*@
+
+<!-- Chart code -->
+<script>
+
+
+
+    //RepresentativeEnquiry 3D Cylinder Chart
+    var chart = AmCharts.makeChart("RepresentativeEnquiry", {
+            "theme": "light",
+            "responsive": {
+                "enabled": true
+            },
+            "type": "serial",
+            "startDuration": 2,
+            "dataProvider": [
+            @foreach (var line in Model.EnquiryList.GroupBy(info => info.AssignedUsername).Select(group => new
+            {
+                Name = group.Key,
+                Count = group.Count(),
+                //Sum = group.Sum(x=>x.Quantity)
+            }))
+            {
+
+                    <text>
+                    {
+                        "country": '@line.Name',
+                        "visits": @line.Count,
+
+                    },
+                </text>
+            }
+            ],
+            "valueAxes": [{
+                "position": "left",
+                "axisAlpha": 0,
+                "gridAlpha": 0
+            }],
+            "graphs": [{
+                "balloonText": "[[category]]: <b>[[value]]</b>",
+                "autoColor": true,
+                "fillAlphas": 0.85,
+                "lineAlpha": 0.1,
+                "type": "column",
+                "topRadius": 1,
+                "valueField": "visits"
+            }],
+            "depth3D": 40,
+            "angle": 30,
+            "chartCursor": {
+                "categoryBalloonEnabled": false,
+                "cursorAlpha": 0,
+                "zoomable": false
+            },
+            "categoryField": "country",
+            "categoryAxis": {
+                "gridPosition": "start",
+                "gridAlpha": 0,
+                "autoWrap": true
+            },
+            "marginLeft": 100,
+            "export": {
+                "enabled": true
+            }
+        }, 0);
+
+
+    //RepresentativeQuotation Simple Column Chart
+    var chart = AmCharts.makeChart("RepresentativeQuotation", {
+        "type": "serial",
+        "theme": "light",
+        "dataProvider": [
+            @foreach (var line in Model.QuotationList.GroupBy(info => info.AssignedUsername).Select(group => new
+            {
+                Name = group.Key,
+                Count = group.Count(),
+                //Sum = group.Sum(x=>x.Quantity)
+            }))
+            {
+
+                    <text>
+                    {
+                        "country": '@line.Name',
+                        "visits": @line.Count,
+
+                    },
+                </text>
+            }
+            ],
+        "valueAxes": [{
+            "gridColor": "#FFFFFF",
+            "gridAlpha": 0.2,
+            "dashLength": 0
+        }],
+        "gridAboveGraphs": true,
+        "startDuration": 1,
+        "graphs": [{
+            "balloonText": "[[category]]: <b>[[value]]</b>",
+            "fillAlphas": 0.8,
+            "lineAlpha": 0.2,
+            "type": "column",
+            "valueField": "visits"
+        }],
+        "chartCursor": {
+            "categoryBalloonEnabled": false,
+            "cursorAlpha": 0,
+            "zoomable": false
+        },
+        "categoryField": "country",
+        "categoryAxis": {
+            "gridPosition": "start",
+            "gridAlpha": 0,
+            "autoWrap": true
+        },
+        "marginLeft": 100,
+        "export": {
+            "enabled": true
+        }
+    });
+
+    AmCharts.addInitHandler(function (chart) {
+        // check if there are graphs with autoColor: true set
+        for (var i = 0; i < chart.graphs.length; i++) {
+            var graph = chart.graphs[i];
+            if (graph.autoColor !== true)
+                continue;
+            var colorKey = "autoColor-" + i;
+            graph.lineColorField = colorKey;
+            graph.fillColorsField = colorKey;
+            for (var x = 0; x < chart.dataProvider.length; x++) {
+                var color = chart.colors[x]
+                chart.dataProvider[x][colorKey] = color;
+            }
+        }
+
+    }, ["serial"]);
+
+    //RepresentativeSales Column chart with images on top
+    var chart = AmCharts.makeChart("RepresentativeSales",
+        {
+            "type": "serial",
+            "theme": "light",
+            "responsive": {
+                "enabled": true
+            },
+            "dataProvider": [
+            @{ var s_total = Model.SalesList.Sum(x => x.Total);}
+            @foreach (var line in Model.SalesList.GroupBy(info => info.AssignedUsername).Select(group => new
+            {
+                Name = group.Key,
+                Count = group.Count(),
+                Sum = (int)group.Sum(x=>x.Total)
+                //Bullet=group.Select(x=>x.AssignedUserImage)
+            }))
+            {
+                var point = ((line.Sum/s_total)*100)*1000;
+                    <text>
+                    {
+                    "name": '@line.Name',
+                    "points": @point,
+                    "actvalue": @line.Sum,
+                     @*"bullet":'~/upload/@line.Bullet'*@
+
+                    },
+                </text>
+            }
+            ],
+            //"dataProvider": [{
+            //    "name": "John",
+            //    "points": 65456,
+            //    "color": "#7F8DA9",
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/A04.png"
+            //}, {
+            //    "name": "Damon",
+            //    "points": 35654,
+            //    "color": "#FEC514",
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/C02.png"
+            //}, {
+            //    "name": "Patrick",
+            //    "points": 45724,
+            //    "color": "#DB4C3C",
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/D02.png"
+            //}, {
+            //    "name": "Mark",
+            //    "points": 65456,
+            //    "color": "#DAF0FD",
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/E01.png"
+            //}, {
+            //    "name": "John",
+            //    "points": 35654,
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/A04.png"
+            //}, {
+            //    "name": "Damon",
+            //    "points": 65456,
+            //    "color": "#FEC514",
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/C02.png"
+            //}, {
+            //    "name": "Patrick",
+            //    "points": 45724,
+            //    "color": "#DB4C3C",
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/D02.png"
+            //}, {
+            //    "name": "Mark",
+            //    "points": 13654,
+            //    "color": "#DAF0FD",
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/E01.png"
+            //}, {
+            //    "name": "Vinay",
+            //    "points": 45724,
+            //    "bullet": "https://www.amcharts.com/lib/images/faces/A04.png"
+            //}
+            //],
+            "valueAxes": [{
+                "maximum": 80000,
+                "minimum": 0,
+                "axisAlpha": 0,
+                "dashLength": 4,
+                "position": "left"
+            }],
+            "startDuration": 1,
+            "graphs": [{
+                "balloonText": "<span style='font-size:13px;'>[[category]]: <b>[[actvalue]]</b></span>",
+                "bulletOffset": 10,
+                "bulletSize": 52,
+                //"colorField": "color",
+                "autoColor": true,
+                "cornerRadiusTop": 8,
+                "customBulletField": "bullet",
+                "fillAlphas": 0.8,
+                "lineAlpha": 0,
+                "type": "column",
+                "valueField": "points"
+            }],
+            "marginTop": 0,
+            "marginRight": 0,
+            "marginLeft": 0,
+            "marginBottom": 0,
+            "autoMargins": false,
+            "categoryField": "name",
+            "categoryAxis": {
+                "axisAlpha": 0,
+                "gridAlpha": 0,
+                "inside": true,
+                "tickLength": 0
+            },
+            //"categoryAxis": {
+            //    "gridPosition": "start",
+            //    "gridAlpha": 0,
+            //    "inside": true,
+            //    "tickLength": 0,
+            //    "autoWrap": true
+            //},
+            //"marginLeft": 100,
+            "export": {
+                "enabled": true
+            }
+        });
+
+
+    $(function () {
+        //Date range picker for RepresentativeEnquiry
+        $('input[name="EnquiryListDateRange"]').daterangepicker({
+            startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+            endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+        });
+
+        //On date change RepresentativeEnquiry
+        $('input[name="EnquiryListDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+            var sDate = picker.startDate.format('MM/DD/YYYY');
+            var eDate = picker.endDate.format('MM/DD/YYYY');
+
+            $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+            $("#RepresentativeEnquiry").load('@Url.Action("RepresentativeEnquiryChart", "RepresentativePerformance")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+                if (JSON.parse(data).length != 0) {
+                    $("#lblMsgEnquiryList").text("");
+                }
+
+
+                        //RepresentativeEnquiry Simple Column Chart
+                        var chart = AmCharts.makeChart("RepresentativeEnquiry", {
+                        "theme": "light",
+                        "responsive": {
+                            "enabled": true
+                        },
+                        "type": "serial",
+                        "startDuration": 2,
+                        "dataProvider": JSON.parse(data),
+                        "valueAxes": [{
+                            "position": "left",
+                            "axisAlpha": 0,
+                            "gridAlpha": 0
+                        }],
+                        "graphs": [{
+                            "balloonText": "[[category]]: <b>[[value]]</b>",
+                            "autoColor": true,
+                            "fillAlphas": 0.85,
+                            "lineAlpha": 0.1,
+                            "type": "column",
+                            "topRadius": 1,
+                            "valueField": "visits"
+                        }],
+                        "depth3D": 40,
+                        "angle": 30,
+                        "chartCursor": {
+                            "categoryBalloonEnabled": false,
+                            "cursorAlpha": 0,
+                            "zoomable": false
+                        },
+                        "categoryField": "country",
+                        //"categoryAxis": {
+                        //    "gridPosition": "start",
+                        //    "axisAlpha": 0,
+                        //    "gridAlpha": 0
+
+                        //},
+                        "categoryAxis": {
+                            "gridPosition": "start",
+                            "gridAlpha": 0,
+                            "autoWrap": true
+                        },
+                        "marginLeft": 100,
+                        "export": {
+                            "enabled": true
+                        }
+                    }, 0);
+            });
+
+        }); //End of RepresentativeEnquiry
+    });
+
+
+     $(function () {
+        //Date range picker for RepresentativeSalesDateRange
+         $('input[name="RepresentativeSalesDateRange"]').daterangepicker({
+            startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+            endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+        });
+
+        //On date change Enquiry Stages
+        $('input[name="RepresentativeSalesDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+            var sDate = picker.startDate.format('MM/DD/YYYY');
+            var eDate = picker.endDate.format('MM/DD/YYYY');
+
+            $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+            $("#RepresentativeSales").load('@Url.Action("RepresentativeSalesChart", "RepresentativePerformance")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+                if (JSON.parse(data).length != 0) {
+                    $("#lblMsgSalesList").text("");
+                }
+
+                        var chart = AmCharts.makeChart("RepresentativeSales",
+                        {
+                            "type": "serial",
+                            "theme": "light",
+                            "responsive": {
+                                "enabled": true
+                            },
+                            "dataProvider":JSON.parse(data),
+                            //"dataProvider": [{
+                            //    "name": "John",
+                            //    "points": 65456,
+                            //    "color": "#7F8DA9",
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/A04.png"
+                            //}, {
+                            //    "name": "Damon",
+                            //    "points": 35654,
+                            //    "color": "#FEC514",
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/C02.png"
+                            //}, {
+                            //    "name": "Patrick",
+                            //    "points": 45724,
+                            //    "color": "#DB4C3C",
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/D02.png"
+                            //}, {
+                            //    "name": "Mark",
+                            //    "points": 65456,
+                            //    "color": "#DAF0FD",
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/E01.png"
+                            //}, {
+                            //    "name": "John",
+                            //    "points": 35654,
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/A04.png"
+                            //}, {
+                            //    "name": "Damon",
+                            //    "points": 65456,
+                            //    "color": "#FEC514",
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/C02.png"
+                            //}, {
+                            //    "name": "Patrick",
+                            //    "points": 45724,
+                            //    "color": "#DB4C3C",
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/D02.png"
+                            //}, {
+                            //    "name": "Mark",
+                            //    "points": 13654,
+                            //    "color": "#DAF0FD",
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/E01.png"
+                            //}, {
+                            //    "name": "Vinay",
+                            //    "points": 45724,
+                            //    "bullet": "https://www.amcharts.com/lib/images/faces/A04.png"
+                            //}
+                            //],
+                            "valueAxes": [{
+                                "maximum": 80000,
+                                "minimum": 0,
+                                "axisAlpha": 0,
+                                "dashLength": 4,
+                                "position": "left"
+                            }],
+                            "startDuration": 1,
+                            "graphs": [{
+                                "balloonText": "<span style='font-size:13px;'>[[category]]: <b>[[actvalue]]</b></span>",
+                                "bulletOffset": 10,
+                                "bulletSize": 52,
+                                //"colorField": "color",
+                                "autoColor": true,
+                                "cornerRadiusTop": 8,
+                                "customBulletField": "bullet",
+                                "fillAlphas": 0.8,
+                                "lineAlpha": 0,
+                                "type": "column",
+                                "valueField": "points"
+                            }],
+                            "marginTop": 0,
+                            "marginRight": 0,
+                            "marginLeft": 0,
+                            "marginBottom": 0,
+                            "autoMargins": false,
+                            "categoryField": "name",
+                            //"categoryAxis": {
+                            //    "gridPosition": "start",
+                            //    "gridAlpha": 0,
+
+                            //    "autoWrap": true
+                            //},
+
+                            "categoryAxis": {
+                                "axisAlpha": 0,
+                                "gridAlpha": 0,
+                                "inside": true,
+                                "tickLength": 0
+                            },
+                            "export": {
+                                "enabled": true
+                            }
+                        });
+
+            });
+
+        }); //End of RepresentativeEnquiry
+    });
+
+
+    $(function () {
+        //Date range picker for RepresentativeEnquiry
+        $('input[name="RepresentativeQuotationDateRange"]').daterangepicker({
+            startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+            endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+        });
+
+        //On date change RepresentativeEnquiry
+        $('input[name="RepresentativeQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+            var sDate = picker.startDate.format('MM/DD/YYYY');
+            var eDate = picker.endDate.format('MM/DD/YYYY');
+
+            $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+            $("#RepresentativeQuotation").load('@Url.Action("RepresentativeQuotationChart", "RepresentativePerformance")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+                if (JSON.parse(data).length != 0) {
+                    $("#lblMsgQuotationList").text("");
+                }
+
+                //RepresentativeEnquiry Simple Column Chart
+                var chart = AmCharts.makeChart("RepresentativeQuotation", {
+                        "type": "serial",
+                        "theme": "light",
+                        "responsive": {
+                        "enabled": true
+                        },
+                        "dataProvider": JSON.parse(data),
+                        "valueAxes": [{
+                            "gridColor": "#FFFFFF",
+                            "gridAlpha": 0.2,
+                            "dashLength": 0
+                        }],
+                        "gridAboveGraphs": true,
+                        "startDuration": 1,
+                        "graphs": [{
+                            "balloonText": "[[category]]: <b>[[value]]</b>",
+                            "fillAlphas": 0.8,
+                            "lineAlpha": 0.2,
+                            "type": "column",
+                            "valueField": "visits"
+                        }],
+                        "chartCursor": {
+                            "categoryBalloonEnabled": false,
+                            "cursorAlpha": 0,
+                            "zoomable": false
+                        },
+                        "categoryField": "country",
+                        "categoryAxis": {
+                            "gridPosition": "start",
+                            "gridAlpha": 0,
+                            "tickPosition": "start",
+                            "tickLength": 20
+                        },
+                        "export": {
+                            "enabled": true
+                        }
+                    });
+            });
+
+        }); //End of Representative Quotation
+    });
+</script>
+<br />
+<!-- HTML -->
+<body style='background:lightgrey;'>
+    <br />
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="RepresentativeSalesDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representativewise Sales</strong>
+                <div id="RepresentativeSales"></div>
+
+                @if (Model.SalesList.Count() == 0)
+                {
+                <label id="lblMsgSalesList">
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                </label>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="RepresentativeQuotationDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representativewise Quotation</strong>
+                <div id="RepresentativeQuotation"></div>
+                @if (Model.QuotationList.Count() == 0)
+                {
+                <label id="lblMsgQuotationList">
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                </label>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="EnquiryListDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representativewise Enquiry</strong>
+                <div id="RepresentativeEnquiry"></div>
+                @if (Model.EnquiryList.Count() == 0)
+                {
+                <label id="lblMsgEnquiryList">
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                </label>
+                }
+            </div>
+        </div>
+    </div>
+</body>

@@ -1,0 +1,410 @@
+﻿@model AdvanceCRM.Common.Mailbox.Classes.EmailDetails
+@using MimeKit.IO;
+@using MimeKit;
+@using System.IO;
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Forward";
+}
+
+@section Head {
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://hayageek.github.io/jQuery-Upload-File/4.0.11/jquery.uploadfile.min.js"></script>
+    @*<link rel="stylesheet" href="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" />*@
+    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.min.css" />
+    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.print.css" media="print" />
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css" />
+    <link href="http://hayageek.github.io/jQuery-Upload-File/4.0.11/uploadfile.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+    @*<script src="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js"></script>*@
+    <script src="https://cdn.ckeditor.com/4.8.0/standard/ckeditor.js"></script>
+    <script src="~/Scripts/fullcalendar/fullcalendar.min.js"></script>
+    <script src="~/Scripts/jquery.icheck.min.js"></script>
+    <script src="~/Scripts/adminlte/demo.js"></script>
+}
+
+@section ContentHeader {
+    <h1>Mailbox</h1>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#fileuploader").uploadFile({
+            url: "UploadFile",
+            multiple: true,
+            dragDrop: true,
+            fileName: "file",
+            returnType: "json",
+            showStatusAfterSuccess: true,
+            showAbort: true,
+            showDelete: true,
+            ////dragDropStr: "Drag Drop",
+
+            ////abortStr: "Abort",
+
+            ///cancelStr: "Cancel",
+
+            ////doneStr: "Fail",
+
+            onSuccess: function (files, data, xhr, pd) {
+                //alert("Url" + data.url + "AttachedFiles" + $('#AttachedFiles').val());
+                //files: list of files
+                //data: response from server
+                //xhr : jquer xhr object
+                $('#AttachedFiles').val($('#AttachedFiles').val() + ',' + data.url);
+            },
+            deleteCallback: function (data, pd) {
+                //for (var i = 0; i < data.length; i++) {
+                alert(data.url);
+                $.post("DeleteFile", { op: "delete", name: data.url },
+                    function (resp, textStatus, jqXHR) {
+                        // alert(textStatus + "" + data[i]);
+                        //Show Message
+                        alert("File Deleted");
+                    });
+                //}
+                pd.statusbar.hide(); //You choice.
+            },
+            onError: function (files, status, errMsg, pd) {
+                alert(errMsg);
+                location.reload();
+            }
+
+        });
+
+    });
+    function checkvalue() {
+        var mystring = document.getElementById('ToAddress').value;
+        //alert("mystring" + mystring);
+        if (!mystring.match(/\S/)) {
+            //alert('Please specify atleast one receipient');
+            toastr.error("<br/><button type='button' id='ConfirmYes' class='btn clear'>OK</button>", 'Please enter atleast one Receipent?',
+                {
+                    "closeButton": true,
+                    "debug": false,
+                    "newestOnTop": true,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": true,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "3000",
+                    "timeOut": 0,
+                    "extendedTimeOut": 0,
+                    "tapToDismiss": false,
+                    "allowHtml": true,
+                    onShown: function (toast) {
+                        $("#ConfirmYes").click(function () {
+                            location.reload();
+                        });
+                    }
+                });
+            return false;
+        } else {
+            //alert("correct input");
+            return true;
+        }
+    }
+    function ShowDivCC() {
+        $("#DivCC").show();
+    }
+    function ShowDivBCC() {
+        $("#DivBCC").show();
+    }
+</script>
+
+
+
+<div class="row">
+    @using (Html.BeginForm("Forward", "Mailbox", FormMethod.Post, new { @id = "ForwardId", enctype = "multipart/form-data", onsubmit = "return checkvalue(this);" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.AttachedFiles)
+        @Html.HiddenFor(m => m.HtmlBody)
+        @Html.HiddenFor(m => m.Attachments)
+        @Html.HiddenFor(m => m.MessageIndex)
+        @Html.HiddenFor(m => m.FolderName)
+        //HtmlHelper.UnobtrusiveJavaScriptEnabled = false;
+        <div class="col-md-2">
+            <a href="~/Mailbox/Inbox" class="btn btn-primary btn-block margin-bottom">Back to Inbox</a>
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Folders</h3>
+                    <div class="box-tools">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body no-padding">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li>
+                            <a href="~/Mailbox/Inbox">
+                                <i class="fa fa-inbox"></i> Inbox
+                                <span class="label label-primary pull-right">12</span>
+                            </a>
+                        </li>
+                        <li><a href="~/Mailbox/Inbox?flag=Sent"><i class="fa fa-envelope-o"></i>Sent</a></li>
+                        <li><a href="~/Mailbox/Inbox?flag=Drafts"><i class="fa fa-file-text-o"></i>Drafts</a></li>
+                        <li>
+                            <a href="~/Mailbox/Inbox?flag=Junk"><i class="fa fa-filter"></i>Junk</a>
+                            @*<a href="~/Mailbox/Inbox?flag=Junk E-Mail"><i class="fa fa-filter"></i>Junk<span class="label label-warning pull-right">65</span></a>*@
+                        </li>
+                        @*@if (Model.ServerName == "Gmail")
+                            {
+                                <li>
+                                    <a href="~/Mailbox/Inbox?flag=Starred"><i class="fa fa-filter"></i>Starred</a>
+                                </li>
+                            }*@
+                        <li><a href="~/Mailbox/Inbox?flag=Trash"><i class="fa fa-trash-o"></i>Trash</a></li>
+                    </ul>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /. box -->
+            @*<div class="box box-solid">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Labels</h3>
+                        <div class="box-tools">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body no-padding">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a href="#"><i class="fa fa-circle-o text-red"></i> Important</a></li>
+                            <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> Promotions</a></li>
+                            <li><a href="#"><i class="fa fa-circle-o text-light-blue"></i> Social</a></li>
+                        </ul>
+                    </div>
+                    <!-- /.box-body -->
+                </div>*@
+            <!-- /.box -->
+        </div>
+        <!-- /.col -->
+
+        <div class="col-md-10">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Forward</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="form-group">
+                        @*<input name="To" id="To" class="form-control" placeholder="To:">*@
+                        @Html.TextBoxFor(m => m.ToAddress, new { @class = "form-control", @placeholder = "To:" })
+                        <span class="pull-right"><label id="LblCC" onclick="ShowDivCC()">Cc</label> <label id="LblBCC" onclick="ShowDivBCC()">Bcc</label></span>
+                        @*@Html.ValidationMessageFor(m => m.ToAddress, "", new { @class = "text-danger" })*@
+                    </div>
+                    <div class="form-group" hidden id="DivCC">
+                        @*<input name="To" id="To" class="form-control" placeholder="To:">*@
+                        @Html.TextBoxFor(m => m.CCAddress, new { @class = "form-control", @placeholder = "Cc:" })
+                        @*@Html.TextBoxFor(m => m.ToAddress, new { htmlAttributes = new { @class = "form-control", @placeholder = "To:" } })*@
+                    </div>
+                    <div class="form-group" hidden id="DivBCC">
+                        @*<input name="To" id="To" class="form-control" placeholder="To:">*@
+                        @Html.TextBoxFor(m => m.BCCAddress, new { @class = "form-control", @placeholder = "Bcc:" })
+                        @*@Html.TextBoxFor(m => m.ToAddress, new { htmlAttributes = new { @class = "form-control", @placeholder = "To:" } })*@
+                    </div>
+                    <div class="form-group">
+                        @Html.TextBoxFor(m => m.Subject, new { @class = "form-control", @placeholder = "Subject:" })
+                    </div>
+                    <div class="form-group">
+                        @{
+                            var str = "";
+                            if (!(@Model.TextBody.IsEmptyOrNull()))
+                            {
+                                str = Model.TextBody.Replace("\n", "<br>");
+                            }
+                        }
+                        <textarea id="TextBody" name="TextBody" class="form-control mailbox-read-message" style="height: 300px"> 
+                           
+                             @if (Model.HtmlBody.IsNullOrEmpty())
+                              {
+                                    @Html.Raw(str)
+                              }
+                              else
+                              {
+                                    @Html.Raw(Model.HtmlBody)
+                              }
+                    </textarea>
+                        <script>
+                            CKEDITOR.replace('TextBody');
+                        </script>
+                    </div>
+                    <div class="box-footer">
+                        <ul class="mailbox-attachments clearfix">
+                            @if (Model.Attachments != null)
+                            {
+                                foreach (var attachment in Model.Attachments)
+                                {
+                                    using (var stream = new MemoryStream())
+                                    {
+                                        var rfc822 = attachment as MessagePart;
+                                        var part = attachment as MimePart;
+
+                                        if (rfc822 != null)
+                                        {
+                                            rfc822.Message.WriteTo(stream);
+                                        }
+                                        else
+                                        {
+                                            part.Content.DecodeTo(stream);
+                                        }
+
+                                        if (!string.IsNullOrEmpty(part.FileName) && part.FileName.Contains(".zip"))
+                                        {
+
+                                            <li>
+                                                <span class="mailbox-attachment-icon"><i class="fa fa-file-zip-o"></i></span>
+                                                <div class="mailbox-attachment-info">
+                                                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-paperclip"></i>@part.FileName</a>
+                                                    <span class="mailbox-attachment-size">
+                                                        @*@Convert.ToInt64(part.ContentDisposition.Size)*@
+                                                        @*@part.ContentDisposition.Size*@
+                                                        @stream.Length bytes
+                                                        <a href="#" class="btn btn-default btn-xs pull-right" onclick="SaveAttachment('@Model.MessageIndex','@part.FileName');"><i class="fa fa-cloud-download fa-2x" data-toggle="tooltip" data-container="body" title="Download"></i></a>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        }
+                                        else if (!string.IsNullOrEmpty(part.FileName) && part.FileName.Contains(".pdf"))
+                                        {
+                                            <li>
+                                                <span class="mailbox-attachment-icon"><i class="fa fa-file-pdf-o"></i></span>
+                                                <div class="mailbox-attachment-info">
+                                                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-paperclip"></i>@part.FileName</a>
+                                                    <span class="mailbox-attachment-size">
+                                                        @*@Convert.ToInt64(part.ContentDisposition.Size)*@
+                                                        @*@part.ContentDisposition.Size*@
+                                                        @stream.Length bytes
+                                                        <a href="#" class="btn btn-default btn-xs pull-right" onclick="SaveAttachment('@Model.MessageIndex','@part.FileName');"><i class="fa fa-cloud-download fa-2x" data-toggle="tooltip" data-container="body" title="Download"></i></a>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        }
+                                        else if (!string.IsNullOrEmpty(part.FileName) && part.FileName.Contains(".jpg"))
+                                        {
+                                            <li>
+                                                @*<span class="mailbox-attachment-icon has-img"><img src="~/Content/adminlte/img/photo1.jpg" alt="Attachment"></span>*@
+                                                @*<span class="mailbox-attachment-icon has-img"><img src="@part.ContentLocation" alt="Attachment"></span>*@
+                                                <span class="mailbox-attachment-icon"><i class="fa fa-file"></i></span>
+                                                <div class="mailbox-attachment-info">
+                                                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-camera"></i>@part.FileName</a>
+                                                    <span class="mailbox-attachment-size">
+                                                        @*@Convert.ToInt64(part.ContentDisposition.Size)*@
+                                                        <a href="#" class="btn btn-default btn-xs pull-right" onclick="SaveAttachment('@Model.MessageIndex','@part.FileName');"><i class="fa fa-cloud-download fa-2x" data-toggle="tooltip" data-container="body" title="Download"></i></a>
+                                                        @stream.Length bytes
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        }
+                                        else if (!string.IsNullOrEmpty(part.FileName) && part.FileName.Contains(".gif"))
+                                        {
+                                            <li>
+                                                @*<span class="mailbox-attachment-icon has-img"><img src="~/Content/adminlte/img/photo1.jpg" alt="Attachment"></span>*@
+                                                @*<span class="mailbox-attachment-icon has-img"><img src="@part.ContentLocation" alt="Attachment"></span>*@
+                                                <span class="mailbox-attachment-icon"><i class="fa fa-file"></i></span>
+                                                <div class="mailbox-attachment-info">
+                                                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-camera"></i>@part.FileName</a>
+                                                    <span class="mailbox-attachment-size">
+                                                        @*@Convert.ToInt64(part.ContentDisposition.Size)*@
+                                                        @stream.Length bytes
+                                                        <a href="#" class="btn btn-default btn-xs pull-right" onclick="SaveAttachment('@Model.MessageIndex','@part.FileName');"><i class="fa fa-cloud-download fa-2x" data-toggle="tooltip" data-container="body" title="Download"></i></a>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        }
+                                        else if (!string.IsNullOrEmpty(part.FileName) && part.FileName.Contains(".docx"))
+                                        {
+                                            <li>
+                                                <span class="mailbox-attachment-icon"><i class="fa fa-file-word-o"></i></span>
+                                                <div class="mailbox-attachment-info">
+                                                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-paperclip"></i>@part.FileName</a>
+                                                    <span class="mailbox-attachment-size">
+                                                        @*@Convert.ToInt64(part.ContentDisposition.Size)*@
+                                                        @*@part.ContentDisposition.Size*@
+                                                        @stream.Length bytes
+                                                        <a href="#" class="btn btn-default btn-xs pull-right" onclick="SaveAttachment('@Model.MessageIndex','@part.FileName');"><i class="fa fa-cloud-download fa-2x" data-toggle="tooltip" data-container="body" title="Download"></i></a>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li>
+                                                <span class="mailbox-attachment-icon"><i class="fa fa-file"></i></span>
+                                                <div class="mailbox-attachment-info">
+                                                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-paperclip"></i>@part.FileName</a>
+                                                    <span class="mailbox-attachment-size">
+                                                        @*@Convert.ToInt64(part.ContentDisposition.Size)*@
+                                                        @stream.Length bytes
+                                                        <a href="#" class="btn btn-default btn-xs pull-right" onclick="SaveAttachment('@Model.MessageIndex','@part.FileName');"><i class="fa fa-cloud-download fa-2x" data-toggle="tooltip" data-container="body" title="Download"></i></a>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        }
+                                        //Console.WriteLine("attachment length = {0}", stream);
+                                        //Console.WriteLine("attachment length = {0}", part.FileName);
+                                        //Console.WriteLine("attachment length = {0}", part.IsAttachment);
+                                    }
+                                }
+                                @*}*@
+                            }
+                        </ul>
+                    </div>
+                    <div class="form-group">
+                        <div id="fileuploader">Upload</div>
+                    </div>
+
+                    @*<div class="form-group">
+                            <div class="btn btn-default btn-file">
+                                <i class="fa fa-paperclip"></i> Attachment
+                                @Html.TextBoxFor(model => model.File, "", new { @type = "file", @multiple = "multiple" })
+                            </div>
+                            <p class="help-block">Max. 32MB</p>
+                        </div>*@
+                </div>
+                <!-- /.box-body -->
+                <div class="box-footer">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default"><i class="fa fa-pencil"></i> Draft</button>
+                        @*<button type="button" class="btn btn-primary" onclick="location.href ='@Url.Action("ComposeMail", "Mailbox",new {To= Model.ToAddress,Subject=Model.Subject,Message=Model.Message })';"><i class="fa fa-envelope-o"></i>Send</button>*@
+
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-envelope-o"></i>Send</button>
+                    </div>
+                    <button type="reset" value="Cancel" class="btn btn-default" onclick="location.href ='@Url.Action("Inbox", "Mailbox", new { flag = "Inbox",Search=""})';"><i class="fa fa-times"></i> Discard</button>
+                </div>
+                <!-- /.box-footer -->
+            </div>
+            <!-- /. box -->
+        </div>
+
+        <!-- /.col -->
+    }
+</div>
+<!-- /.row -->
+
+<script>
+
+    //$(function () {
+    //    //Add text editor
+    //    $("#TextBody").wysihtml5();
+
+    //});
+
+    //$('#TextBody').wysihtml5({
+    //    "font-styles": true, //Font styling, e.g. h1, h2, etc. Default true
+    //    "emphasis": true, //Italics, bold, etc. Default true
+    //    "lists": true, //(Un)ordered lists, e.g. Bullets, Numbers. Default true
+    //    "html": true, //Button which allows you to edit the generated HTML. Default false
+    //    "link": true, //Button to insert a link. Default true
+    //    "image": true, //Button to insert an image. Default true,
+    //    "color": false //Button to change color of font
+    //});
+</script>
+
+
+

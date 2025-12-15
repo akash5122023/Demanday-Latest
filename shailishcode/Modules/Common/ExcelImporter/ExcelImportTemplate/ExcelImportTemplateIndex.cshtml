@@ -1,0 +1,15 @@
+﻿@inject Serenity.ITextLocalizer Localizer
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer.Get("Db.ExcelImporter.ExcelImportTemplate.EntityPlural");
+}
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new _Ext.ExcelImporter.ExcelImportTemplateGrid($('#GridDiv'), {}).init();
+
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });
+</script>

@@ -1,0 +1,101 @@
+﻿
+@{
+    ViewBag.Title = "RecipientList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title">
+
+        @if (ViewBag.flag == "Opens")
+        {
+        <div class="title-text">
+            Opened
+        </div>
+
+        }
+        else
+        {
+        <div class="title-text">
+            Campaign Sent
+        </div>
+
+        }
+
+    </div>
+    <br />
+
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Email</th>
+                @if (ViewBag.flag == "Opens")
+                {
+                <th>Opens</th>
+                <th>Last Open</th>
+                }
+                @if (ViewBag.flag != "Opens")
+                {
+                <th>Preferred Format</th>
+                <th>Member Rating</th>
+                <th>Last Changed</th>
+                <th>Status</th>
+                }
+
+            </tr>
+        </thead>
+        <tbody>
+            @if (ViewBag.flag == "Opens")
+            {
+
+                foreach (var member in ViewBag.SentToRecipients)
+                {
+
+
+                    if (member.OpenCount > 0)
+                    {
+            <tr>
+
+
+                <td class="col-sm-6">
+                    <a href="/MailChimp/SubscriberActivity?CampaignId=@member.CampaignId+&EmailAddress=@member.EmailAddress" title="Subscriber activity">@member.EmailAddress</a>
+                    @*@member.EmailAddress*@
+                </td>
+                <td>@member.OpenCount</td>
+                <td>@Convert.ToDateTime(member.LastOpen).ToString("D") @Convert.ToDateTime(member.LastOpen).ToString("t")</td>
+                @*<td>@member.LastOpen.Date</td>*@
+            </tr>
+
+
+                    }
+                }
+            }
+            else
+            {
+                foreach (var item in ViewBag.RecipientsDetails)
+                {
+            <tr>
+                @*<a href="/MailChimp/SubscriberActivity?CampaignId=@item.Id+&EmailAddress=@member.EmailAddress" title="Subscriber activity">@member.EmailAddress</a>*@
+
+                <td>
+                    <a href="/MailChimp/SubscriberActivity?CampaignId=@ViewBag.CampaignId+&EmailAddress=@item.EmailAddress" title="Subscriber activity">@item.EmailAddress</a>
+                    @*@item.EmailAddress*@
+                </td>
+                <td>@item.EmailType</td>
+                <td>@item.MemberRating</td>
+                <td>@Convert.ToDateTime(item.LastChanged).ToString("D") @Convert.ToDateTime(item.LastChanged).ToString("t") </td>
+                <td><span class="badge">@item.Status</span></td>
+            </tr>
+                }
+
+
+            }
+
+
+        </tbody>
+
+    </table>
+
+</div>
+

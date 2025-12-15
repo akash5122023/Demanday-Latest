@@ -1,0 +1,260 @@
+﻿@model AdvanceCRM.Products.ItineraryReportData
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    #datatable {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #datatable td, #datatable th {
+            border: 1px solid #ddd;
+            padding: 2px
+        }
+
+    header {
+        padding: 10px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #AAAAAA;
+    }
+
+    #logo {
+        float: left;
+        margin-top: 8px;
+    }
+
+    #company {
+        width: 50%;
+        float: right;
+        text-align: right;
+    }
+
+    #client {
+        border-left: 6px solid #0087C3;
+    }
+
+
+</style>
+
+
+<script type="text/javascript">
+
+    var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+    var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function toWords(num) {
+        alert(num)
+        if ((num = num.toString()).length > 9) return 'overflow';
+        n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return; var str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + ' ' : '';
+        return str.trim();
+    }
+</script>
+
+<body>
+    <table style="width: 100% " border="0">
+        @if (Model.Company != null && Model.Company.HeaderImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%"><img src="~/upload/@Model.Company.HeaderImage" height="@Model.Company.HeaderHeight" width="@Model.Company.HeaderWidth" /></td>
+            </tr>
+        }
+    </table>
+
+    @if (Model.Company != null && Model.Company.HeaderContent != null)
+    {
+        @Html.Raw(Model.Company.HeaderContent);
+    }
+    <header class="clearfix">
+        @if (Model.Company?.CompanyDetails == true)
+        {
+            if (Model.Company?.Logo != null)
+            {
+                <div id="logo">
+                    <img src="~/upload/@Model.Company.Logo" height="@Model.Company.LogoHeight" width="@Model.Company.LogoWidth" />
+                </div> }
+            <div id="company">
+                    <h4 class="name">@Model.Company.Name</h4>
+                    <div>@Model.Company.Address</div>
+                    @*<div>@Model.Company.Phone</div>
+                    <div>GSTIN: @Model.Company.GSTIN</div>
+                    <div>PAN No: @Model.Company.PANNo</div>*@
+                </div>
+        }
+    </header>
+
+    <div style="background-color:aqua">
+        @*<div class="section-title">Itinerary Details</div>*@
+
+
+        <div>
+            <h3 style=" text-decoration: underline; font-weight: 800; text-align:center" class="text-red">@Model.Itinerary.Headline</h3>
+        </div>
+
+        <div>Date: @Model.Itinerary.Date</div><br />
+        @*<div>Days: @Model.Itinerary.DaysId</div>*@
+
+        @if (
+      !string.IsNullOrWhiteSpace(Model.Itinerary.From) ||
+      !string.IsNullOrWhiteSpace(Model.Itinerary.To))
+        {
+
+            if (!string.IsNullOrWhiteSpace(Model.Itinerary.From))
+            {
+               <div>From: @Model.Itinerary.From</div>
+            }
+            if (!string.IsNullOrWhiteSpace(Model.Itinerary.To))
+            {
+                <div>To: @Model.Itinerary.To</div>
+            }
+        }
+
+        @{
+            int nights = 0, adults = 0, childrens = 0;
+            bool isNightsValid = int.TryParse(Model.Itinerary.Nights, out nights);
+            bool isAdultsValid = int.TryParse(Model.Itinerary.Adults, out adults);
+            bool isChildrensValid = int.TryParse(Model.Itinerary.Childrens, out childrens);
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Itinerary.Destination) ||
+            !string.IsNullOrWhiteSpace(Model.Itinerary.HotelName) ||
+            isNightsValid && nights > 0 ||
+            isAdultsValid && adults > 0 ||
+            isChildrensValid && childrens > 0 ||
+            !string.IsNullOrWhiteSpace(Model.Itinerary.MealPlan))
+        {
+
+
+            if (!string.IsNullOrWhiteSpace(Model.Itinerary.Destination))
+            {
+                <div>Destination: @Model.Itinerary.Destination</div>
+            }
+            if (!string.IsNullOrWhiteSpace(Model.Itinerary.HotelName))
+            {
+                <div>Hotel Name: @Model.Itinerary.HotelName</div>
+            }
+            if (isNightsValid && nights > 0)
+            {
+                <div>Nights: @Model.Itinerary.Nights</div>
+            }
+            if (isAdultsValid && adults > 0)
+            {
+                <div>Adults: @Model.Itinerary.Adults</div>
+            }
+            if (isChildrensValid && childrens > 0)
+            {
+                <div>Children: @Model.Itinerary.Childrens</div>
+            }
+            if (!string.IsNullOrWhiteSpace(Model.Itinerary.MealPlan))
+            {
+                <div>Meal Plan: @Model.Itinerary.MealPlan</div>
+            }
+        }
+
+
+
+        @*<div>From: @Model.Itinerary.From</div>
+        <div>To: @Model.Itinerary.To</div>
+        <div>Destination: @Model.Itinerary.Destination</div>
+        <div>Hotel Name: @Model.Itinerary.HotelName</div>
+        <div>Nights: @Model.Itinerary.Nights</div>
+        <div>Adults: @Model.Itinerary.Adults</div>
+        <div>Children: @Model.Itinerary.Childrens</div>
+        <div>Meal Plan: @Model.Itinerary.MealPlan</div>*@
+
+        @*<tr>
+            <td>@Model.Itinerary.Headline</td>
+            <td>@Model.Itinerary.Date</td>
+            <td>@Model.Itinerary.DaysId</td>
+            <td>@Model.Itinerary.From</td>
+            <td>@Model.Itinerary.To</td>
+            <td>@Model.Itinerary.Destination</td>
+            <td>@Model.Itinerary.HotelName</td>
+            <td>@Model.Itinerary.Nights</td>
+            <td>@Model.Itinerary.Adults</td>
+            <td>@Model.Itinerary.Childrens</td>
+            <td>@Model.Itinerary.MealPlan</td>
+            <td>@Model.Itinerary.Amount</td>
+            <td>@Model.Itinerary.TermsAndConditions</td>
+        </tr>*@
+
+    </div>
+
+    <div class="section-title">Itinerary Terms</div>
+    <table id="datatable">
+
+        @foreach (var term in Model.ItineraryTerm)
+        {
+            <div id="header" class="clearfix">
+                <h5>
+                    Days : @term.DaysId
+                </h5>
+                @{
+                    var attachments = (term.DaysFileAttachments ?? "").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                }
+            <p>
+                <h4 class="bg-yellow text-black">@term.DaysTitle</h4>   <br /><br />
+                <h4 class="bg-yellow-active text-black"> @term.DaysHeading</h4>
+                <br /><br />
+                @term.DaysDescription <br /><br />
+
+                @*@if (!terms.DaysFileAttachment.IsNullOrEmpty())
+        {
+            int fileSize = 1440 / totalColumns;
+            <img width="@fileSize px" src="~/upload/@qp.FileAttachment" alt="FileAttachment" />
+        }*@
+                @*@term.DaysFileAttachments
+
+        @foreach (var file in attachments)
+        {
+            <img src="~/upload/@file.Trim()" alt="Day Image" />
+        }*@
+
+                @if (attachments.Any())
+                {
+                    <div>
+                        @foreach (var file in attachments)
+                        {
+                            var trimmedFile = file.Trim();
+                            <div>
+                                <img src="@Url.Content("~/upload/" + trimmedFile)" alt="Day Image"  />
+                            </div>
+                        }
+                    </div>
+                }
+            </p>
+            </div>
+        }
+
+
+    </table>
+    <div>
+        <h5 class="bg-aqua text-black">Amount:@Model.Itinerary.Amount</h5></div>
+    <div>
+        <h4 class="bg-yellow-active text-black">Terms and Conditions:</h4>
+        @Model.Itinerary.TermsAndConditions
+    </div>
+
+
+
+</body>

@@ -1,0 +1,38 @@
+#LoginPanel h3 {
+    font-size: 24px;
+    text-align: center;
+}
+
+#LoginPanel .s-Form .caption,
+#LoginPanel .s-Form input {
+    font-size: 16px;
+}
+
+#LoginPanel .s-Form input {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    color: #000;
+}
+
+#LoginPanel .btn-primary {
+    height: 42px;
+    padding: 0 20px;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: #3598dc;
+}
+
+#LoginPanel .actions a {
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+#LoginPanel .actions a:hover {
+    text-decoration: underline;
+}
+
+#LoginPanel .s-Form > div:last-child {
+    font-size: 12px;
+    font-style: italic;
+}

@@ -1,0 +1,60 @@
+﻿@model AdvanceCRM.Reports.CMSReportModel
+
+
+<strong>Enquiry Statistics </strong>
+    &nbsp;&nbsp; - &nbsp;&nbsp; <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat()
+    <table style="width:100%; border:groove" , border="1">
+        <tr><td><strong> Statistics: </strong></td></tr>
+        <tr>
+            <td>&nbsp;&nbsp; Total Enquiries &nbsp;&nbsp;&nbsp;&nbsp; : &nbsp; @Model.All.Count</td>
+        </tr>
+        <tr>
+            <td>
+                &nbsp;&nbsp; Open Enquiries &nbsp;&nbsp;&nbsp;&nbsp;: &nbsp; @Model.Open.Count
+            </td>
+        </tr>
+        <tr>
+            <td>
+                &nbsp;&nbsp; Closed Enquiries &nbsp; : &nbsp; @Model.Closed.Count
+            </td>
+        </tr>
+    </table>
+
+    @*<table style="width:100%; border:groove" , border="1">
+        <tr><td><strong> Conversion: </strong></td></tr>
+        <tr>
+            <td>&nbsp;&nbsp; Won Enquiries&nbsp;&nbsp;&nbsp; : &nbsp; @Model.Won.Count</td>
+        </tr>
+        <tr>
+            <td>
+                &nbsp;&nbsp; Lost Enquiries &nbsp;&nbsp;&nbsp;&nbsp;: &nbsp; @Model.Lost.Count
+            </td>
+        </tr>
+    </table>*@
+
+    <table style="width:100%; border:groove" , border="1">
+        <tr><td><strong> Ratio's: </strong></td></tr>
+        <tr>
+            @if (Model.Won.Count > 0)
+            {
+                double won = Model.Won.Count;
+                double closed = Model.Closed.Count;
+                double all = Model.All.Count;
+                double ratio = ((won / closed) * 100);
+                <td>&nbsp;&nbsp; Conversion Ratio &nbsp;: &nbsp; @ratio.ToString("0.00")%</td>
+
+            }
+        </tr>
+        <tr>
+            @if (Model.Lost.Count > 0)
+            {
+                double lost = Model.Lost.Count;
+                double closed = Model.Closed.Count;
+                double all = Model.All.Count;
+                double ratio = ((lost / closed) * 100);
+                <td>
+                    &nbsp;&nbsp; Loss Ratio &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : &nbsp; @ratio.ToString("0.00")%
+                </td>
+            }
+        </tr>
+    </table>

@@ -1,0 +1,84 @@
+﻿@*@model MailChipNetDemo.Models.ModelCampaign*@
+
+
+
+@model IEnumerable<MailChimp.Net.Models.Campaign>
+
+
+
+<h4>Campaign : <strong>@ViewBag.CampaignObject.Settings.Title</strong></h4>
+
+@if (ViewBag.CampaignObject.Status == "sent" || ViewBag.CampaignObject.Status == "schedule")
+{
+<div class="row">
+    <div class="col-sm-4">
+        <a href="@ViewBag.CampaignObject.ArchiveUrl" target="_viewCampaign"><strong>Preview Campaign  &raquo;</strong></a>
+    </div>
+</div>
+}
+<br />
+
+<table class="table table-user-information">
+    <tbody>
+        <tr>
+            <td><strong>From Name</strong></td>
+            <td>@ViewBag.CampaignObject.Settings.FromName</td>
+        </tr>
+        <tr>
+            <td><strong>From Email</strong></td>
+            <td>@ViewBag.CampaignObject.Settings.ReplyTo</td>
+        </tr>
+        <tr>
+            <td><strong>Subject Line</strong></td>
+            <td>@ViewBag.CampaignObject.Settings.SubjectLine</td>
+        </tr>
+        <tr>
+            <td><strong>Recipients Sent to List</strong></td>
+            <td>@ViewBag.ListObject.Name</td>
+        </tr>
+        <tr>
+            <td><strong>Campaign Url</strong></td>
+            <td>@ViewBag.CampaignObject.ArchiveUrl</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Status</strong>
+            </td>
+            <td>
+                <span class="badge">@ViewBag.CampaignObject.Status</span>
+            </td>
+        </tr>
+        <tr>
+            @if (ViewBag.CampaignObject.Status == "sent" || ViewBag.CampaignObject.Status == "schedule")
+            {
+            <td><strong>Sent Time</strong></td>
+            <td>@ViewBag.CampaignObject.SendTime</td>
+            }
+            else if (ViewBag.CampaignObject.Status == "save")
+            {
+            <td><strong>Created Time</strong></td>
+            <td>@ViewBag.CampaignObject.CreateTime</td>
+
+            }
+        </tr>
+        @if (ViewBag.ListObject.Stats.MemberCount > 0)
+        {
+        <tr>
+            <td>
+                <strong>Receipents</strong>
+            </td>
+            <td>
+                <strong><a href="/MailChimp/Members?id=@ViewBag.CampaignObject.Recipients.ListId.ToString()" title="Receipents List">@ViewBag.ListObject.Stats.MemberCount</a> </strong>
+            </td>
+        </tr>
+        }
+        <tr>
+            <td>
+                <strong>Emails Sent</strong>
+            </td>
+            <td>
+                @ViewBag.CampaignObject.EmailsSent
+            </td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,3143 @@
+﻿
+@model AdvanceCRM.Modules.Premium.RepresentativeDashboardPageModel
+@{
+	ViewBag.Title = "RepresentativeDashboard";
+}
+
+<!-- Styles -->
+<style>
+    #RepresentativeEnquirystatus {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #RepresentativeQuotationstatus {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #RepresentativeSalesstatus {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #DatewiseEQSQuantityAnalysis {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #DatewiseEQSAmountAnalysis {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #RepresentativeEnquiryStages {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #RepresentativeQuotationStages {
+        width: 100%;
+        height: 250px;
+        font-size: 11px;
+    }
+
+    #OverallTargetEnquiry {
+        width: 100%;
+        height: 300px;
+    }
+
+    #OverallTargetEnquiryAmt {
+        width: 100%;
+        height: 300px;
+    }
+
+    #OverallTargetQuotation {
+        width: 100%;
+        height: 300px;
+    }
+
+    #OverallTargetQuotationAmt {
+        width: 100%;
+        height: 300px;
+    }
+
+    #OverallTargetSales {
+        width: 100%;
+        height: 300px;
+    }
+
+    #OverallTargetSalesAmt {
+        width: 100%;
+        height: 300px;
+    }
+
+
+    #ProductwiseEnquiry {
+        width: 100%;
+        height: 250px;
+    }
+
+    #ProductwiseSales {
+        width: 100%;
+        height: 250px;
+    }
+
+    #ConversionRatioQuotation {
+        width: 100%;
+        height: 300px;
+    }
+
+    #ConversionRatioEnq {
+        width: 100%;
+        height: 300px;
+    }
+
+    #CitywiseEnquiryAnalysis {
+        width: 100%;
+        height: 500px;
+        font-size: 11px;
+    }
+
+    #CitywiseQuotationAnalysis {
+        width: 100%;
+        height: 500px;
+        font-size: 11px;
+    }
+
+    #CitywiseSalesAnalysis {
+        width: 100%;
+        height: 500px;
+        font-size: 11px;
+    }
+
+
+    .amcharts-pie-slice {
+        transform: scale(1);
+        transform-origin: 50% 50%;
+        transition-duration: 0.3s;
+        transition: all .3s ease-out;
+        -webkit-transition: all .3s ease-out;
+        -moz-transition: all .3s ease-out;
+        -o-transition: all .3s ease-out;
+        cursor: pointer;
+        box-shadow: 0 0 30px 0 #000;
+    }
+
+        .amcharts-pie-slice:hover {
+            transform: scale(1.1);
+            filter: url(#shadow);
+        }
+
+    .kv-reqd {
+        color: red;
+        font-family: monospace;
+        font-weight: normal;
+    }
+</style>
+
+
+
+<link rel="stylesheet" href="~/Scripts/daterangepicker/daterangepicker-bs3.css" />
+<link rel="stylesheet" href="~/Content/iCheck/all.css" />
+<link rel="stylesheet" href="~/Scripts/colorpicker/bootstrap-colorpicker.min.css" />
+<link rel="stylesheet" href="~/Scripts/timepicker/bootstrap-timepicker.min.css" />
+<link href="~/Content/bootstrap-select.css" rel="stylesheet" />
+
+
+
+<script src="~/Scripts/input-mask/jquery.inputmask.js"></script>
+<script src="~/Scripts/input-mask/jquery.inputmask.date.extensions.js"></script>
+<script src="~/Scripts/input-mask/jquery.inputmask.extensions.js"></script>
+<script src="~/Scripts/daterangepicker/moment.min.js"></script>
+<script src="~/Scripts/daterangepicker/daterangepicker.js"></script>
+<script src="~/Scripts/bootstrap-select.js"></script>
+@*<script src="~/Scripts/colorpicker/bootstrap-colorpicker.min.js"></script>*@
+<script src="~/Scripts/timepicker/bootstrap-timepicker.min.js"></script>
+<script src="~/Scripts/jquery.icheck.min.js"></script>
+<script src="~/Scripts/adminlte/demo.js"></script>
+
+
+
+<!-- Resources -->
+<script src="~/amcharts/amcharts.js"></script>
+@*3D PIE CHART,3D Donut Chart,Simple Pie Chart*@
+<script src="~/amcharts/pie.js"></script>
+@*3D FUNNEL AND PYRAMID*@
+<script src="~/amcharts/funnel.js"></script>
+@*3D Cylinder Chart,Stacked bar chart with negative values,Column and Line mix,Reversed Value Axis*@
+<script src="~/amcharts/serial.js"></script>
+@*Solid Gauge,Animated gauge*@
+<script src="~/amcharts/gauge.js"></script>
+<script src="~/amcharts/plugins/export/export.min.js"></script>
+<link href="~/amcharts/plugins/export/export.css" rel="stylesheet" />
+<script src="~/amcharts/themes/light.js"></script>
+<script src="~/amcharts/plugins/responsive/responsive.min.js"></script>
+
+<!-- Chart code -->
+<script>
+	$(document).ready(function () {
+
+		$("div.id_listval select").on('change', function () {
+			$("#RepEnqStagesDateRange").val("");
+			$("#RepQuotDateRange").val("");
+			$("#DatewiseEQSQuantityDateRange").val("");
+			$("#DatewiseEQSAmountDateRange").val("");
+			$("#ProductwiseEnquiryDateRange").val("");
+			$("#ProductwiseSalesDateRange").val("");
+			$("#ConversionRatioEnquiryDateRange").val("");
+			$("#ConversionRatioQuotationDateRange").val("");
+			$("#RepEnquirystatusDateRange").val("");
+			$("#RepQuotationstatusDateRange").val("");
+			$("#RepSalesstatusDateRange").val("");
+			$("#OverallTargetEnquiryDateRange").val("");
+			$("#OverallTargetEnquiryAmtDateRange").val("");
+			$("#OverallTargetQuotationDateRange").val("");
+			$("#OverallTargetQuotationAmtDateRange").val("");
+			$("#OverallTargetSalesDateRange").val("");
+			$("#OverallTargetSalesAmtDateRange").val("");
+			$("#CitywiseEnquiryDateRange").val("");
+			$("#CitywiseQuotationDateRange").val("");
+			$("#CitywiseSalesDateRange").val("");
+
+
+
+			$("#ListId").val(this.value);
+				$.ajax({
+						url:'@Url.Action("EnquiryStagesFunnel", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						success: function (data) {
+							//alert(JSON.parse(data).length);
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgEnquiryStages").show();
+								$("#MsgEnquiryStages").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgEnquiryStages").hide();
+								$("#MsgEnquiryStages").text("");
+							}
+
+							//RepresentativeEnquiryStages Funnel
+							var chart = AmCharts.makeChart("RepresentativeEnquiryStages", {
+								"type": "funnel",
+								"theme": "light",
+								"responsive": {
+									"enabled": true
+								},
+								"dataProvider": JSON.parse(data),
+								"balloon": {
+									"fixedPosition": true
+								},
+								"valueField": "value",
+								"titleField": "title",
+								"labelText": "[[title]]([[value]], Amt:[[sum]])",
+								"marginRight": 240,
+								"marginLeft": 50,
+								"startX": -500,
+								"depth3D": 100,
+								"angle": 40,
+								"outlineAlpha": 1,
+								"outlineColor": "#FFFFFF",
+								"outlineThickness": 2,
+								"labelPosition": "right",
+								"balloonText": "[[title]](Count:[[value]], Amt:[[sum]])",
+								"export": {
+									"enabled": true
+								}
+							});
+						}
+				});
+
+				$.ajax({
+					url: '@Url.Action("QuotationStagesFunnelChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data).length == 0) {
+							$("#lblMsgQuotationStages").show();
+							$("#MsgQuotationStages").text("Data is not available for last 30 days,kindly select Date range");
+						}
+						else
+						{
+							$("#lblMsgQuotationStages").hide();
+							$("#MsgQuotationStages").text("");
+						}
+
+
+						//Representative QuotationStages Funnel
+						var chart = AmCharts.makeChart("RepresentativeQuotationStages", {
+							"type": "funnel",
+							"theme": "light",
+							"responsive": {
+								"enabled": true
+							},
+							"dataProvider": JSON.parse(data),
+							"balloon": {
+								"fixedPosition": true
+							},
+							"valueField": "value",
+							"titleField": "title",
+							"labelText": "[[title]]([[value]], Amt:[[sum]])",
+							"marginRight": 240,
+							"marginLeft": 50,
+							"startX": -500,
+							"depth3D": 100,
+							"angle": 40,
+							"outlineAlpha": 1,
+							"outlineColor": "#FFFFFF",
+							"outlineThickness": 2,
+							"labelPosition": "right",
+							"balloonText": "[[title]](Count:[[value]], Amt:[[sum]])",
+							"export": {
+								"enabled": true
+							}
+						});
+					}
+			   });
+				$.ajax({
+					url:'@Url.Action("MostEnquiredProductChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data).length == 0) {
+							$("#lblMostEnquiryProduct").show();
+							$("#MostEnquiryProduct").text("Data is not available for last 30 days,kindly select Date range");
+						}
+
+						if (JSON.parse(data).length != 0) {
+							$("#lblMostEnquiryProduct").hide();
+							$("#MostEnquiryProduct").text("");
+						}
+
+						//ProductwiseEnquiry(Top 15 Product) Simple Column Chart
+						var chart = AmCharts.makeChart("ProductwiseEnquiry", {
+							"type": "serial",
+							"responsive": {
+								"enabled": true
+							},
+							"theme": "light",
+							"dataProvider": JSON.parse(data),
+							"valueAxes": [{
+								"gridColor": "#FFFFFF",
+								"gridAlpha": 0.2,
+								"dashLength": 0
+							}],
+							"gridAboveGraphs": true,
+							"startDuration": 1,
+							"graphs": [{
+								"balloonText": "[[category]]: <b>[[value]]</b>",
+								"fillAlphas": 0.8,
+								"lineAlpha": 0.2,
+								"type": "column",
+								"valueField": "visits"
+							}],
+							"chartCursor": {
+								"categoryBalloonEnabled": false,
+								"cursorAlpha": 0,
+								"zoomable": false
+							},
+							"categoryField": "country",
+							"categoryAxis": {
+								"gridPosition": "start",
+								"gridAlpha": 0,
+								"autoWrap": true
+							},
+							"marginLeft": 100,
+							"export": {
+								"enabled": true
+							}
+						});
+					}
+				});
+
+
+			 //ProductwiseSales(Top 15 Product) Simple Column Chart
+				$.ajax({
+					url: '@Url.Action("MostSalesProductChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data).length == 0) {
+							$("#lblMsgMostSalesProduct").show();
+							$("#MsgMostSalesProduct").text("Data is not available for last 30 days,kindly select Date range");
+						}
+						else {
+							$("#lblMsgMostSalesProduct").hide();
+							$("#MsgMostSalesProduct").text("");
+						}
+
+						var chart = AmCharts.makeChart("ProductwiseSales", {
+							"type": "serial",
+							"theme": "light",
+							"responsive": {
+								"enabled": true
+							},
+							"dataProvider": JSON.parse(data),
+							"valueAxes": [{
+								"gridColor": "#FFFFFF",
+								"gridAlpha": 0.2,
+								"dashLength": 0
+							}],
+							"gridAboveGraphs": true,
+							"startDuration": 1,
+							"graphs": [{
+								"balloonText": "[[category]]: <b>[[value]]</b>",
+								"fillAlphas": 0.8,
+								"lineAlpha": 0.2,
+								"type": "column",
+								"valueField": "visits"
+							}],
+							"chartCursor": {
+								"categoryBalloonEnabled": false,
+								"cursorAlpha": 0,
+								"zoomable": false
+							},
+							"categoryField": "country",
+							"categoryAxis": {
+								"gridPosition": "start",
+								"gridAlpha": 0,
+								"autoWrap": true
+							},
+							"marginLeft": 100,
+							"export": {
+								"enabled": true
+							}
+						});
+					}
+				});
+
+				//RepresentativeEnquirystatus  pyramid
+				$.ajax({
+					url: '@Url.Action("EnquiryStatus", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data) == "") {
+							$("#lblMsgRepresentativeEnquirystatus").show();
+							$("#MsgRepresentativeEnquirystatus").text("Data is not available for last 30 days,kindly select Date range");
+						}
+						else {
+							$("#lblMsgRepresentativeEnquirystatus").hide();
+							$("#MsgRepresentativeEnquirystatus").text("");
+
+						}
+						var chart = AmCharts.makeChart("RepresentativeEnquirystatus", {
+							"type": "funnel",
+							"theme": "light",
+							"responsive": {
+								"enabled": true
+							},
+							"dataProvider": JSON.parse(data),
+							"balloon": {
+								"fixedPosition": true
+							},
+							"valueField": "value",
+							"titleField": "title",
+							"marginRight": 240,
+							"marginLeft": 50,
+							"startX": -500,
+							"rotate": true,
+							"labelPosition": "right",
+							"balloonText": "[[title]]: [[value]]",
+							"export": {
+								"enabled": true
+							}
+						});
+					}
+				});
+
+			   //Representative Quotationstatus  pyramid
+
+				$.ajax({
+					url: '@Url.Action("QuotationStatusChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data) == "")
+						{
+									$("#lblMsgRepresentativeQuotationstatus").show();
+									$("#MsgRepresentativeQuotationstatus").text("Data is not available for last 30 days,kindly select Date range");
+						}
+						else
+						{
+									$("#lblMsgRepresentativeQuotationstatus").hide();
+									$("#MsgRepresentativeQuotationstatus").text("");
+
+						}
+						var chart = AmCharts.makeChart("RepresentativeQuotationstatus", {
+							"type": "funnel",
+							"theme": "light",
+							"responsive": {
+								"enabled": true
+							},
+							"dataProvider": JSON.parse(data),
+							"balloon": {
+								"fixedPosition": true
+							},
+							"valueField": "value",
+							"titleField": "title",
+							"marginRight": 240,
+							"marginLeft": 50,
+							"startX": -500,
+							"rotate": true,
+							"labelPosition": "right",
+							"balloonText": "[[title]]: [[value]]",
+							"export": {
+								"enabled": true
+							}
+						});
+					}
+				});
+
+			 //Representative Sales status  pyramid
+				$.ajax({
+					url: '@Url.Action("SalesStatusChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data) == "") {
+							$("#lblMsgRepresentativeSalesstatus").show();
+							$("#MsgRepresentativeSalesstatus").text("Data is not available for last 30 days,kindly select Date range");
+						}
+						else {
+							$("#lblMsgRepresentativeSalesstatus").hide();
+							$("#MsgRepresentativeSalesstatus").text("");
+
+						}
+
+						var chart = AmCharts.makeChart("RepresentativeSalesstatus", {
+							"type": "funnel",
+							"theme": "light",
+							"responsive": {
+								"enabled": true
+							},
+							"dataProvider": JSON.parse(data),
+							"balloon": {
+								"fixedPosition": true
+							},
+							"valueField": "value",
+							"titleField": "title",
+							"marginRight": 240,
+							"marginLeft": 50,
+							"startX": -500,
+							"rotate": true,
+							"labelPosition": "right",
+							"balloonText": "[[title]]: [[value]]",
+							"export": {
+								"enabled": true
+							}
+						});
+					}
+				});
+
+			 //Datewise EQSQuantityAnalysis Donut chart
+
+				$.ajax({
+					url: '@Url.Action("DatewiseEQSQuantityChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data).length == 0) {
+							$("#lblMsgDatewiseEQSQuantity").show();
+							$("#MsgDatewiseEQSQuantity").text("Data is not available for last 30 days,kindly select Date range");
+						}
+
+
+						var chart = AmCharts.makeChart("DatewiseEQSQuantityAnalysis", {
+							"type": "pie",
+							"theme": "light",
+							"responsive": {
+								"enabled": true
+							},
+							"dataProvider": JSON.parse(data),
+							"titleField": "title",
+							"valueField": "value",
+							"labelRadius": 5,
+							"radius": "42%",
+							"innerRadius": "60%",
+							"labelText": "[[title]]:[[value]]",
+							"export": {
+								"enabled": true
+							}
+						});
+					}
+				});
+
+			  //DatewiseEQSAmountAnalysis Donut chart
+
+				$.ajax({
+					url: '@Url.Action("DatewiseEQSAmountChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data).length == 0) {
+							$("#lblMsgDatewiseEQSAmount").show();
+							$("#MsgDatewiseEQSAmount").text("Data is not available for last 30 days,kindly select Date range");
+						}
+
+						var chart = AmCharts.makeChart("DatewiseEQSAmountAnalysis", {
+							"type": "pie",
+							"theme": "light",
+							"responsive": {
+								"enabled": true
+							},
+							"dataProvider": JSON.parse(data),
+							"titleField": "title",
+							"valueField": "value",
+							"labelRadius": 5,
+
+							"radius": "42%",
+							"innerRadius": "60%",
+							"labelText": "[[title]]:[[value]]",
+							"export": {
+								"enabled": true
+							}
+						});
+					}
+				});
+
+				//ConversionRatioEnquiry Angular Gauge
+
+				$.ajax({
+					url: '@Url.Action("RepresentativeEnquiryRatioChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data).length == 0) {
+							$("#lblMsgConversionRatioEnquiry").show();
+							$("#MsgConversionRatioEnquiry").text("Data is not available for last 30 days,kindly select Date range");
+						}
+
+						var gaugeChart = AmCharts.makeChart("ConversionRatioEnq", {
+							"type": "gauge",
+							"responsive": {
+								"enabled": true
+							},
+							"theme": "light",
+							"axes": [{
+								"axisThickness": 1,
+								"axisAlpha": 0.2,
+								"tickAlpha": 0.2,
+								"valueInterval": 5,
+								"bands": [{
+									"color": "#cc4748",
+									"endValue": 30,
+									"innerRadius": "70%",
+									"startValue": 0
+								}, {
+									"color": "#fdd400",
+									"endValue": 70,
+									"innerRadius": "70%",
+									"startValue": 30
+								}, {
+									"color": "#84b761",
+									"endValue": 100,
+									"innerRadius": "70%",
+									"startValue": 70
+								}],
+								"bottomText": "0 Conversion",
+								"bottomTextYOffset": -20,
+								"endValue": 100
+							}],
+							"arrows": [{}],
+							"export": {
+								"enabled": true
+							}
+						});
+
+						setInterval(randomValueEnqInitial(data), 2000);
+						// set random value
+						function randomValueEnqInitial(Enqdata) {
+							var value = Enqdata;
+							if (gaugeChart) {
+								if (gaugeChart.arrows) {
+									if (gaugeChart.arrows[0]) {
+										if (gaugeChart.arrows[0].setValue) {
+											gaugeChart.arrows[0].setValue(value);
+											gaugeChart.axes[0].setBottomText("Enquiry Conversion" + "   " + (value + ("%")));
+										}
+									}
+								}
+							}
+						}
+
+					}
+				});
+
+
+
+			//ConversionRatioQuotation Angular Gauge
+
+				$.ajax({
+					url: '@Url.Action("RepresentativeQuotationRatioChart", "RepresentativeDashboard")?StartDate=' +
+					'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' + '@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+					cache: false,
+					type: "GET",
+					dataType: "html",
+					success: function (data) {
+
+						if (JSON.parse(data).length == 0) {
+							$("#lblMsgConversionRatioQuotation").show();
+							$("#MsgConversionRatioQuotation").text("Data is not available for last 30 days,kindly select Date range");
+						}
+
+						var gaugeChart = AmCharts.makeChart("ConversionRatioQuotation", {
+							"type": "gauge",
+							"responsive": {
+								"enabled": true
+							},
+							"theme": "light",
+							"axes": [{
+								"axisThickness": 1,
+								"axisAlpha": 0.2,
+								"tickAlpha": 0.2,
+								"valueInterval": 5,
+								"bands": [{
+									"color": "#cc4748",
+									"endValue": 30,
+									"innerRadius": "70%",
+									"startValue": 0
+								}, {
+									"color": "#fdd400",
+									"endValue": 70,
+									"innerRadius": "70%",
+									"startValue": 30
+								}, {
+									"color": "#84b761",
+									"endValue": 100,
+									"innerRadius": "70%",
+									"startValue": 70
+								}],
+								"bottomText": "0 Conversion",
+								"bottomTextYOffset": -20,
+								"endValue": 100
+							}],
+							"arrows": [{}],
+							"export": {
+								"enabled": true
+							}
+						});
+
+						setInterval(randomValueQuotInitial(data), 2000);
+						// set random value
+						function randomValueQuotInitial(QIdata) {
+							var value = QIdata;
+							if (gaugeChart) {
+								if (gaugeChart.arrows) {
+									if (gaugeChart.arrows[0]) {
+										if (gaugeChart.arrows[0].setValue) {
+											gaugeChart.arrows[0].setValue(value);
+											gaugeChart.axes[0].setBottomText("Quotation Conversion" + "    " + (value + ("%")));
+										}
+									}
+								}
+							}
+						}
+
+					}
+			});
+
+
+
+			 $.ajax({
+						url:'@Url.Action("CitywiseEnquiryChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						success: function (data) {
+							//alert(JSON.parse(data).length);
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgRepCitywiseEnquiryAnalysis").show();
+								$("#MsgRepCitywiseEnquiryAnalysis").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgRepCitywiseEnquiryAnalysis").hide();
+								$("#MsgRepCitywiseEnquiryAnalysis").text("");
+							}
+
+							//CitywiseEnquiry Pie chart
+							var chart = AmCharts.makeChart("CitywiseEnquiryAnalysis", {
+								"type": "pie",
+								"startDuration": 0,
+								"theme": "light",
+								"responsive": {
+									"enabled": true
+								},
+								"addClassNames": true,
+								"legend": {
+									"position": "right",
+									"marginRight": 100,
+									"autoMargins": false
+								},
+								"innerRadius": "30%",
+								"defs": {
+									"filter": [{
+										"id": "shadow",
+										"width": "200%",
+										"height": "200%",
+										"feOffset": {
+											"result": "offOut",
+											"in": "SourceAlpha",
+											"dx": 0,
+											"dy": 0
+										},
+										"feGaussianBlur": {
+											"result": "blurOut",
+											"in": "offOut",
+											"stdDeviation": 5
+										},
+										"feBlend": {
+											"in": "SourceGraphic",
+											"in2": "blurOut",
+											"mode": "normal"
+										}
+									}]
+								},
+								"dataProvider": JSON.parse(data),
+								"valueField": "litres",
+								"titleField": "country",
+								"labelText": "[[country]]([[litres]], Amt:[[sum]])",
+								"balloonText": "[[country]](Count:[[litres]], Amt:[[sum]])",
+								"autoMargins": false,
+								"marginTop": 0,
+								"marginBottom": 0,
+								"marginLeft": 0,
+								"marginRight": 0,
+								"pullOutRadius": 10,
+								"export": {
+									"enabled": true
+								}
+							});
+
+							chart.addListener("init", handleInit);
+
+							chart.addListener("rollOverSlice", function (e) {
+								handleRollOver(e);
+							});
+
+							function handleInit() {
+								chart.legend.addListener("rollOverItem", handleRollOver);
+							}
+
+							function handleRollOver(e) {
+								var wedge = e.dataItem.wedge.node;
+								wedge.parentNode.appendChild(wedge);
+							}
+
+						}
+			});
+
+
+			 $.ajax({
+						url:'@Url.Action("CitywiseQuotationChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						success: function (data) {
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgRepCitywiseQuotationAnalysis").show();
+								$("#MsgRepCitywiseQuotationAnalysis").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgRepCitywiseQuotationAnalysis").hide();
+								$("#MsgRepCitywiseQuotationAnalysis").text("");
+							}
+
+							//CitywiseQuotationAnalysis Pie chart
+							var chart = AmCharts.makeChart("CitywiseQuotationAnalysis", {
+								"type": "pie",
+								"startDuration": 0,
+								"theme": "light",
+								"responsive": {
+									"enabled": true
+								},
+								"addClassNames": true,
+								"legend": {
+									"position": "right",
+									"marginRight": 100,
+									"autoMargins": false
+								},
+								"innerRadius": "30%",
+								"defs": {
+									"filter": [{
+										"id": "shadow",
+										"width": "200%",
+										"height": "200%",
+										"feOffset": {
+											"result": "offOut",
+											"in": "SourceAlpha",
+											"dx": 0,
+											"dy": 0
+										},
+										"feGaussianBlur": {
+											"result": "blurOut",
+											"in": "offOut",
+											"stdDeviation": 5
+										},
+										"feBlend": {
+											"in": "SourceGraphic",
+											"in2": "blurOut",
+											"mode": "normal"
+										}
+									}]
+								},
+								"dataProvider": JSON.parse(data),
+								"valueField": "litres",
+								"titleField": "country",
+								"labelText": "[[country]]([[litres]], Amt:[[sum]])",
+								"balloonText": "[[country]](Count:[[litres]], Amt:[[sum]])",
+								"autoMargins": false,
+								"marginTop": 0,
+								"marginBottom": 0,
+								"marginLeft": 0,
+								"marginRight": 0,
+								"pullOutRadius": 10,
+								"export": {
+									"enabled": true
+								}
+							});
+
+							chart.addListener("init", handleInit);
+
+							chart.addListener("rollOverSlice", function (e) {
+								handleRollOver(e);
+							});
+
+							function handleInit() {
+								chart.legend.addListener("rollOverItem", handleRollOver);
+							}
+
+							function handleRollOver(e) {
+								var wedge = e.dataItem.wedge.node;
+								wedge.parentNode.appendChild(wedge);
+							}
+
+						}
+			});
+
+
+			 $.ajax({
+						url:'@Url.Action("CitywiseSalesChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						success: function (data) {
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgRepCitywiseSalesAnalysis").show();
+								$("#MsgRepCitywiseSalesAnalysis").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgRepCitywiseSalesAnalysis").hide();
+								$("#MsgRepCitywiseSalesAnalysis").text("");
+							}
+							//CitywiseSalesAnalysis Pie chart
+							var chart = AmCharts.makeChart("CitywiseSalesAnalysis", {
+								"type": "pie",
+								"startDuration": 0,
+								"theme": "light",
+								"responsive": {
+									"enabled": true
+								},
+								"addClassNames": true,
+								"legend": {
+									"position": "right",
+									"marginRight": 100,
+									"autoMargins": false
+								},
+								"innerRadius": "30%",
+								"defs": {
+									"filter": [{
+										"id": "shadow",
+										"width": "200%",
+										"height": "200%",
+										"feOffset": {
+											"result": "offOut",
+											"in": "SourceAlpha",
+											"dx": 0,
+											"dy": 0
+										},
+										"feGaussianBlur": {
+											"result": "blurOut",
+											"in": "offOut",
+											"stdDeviation": 5
+										},
+										"feBlend": {
+											"in": "SourceGraphic",
+											"in2": "blurOut",
+											"mode": "normal"
+										}
+									}]
+								},
+								"dataProvider": JSON.parse(data),
+								"valueField": "litres",
+								"titleField": "country",
+								"labelText": "[[country]]([[litres]], Amt:[[sum]])",
+								"balloonText": "[[country]](Count:[[litres]], Amt:[[sum]])",
+								"autoMargins": false,
+								"marginTop": 0,
+								"marginBottom": 0,
+								"marginLeft": 0,
+								"marginRight": 0,
+								"pullOutRadius": 10,
+								"export": {
+									"enabled": true
+								}
+							});
+
+							chart.addListener("init", handleInit);
+
+							chart.addListener("rollOverSlice", function (e) {
+								handleRollOver(e);
+							});
+
+							function handleInit() {
+								chart.legend.addListener("rollOverItem", handleRollOver);
+							}
+
+							function handleRollOver(e) {
+								var wedge = e.dataItem.wedge.node;
+								wedge.parentNode.appendChild(wedge);
+							}
+
+						}
+			});
+
+
+					  $.ajax({
+						url:'@Url.Action("OverallTargetEnquiryChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						  success: function (data) {
+
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgTargetAchievementEnquiry").show();
+								$("#MsgTargetAchievementEnquiry").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgTargetAchievementEnquiry").hide();
+								$("#MsgTargetAchievementEnquiry").text("");
+							}
+
+							//Representative Overall Target Enquiry
+							var Obj = JSON.parse(data);
+								$("#ReqTCnt").text(Obj.RCnt);
+								$("#AchTarCnt").text(Obj.ACnt);
+
+								//OverallTargetEnquiry Animated gauge
+								var chartGuageEnq = AmCharts.makeChart("OverallTargetEnquiry",         {
+									"theme": "light",
+									"type": "gauge",
+									"responsive": {
+										"enabled": true
+									},
+									"axes": [{
+										"topTextFontSize": 20,
+										"topTextYOffset": 70,
+										"axisColor": "#31d6ea",
+										"axisThickness": 1,
+										"endValue": 100,
+										"gridInside": true,
+										"inside": true,
+										"radius": "50%",
+										"valueInterval": 20,
+										"tickColor": "#67b7dc",
+										"startAngle": -90,
+										"endAngle": 90,
+										"unit": "%",
+										"bandOutlineAlpha": 0,
+										"bands": [{
+											"color": "#0080ff",
+											"endValue": 100,
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}, {
+											"color": "#3cd3a3",
+											"endValue": Obj.Percent, //Change here
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}]
+									}],
+									"arrows": [{
+										"alpha": 1,
+										"innerRadius": "35%",
+										"nailRadius": 0,
+										"radius": "170%"
+									}]
+								});
+
+								setInterval(randomValueEnqd, 2000);
+
+
+								function randomValueEnqd() {
+									var value = Math.round(Obj.Percent); //and here
+									chartGuageEnq.arrows[0].setValue(value);
+									chartGuageEnq.axes[0].setTopText(value + " %");
+
+                                                                        chartGuageEnq.axes[0].bands[1].endValue = value;
+                                                                        chartGuageEnq.validateNow();
+								}
+						}
+					  }); //End Representative Overall Target Enquiry
+
+
+					  $.ajax({
+						url:'@Url.Action("OverallTargetEnquiryAmtChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						  success: function (data) {
+
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgTargetAchievementEnquiryAmt").show();
+								$("#MsgTargetAchievementEnquiryAmt").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgTargetAchievementEnquiryAmt").hide();
+								$("#MsgTargetAchievementEnquiryAmt").text("");
+							}
+
+							  var obj = JSON.parse(data);
+
+							  $("#ReqTAmt").text(obj.RAmt);
+							  $("#AchTarAmt").text(obj.AAmt);
+
+							  //OverallTargetEnquiryAmt Animated gauge
+							  var chartAmt = AmCharts.makeChart("OverallTargetEnquiryAmt", {
+								  "theme": "light",
+								  "type": "gauge",
+								  "responsive": {
+									  "enabled": true
+								  },
+								  "axes": [{
+									  "topTextFontSize": 20,
+									  "topTextYOffset": 70,
+									  "axisColor": "#31d6ea",
+									  "axisThickness": 1,
+									  "endValue": 100,
+									  "gridInside": true,
+									  "inside": true,
+									  "radius": "50%",
+									  "valueInterval": 20,
+									  "tickColor": "#67b7dc",
+									  "startAngle": -90,
+									  "endAngle": 90,
+									  "unit": "%",
+									  "bandOutlineAlpha": 0,
+									  "bands": [{
+										  "color": "#0080ff",
+										  "endValue": 100,
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }, {
+										  "color": "#3cd3a3",
+										  "endValue": obj.Per, //Change here
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }]
+								  }],
+								  "arrows": [{
+									  "alpha": 1,
+									  "innerRadius": "35%",
+									  "nailRadius": 0,
+									  "radius": "170%"
+								  }]
+							  });
+
+							  setInterval(randomValueEnqAmtd, 2000);
+
+
+							  function randomValueEnqAmtd() {
+								  //alert(data);
+								  var value = Math.round(obj.Per); //and here
+								  chartAmt.arrows[0].setValue(value);
+								  chartAmt.axes[0].setTopText(value + " %");
+
+                                                                  chartAmt.axes[0].bands[1].endValue = value;
+                                                                  chartAmt.validateNow();
+							  }
+
+						}
+					  }); //End Representative Overall Target Enquiry Amt
+
+
+					$.ajax({
+						url:'@Url.Action("OverallTargetQuotationChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						  success: function (data) {
+
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgTargetAchievementQuotation").show();
+								$("#MsgTargetAchievementQuotation").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgTargetAchievementQuotation").hide();
+								$("#MsgTargetAchievementQuotation").text("");
+							}
+
+							  var Obj = JSON.parse(data);
+
+							  $("#ReqTQuotCnt").text(Obj.RCnt);
+							  $("#AchTarQuotCnt").text(Obj.ACnt);
+
+							  //OverallTargetQuotation Animated gauge
+							  var chartGuageQ = AmCharts.makeChart("OverallTargetQuotation", {
+								  "theme": "light",
+								  "responsive": {
+									  "enabled": true
+								  },
+								  "type": "gauge",
+								  "axes": [{
+									  "topTextFontSize": 20,
+									  "topTextYOffset": 70,
+									  "axisColor": "#31d6ea",
+									  "axisThickness": 1,
+									  "endValue": 100,
+									  "gridInside": true,
+									  "inside": true,
+									  "radius": "50%",
+									  "valueInterval": 20,
+									  "tickColor": "#67b7dc",
+									  "startAngle": -90,
+									  "endAngle": 90,
+									  "unit": "%",
+									  "bandOutlineAlpha": 0,
+									  "bands": [{
+										  "color": "#0080ff",
+										  "endValue": 100,
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }, {
+										  "color": "#3cd3a3",
+										  "endValue": Obj.Percent, //Change here
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }]
+								  }],
+								  "arrows": [{
+									  "alpha": 1,
+									  "innerRadius": "35%",
+									  "nailRadius": 0,
+									  "radius": "170%"
+								  }]
+							  });
+
+							  setInterval(randomValueQuotd, 2000);
+
+
+							  function randomValueQuotd() {
+								  var value = Math.round(Obj.Percent); //and here
+								  chartGuageQ.arrows[0].setValue(value);
+								  chartGuageQ.axes[0].setTopText(value + " %");
+
+                                                                  chartGuageQ.axes[0].bands[1].endValue = value;
+                                                                  chartGuageQ.validateNow();
+							  }
+
+						}
+					}); //End Representative Overall Target Quotation
+
+
+
+
+					$.ajax({
+						url:'@Url.Action("OverallTargetQuotationAmtChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						  success: function (data) {
+
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgTargetAchievementQuotationAmt").show();
+								$("#MsgTargetAchievementQuotationAmt").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgTargetAchievementQuotationAmt").hide();
+								$("#MsgTargetAchievementQuotationAmt").text("");
+							}
+
+
+							  var obj = JSON.parse(data);
+
+							  $("#ReqTQuotAmt").text(obj.RAmt);
+							  $("#AchTarQuotAmt").text(obj.AAmt);
+
+							  //OverallTargetQuotationAmt Animated gauge
+							  var chartQAmt = AmCharts.makeChart("OverallTargetQuotationAmt",       {
+								  "theme": "light",
+								  "responsive": {
+									  "enabled": true
+								  },
+								  "type": "gauge",
+								  "axes": [{
+									  "topTextFontSize": 20,
+									  "topTextYOffset": 70,
+									  "axisColor": "#31d6ea",
+									  "axisThickness": 1,
+									  "endValue": 100,
+									  "gridInside": true,
+									  "inside": true,
+									  "radius": "50%",
+									  "valueInterval": 20,
+									  "tickColor": "#67b7dc",
+									  "startAngle": -90,
+									  "endAngle": 90,
+									  "unit": "%",
+									  "bandOutlineAlpha": 0,
+									  "bands": [{
+										  "color": "#0080ff",
+										  "endValue": 100,
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }, {
+										  "color": "#3cd3a3",
+										  "endValue": obj.Per, //Change here
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }]
+								  }],
+								  "arrows": [{
+									  "alpha": 1,
+									  "innerRadius": "35%",
+									  "nailRadius": 0,
+									  "radius": "170%"
+								  }]
+							  });
+
+							  setInterval(randomValueQuotAmtd, 2000);
+
+
+							  function randomValueQuotAmtd() {
+								  //alert(data);
+								  var value = Math.round(obj.Per); //and here
+								  chartQAmt.arrows[0].setValue(value);
+								  chartQAmt.axes[0].setTopText(value + " %");
+
+                                                                  chartQAmt.axes[0].bands[1].endValue = value;
+                                                                  chartQAmt.validateNow();
+							  }
+
+
+
+						  }
+					}); //End Representative Overall Target Quotation Amt
+
+
+					$.ajax({
+						url:'@Url.Action("OverallTargetSalesChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						  success: function (data) {
+
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgTargetAchievementSales").show();
+								$("#MsgTargetAchievementSales").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgTargetAchievementSales").hide();
+								$("#MsgTargetAchievementSales").text("");
+							}
+
+							  var Obj = JSON.parse(data);
+
+							  $("#ReqTSalCnt").text(Obj.RCnt);
+							  $("#AchTarSalCnt").text(Obj.ACnt);
+
+							  //OverallTargetSales Animated gauge
+							  var chartGuage = AmCharts.makeChart("OverallTargetSales", {
+								  "theme": "light",
+								  "type": "gauge",
+								  "axes": [{
+									  "topTextFontSize": 20,
+									  "topTextYOffset": 70,
+									  "axisColor": "#31d6ea",
+									  "axisThickness": 1,
+									  "endValue": 100,
+									  "gridInside": true,
+									  "inside": true,
+									  "radius": "50%",
+									  "valueInterval": 20,
+									  "tickColor": "#67b7dc",
+									  "startAngle": -90,
+									  "endAngle": 90,
+									  "unit": "%",
+									  "bandOutlineAlpha": 0,
+									  "bands": [{
+										  "color": "#0080ff",
+										  "endValue": 100,
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }, {
+										  "color": "#3cd3a3",
+										  "endValue": Obj.Percent, //Change here
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }]
+								  }],
+								  "arrows": [{
+									  "alpha": 1,
+									  "innerRadius": "35%",
+									  "nailRadius": 0,
+									  "radius": "170%"
+								  }]
+							  });
+
+							  setInterval(randomValueEnqd, 2000);
+
+
+							  function randomValueEnqd() {
+								  var value = Math.round(Obj.Percent); //and here
+								  chartGuage.arrows[0].setValue(value);
+								  chartGuage.axes[0].setTopText(value + " %");
+
+                                                                  chartGuage.axes[0].bands[1].endValue = value;
+                                                                  chartGuage.validateNow();
+							  }
+
+
+						}
+					}); //End Representative Overall Target Sales
+
+
+
+
+					$.ajax({
+						url:'@Url.Action("OverallTargetSalesAmtChart", "RepresentativeDashboard")?StartDate=' +
+						'@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")' + '&EndDate=' +'@System.DateTime.Now.ToString("MM/dd/yyyy")' + '&ListId=' + this.value,
+
+						cache: false,
+						type: "GET",
+						dataType: "html",
+						  success: function (data) {
+
+							if (JSON.parse(data).length == 0) {
+								$("#lblMsgTargetAchievementSalesAmt").show();
+								$("#MsgTargetAchievementSalesAmt").text("Data is not available for last 30 days,kindly select Date range");
+							}
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgTargetAchievementSalesAmt").hide();
+								$("#MsgTargetAchievementSalesAmt").text("");
+							}
+
+							  var obj = JSON.parse(data);
+
+							  $("#ReqTSalAmt").text(obj.RAmt);
+							  $("#AchTarSalAmt").text(obj.AAmt);
+
+							  //OverallTargetSalesAmt Animated gauge
+							  var chartAmt = AmCharts.makeChart("OverallTargetSalesAmt", {
+								  "theme": "light",
+								  "responsive": {
+									  "enabled": true
+								  },
+								  "type": "gauge",
+								  "axes": [{
+									  "topTextFontSize": 20,
+									  "topTextYOffset": 70,
+									  "axisColor": "#31d6ea",
+									  "axisThickness": 1,
+									  "endValue": 100,
+									  "gridInside": true,
+									  "inside": true,
+									  "radius": "50%",
+									  "valueInterval": 20,
+									  "tickColor": "#67b7dc",
+									  "startAngle": -90,
+									  "endAngle": 90,
+									  "unit": "%",
+									  "bandOutlineAlpha": 0,
+									  "bands": [{
+										  "color": "#0080ff",
+										  "endValue": 100,
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }, {
+										  "color": "#3cd3a3",
+										  "endValue": obj.Per, //Change here
+										  "innerRadius": "105%",
+										  "radius": "170%",
+										  "gradientRatio": [0.5, 0, -0.5],
+										  "startValue": 0
+									  }]
+								  }],
+								  "arrows": [{
+									  "alpha": 1,
+									  "innerRadius": "35%",
+									  "nailRadius": 0,
+									  "radius": "170%"
+								  }]
+							  });
+
+							  setInterval(randomValueEnqAmtd, 2000);
+
+
+							  function randomValueEnqAmtd() {
+								  //alert(data);
+								  var value = Math.round(obj.Per); //and here
+								  chartAmt.arrows[0].setValue(value);
+								  chartAmt.axes[0].setTopText(value + " %");
+
+                                                                  chartAmt.axes[0].bands[1].endValue = value;
+                                                                  chartAmt.validateNow();
+							  }
+
+
+						}
+					}); //End Representative Overall Target Sales Amount
+
+
+
+
+
+
+
+
+
+					$(function () {
+						//Date range picker for EnquiryStages
+						$('input[name="RepEnqStagesDateRange"]').daterangepicker({
+						@*startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'*@
+						});
+
+						//On date change Enquiry Stages
+						$('input[name="RepEnqStagesDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+						var sDate = picker.startDate.format('MM/DD/YYYY');
+						var eDate = picker.endDate.format('MM/DD/YYYY');
+						$("#StartDate").val(picker.startDate.format('MM/DD/YYYY'));
+						$("#EndDate").val(picker.endDate.format('MM/DD/YYYY'));
+							//$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+						$(this).val($("#StartDate").val() + ' - ' + $("#EndDate").val());
+
+							$("#RepresentativeEnquiryStages").load('@Url.Action("EnquiryStagesFunnel", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								if (JSON.parse(data).length != 0) {
+									$("#MsgEnquiryStages").text("");
+									$("#lblMsgEnquiryStages").hide();
+								}
+
+							   var chart = AmCharts.makeChart("RepresentativeEnquiryStages", {
+										"type": "funnel",
+											"theme": "light",
+											"responsive": {
+											"enabled": true
+											},
+											"dataProvider": JSON.parse(data),
+											"balloon": {
+											"fixedPosition": true
+											},
+											"valueField": "value",
+											"titleField": "title",
+											"labelText": "[[title]]([[value]], Amt:[[sum]])",
+											"marginRight": 240,
+											"marginLeft": 50,
+											"startX": -500,
+											"depth3D": 100,
+											"angle": 40,
+											"outlineAlpha": 1,
+											"outlineColor": "#FFFFFF",
+											"outlineThickness": 2,
+											"labelPosition": "right",
+											"balloonText": "[[title]](Count:[[value]], Amt:[[sum]])",
+											"export": {
+											"enabled": true
+											}
+								});
+							});
+
+						});
+						//End of Enquiry Stages
+
+						 //Start Date range picker for Quotation Stages
+						$('input[name="RepQuotDateRange"]').daterangepicker({
+								startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+								endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+
+						//On date change Quotation Stages
+						$('input[name="RepQuotDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#RepresentativeQuotationStages").load('@Url.Action("QuotationStagesFunnelChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								if (JSON.parse(data).length != 0) {
+									$("#lblMsgQuotationStages").hide();
+									$("#MsgQuotationStages").text("");
+								}
+								var chart = AmCharts.makeChart("RepresentativeQuotationStages", {
+									"type": "funnel",
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"dataProvider": JSON.parse(data),
+									"balloon": {
+										"fixedPosition": true
+									},
+									"valueField": "value",
+									"titleField": "title",
+									"labelText": "[[title]]([[value]], Amt:[[sum]])",
+									"marginRight": 240,
+									"marginLeft": 50,
+									"startX": -500,
+									"depth3D": 100,
+									"angle": 40,
+									"outlineAlpha": 1,
+									"outlineColor": "#FFFFFF",
+									"outlineThickness": 2,
+									"labelPosition": "right",
+									"balloonText": "[[title]](Count:[[value]], Amt:[[sum]])",
+									"export": {
+										"enabled": true
+									}
+								});
+							});
+
+						});
+						//End of Quotation Stages
+
+						   //Start MostEnquiredProduct
+							$('input[name="ProductwiseEnquiryDateRange"]').daterangepicker({
+								startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+								endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+							});
+
+							$('input[name="ProductwiseEnquiryDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+								var sDate = picker.startDate.format('MM/DD/YYYY');
+								var eDate = picker.endDate.format('MM/DD/YYYY');
+
+								$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+								$("#ProductwiseEnquiry").load('@Url.Action("MostEnquiredProductChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+									if (JSON.parse(data).length != 0) {
+										$("#lblMostEnquiryProduct").hide();
+										$("#MostEnquiryProduct").text("");
+									}
+									var chart = AmCharts.makeChart("ProductwiseEnquiry", {
+										"type": "serial",
+										"responsive": {
+											"enabled": true
+										},
+										"theme": "light",
+										"dataProvider": JSON.parse(data),
+										"valueAxes": [{
+											"gridColor": "#FFFFFF",
+											"gridAlpha": 0.2,
+											"dashLength": 0
+										}],
+										"gridAboveGraphs": true,
+										"startDuration": 1,
+										"graphs": [{
+											"balloonText": "[[category]]: <b>[[value]]</b>",
+											"fillAlphas": 0.8,
+											"lineAlpha": 0.2,
+											"type": "column",
+											"valueField": "visits"
+										}],
+										"chartCursor": {
+											"categoryBalloonEnabled": false,
+											"cursorAlpha": 0,
+											"zoomable": false
+										},
+										"categoryField": "country",
+										"categoryAxis": {
+											"gridPosition": "start",
+											"gridAlpha": 0,
+											"autoWrap": true
+										},
+										"marginLeft": 100,
+										"export": {
+											"enabled": true
+										}
+									});
+
+								});
+
+							});
+							//End of MostEnquiredProduct
+
+							//Start MostsalesProduct
+
+							$('input[name="ProductwiseSalesDateRange"]').daterangepicker({
+							startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+							endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+							});
+
+							$('input[name="ProductwiseSalesDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+							$("#ProductwiseSales").load('@Url.Action("MostSalesProductChart","RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								if (JSON.parse(data).length == 0) {
+									$("#lblMsgMostSalesProduct").hide();
+									$("#MsgMostSalesProduct").text("");
+								}
+
+								var chart = AmCharts.makeChart("ProductwiseSales", {
+									"type": "serial",
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"dataProvider": JSON.parse(data),
+									"valueAxes": [{
+										"gridColor": "#FFFFFF",
+										"gridAlpha": 0.2,
+										"dashLength": 0
+									}],
+									"gridAboveGraphs": true,
+									"startDuration": 1,
+									"graphs": [{
+										"balloonText": "[[category]]: <b>[[value]]</b>",
+										"fillAlphas": 0.8,
+										"lineAlpha": 0.2,
+										"type": "column",
+										"valueField": "visits"
+									}],
+									"chartCursor": {
+										"categoryBalloonEnabled": false,
+										"cursorAlpha": 0,
+										"zoomable": false
+									},
+									"categoryField": "country",
+									"categoryAxis": {
+										"gridPosition": "start",
+										"gridAlpha": 0,
+										"autoWrap": true
+									},
+									"marginLeft": 100,
+									"export": {
+										"enabled": true
+									}
+								});
+							});
+
+					});
+					//End of Most Sales Product
+
+						//Start Representative Enquiry Status Pyramid
+						//Date range picker for Representative Enquiry Status Pyramid
+						$('input[name="RepEnquirystatusDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Enquiry Status
+							$('input[name="RepEnquirystatusDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#RepresentativeEnquirystatus").load('@Url.Action("EnquiryStatus","RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								if (JSON.parse(data) == "") {
+									$("#lblMsgRepresentativeEnquirystatus").show();
+									$("#MsgRepresentativeEnquirystatus").text("Data is not available for last 30 days,kindly select Date range");
+								}
+								else {
+									$("#lblMsgRepresentativeEnquirystatus").hide();
+									$("#MsgRepresentativeEnquirystatus").text("");
+
+								}
+
+								//Representative Enquiry status  pyramid
+								var chart = AmCharts.makeChart("RepresentativeEnquirystatus", {
+									"type": "funnel",
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"dataProvider": JSON.parse(data),
+									"balloon": {
+										"fixedPosition": true
+									},
+									"valueField": "value",
+									"titleField": "title",
+									"marginRight": 240,
+									"marginLeft": 50,
+									"startX": -500,
+									"rotate": true,
+									"labelPosition": "right",
+									"balloonText": "[[title]]: [[value]]",
+									"export": {
+										"enabled": true
+									}
+								});
+
+							});
+
+						});
+						//End of Enquiry Status
+
+						//QuotationStatus Pyramid
+						//Date range picker for QuotationStatusPyramid
+						$('input[name="RepQuotationstatusDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Quotation status
+						$('input[name="RepQuotationstatusDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#RepresentativeQuotationstatus").load('@Url.Action("QuotationStatusChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								if (JSON.parse(data) == "") {
+									$("#lblMsgRepresentativeQuotationstatus").show();
+									$("#MsgRepresentativeQuotationstatus").text("Data is not available for last 30 days,kindly select Date range");
+								}
+								else {
+									$("#lblMsgRepresentativeQuotationstatus").hide();
+									$("#MsgRepresentativeQuotationstatus").text("");
+
+								}
+
+								//RepresentativeQuotationstatus  pyramid
+								var chart = AmCharts.makeChart("RepresentativeQuotationstatus", {
+									"type": "funnel",
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"dataProvider": JSON.parse(data),
+									"balloon": {
+										"fixedPosition": true
+									},
+									"valueField": "value",
+									"titleField": "title",
+									"marginRight": 240,
+									"marginLeft": 50,
+									"startX": -500,
+									"rotate": true,
+									"labelPosition": "right",
+									"balloonText": "[[title]]: [[value]]",
+									"export": {
+										"enabled": true
+									}
+								});
+
+							});
+
+						});
+						//End of Quotation Status
+
+						//Sales Status Pyramid
+						//Date range picker for SalesStatusPyramid
+						$('input[name="RepSalesstatusDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Sales Status
+						$('input[name="RepSalesstatusDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#RepresentativeSalesstatus").load('@Url.Action("SalesStatusChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+
+								if (JSON.parse(data) == "") {
+									$("#lblMsgRepresentativeSalesstatus").show();
+									$("#MsgRepresentativeSalesstatus").text("Data is not available for last 30 days,kindly select Date range");
+								}
+								else {
+									$("#lblMsgRepresentativeSalesstatus").hide();
+									$("#MsgRepresentativeSalesstatus").text("");
+
+								}
+
+								//Representative Sales status  pyramid
+								var chart = AmCharts.makeChart("RepresentativeSalesstatus", {
+									"type": "funnel",
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"dataProvider": JSON.parse(data),
+									"balloon": {
+										"fixedPosition": true
+									},
+									"valueField": "value",
+									"titleField": "title",
+									"marginRight": 240,
+									"marginLeft": 50,
+									"startX": -500,
+									"rotate": true,
+									"labelPosition": "right",
+									"balloonText": "[[title]]: [[value]]",
+									"export": {
+										"enabled": true
+									}
+								});
+
+							});
+
+						});
+						//End of Sales  Status
+
+
+						//Representative Datewise EQS Quantity Analysis
+						//Date range picker for Representative Datewise EQS Quantity Analysis
+						$('input[name="DatewiseEQSQuantityDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Datewise EQS Quantity Analysis
+						$('input[name="DatewiseEQSQuantityDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#DatewiseEQSQuantityAnalysis").load('@Url.Action("DatewiseEQSQuantityChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								if (JSON.parse(data).length != 0) {
+									$("#lblMsgDatewiseEQSQuantity").hide();
+									$("#MsgDatewiseEQSQuantity").text("");
+								}
+
+								//Representative Datewise EQS Quantity Analysis
+								var chart = AmCharts.makeChart("DatewiseEQSQuantityAnalysis", {
+									"type": "pie",
+									"responsive": {
+										"enabled": true
+									},
+									"theme": "light",
+									"dataProvider": JSON.parse(data),
+									"titleField": "title",
+									"valueField": "value",
+									"labelRadius": 5,
+									"radius": "42%",
+									"innerRadius": "60%",
+									"labelText": "[[title]]:[[value]]",
+									"export": {
+										"enabled": true
+									}
+								});
+							});
+
+						});
+						//End of Representative Datewise EQS Quantity Analysis
+
+
+						//Representative Datewise EQS Amount Analysis
+						//Date range picker for Representative Datewise EQS Amount Analysis
+						$('input[name="DatewiseEQSAmountDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Datewise EQS Quantity Analysis
+						$('input[name="DatewiseEQSAmountDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#DatewiseEQSAmountAnalysis").load('@Url.Action("DatewiseEQSAmountChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								   if (JSON.parse(data).length != 0) {
+									   $("#lblMsgDatewiseEQSAmount").hide();
+									   $("#MsgDatewiseEQSAmount").text("");
+								   }
+
+								//Representative Datewise EQS Quantity Analysis
+								var chart = AmCharts.makeChart("DatewiseEQSAmountAnalysis", {
+									"type": "pie",
+									"responsive": {
+										"enabled": true
+									},
+									"theme": "light",
+									"dataProvider": JSON.parse(data),
+									"titleField": "title",
+									"valueField": "value",
+									"labelRadius": 5,
+									"radius": "42%",
+									"innerRadius": "60%",
+									"labelText": "[[title]]:[[value]]",
+									"export": {
+										"enabled": true
+									}
+								});
+							});
+
+						});
+						//End of Representative Datewise EQS Quantity Analysis
+
+						//Representative Enquiry Ratio
+						//Date range picker for Representative Enquiry Ratio
+						$('input[name="ConversionRatioEnquiryDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Enquiry Ratio
+						$('input[name="ConversionRatioEnquiryDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+						var sDate = picker.startDate.format('MM/DD/YYYY');
+						var eDate = picker.endDate.format('MM/DD/YYYY');
+
+						$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+						$("#ConversionRatioEnq").load('@Url.Action("RepresentativeEnquiryRatioChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgConversionRatioEnquiry").hide();
+								$("#MsgConversionRatioEnquiry").text("");
+							}
+
+					   //Conversion Ratio Enquiry Angular Gauge
+							var gaugeChart = AmCharts.makeChart("ConversionRatioEnq", {
+							"type": "gauge",
+								"theme": "light",
+								"responsive": {
+									"enabled": true
+								},
+							"axes": [{
+								"axisThickness": 1,
+								"axisAlpha": 0.2,
+								"tickAlpha": 0.2,
+								"valueInterval": 5,
+								"bands": [{
+									"color": "#cc4748",
+									"endValue": 30,
+									"innerRadius": "70%",
+									"startValue": 0
+								}, {
+									"color": "#fdd400",
+									"endValue": 70,
+									"innerRadius": "70%",
+									"startValue": 30
+								}, {
+									"color": "#84b761",
+									"endValue": 100,
+									"innerRadius": "70%",
+									"startValue": 70
+								}],
+								"bottomText": "0 Conversion",
+								"bottomTextYOffset": -20,
+								"endValue": 100
+							}],
+							"arrows": [{}],
+							"export": {
+								"enabled": true
+							}
+						});
+
+					setInterval(randomValueE(data), 2000);
+					// set random value
+					function randomValueE(Edata) {
+						var value = Edata;
+								if (gaugeChart) {
+									if (gaugeChart.arrows) {
+										if (gaugeChart.arrows[0]) {
+											if (gaugeChart.arrows[0].setValue) {
+												gaugeChart.arrows[0].setValue(value);
+												gaugeChart.axes[0].setBottomText("Enquiry Conversion"+"    "+(value+"%"));
+											}
+										}
+									}
+								}
+							}
+
+						});
+
+						});
+						//End of Representative Enquiry Ratio
+
+
+
+
+						 //Representative Quotation Ratio
+						//Date range picker for Representative Quotation Ratio
+						$('input[name="ConversionRatioQuotationDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Quotation Ratio
+						$('input[name="ConversionRatioQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+						var sDate = picker.startDate.format('MM/DD/YYYY');
+						var eDate = picker.endDate.format('MM/DD/YYYY');
+
+						$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+						$("#ConversionRatioQuotation").load('@Url.Action("RepresentativeQuotationRatioChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+							if (JSON.parse(data).length != 0) {
+								$("#lblMsgConversionRatioQuotation").hide();
+								$("#MsgConversionRatioQuotation").text("");
+							}
+
+					   //Conversion Ratio Quotation Angular Gauge
+							var gaugeChart = AmCharts.makeChart("ConversionRatioQuotation", {
+							"type": "gauge",
+							"theme": "light",
+							"responsive": {
+								"enabled": true
+							},
+							"axes": [{
+								"axisThickness": 1,
+								"axisAlpha": 0.2,
+								"tickAlpha": 0.2,
+								"valueInterval": 5,
+								"bands": [{
+									"color": "#cc4748",
+									"endValue": 30,
+									"innerRadius": "70%",
+									"startValue": 0
+								}, {
+									"color": "#fdd400",
+									"endValue": 70,
+									"innerRadius": "70%",
+									"startValue": 30
+								}, {
+									"color": "#84b761",
+									"endValue": 100,
+									"innerRadius": "70%",
+									"startValue": 70
+								}],
+								"bottomText": "0 Conversion",
+								"bottomTextYOffset": -20,
+								"endValue": 100
+							}],
+							"arrows": [{}],
+							"export": {
+								"enabled": true
+							}
+						});
+
+					setInterval(randomValueQuot(data), 2000);
+					// set random value
+					function randomValueQuot(Qdata) {
+						var value = Qdata;
+								if (gaugeChart) {
+									if (gaugeChart.arrows) {
+										if (gaugeChart.arrows[0]) {
+											if (gaugeChart.arrows[0].setValue) {
+												gaugeChart.arrows[0].setValue(value);
+												gaugeChart.axes[0].setBottomText("Quotation Conversion"+"    "+(value+"%"));
+											}
+										}
+									}
+								}
+							}
+
+						});
+
+						});
+						//End of Representative Quotation Ratio
+
+
+						//Representative Citywise Enquiry DateRange Analysis
+						//Date range picker for Representative CitywiseEnquiryDateRange
+						$('input[name="CitywiseEnquiryDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Citywise Enquiry  Analysis
+						$('input[name="CitywiseEnquiryDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#CitywiseEnquiryAnalysis").load('@Url.Action("CitywiseEnquiryChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								   if (JSON.parse(data).length != 0) {
+									   $("#lblMsgRepCitywiseEnquiryAnalysis").hide();
+									   $("#MsgRepCitywiseEnquiryAnalysis").text("");
+								   }
+
+								//Representative Citywise Enquiry Analysis
+								//CitywiseEnquiry Pie chart
+								var chart = AmCharts.makeChart("CitywiseEnquiryAnalysis", {
+									"type": "pie",
+									"startDuration": 0,
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"addClassNames": true,
+									"legend": {
+										"position": "right",
+										"marginRight": 100,
+										"autoMargins": false
+									},
+									"innerRadius": "30%",
+									"defs": {
+										"filter": [{
+											"id": "shadow",
+											"width": "200%",
+											"height": "200%",
+											"feOffset": {
+												"result": "offOut",
+												"in": "SourceAlpha",
+												"dx": 0,
+												"dy": 0
+											},
+											"feGaussianBlur": {
+												"result": "blurOut",
+												"in": "offOut",
+												"stdDeviation": 5
+											},
+											"feBlend": {
+												"in": "SourceGraphic",
+												"in2": "blurOut",
+												"mode": "normal"
+											}
+										}]
+									},
+									"dataProvider": JSON.parse(data),
+									"valueField": "litres",
+									"titleField": "country",
+									"labelText": "[[country]]([[litres]], Amt:[[sum]])",
+									"balloonText": "[[country]](Count:[[litres]], Amt:[[sum]])",
+									"autoMargins": false,
+									"marginTop": 0,
+									"marginBottom": 0,
+									"marginLeft": 0,
+									"marginRight": 0,
+									"pullOutRadius": 10,
+									"export": {
+										"enabled": true
+									}
+								});
+
+								chart.addListener("init", handleInit);
+
+								chart.addListener("rollOverSlice", function (e) {
+									handleRollOver(e);
+								});
+
+								function handleInit() {
+									chart.legend.addListener("rollOverItem", handleRollOver);
+								}
+
+								function handleRollOver(e) {
+									var wedge = e.dataItem.wedge.node;
+									wedge.parentNode.appendChild(wedge);
+								}
+							});
+
+						});
+						//End of Representative Citywise Enquiry Analysis
+
+						//Representative Citywise Quotation DateRange Analysis
+						//Date range picker for Representative CitywiseEnquiryDateRange
+						$('input[name="CitywiseQuotationDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Citywise Enquiry  Analysis
+						$('input[name="CitywiseQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#CitywiseQuotationAnalysis").load('@Url.Action("CitywiseQuotationChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								   if (JSON.parse(data).length != 0) {
+									   $("#lblMsgRepCitywiseQuotationAnalysis").hide();
+									   $("#MsgRepCitywiseQuotationAnalysis").text("");
+								   }
+
+								//Representative Citywise Quotation Analysis
+								//CitywiseQuotationAnalysis Pie chart
+								var chart = AmCharts.makeChart("CitywiseQuotationAnalysis", {
+									"type": "pie",
+									"startDuration": 0,
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"addClassNames": true,
+									"legend": {
+										"position": "right",
+										"marginRight": 100,
+										"autoMargins": false
+									},
+									"innerRadius": "30%",
+									"defs": {
+										"filter": [{
+											"id": "shadow",
+											"width": "200%",
+											"height": "200%",
+											"feOffset": {
+												"result": "offOut",
+												"in": "SourceAlpha",
+												"dx": 0,
+												"dy": 0
+											},
+											"feGaussianBlur": {
+												"result": "blurOut",
+												"in": "offOut",
+												"stdDeviation": 5
+											},
+											"feBlend": {
+												"in": "SourceGraphic",
+												"in2": "blurOut",
+												"mode": "normal"
+											}
+										}]
+									},
+									"dataProvider": JSON.parse(data),
+									"valueField": "litres",
+									"titleField": "country",
+									"labelText": "[[country]]([[litres]], Amt:[[sum]])",
+									"balloonText": "[[country]](Count:[[litres]], Amt:[[sum]])",
+									"autoMargins": false,
+									"marginTop": 0,
+									"marginBottom": 0,
+									"marginLeft": 0,
+									"marginRight": 0,
+									"pullOutRadius": 10,
+									"export": {
+										"enabled": true
+									}
+								});
+
+								chart.addListener("init", handleInit);
+
+								chart.addListener("rollOverSlice", function (e) {
+									handleRollOver(e);
+								});
+
+								function handleInit() {
+									chart.legend.addListener("rollOverItem", handleRollOver);
+								}
+
+								function handleRollOver(e) {
+									var wedge = e.dataItem.wedge.node;
+									wedge.parentNode.appendChild(wedge);
+								}
+							});
+
+						});
+						//End of Representative Citywise Quotation Analysis
+
+						//Representative Citywise Sales DateRange Analysis
+						//Date range picker for Representative Citywise Sales DateRange
+						$('input[name="CitywiseSalesDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Citywise Sales  Analysis
+						$('input[name="CitywiseSalesDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#CitywiseSalesAnalysis").load('@Url.Action("CitywiseSalesChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								   if (JSON.parse(data).length != 0) {
+									   $("#lblMsgRepCitywiseSalesAnalysis").hide();
+									   $("#MsgRepCitywiseSalesAnalysis").text("");
+								   }
+
+								//Representative CitywiseSalesAnalysis
+								//CitywiseSalesAnalysis Pie chart
+								var chart = AmCharts.makeChart("CitywiseSalesAnalysis", {
+									"type": "pie",
+									"startDuration": 0,
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"addClassNames": true,
+									"legend": {
+										"position": "right",
+										"marginRight": 100,
+										"autoMargins": false
+									},
+									"innerRadius": "30%",
+									"defs": {
+										"filter": [{
+											"id": "shadow",
+											"width": "200%",
+											"height": "200%",
+											"feOffset": {
+												"result": "offOut",
+												"in": "SourceAlpha",
+												"dx": 0,
+												"dy": 0
+											},
+											"feGaussianBlur": {
+												"result": "blurOut",
+												"in": "offOut",
+												"stdDeviation": 5
+											},
+											"feBlend": {
+												"in": "SourceGraphic",
+												"in2": "blurOut",
+												"mode": "normal"
+											}
+										}]
+									},
+									"dataProvider": JSON.parse(data),
+									"valueField": "litres",
+									"titleField": "country",
+									"labelText": "[[country]]([[litres]], Amt:[[sum]])",
+									"balloonText": "[[country]](Count:[[litres]], Amt:[[sum]])",
+									"autoMargins": false,
+									"marginTop": 0,
+									"marginBottom": 0,
+									"marginLeft": 0,
+									"marginRight": 0,
+									"pullOutRadius": 10,
+									"export": {
+										"enabled": true
+									}
+								});
+
+								chart.addListener("init", handleInit);
+
+								chart.addListener("rollOverSlice", function (e) {
+									handleRollOver(e);
+								});
+
+								function handleInit() {
+									chart.legend.addListener("rollOverItem", handleRollOver);
+								}
+
+								function handleRollOver(e) {
+									var wedge = e.dataItem.wedge.node;
+									wedge.parentNode.appendChild(wedge);
+								}
+							});
+
+						});
+						//End of Representative Citywise Sales Analysis
+
+						//Overall Target Enquiry DateRange DateRange Analysis
+						//Date range picker for Representative Overall Target Enquiry
+						$('input[name="OverallTargetEnquiryDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Overall Target Enquiry
+						$('input[name="OverallTargetEnquiryDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+							$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#OverallTargetEnquiry").load('@Url.Action("OverallTargetEnquiryChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								   if (JSON.parse(data).length != 0) {
+									   $("#lblMsgTargetAchievementEnquiry").hide();
+									   $("#MsgTargetAchievementEnquiry").text("");
+								   }
+
+								//Representative Overall Target Enquiry
+								var Obj = JSON.parse(data);
+								$("#ReqTCnt").text(Obj.RCnt);
+								$("#AchTarCnt").text(Obj.ACnt);
+
+								//OverallTargetEnquiry Animated gauge
+								var chartEnq = AmCharts.makeChart("OverallTargetEnquiry", {
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"type": "gauge",
+									"axes": [{
+										"topTextFontSize": 20,
+										"topTextYOffset": 70,
+										"axisColor": "#31d6ea",
+										"axisThickness": 1,
+										"endValue": 100,
+										"gridInside": true,
+										"inside": true,
+										"radius": "50%",
+										"valueInterval": 20,
+										"tickColor": "#67b7dc",
+										"startAngle": -90,
+										"endAngle": 90,
+										"unit": "%",
+										"bandOutlineAlpha": 0,
+										"bands": [{
+											"color": "#0080ff",
+											"endValue": 100,
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}, {
+											"color": "#3cd3a3",
+											"endValue": Obj.Percent, //Change here
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}]
+									}],
+									"arrows": [{
+										"alpha": 1,
+										"innerRadius": "35%",
+										"nailRadius": 0,
+										"radius": "170%"
+									}]
+								});
+
+								setInterval(randomValueEnqd, 2000);
+
+
+								function randomValueEnqd() {
+									var value = Math.round(Obj.Percent); //and here
+									chartEnq.arrows[0].setValue(value);
+									chartEnq.axes[0].setTopText(value + " %");
+                                                                        chartEnq.axes[0].bands[1].endValue = value;
+                                                                        chartEnq.validateNow();
+								}
+							});
+
+						});
+						//End of Representative Overall Target Enquiry
+
+
+						//Overall Target Enquiry Amt  DateRange Analysis
+						//Date range picker for Representative Overall Target Enquiry Amt
+						$('input[name="OverallTargetEnquiryAmtDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Overall Target Enquiry Amt
+						$('input[name="OverallTargetEnquiryAmtDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+						$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+						$("#OverallTargetEnquiryAmt").load('@Url.Action("OverallTargetEnquiryAmtChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								   if (JSON.parse(data).length != 0) {
+									   $("#lblMsgTargetAchievementEnquiryAmt").hide();
+									   $("#MsgTargetAchievementEnquiryAmt").text("");
+								   }
+
+								var obj = JSON.parse(data);
+
+								$("#ReqTAmt").text(obj.RAmt);
+								$("#AchTarAmt").text(obj.AAmt);
+
+								//OverallTargetEnquiryAmt Animated gauge
+								var chartAmt = AmCharts.makeChart("OverallTargetEnquiryAmt", {
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"type": "gauge",
+									"axes": [{
+										"topTextFontSize": 20,
+										"topTextYOffset": 70,
+										"axisColor": "#31d6ea",
+										"axisThickness": 1,
+										"endValue": 100,
+										"gridInside": true,
+										"inside": true,
+										"radius": "50%",
+										"valueInterval": 20,
+										"tickColor": "#67b7dc",
+										"startAngle": -90,
+										"endAngle": 90,
+										"unit": "%",
+										"bandOutlineAlpha": 0,
+										"bands": [{
+											"color": "#0080ff",
+											"endValue": 100,
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}, {
+											"color": "#3cd3a3",
+											"endValue": obj.Per, //Change here
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}]
+									}],
+									"arrows": [{
+										"alpha": 1,
+										"innerRadius": "35%",
+										"nailRadius": 0,
+										"radius": "170%"
+									}]
+								});
+
+								setInterval(randomValueEnqAmtd, 2000);
+
+
+								function randomValueEnqAmtd() {
+									//alert(data);
+									var value = Math.round(obj.Per); //and here
+									chartAmt.arrows[0].setValue(value);
+									chartAmt.axes[0].setTopText(value + " %");
+
+                                                                        chartAmt.axes[0].bands[1].endValue = value;
+                                                                        chartAmt.validateNow();
+								}
+							});
+
+						});
+						//End of Representative Overall Target Enquiry Amt
+
+
+						//Overall Target Quotation  DateRange Analysis
+						//Date range picker for Representative Overall Target Quotation Count
+						$('input[name="OverallTargetQuotationDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Overall Target Quotation Count
+						$('input[name="OverallTargetQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+						$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#OverallTargetQuotation").load('@Url.Action("OverallTargetQuotationChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								   if (JSON.parse(data).length != 0) {
+									   $("#lblMsgTargetAchievementQuotation").hide();
+									   $("#MsgTargetAchievementQuotation").text("");
+								   }
+
+								var Obj = JSON.parse(data);
+
+								$("#ReqTQuotCnt").text(Obj.RCnt);
+								$("#AchTarQuotCnt").text(Obj.ACnt);
+
+								//OverallTargetQuotation Animated gauge
+								var chartGuageQCnt = AmCharts.makeChart("OverallTargetQuotation", {
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"type": "gauge",
+									"axes": [{
+										"topTextFontSize": 20,
+										"topTextYOffset": 70,
+										"axisColor": "#31d6ea",
+										"axisThickness": 1,
+										"endValue": 100,
+										"gridInside": true,
+										"inside": true,
+										"radius": "50%",
+										"valueInterval": 20,
+										"tickColor": "#67b7dc",
+										"startAngle": -90,
+										"endAngle": 90,
+										"unit": "%",
+										"bandOutlineAlpha": 0,
+										"bands": [{
+											"color": "#0080ff",
+											"endValue": 100,
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}, {
+											"color": "#3cd3a3",
+											"endValue": Obj.Percent, //Change here
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}]
+									}],
+									"arrows": [{
+										"alpha": 1,
+										"innerRadius": "35%",
+										"nailRadius": 0,
+										"radius": "170%"
+									}]
+								});
+
+								setInterval(randomValueQuotd, 2000);
+
+
+								function randomValueQuotd() {
+									var value = Math.round(Obj.Percent); //and here
+									chartGuageQCnt.arrows[0].setValue(value);
+									chartGuageQCnt.axes[0].setTopText(value + " %");
+
+                                                                        chartGuageQCnt.axes[0].bands[1].endValue = value;
+                                                                        chartGuageQCnt.validateNow();
+								}
+							});
+
+						});
+						//End of Representative Overall Target Quotation Count
+
+
+
+						//Overall Target Quotation  DateRange Analysis
+						//Date range picker for Representative Overall Target Quotation Amt
+						$('input[name="OverallTargetQuotationAmtDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Overall Target Enquiry Amt
+						$('input[name="OverallTargetQuotationAmtDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+						$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+							$("#OverallTargetQuotationAmt").load('@Url.Action("OverallTargetQuotationAmtChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								   if (JSON.parse(data).length != 0) {
+									   $("#lblMsgTargetAchievementQuotationAmt").hide();
+									   $("#MsgTargetAchievementQuotationAmt").text("");
+								   }
+
+								var obj = JSON.parse(data);
+
+								$("#ReqTQuotAmt").text(obj.RAmt);
+								$("#AchTarQuotAmt").text(obj.AAmt);
+
+								//OverallTargetQuotationAmt Animated gauge
+								var chartQAmtd = AmCharts.makeChart("OverallTargetQuotationAmt", {
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"type": "gauge",
+									"axes": [{
+										"topTextFontSize": 20,
+										"topTextYOffset": 70,
+										"axisColor": "#31d6ea",
+										"axisThickness": 1,
+										"endValue": 100,
+										"gridInside": true,
+										"inside": true,
+										"radius": "50%",
+										"valueInterval": 20,
+										"tickColor": "#67b7dc",
+										"startAngle": -90,
+										"endAngle": 90,
+										"unit": "%",
+										"bandOutlineAlpha": 0,
+										"bands": [{
+											"color": "#0080ff",
+											"endValue": 100,
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}, {
+											"color": "#3cd3a3",
+												"endValue": obj.Per, //Change here
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}]
+									}],
+									"arrows": [{
+										"alpha": 1,
+										"innerRadius": "35%",
+										"nailRadius": 0,
+										"radius": "170%"
+									}]
+								});
+
+								setInterval(randomValueQuotAmtd, 2000);
+
+								function randomValueQuotAmtd() {
+									//alert(data);
+									var value = Math.round(obj.Per); //and here
+									chartQAmtd.arrows[0].setValue(value);
+									chartQAmtd.axes[0].setTopText(value + " %");
+
+                                                                        chartQAmtd.axes[0].bands[1].endValue = value;
+                                                                        chartQAmtd.validateNow();
+								}
+
+							});
+
+						});
+						//End of Representative Overall Target Quotation Amt
+
+
+						//Overall Target Sales  DateRange Analysis
+						//Date range picker for Representative Overall Target Sales Count
+						$('input[name="OverallTargetSalesDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Overall Target Sales Count
+						$('input[name="OverallTargetSalesDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+						$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+						$("#OverallTargetSales").load('@Url.Action("OverallTargetSalesChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+						if (JSON.parse(data).length != 0) {
+							$("#lblMsgTargetAchievementSales").hide();
+							$("#MsgTargetAchievementSales").text("");
+						}
+
+							var Obj = JSON.parse(data);
+
+							$("#ReqTSalCnt").text(Obj.RCnt);
+							$("#AchTarSalCnt").text(Obj.ACnt);
+
+							//OverallTargetSales Animated gauge
+							var chartGuage = AmCharts.makeChart("OverallTargetSales", {
+								"theme": "light",
+								"responsive": {
+									"enabled": true
+								},
+								"type": "gauge",
+								"axes": [{
+									"topTextFontSize": 20,
+									"topTextYOffset": 70,
+									"axisColor": "#31d6ea",
+									"axisThickness": 1,
+									"endValue": 100,
+									"gridInside": true,
+									"inside": true,
+									"radius": "50%",
+									"valueInterval": 20,
+									"tickColor": "#67b7dc",
+									"startAngle": -90,
+									"endAngle": 90,
+									"unit": "%",
+									"bandOutlineAlpha": 0,
+									"bands": [{
+										"color": "#0080ff",
+										"endValue": 100,
+										"innerRadius": "105%",
+										"radius": "170%",
+										"gradientRatio": [0.5, 0, -0.5],
+										"startValue": 0
+									}, {
+										"color": "#3cd3a3",
+										"endValue": Obj.Percent, //Change here
+										"innerRadius": "105%",
+										"radius": "170%",
+										"gradientRatio": [0.5, 0, -0.5],
+										"startValue": 0
+									}]
+								}],
+								"arrows": [{
+									"alpha": 1,
+									"innerRadius": "35%",
+									"nailRadius": 0,
+									"radius": "170%"
+								}]
+							});
+
+							setInterval(randomValueEnqd, 2000);
+
+
+							function randomValueEnqd() {
+								var value = Math.round(Obj.Percent); //and here
+								chartGuage.arrows[0].setValue(value);
+								chartGuage.axes[0].setTopText(value + " %");
+
+                                                                chartGuage.axes[0].bands[1].endValue = value;
+                                                                chartGuage.validateNow();
+							}
+
+							});
+
+						});
+						//End of Representative Overall Target Quotation Count
+
+
+
+						//Overall Target Sales  DateRange Analysis
+						//Date range picker for Representative Overall Target Quotation Amt
+						$('input[name="OverallTargetSalesAmtDateRange"]').daterangepicker({
+						startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+						endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+						});
+
+						//On date change Representative Overall Target Enquiry Amt
+						$('input[name="OverallTargetSalesAmtDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+							var sDate = picker.startDate.format('MM/DD/YYYY');
+							var eDate = picker.endDate.format('MM/DD/YYYY');
+
+						$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+						$("#OverallTargetSalesAmt").load('@Url.Action("OverallTargetSalesAmtChart", "RepresentativeDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY') + '&ListId=' + $("#ListId").val(), function (data) {
+
+								if (JSON.parse(data).length != 0) {
+									$("#lblMsgTargetAchievementSalesAmt").hide();
+									$("#MsgTargetAchievementSalesAmt").text("");
+								}
+
+								var obj = JSON.parse(data);
+
+								$("#ReqTSalAmt").text(obj.RAmt);
+								$("#AchTarSalAmt").text(obj.AAmt);
+
+								//OverallTargetSalesAmt Animated gauge
+								var chartAmt = AmCharts.makeChart("OverallTargetSalesAmt", {
+									"theme": "light",
+									"responsive": {
+										"enabled": true
+									},
+									"type": "gauge",
+									"axes": [{
+										"topTextFontSize": 20,
+										"topTextYOffset": 70,
+										"axisColor": "#31d6ea",
+										"axisThickness": 1,
+										"endValue": 100,
+										"gridInside": true,
+										"inside": true,
+										"radius": "50%",
+										"valueInterval": 20,
+										"tickColor": "#67b7dc",
+										"startAngle": -90,
+										"endAngle": 90,
+										"unit": "%",
+										"bandOutlineAlpha": 0,
+										"bands": [{
+											"color": "#0080ff",
+											"endValue": 100,
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}, {
+											"color": "#3cd3a3",
+											"endValue": obj.Per, //Change here
+											"innerRadius": "105%",
+											"radius": "170%",
+											"gradientRatio": [0.5, 0, -0.5],
+											"startValue": 0
+										}]
+									}],
+									"arrows": [{
+										"alpha": 1,
+										"innerRadius": "35%",
+										"nailRadius": 0,
+										"radius": "170%"
+									}]
+								});
+
+								setInterval(randomValueSalAmtd, 2000);
+
+
+								function randomValueSalAmtd() {
+									//alert(data);
+									var value = Math.round(obj.Per); //and here
+									chartAmt.arrows[0].setValue(value);
+									chartAmt.axes[0].setTopText(value + " %");
+
+                                                                        chartAmt.axes[0].bands[1].endValue = value;
+                                                                        chartAmt.validateNow();
+								}
+
+							});
+
+						});
+						//End of Representative Overall Target Sales Amt
+
+					});
+
+
+		});
+	});
+</script>
+<script>
+</script>
+<br />
+<!-- HTML -->
+<body style='background:lightgrey;'>
+    @Html.HiddenFor(m => m.StartDate)
+    @Html.HiddenFor(m => m.EndDate)
+    @Html.HiddenFor(m => m.ListId)
+
+
+    <br />
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div class="well active" style='background: white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group col-lg-5">
+
+                            <div class="id_listval" style='text-align:left;'>
+                                <label for="LabelforList" class="col-form-label">Select Representative<span class="kv-reqd">*</span></label>
+                                <div class="input-group">
+
+                                    <select class="selectpicker"
+                                            name="ListId"
+                                            id="ListId"
+                                            data-show-subtext="true"
+                                            data-live-search="true"
+                                            required title="Select">
+                                        >
+                                        @foreach (var item in ViewBag.ListData)
+			{
+                                        <option value="@item.UserId">
+                                            @item.Username
+                                        </option>
+}
+                                    </select>
+                                    <input type="hidden" name="SearchButton" value="true">
+                                    @Html.ValidationMessageFor(m => m.ListId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-4 pull-right" style='text-align:right;'>
+                            <Center><h3>Representative Dashboard</h3></Center>
+                        </div>
+                    </div>
+                </div>
+
+                <script type="text/javascript">
+			function SetListVal() {
+			$("div.id_listval select").val('@Model.ListId');
+			}
+			SetListVal();
+
+                </script>
+            </div>
+        </div>
+    </div>
+    <div id="RepresentativeDiv">
+        @Html.Partial(MVC.Views.Premium.RepresentativePartialView, Model)
+    </div>
+</body>
+
+

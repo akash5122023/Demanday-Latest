@@ -1,0 +1,95 @@
+﻿
+@model AdvanceCRM.Modules.Reports.GST.GSTR1B2CLPageModel
+
+<table class="table table-bordered table-condensed table-striped table-hover" style="width:100%">
+    <thead style="width:100%">
+        <tr style="height:40px; background-color:lightgrey;">
+            <th style="width:10%">Invoice Number</th>
+            <th style="width:10%">Invoice date</th>
+            <th style="width:10%">Invoice Value</th>
+            <th style="width:15%">Place Of Supply</th>
+            <th style="width:10%">Rate</th>
+            <th style="width:10%">Applicable % of Tax Rate</th>
+            <th style="width:10%">Taxable Value</th>
+            <th style="width:10%">Cess Amount</th>
+            <th style="width:15%">E-Commerce GSTIN</th>
+        </tr>
+    </thead>
+    <tbody>
+
+
+        @foreach (var line in Model.SalesList)
+        {
+
+            foreach (var item in Model.SalesProductList.Where(x => x.SalesId == line.Id).GroupBy(y => y.Percentage1))
+            {
+                if ((line.ContactsEComGstin.IsNullOrEmpty()))
+                {
+        <tr>
+
+            <td style="width:10%">
+                @if (line.InvoiceNo.HasValue)
+                            {
+                                var val = line.Date.Value.Year.ToString() + "/" + line.InvoiceNo.ToString();
+                @val
+                            }
+                            else
+                            {
+                                var val = line.Date.Value.Year.ToString() + "/" + line.Id.ToString();
+                @val
+                            }
+            </td>
+            <td style="width:10%">
+                @line.Date.Value.ToString("dd-MMM-yyyy")
+
+            </td>
+            <td style="width:10%">
+                @line.Total.Value.ToString("#,##0.00")
+            </td>
+            <td style="width:15%">
+                @*@line.ContactsStateId*@
+                @if (line.ContactsStateId.HasValue)
+                            {
+                @Model.StateList.FirstOrDefault(x => x.Id == line.ContactsStateId).State
+                            }
+                @*else
+                    {
+                        @line.ContactsStateId
+                    }*@
+
+            </td>
+
+
+
+            <td style="width:10%">
+                @if (item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1 < 1)
+                            {
+                @item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1
+                            }
+                            else
+                            {
+                                double t1 = ((double)@item.FirstOrDefault(x => x.SalesId == line.Id).Percentage1) + ((double)@item.FirstOrDefault(x => x.SalesId == line.Id).Percentage2);
+
+                @t1.ToString("#,##0.00");
+
+                            }
+            </td>
+            <td style="width:10%"></td>
+            <td style="width:10%">
+                @item.Sum(x => x.GrandTotal).Value.ToString("#,##0.00")
+            </td>
+            <td style="width:10%"></td>
+            <td style="width:15%">
+                @if (!line.ContactsEComGstin.IsNullOrEmpty())
+                            {
+                <text> @line.ContactsEComGstin </text>
+                            }
+            </td>
+        </tr>
+                }
+
+            }
+        }
+
+    </tbody>
+</table>

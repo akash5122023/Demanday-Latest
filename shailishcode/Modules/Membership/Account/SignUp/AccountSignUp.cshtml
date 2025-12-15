@@ -1,0 +1,529 @@
+@using System.Text.Json
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = Texts.Forms.Membership.SignUp.FormTitle.ToString(Localizer);
+    ViewData["PageId"] = "SignUp";
+    ViewData["BodyClass"] = "register-page";
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    var razorpayConfig = ViewData["RazorpayConfig"] as AdvanceCRM.Membership.RazorpayClientConfig ?? new AdvanceCRM.Membership.RazorpayClientConfig();
+    var razorpayConfigJson = JsonSerializer.Serialize(razorpayConfig, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/Content/iCheck/square/blue.css" />
+    <script src="~/Scripts/jquery.icheck.min.js"></script>
+    <style>
+        body.register-page {
+            background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.18), transparent 55%),
+                radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.12), transparent 50%),
+                linear-gradient(130deg, #6f73ff 0%, #44d3c7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .signup-wrapper {
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .signup-card {
+            display: flex;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 22px 48px rgba(21, 34, 68, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .signup-hero {
+            flex: 1 1 340px;
+            background: linear-gradient(160deg, rgba(73, 92, 255, 0.95), rgba(87, 204, 195, 0.95));
+            color: #fff;
+            padding: 56px 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-hero::before,
+        .signup-hero::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            filter: blur(0.5px);
+        }
+
+        .signup-hero::before {
+            width: 180px;
+            height: 180px;
+            top: -60px;
+            right: -40px;
+        }
+
+        .signup-hero::after {
+            width: 220px;
+            height: 220px;
+            bottom: -80px;
+            left: -60px;
+        }
+
+        .signup-hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            height: 100%;
+        }
+
+        .signup-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            font-size: 13px;
+        }
+
+        .signup-hero h2 {
+            font-size: 32px;
+            line-height: 1.25;
+            margin: 0;
+        }
+
+        .signup-hero p {
+            margin: 0;
+            font-size: 15px;
+            opacity: 0.9;
+            max-width: 420px;
+        }
+
+        .signup-hero-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .signup-hero-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            opacity: 0.92;
+        }
+
+        .signup-hero-list i {
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .signup-hero-footer {
+            margin-top: auto;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .signup-form-area {
+            flex: 1 1 420px;
+            padding: 40px 48px;
+            background: #f7f9fc;
+        }
+
+        .register-box {
+            width: 100%;
+            margin: 0;
+        }
+
+        .register-logo {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: left;
+            margin-bottom: 12px;
+            color: #2d2f55;
+        }
+
+        .register-box-body {
+            max-width: none;
+            padding: 32px;
+            border-radius: 22px;
+            background: #fff;
+            box-shadow: 0 16px 30px rgba(27, 39, 75, 0.08);
+        }
+
+        .register-box-body .page-title {
+            font-weight: 700;
+            color: #1f2559;
+            margin-bottom: 6px;
+        }
+
+        .register-box-body .login-box-msg {
+            margin-bottom: 24px;
+            color: #5f6c8f;
+        }
+
+        .s-SignUpPanel .propertygrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 18px 24px;
+        }
+
+        .s-SignUpPanel .propertygrid .field {
+            margin: 0;
+        }
+
+        .s-SignUpPanel .propertygrid .caption {
+            font-weight: 600;
+            color: #2d2f55;
+            margin-bottom: 6px;
+        }
+
+        .s-SignUpPanel .propertygrid input.editor {
+            height: 46px;
+            border-radius: 12px;
+            border: 1px solid #d8deed;
+            padding: 10px 14px;
+            box-shadow: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .s-SignUpPanel .propertygrid input.editor:focus {
+            border-color: #6f73ff;
+            box-shadow: 0 0 0 3px rgba(111, 115, 255, 0.18);
+        }
+
+        .signup-payment {
+            margin-top: 24px;
+            border-radius: 18px;
+            padding: 24px 26px;
+            background: #f7f8ff;
+            border: 1px solid rgba(165, 180, 252, 0.45);
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .signup-payment.is-visible {
+            display: flex;
+        }
+
+        .signup-payment h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2559;
+        }
+
+        .signup-payment .payment-description {
+            margin: 4px 0 0;
+            color: #4a4f77;
+            font-size: 14px;
+        }
+
+        .signup-payment .payment-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #1f2559;
+            background: #fff;
+            border-radius: 14px;
+            padding: 14px 18px;
+            border: 1px dashed rgba(111, 115, 255, 0.45);
+        }
+
+        .signup-payment .payment-summary span {
+            display: block;
+        }
+
+        .signup-payment .payment-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .signup-payment .btn-pay {
+            background: linear-gradient(120deg, #16c79a, #0fbf9f);
+            border: none;
+            border-radius: 12px;
+            height: 48px;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(15, 191, 159, 0.25);
+        }
+
+        .signup-payment .btn-pay:hover {
+            background: linear-gradient(120deg, #13b78d, #0aa58a);
+        }
+
+        .signup-payment .payment-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .signup-payment .payment-status i {
+            font-size: 16px;
+        }
+
+        .signup-payment .payment-status--pending {
+            color: #ff8a65;
+        }
+
+        .signup-payment .payment-status--success {
+            color: #1abc9c;
+        }
+
+        .signup-payment .payment-status--error {
+            color: #e74c3c;
+        }
+        .signup-meta {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .trial-info {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(111, 115, 255, 0.12), rgba(68, 211, 199, 0.18));
+            border: 1px solid rgba(111, 115, 255, 0.35);
+            color: #1f2559;
+        }
+
+        .trial-info.is-visible {
+            display: flex;
+        }
+
+        .trial-info .trial-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5360f0;
+            box-shadow: 0 10px 20px rgba(83, 96, 240, 0.18);
+            flex-shrink: 0;
+        }
+
+        .trial-info .trial-icon i {
+            font-size: 18px;
+        }
+
+        .trial-info .trial-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .trial-info .trial-title {
+            font-size: 13px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #475093;
+        }
+
+        .trial-info .trial-text {
+            font-size: 15px;
+            color: #3c4270;
+        }
+
+        .signup-footer-links {
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        .signup-footer-links a {
+            color: #4f57c2;
+            font-weight: 600;
+        }
+
+        .btn.btn-primary.btn-flat {
+            height: 48px;
+            border-radius: 14px;
+            font-weight: 600;
+            background: linear-gradient(120deg, #6f73ff, #44d3c7);
+            border: none;
+            box-shadow: 0 10px 18px rgba(87, 100, 255, 0.25);
+        }
+
+        .btn.btn-primary.btn-flat:hover {
+            background: linear-gradient(120deg, #5f63ff, #37c1b6);
+        }
+
+
+        @@media (max-width: 992px) {
+
+            .signup-card {
+                flex-direction: column;
+            }
+
+            .signup-hero {
+                padding: 48px 40px;
+            }
+
+            .signup-form-area {
+                padding: 32px 28px 40px;
+            }
+        }
+
+        @@media (max-width: 640px) {
+
+            body.register-page {
+                padding: 24px 16px;
+            }
+
+            .signup-form-area {
+                padding: 24px 18px 32px;
+            }
+
+            .register-box-body {
+                padding: 24px 20px;
+            }
+
+            .signup-meta {
+                gap: 12px;
+            }
+
+            .trial-info {
+                align-items: flex-start;
+                text-align: left;
+            }
+        }
+    </style>
+}
+
+<script id="Template_Membership_SignUpPanel" type="text/template">
+    <div class="s-Form">
+        <form id="~_Form" action="">
+            <div class="fieldset">
+                <div id="~_PropertyGrid"></div>
+                <div class="clear"></div>
+            </div>
+
+            <div id="~_PaymentSection" class="signup-payment">
+                <div>
+                    <h4>Secure payment</h4>
+                    <p class="payment-description">Please complete your payment before submitting the sign up form.</p>
+                </div>
+                <div class="payment-summary" id="~_PaymentSummary">
+                    <span id="~_PaymentPlanLabel">Plan: --</span>
+                    <span id="~_PaymentAmountLabel">Amount: --</span>
+                </div>
+                <div class="payment-actions">
+                    <button type="button" id="~_PaymentButton" class="btn btn-pay">Pay with Razorpay</button>
+                    <div id="~_PaymentStatus" class="payment-status payment-status--pending">
+                        <i class="fa fa-clock-o"></i>
+                        <span>Payment pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="signup-meta">
+                <div id="~_TrialInfo" class="trial-info" role="status" aria-live="polite">
+                    <span class="trial-icon"><i class="fa fa-calendar-check-o"></i></span>
+                    <span class="trial-copy">
+                        <span class="trial-title">Trial period</span>
+                        <span id="~_TrialInfoText" class="trial-text">Free trial</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 24px; align-items: center;">
+                <div class="col-sm-7 col-xs-12">
+                    <div class="checkbox icheck">
+                        <label>
+                            <input type="checkbox"> @Texts.Forms.Membership.SignUp.AcceptTerms.ToString(Localizer)
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-5 col-xs-12">
+                    <button id="~_SubmitButton" type="submit" class="btn btn-primary btn-block btn-flat">@Texts.Forms.Membership.SignUp.SubmitButton.ToString(Localizer)</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</script>
+
+<div class="signup-wrapper">
+    <div class="signup-card">
+        <div class="signup-hero">
+            <div class="signup-hero-content">
+                <span class="signup-hero-badge"><i class="fa fa-bolt"></i> BizPlusERP Suite</span>
+                <div>
+                    <h2>Get started with a smarter workflow</h2>
+                    <p>Organise your operations, automate follow-ups and collaborate with your team in a single ERP experience.</p>
+                </div>
+                <ul class="signup-hero-list">
+                    <li><i class="fa fa-check-circle"></i> Centralise sales, support and marketing activities.</li>
+                    <li><i class="fa fa-check-circle"></i> Invite team members and assign modules instantly.</li>
+                    <li><i class="fa fa-check-circle"></i> Monitor performance with real-time dashboards.</li>
+                </ul>
+                <div class="signup-hero-footer">
+                    Trusted by growing businesses to modernise their ERP operations.
+                </div>
+            </div>
+        </div>
+        <div class="signup-form-area">
+            <div class="register-box">
+                <div class="register-logo">
+                    @Texts.Navigation.SiteTitle.ToString(Localizer)
+                </div>
+                <div class="register-box-body">
+                    <h3 class="page-title">@Texts.Forms.Membership.SignUp.FormTitle.ToString(Localizer)</h3>
+                    <p class="login-box-msg">@Texts.Forms.Membership.SignUp.FormInfo.ToString(Localizer)</p>
+                    <div id="SignUpPanel">
+                    </div>
+                    <div class="signup-footer-links">
+                        <a href="~/Account/Login">@Texts.Forms.Membership.SignUp.BackToLogin.ToString(Localizer)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (razorpayConfig.Enabled)
+{
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+}
+
+<script type="text/javascript">
+    window.SignUpRazorpay = @Html.Raw(razorpayConfigJson);
+</script>
+
+<script type="text/javascript">
+$(function() {
+    new AdvanceCRM.Membership.SignUpPanel($('#SignUpPanel')).init();
+    $('.field.DisplayName,.field.Email,.field.ConfirmEmail,.field.Password,.field.ConfirmPassword').addClass("has-icon");
+    $('.field.DisplayName input').after("<span class='glyphicon glyphicon-user form-control-feedback'></span>");
+    $('.emaildomain').after("<span class='glyphicon glyphicon-envelope form-control-feedback'></span>");
+    $('.field.Password input').after("<span class='glyphicon glyphicon-lock form-control-feedback'></span>");
+    $('.field.ConfirmPassword input').after("<span class='glyphicon glyphicon-log-in form-control-feedback'></span>");
+    $('.checkbox.icheck input[type="checkbox"]').iCheck({
+        checkboxClass: 'icheckbox_square-blue',
+        radioClass: 'iradio_square-blue',
+        increaseArea: '20%'
+    });
+});
+</script>
+

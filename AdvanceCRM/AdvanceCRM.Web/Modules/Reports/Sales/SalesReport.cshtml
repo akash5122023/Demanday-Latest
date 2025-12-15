@@ -1,0 +1,57 @@
+﻿@model AdvanceCRM.Reports.SalesReportModel
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "Sales Report";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+}
+
+<body>
+    <table style="width:100%; border:groove;">
+        <tr>
+            <td align="center">
+                <h3 style="text-decoration-color:burlywood">@Model.Company.Name</h3>
+                <h4>@Model.Company.Address</h4>
+                <h5>@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>
+    @if (Model.Request.Type == AdvanceCRM.Reports.SalesReportType.Productwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Sales.ProductwiseSales, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.SalesReportType.Customerwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Sales.CustomerwiseSales, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.SalesReportType.Divisionwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Sales.DivisionwiseSales, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.SalesReportType.Mediawise)
+    {
+        @Html.Partial(MVC.Views.Reports.Sales.MediawiseSales, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.SalesReportType.Representativewise)
+    {
+        @Html.Partial(MVC.Views.Reports.Sales.RepwiseSales, Model);
+    }
+    @*
+        else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.LostReasons)
+        {
+            @Html.Partial(MVC.Views.Reports.Sales.LostQuotationReasons, Model);
+        }
+
+        else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.Customerwise)
+        {
+            @Html.Partial(MVC.Views.Reports.Sales.CustomerwiseSales, Model);
+        }
+
+        else if (Model.Request.Type == AdvanceCRM.Reports.LeadsReportType.Detailed)
+        {
+            @Html.Partial(MVC.Views.Reports.Sales.SalesDetailReport, Model);
+        }
+        else
+        {
+            @Html.Partial(MVC.Views.Reports.Quotation.QuotationStatistics, Model);
+        }*@
+</body>

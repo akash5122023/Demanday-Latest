@@ -1,0 +1,385 @@
+﻿@model AdvanceCRM.Sales.ChallanReportData
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+@{
+    bool stateChanged = Model.Challan.ContactsStateId != Model.Company.StateId;
+    bool taxColumns = Model.Company.ChallanTaxColumnIncluded ?? false;
+    int baseColumns = 7; // Original columns (SrNo, HSN, Product, Rate, Qty, Discount, Total)
+    if (taxColumns)
+    {
+        baseColumns += (stateChanged ? 1 : 2); // Add tax columns
+    }
+
+    // Initialize all decimal variables with explicit conversions
+    decimal Total = 0m;
+    decimal TaxTotal = 0m;
+    decimal pack = Model.Challan.PackagingCharges.HasValue ? Convert.ToDecimal(Model.Challan.PackagingCharges.Value) : 0m;
+    decimal frieght = Model.Challan.FreightCharges.HasValue ? Convert.ToDecimal(Model.Challan.FreightCharges.Value) : 0m;
+    decimal adv = Model.Challan.Advacne.HasValue ? Convert.ToDecimal(Model.Challan.Advacne.Value) : 0m;
+    decimal grandTotal = 0m;
+}
+
+<style>
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    #datatable {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #datatable td, #datatable th {
+            border: 1px solid #ddd;
+            padding: 2px
+        }
+
+    header {
+        padding: 10px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #AAAAAA;
+    }
+
+    #logo {
+        float: left;
+        margin-top: 8px;
+    }
+
+    #company {
+        width: 50%;
+        float: right;
+        text-align: right;
+    }
+
+    #client {
+        border-left: 6px solid #0087C3;
+    }
+</style>
+
+<script type="text/javascript">
+    var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+    var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function toWords(num) {
+        if ((num = num.toString()).length > 9) return 'overflow';
+        n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return; var str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only ' : '';
+        return str.trim();
+    }
+</script>
+
+<body style="align-self:stretch; align-items:center; align-items:center">
+    <table style="width: 100% " border="0">
+        @if (Model.Company.HeaderImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%"><img src="~/upload/@Model.Company.HeaderImage" height="@(Model.Company.HeaderHeight ?? 0)" width="@(Model.Company.HeaderWidth ?? 0)" /></td>
+            </tr>
+        }
+    </table>
+    @if (Model.Company.HeaderContent != null)
+    {
+        @Html.Raw(Model.Company.HeaderContent);
+    }
+    <header class="clearfix">
+        @if (Model.Company.CompanyDetails != null && Model.Company.CompanyDetails == true)
+        {
+            if (Model.Company.Logo != null)
+            {
+                <div id="logo">
+                    <img src="~/upload/@Model.Company.Logo" height="@(Model.Company.LogoHeight ?? 0)" width="@(Model.Company.LogoWidth ?? 0)" />
+                </div>
+            }
+            <div id="company">
+                <h4 class="name">@Model.Company.Name</h4>
+                <div>@Model.Company.Address</div>
+                <div>@Model.Company.Phone</div>
+                <div>GSTIN: @Model.Company.GSTIN</div>
+                <div>PAN No: @Model.Company.PANNo</div>
+            </div>
+        }
+    </header>
+
+    @if (Model.Company.DcHeaderContent != null)
+    {
+        @Html.Raw(Model.Company.DcHeaderContent);
+    }
+
+    <table style="width:100%">
+        <tr>
+            <td>
+                <table style="width: 100%; border-collapse: collapse;" id="client">
+                    <tr>
+                        <td valign="top" style="width: 30%; padding: 10px;">
+                            <strong>Challan No:</strong> @Model.Company.ChallanPrefix@(Model.Challan.Date?.Year.ToString())/@Model.Challan.ChallanNo@Model.Company.ChallanSuffix
+                            <br />
+                            <strong>Date:</strong> @(Model.Challan.Date?.ToString("dd MMM yyyy"))
+                            <br />
+                            <strong>Name:</strong> @Model.Challan.ContactsName
+                            <br />
+                            <strong>Phone:</strong> @Model.Challan.ContactsPhone
+
+                            @if (Model.Challan.ContactsGstin != null)
+                            {
+                                <br />
+                                <strong>GSTIN:</strong> @Model.Challan.ContactsGstin
+                            }
+                            @if (Model.Challan.ContactsPanNo != null)
+                            {
+                                <br />
+                                <strong>PAN No:</strong> @Model.Challan.ContactsPanNo
+                            }
+                        </td>
+
+                        <td valign="top" style="width: 40%; padding: 10px;">
+                            <strong>Billing Address:</strong>
+                            <span style="white-space: pre-line;">
+                                @Model.Challan.ContactsAddress
+                            </span>
+                            <br /><br />
+                            <strong>Shipping Address:</strong>
+                            <span style="white-space: pre-line;">
+                                @if (Model.Challan.ShippingAddress != null)
+                                {
+                                    @Model.Challan.ShippingAddress
+                                }
+                                else
+                                {
+                                    @Model.Challan.ContactsAddress
+                                }
+                            </span>
+                        </td>
+
+                        <td align="right" style="width: 30%; padding: 10px; vertical-align: middle;">
+                            <h3 style="margin: 0;">Delivery Challan / Packing Slip</h3>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="8" align="center" class="bg-gray-light">
+                &nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+                    <tr>
+                        <td align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;HSN&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Product&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Rate&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Qty&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Discount&nbsp;</strong></td>
+                        @if (taxColumns)
+                        {
+                            if (stateChanged)
+                            {
+                                <td align="center"><strong>&nbsp;Tax (IGST)&nbsp;</strong></td>
+                            }
+                            else
+                            {
+                                <td align="center"><strong>&nbsp;CGST&nbsp;</strong></td>
+                                <td align="center"><strong>&nbsp;SGST&nbsp;</strong></td>
+                            }
+                        }
+                        <td align="center"><strong>Total</strong></td>
+                    </tr>
+
+                    @{
+                        int srno = 1;
+                        Total = 0m;
+                        TaxTotal = 0m;
+                    }
+                    @foreach (var qp in Model.ChallanProducts)
+                    {
+                        var lineTotal = qp.LineTotal.HasValue ? Convert.ToDecimal(qp.LineTotal.Value) : 0m;
+                        var tax1Amount = qp.Tax1Amount.HasValue ? Convert.ToDecimal(qp.Tax1Amount.Value) : 0m;
+                        var tax2Amount = qp.Tax2Amount.HasValue ? Convert.ToDecimal(qp.Tax2Amount.Value) : 0m;
+
+                        <tr>
+                            <td align="center">@srno</td>
+                            <td align="Left">&nbsp;@qp.ProductsHsn</td>
+                            <td align="left" style="padding:3px;">
+                                &nbsp;@qp.ProductsName<br />
+                                <span style="white-space: pre-line; font-size:smaller"><i>@qp.Description</i></span>
+                                @if (qp.Serial != null)
+                                {
+                                    <span style="white-space: pre-line; font-size:smaller">
+                                        <i>SN: @qp.Serial</i>
+                                    </span>
+                                }
+                            </td>
+                            <td align="right">&nbsp;@(qp.Price.HasValue ? Convert.ToDecimal(qp.Price.Value).ToString("#,##0.00") : "0.00")&nbsp;</td>
+                            <td align="center">@(qp.Quantity.HasValue ? qp.Quantity.Value.ToString() : "0") </td>
+                            <td align="center">
+                                @(qp.Discount.HasValue ? Convert.ToDecimal(qp.Discount.Value).ToString("0") : "0")%&nbsp;
+                                @if (qp.DiscountAmount.HasValue && Convert.ToDecimal(qp.DiscountAmount.Value) > 0)
+                                {
+                                    <text>&amp; Amt: @(Convert.ToDecimal(qp.DiscountAmount.Value).ToString("#,##0.00"))</text>
+                                }
+                            </td>
+
+                            @if (taxColumns)
+                            {
+                                if (stateChanged)
+                                {
+                                    <td align="right">
+                                        @((tax1Amount + tax2Amount).ToString("#,##0.00"))&nbsp;
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td align="right">@tax1Amount.ToString("#,##0.00")&nbsp;</td>
+                                    <td align="right">@tax2Amount.ToString("#,##0.00")&nbsp;</td>
+                                }
+                            }
+
+                            <td align="right">@lineTotal.ToString("#,##0.00")&nbsp;</td>
+
+                            @{
+                                Total += lineTotal;
+                                TaxTotal += tax1Amount + tax2Amount;
+                                srno++;
+                            }
+                        </tr>
+                    }
+
+                    @{int diff = 7 - srno; }
+                    @for (int i = diff; i > 0; i--)
+                    {
+                        <tr>
+                            @for (int j = 0; j < baseColumns; j++)
+                            {
+                                <td>&nbsp;</td>
+                            }
+                        </tr>
+                    }
+
+                    <tr>
+                        <td colspan="@baseColumns" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">
+                            &nbsp;
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="@(baseColumns-3)" align="left">
+                            @if (Model.Challan.DispatchDetails != null)
+                            {
+                                <text> &nbsp;<strong> Dispatch Details: </strong> @Model.Challan.DispatchDetails </text>
+                            }
+                        </td>
+                        <td colspan="2" align="right"><strong> Total:&nbsp;</strong></td>
+                        <td align="right"><strong>@Total.ToString("#,##0.00")</strong></td>
+                    </tr>
+
+                    @if (pack != 0m)
+                    {
+                        <tr>
+                            <td colspan="@(baseColumns-1)" align="right"><strong> Packaging Charges:&nbsp;</strong></td>
+                            <td align="right"><strong>@pack.ToString("#,##0.00")</strong></td>
+                        </tr>
+                    }
+
+                    @if (frieght != 0m)
+                    {
+                        <tr>
+                            <td colspan="@(baseColumns-1)" align="right"><strong> Freight Charges:&nbsp;</strong></td>
+                            <td align="right"><strong>@frieght.ToString("#,##0.00")</strong></td>
+                        </tr>
+                    }
+
+                    @if (adv != 0m)
+                    {
+                        <tr>
+                            <td colspan="@(baseColumns-1)" align="right"><strong> Advance:&nbsp;</strong></td>
+                            <td align="right"><strong>@adv.ToString("#,##0.00")</strong></td>
+                        </tr>
+                    }
+
+                    @if (taxColumns)
+                    {
+                        if (!stateChanged)
+                        {
+                            <tr>
+                                <td colspan="@(baseColumns-2)" align="right"><strong>Total CGST:&nbsp;</strong></td>
+                                <td align="right"><strong>@Model.ChallanProducts.Sum(x => x.Tax1Amount.HasValue ? Convert.ToDecimal(x.Tax1Amount.Value) : 0m).ToString("#,##0.00")</strong></td>
+                                <td align="right"><strong>@Model.ChallanProducts.Sum(x => x.Tax2Amount.HasValue ? Convert.ToDecimal(x.Tax2Amount.Value) : 0m).ToString("#,##0.00")</strong></td>
+                            </tr>
+                        }
+
+
+                    }
+
+                    <tr>
+                        <td colspan="@(baseColumns-1)" align="right"><strong>Total Tax (IGST)):&nbsp;</strong></td>
+                        <td align="right"><strong>@TaxTotal.ToString("#,##0.00")</strong></td>
+                    </tr>
+
+                    @{
+                        grandTotal = Total + pack + frieght - adv + TaxTotal;
+                    }
+                    <tr>
+                        <td colspan="@(baseColumns-3)" align="left">
+                            @if (Model.Challan.DueDate != null)
+                            {
+                                <text> &nbsp;<strong> Due Date: </strong> @(Model.Challan.DueDate?.ToShortDateString()) </text>
+                            }
+                        </td>
+                        <td align="right" colspan="2"><strong> Grand Total:&nbsp;</strong></td>
+                        <td align="right"><strong>@grandTotal.ToString("#,##0.00")</strong></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="@baseColumns" bgcolor="wheat">
+                            <strong> &nbsp; Total in Words:</strong>
+                            <script>document.write(toWords(@Convert.ToInt32(grandTotal)))</script>
+                            Only
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    @if (Model.Template.TermsConditions != null)
+    {
+        <h5>Terms &amp; Condition's</h5>
+        <table cellpadding="100" cellspacing="100" border="1" style="width:100%">
+            <tr>
+                <td align="Left"><span style="white-space: pre-line">@Model.Template.TermsConditions</span></td>
+            </tr>
+        </table>
+    }
+
+    @if (Model.Company.DcFooterContent != null)
+    {
+        @Html.Raw(Model.Company.DcFooterContent);
+    }
+
+    <table style="width: 100% " border="0">
+        @if (Model.Company.DcFooterImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%"><img src="~/upload/@Model.Company.DcFooterImage" height="@(Model.Company.DcFooterHeight ?? 0)" width="@(Model.Company.DcFooterWidth ?? 0)" /></td>
+            </tr>
+        }
+    </table>
+</body>

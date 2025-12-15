@@ -1,0 +1,1520 @@
+﻿@*@singleData AdvanceCRM.Sales.SalesReportData*@
+
+@model object
+@inject Serenity.ITextLocalizer Localizer
+
+@{
+	var singleData = Model as AdvanceCRM.Sales.SalesReportData;
+	var listData = Model as List<AdvanceCRM.Sales.SalesReportData>;
+}
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+	Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+	tr {
+	page-break-inside: auto;
+	page-break-after: auto
+	}
+
+	td {
+	page-break-inside: auto;
+	page-break-after: auto
+	}
+
+	#datatable {
+	border-collapse: collapse;
+	width: 100%;
+	}
+
+	#datatable td, #datatable th {
+	border: 1px solid #ddd;
+	padding: 2px
+	}
+
+	header {
+	padding: 10px 0;
+	margin-bottom: 20px;
+	border-bottom: 1px solid #AAAAAA;
+	}
+
+	#logo {
+	float: left;
+	margin-top: 8px;
+	}
+
+	#company {
+	width: 50%;
+	float: right;
+	text-align: right;
+	}
+
+	#client {
+	border-left: 6px solid #0087C3;
+	}
+
+	#terms {
+	padding-left: 6px;
+	border-left: 6px solid #0087C3;
+	}
+</style>
+
+<script type="text/javascript">
+
+	var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+	var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+	function toWords(num) {
+	if ((num = num.toString()).length > 9) return 'overflow';
+	n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+	if (!n) return; var str = '';
+	str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+	str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+	str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+	str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+	str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + ' ' : '';
+	return str.trim();
+	}
+</script>
+
+@if (singleData != null)
+{
+
+	<body style="align-self:stretch; align-items:center; align-items:center">
+		<table style="width:100%" border="0">
+			@if (singleData.Company.InvoiceHeaderImage != null)
+			{
+				<tr style="border:none !important;">
+					<td align="center" style="border:none !important; width:100%">
+						&nbsp;<img src="~/upload/@singleData.Company.InvoiceHeaderImage" height="@singleData.Company.InvoiceHeaderHeight" width="@singleData.Company.InvoiceHeaderWidth" />
+
+						&nbsp;
+					</td>
+				</tr>
+			}
+
+		</table>
+		@if (singleData.Company.InvoiceHeaderContent != null)
+		{
+			@Html.Raw(singleData.Company.InvoiceHeaderContent)
+			;
+		}
+
+		<header class="clearfix">
+			@if (singleData.Company.CompanyDetails != null && singleData.Company.CompanyDetails == true)
+			{
+				if (singleData.Company.Logo != null)
+				{
+					<div id="logo">
+						<img src="~/upload/@singleData.Company.Logo" height="@singleData.Company.LogoHeight.Value.ToString()" width="@singleData.Company.LogoWidth.Value.ToString()" />
+					</div>
+				}
+				<div id="company">
+					<h4 class="name">@singleData.Company.Name</h4>
+					<div>@singleData.Company.Address</div>
+					<div>@singleData.Company.Phone</div>
+					<div>GSTIN: @singleData.Company.GSTIN</div>
+					<div>PAN No: @singleData.Company.PANNo</div>
+				</div>
+			}
+		</header>
+		<table style="width:100%">
+			<tr>
+				<td>
+					<table style="width:100%; border-collapse:collapse" id="client">
+						<tr>
+							<td valign="top" style="width:10%;">
+								<strong>&nbsp;Name&nbsp;</strong>:&nbsp;
+							</td>
+							<td>@singleData.Invoice.ContactsName</td>
+							@{
+								int detailsRow = 4;
+								detailsRow += (singleData.Invoice.ContactPersonName.IsNullOrEmpty() ? 0 : 1);
+								detailsRow += (singleData.Invoice.ContactsGstin.IsNullOrEmpty() ? 0 : 1);
+								detailsRow += (singleData.Invoice.ContactsPanNo.IsNullOrEmpty() ? 0 : 1);
+							}
+							<td align="left" style="width:33%; padding: 5px; border-left: 2px solid lightgray;" valign="top" rowspan="@detailsRow">
+								@if (singleData.Invoice.BillingAddress == true)
+								{
+									<strong>Billing Address:&nbsp;</strong>
+									<span style="white-space: pre-line;">
+										@singleData.Invoice.ContactsAddress
+
+									</span>
+								}
+
+								<br />
+								@if (singleData.Invoice.OtherAddress == true)
+								{
+									<strong>Shipping Address:&nbsp;</strong>
+									<span style="white-space: pre-line;">
+
+										@if (singleData.Invoice.ShippingAddress != null)
+										{
+											@singleData.Invoice.ShippingAddress
+										}
+										else
+										{
+											@singleData.Invoice.ContactsAddress
+										}
+
+									</span>
+								}
+							</td>
+							<td align="right" style="width:33%" valign="middle" rowspan="@detailsRow">
+								<h3>Invoice<br /><small>@singleData.Invoice.InvoiceN</small></h3>
+								<strong>Date&nbsp;</strong>:&nbsp;@singleData.Invoice.Date.Value.ToString("dd MMM yyyy")
+								<br />
+								@if (singleData.Invoice.QuotationNo != null)
+								{
+									<text>
+										<strong>Quotation No&nbsp;</strong>:&nbsp;@singleData.Invoice.QuotationN
+										<br />
+										<strong>Quotation Date&nbsp;</strong>:&nbsp;@singleData.Invoice.QuotationDate.Value.ToString("dd MMM yyyy")
+										<br />
+									</text>
+								}
+								@if (singleData.Invoice.PurchaseOrderNo != null)
+								{
+									<text>
+										<strong>Purchase Order&nbsp;</strong>:&nbsp;@singleData.Invoice.PurchaseOrderNo
+										<br />
+										<strong>P.O Date&nbsp;</strong>:&nbsp;@singleData.Invoice.PurchaseOrderDate.Value.ToString("dd MMM yyyy")
+										<br />
+									</text>
+								}
+							</td>
+						</tr>
+						<tr>
+							<td valign="top">
+								<strong>&nbsp;Phone&nbsp;</strong>:&nbsp;
+							</td>
+							<td>@singleData.Invoice.ContactsPhone</td>
+						</tr>
+						<tr>
+							<td valign="top">
+								<strong>&nbsp;Email&nbsp;</strong>:&nbsp;
+							</td>
+							<td>@singleData.Invoice.ContactsEmail</td>
+						</tr>
+						<tr>
+							<td valign="top">
+								<strong>&nbsp;Address&nbsp;</strong>:&nbsp;
+							</td>
+							<td valign="top">@singleData.Invoice.ContactsAddress</td>
+						</tr>
+						@*@if (!singleData.Invoice.ContactPersonName.IsNullOrEmpty())
+                            {
+                                <tr>
+                                    <td valign="top">
+                                        <strong>&nbsp;Person&nbsp;</strong>:&nbsp;
+                                    </td>
+                                    <td valign="top">@singleData.Invoice.ContactPersonName @(singleData.Invoice.ContactPersonPhone.IsNullOrEmpty() ? "" : "(" + singleData.Invoice.ContactPersonPhone + ")")</td>
+                                </tr>
+                            }*@
+						@if (!singleData.Invoice.ContactsGstin.IsNullOrEmpty())
+						{
+							<tr>
+								<td valign="top">
+									<strong>&nbsp;GSTIN&nbsp;</strong>:&nbsp;
+								</td>
+								<td valign="top">@singleData.Invoice.ContactsGstin</td>
+							</tr>
+						}
+						@if (!singleData.Invoice.ContactsPanNo.IsNullOrEmpty())
+						{
+							<tr>
+								<td valign="top">
+									<strong>&nbsp;PAN No&nbsp;</strong>:&nbsp;
+								</td>
+								<td valign="top">@singleData.Invoice.ContactsPanNo</td>
+							</tr>
+						}
+					</table>
+				</td>
+			</tr>
+
+			@*Subject*@
+			@if (singleData.Invoice.Subject != null)
+			{
+				<tr>
+					<td>
+						<strong>Subject&nbsp;</strong>:&nbsp;@singleData.Invoice.Subject
+					</td>
+				</tr>
+			}
+			@*Reference*@
+			@if (singleData.Invoice.Reference != null)
+			{
+				<tr>
+					<td>
+						<strong>Reference&nbsp;</strong>:&nbsp;@singleData.Invoice.Reference
+					</td>
+				</tr>
+			}
+
+
+			@*Reference*@
+			@if (singleData.Invoice.Message != null)
+			{
+				<tr>
+					<td>
+						@singleData.Invoice.Message
+					</td>
+				</tr>
+			}
+
+
+			@* Products *@
+			<tr>
+				<td colspan="8" align="center" class="bg-gray-light">
+					&nbsp;
+				</td>
+			</tr>
+		</table>
+		<table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+
+
+			@{
+				bool stateChanged = singleData.Invoice.ContactsStateId != singleData.Company.StateId;
+				//bool stateChanged = singleData?.Invoice?.ContactsStateId != singleData?.Company?.StateId;
+				bool hasHSN = singleData.InvoiceProducts.Where(x => x.ProductsHsn.IsNullOrEmpty() != true).Count() > 0;
+				bool hasImage = (singleData.Company.InvoiceTemplate != null) && (singleData.Company.InvoiceTemplate == AdvanceCRM.Masters.PrintTemplates.Template2);
+
+				double discountTot = (singleData.InvoiceProducts.Sum(x => x.Discount.Value));
+				double discountAmtTot = (singleData.InvoiceProducts.Sum(x => x.DiscountAmount.Value));
+				bool hasDiscount = ((discountTot > 0) || (discountAmtTot > 0));
+				string currencyUnit = (singleData.taxable == true ? "" : singleData.Invoice.ToCurrency.GetEnumDescription(Localizer));
+				bool taxColumns = singleData.taxable && (singleData.Company.InvoiceTaxColumnIncluded ?? true);
+				//bool taxColumns = (singleData?.taxable ?? true) && (singleData?.Company?.InvoiceTaxColumnIncluded ?? false);
+				bool discountedPrice = hasDiscount ? (singleData.Company.InvoiceDiscountedPriceIncluded ?? false) : false;
+				int totalColumns = 6;
+				totalColumns += (hasDiscount ? (discountedPrice ? 2 : 1) : 0);
+				totalColumns += (hasHSN ? 1 : 0);
+				totalColumns += (hasImage ? 1 : 0);
+				totalColumns += (taxColumns ? (stateChanged ? 1 : 2) : 0);
+			}
+
+			<tr class="bg-gray">
+				<th align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></th>
+				@if (hasImage)
+				{
+					<th align="center"><strong>&nbsp;Image&nbsp;</strong></th>
+				}
+				@if (hasHSN)
+				{
+					<th align="center"><strong>&nbsp;HSN&nbsp;</strong></th>
+				}
+				<th align="center"><strong>&nbsp;Product / Service&nbsp;</strong></th>
+				<th align="center"><strong>&nbsp;Rate&nbsp;</strong></th>
+				@if (hasDiscount)
+				{
+					<th align="center"><strong>&nbsp;Discount&nbsp;</strong></th>
+					if (discountedPrice)
+					{
+						<th align="center"><strong>&nbsp;Price&nbsp;(Disc)&nbsp;</strong></th>
+					}
+				}
+				<th align="center"><strong>&nbsp;Qty&nbsp;</strong></th>
+
+				@if (taxColumns)
+				{
+					if (stateChanged)
+					{
+						<th align="center"><strong>&nbsp;Tax&nbsp;</strong></th>
+					}
+					else
+					{
+						<th align="center"><strong>&nbsp;Tax1&nbsp;</strong></th>
+						<th align="center"><strong>&nbsp;Tax2&nbsp;</strong></th>
+					}
+				}
+				<th align="center"><strong>Total</strong></th>
+				<th align="center"><strong>Grand Total</strong></th>
+			</tr>
+			@{
+				int srno = 1;
+			}
+			@foreach (var qp in singleData.InvoiceProducts)
+			{
+				<tr>
+					<td align="center">@srno</td>
+					@if (hasImage)
+					{
+						<td align="center">
+							@if (!qp.ProductsImage.IsNullOrEmpty())
+							{
+								int imageSize = 1440 / totalColumns;
+								<img width="@imageSize px" src="~/upload/@qp.ProductsImage" />
+							}
+						</td>
+					}
+					@if (hasHSN)
+					{
+						<td align="Left">&nbsp;@qp.ProductsHsn</td>
+					}
+					<td align="left">
+						&nbsp;@qp.ProductsName<br />
+						<span style="white-space: pre-line; font-size:smaller"><i>@qp.Description</i></span>
+						@if (qp.ProductsTechSpecs.IsNullOrEmpty() == false)
+						{
+							<span style="white-space: pre-line; font-size:smaller">
+								<b>Tech Specs: </b><i>@qp.ProductsTechSpecs</i>
+							</span>
+						}
+						@if (qp.ProductsCode.IsNullOrEmpty() == false)
+						{
+							<span style="white-space: pre-line; font-size:smaller">
+								<b>Code: </b><i>@qp.ProductsCode</i>
+							</span>
+						}
+						@* Show travel details when From, To, and Date are filled *@
+						@if (!string.IsNullOrEmpty(qp.From) && !string.IsNullOrEmpty(qp.To) && qp.Date != null)
+						{
+							<div style="white-space: pre-line; font-size:smaller">
+								<b>Travel:</b> <i>@qp.From to @qp.To on @qp.Date</i>
+							</div>
+						}
+
+						@* Show hotel details when Destination is filled *@
+						@if (!string.IsNullOrEmpty(qp.Destination))
+						{
+							<div style="white-space: pre-line; font-size:smaller">
+								<b>Hotels:</b>
+								<i>Destination: @qp.Destination</i>
+								<i>Hotel: @qp.HotelName</i>
+								<i>Nights: @qp.Nights</i>
+								<i>Adults: @qp.Adults</i>
+								<i>Childrens: @qp.Childrens</i>
+								<i>MealPlan: @qp.MealPlan</i>
+							</div>
+						}
+						@if (qp.WarrantyStart.HasValue && qp.WarrantyEnd.HasValue)
+						{
+							<span style="white-space: pre-line; font-size:smaller">
+								<i>@qp.WarrantyStart.Value.ToShortDateString() To  @qp.WarrantyEnd.Value.ToShortDateString()</i>
+							</span>
+						}
+						@if (qp.Serial != null)
+						{
+							<span style="white-space: pre-line; font-size:smaller">
+								<i>SN: @qp.Serial</i>
+							</span>
+						}
+					</td>
+					<td align="right">&nbsp;@qp.Price.Value.ToString("#,##0.00")&nbsp;</td>
+					@if (hasDiscount)
+					{
+						<td align="center">
+							@if (qp.Discount.Value > 0)
+							{
+								<text>@qp.Discount.Value%&nbsp;</text>
+								if (qp.DiscountAmount.Value > 0)
+								{
+									<text>&amp; Amt: @qp.DiscountAmount.Value&nbsp;</text>
+
+									@currencyUnit
+								}
+							}
+							else
+							{
+								if (qp.DiscountAmount.Value > 0)
+								{
+									<text>Amt: @qp.DiscountAmount.Value&nbsp;</text>
+
+									@currencyUnit
+								}
+								else
+								{
+									<text>0%</text>
+								}
+							}
+						</td>
+						if (discountedPrice)
+						{
+							<td align="center">&nbsp;@qp.DiscPrice.Value.ToString("#,##0.00")&nbsp;</td>
+						}
+					}
+					<td align="center">@qp.Quantity.Value @qp.Unit&nbsp;</td>
+
+					@if (taxColumns)
+					{
+						if (stateChanged == true)
+						{
+							decimal totTA = (qp.Tax1Amount ?? 0) + (qp.Tax2Amount ?? 0);
+							<td align="center">
+								@if (totTA > 0)
+								{
+									<text>
+										IGST: (@(qp.Percentage1 + qp.Percentage2)%)
+										<br />Amount: @totTA.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;
+									</text>
+								}
+								else
+								{
+									<text>&nbsp; 0</text>
+								}
+							</td>
+						}
+						else
+						{
+							if (qp.Tax1Amount.HasValue())
+							{
+								<td align="center">@qp.TaxType1 (@qp.Percentage1%) <br />&nbsp;Amount: @qp.Tax1Amount.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+							}
+							if (qp.Tax2Amount.HasValue())
+							{
+								<td align="center">@qp.TaxType2 (@qp.Percentage2%) <br />&nbsp;Amount: @qp.Tax2Amount.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+							}
+						}
+
+					}
+
+					<td align="right">@qp.LineTotal.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+					<td align="right">@qp.GrandTotal.GetValueOrDefault().ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+
+					@{
+						srno++;
+					}
+				</tr>
+			}
+
+			@{
+				int diff;
+
+				if (singleData.Invoice.Lines != null)
+				{
+					diff = (int)singleData.Invoice.Lines - srno;
+				}
+				else
+				{
+					diff = 10 - srno;
+				}
+			}
+
+			@for (int i = diff; i > 0; i--)
+			{
+				<tr>
+					@for (int j = 0; j < totalColumns; ++j)
+					{
+						<td>&nbsp;</td>
+					}
+				</tr>
+			}
+
+			<tr>
+				<td colspan="@totalColumns" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">
+					&nbsp;
+				</td>
+
+			</tr>
+
+			@* Total *@
+			<tr>
+				@if (singleData.Invoice.DispatchDetails != null)
+				{
+					<td colspan="@(totalColumns - 3)" align="left">
+						<text>
+							&nbsp;
+							<strong> Dispatch Details: </strong> @singleData.Invoice.DispatchDetails
+						</text>
+					</td>
+					<td colspan="2" align="right"><strong> Total:&nbsp;</strong></td>
+				}
+				else
+				{
+					<td colspan="@(totalColumns - 1)" align="right"><strong> Total:&nbsp;</strong></td>
+				}
+				<td align="right"><strong>@(((decimal)(singleData.Invoice.Total ?? 0)).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+			</tr>
+
+			@* TaxAmount *@
+			@if (singleData.taxable == true)
+			{
+				if (stateChanged == false)
+				{
+					@* Tax1Amount *@
+					foreach (var item in singleData.InvoiceProducts.Select(x => x.TaxType1).Distinct())
+					{
+						if ((!item.IsEmptyOrNull()))
+						{
+							<tr>
+								<td colspan="@(totalColumns - 1)" align="right"><strong>@item :&nbsp;</strong></td>
+								<td align="right"><strong>@singleData.InvoiceProducts.Where(y => y.TaxType1 == item).Sum(x => x.Tax1Amount).Value.ToString("#,##0.00")&nbsp;@currencyUnit &nbsp;</strong></td>
+							</tr>
+						}
+					}
+					@* Tax2Amount *@
+					foreach (var item in singleData.InvoiceProducts.Select(x => x.TaxType2).Distinct())
+					{
+						if ((!item.IsEmptyOrNull()))
+						{
+							<tr>
+								<td colspan="@(totalColumns - 1)" align="right"><strong>@item :&nbsp;</strong></td>
+								<td align="right"><strong>@singleData.InvoiceProducts.Where(y => y.TaxType2 == item).Sum(x => x.Tax2Amount).Value.ToString("#,##0.00")&nbsp;@currencyUnit &nbsp;</strong></td>
+							</tr>
+						}
+					}
+				}
+
+				@* Total Tax*@
+				<tr>
+					<td colspan="@(totalColumns - 1)" align="right"><strong> Total Tax @(stateChanged ? "(IGST)" : ""):&nbsp;</strong></td>
+					@{
+						decimal totax = (decimal)((singleData.Invoice.Tax1 ?? 0) + (singleData.Invoice.Tax2 ?? 0));
+					}
+					<td align="right"><strong>@(totax.ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+				</tr>
+			}
+
+			@* Packaging Charges *@
+			@if (singleData.Invoice.PackagingCharges != null && singleData.Invoice.PackagingCharges != 0)
+			{
+				<tr>
+					<td colspan="@(totalColumns - 1)" align="right"><strong> Packaging Charges:&nbsp;</strong></td>
+					<td align="right"><strong>@singleData.Invoice.PackagingCharges.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+				</tr>
+			}
+
+			@* Freight Charges *@
+			@if (singleData.Invoice.FreightCharges != null && singleData.Invoice.FreightCharges != 0)
+			{
+				<tr>
+					<td colspan="@(totalColumns - 1)" align="right"><strong> Freight Charges:&nbsp;</strong></td>
+					<td align="right"><strong>@singleData.Invoice.FreightCharges.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+				</tr>
+			}
+
+			@* Advance *@
+			@if (singleData.Invoice.Advacne != null && singleData.Invoice.Advacne != 0)
+			{
+				<tr>
+					<td colspan="@(totalColumns - 1)" align="right"><strong> Advance:&nbsp;</strong></td>
+					<td align="right"><strong>@singleData.Invoice.Advacne.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+				</tr>
+			}
+
+			@* Roundup *@
+			@if (singleData.Invoice.Roundup != null && singleData.Invoice.Roundup != 0)
+			{
+				<tr>
+					<td colspan="@(totalColumns - 1)" align="right"><strong> Roundup:&nbsp;</strong></td>
+					<td align="right"><strong>@singleData.Invoice.Roundup&nbsp;@currencyUnit&nbsp;</strong></td>
+				</tr>
+			}
+			@{
+				decimal charges = 0, concessions = 0, percent = 0, gTotal = (decimal)(singleData.Invoice.GrandTotal ?? 0);
+			}
+			@if (singleData.SalesCharges != null)
+			{
+				foreach (var ch in singleData.SalesCharges)
+				{
+					charges += (decimal)(ch.ChargesPercentage.Value / 100) * gTotal;
+					<tr>
+						<td align="right" colspan="@(totalColumns - 1)"><strong> @ch.ChargesName:&nbsp;</strong></td>
+						<td align="right"><strong>@(((decimal)(ch.ChargesPercentage.Value / 100) * gTotal).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+					</tr>
+				}
+			}
+
+			@*@if (singleData.SalesConcession != null)
+                {
+                    foreach (var co in singleData.SalesConcession)
+                    {
+                        concessions += (decimal)(co.ConcessionPercentage.Value / 100) * gTotal;
+                        <tr>
+                            <td align="right" colspan="@(totalColumns - 1)"><strong> @co.ConcessionName:&nbsp;</strong></td>
+                            <td align="right"><strong>-@(((decimal)(co.ConcessionPercentage.Value / 100) * gTotal).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+                        </tr>
+                    }
+                }*@
+
+
+			@if (singleData.SalesConcession != null)
+			{
+				foreach (var co in singleData.SalesConcession)
+				{
+					if (co.ConcessionPercentage.Value > 0)
+					{
+						concessions += (decimal)(co.ConcessionPercentage.Value / 100) * gTotal;
+						<tr>
+							<td align="right" colspan="@(totalColumns - 1)"><strong> @co.ConcessionName:&nbsp;</strong></td>
+
+							<td align="right"><strong> -@(((decimal)(co.ConcessionPercentage.Value / 100) * gTotal).ToString("#,##0.00")) &nbsp; @currencyUnit &nbsp;</strong></td>
+
+						</tr>
+					}
+					else if (co.ConcessionAmount.Value > 0)
+					{
+						// percent = (decimal)(co.ConcessionAmount.Value)
+						percent = ((decimal)(co.ConcessionAmount.Value) / gTotal) * 100;
+						concessions += (decimal)(percent / 100) * gTotal;
+						<tr>
+							<td align="right" colspan="@(totalColumns - 1)"><strong> @co.ConcessionName:&nbsp;</strong></td>
+
+							<td align="right"><strong> -@(((decimal)(percent / 100) * gTotal).ToString("#,##0.00")) &nbsp; @currencyUnit &nbsp;</strong></td>
+						</tr>
+
+					}
+				}
+			}
+
+			@* Grand Total *@
+			<tr>
+				<td colspan="@(totalColumns - 3)" align="left">
+					@if (singleData.Invoice.DueDate != null)
+					{
+						<text> &nbsp;<strong> Due Date: </strong> @singleData.Invoice.DueDate.Value.ToShortDateString() </text>
+					}
+				</td>
+				<td colspan="2" align="right"><strong> Grand Total:&nbsp;</strong></td>
+				<td align="right"><strong>@((gTotal + charges - concessions).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+			</tr>
+
+			<tr>
+				<td colspan="@(totalColumns)" bgcolor="wheat">
+					<strong> &nbsp; Total in Words:</strong>
+					<script>document.write(toWords(@Convert.ToInt32(gTotal + charges - concessions)))</script>
+					@currencyUnit Only
+				</td>
+			</tr>
+		</table>
+
+
+
+		@* Terms *@
+		<br />
+		@if (singleData.SalesTerms.Count > 0)
+
+		{
+			//<div id="terms">
+
+			<table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+
+				<tr class="bg-gray">
+					<td style="text-align: center;font-size:16px">
+						<strong>
+							Terms &amp; Condition's
+						</strong>
+					</td>
+				</tr>
+				@{
+					int Tsrno = 1;
+				}
+				@foreach (var qt in singleData.SalesTerms)
+				{
+					var terms = qt.Terms.Split('$');
+					foreach (var qt1 in terms)
+					{
+						String substr1 = " | ";
+						string input = qt1;
+
+						bool con = input.Contains(substr1);
+						if (con == true)
+						{
+							string[] splitString = qt1.Split('|');
+							string result1 = splitString[0].Trim();
+							string result2 = splitString[1].Trim();
+
+
+							<tr>
+								<td class="notice" style="padding:1px 2px 1px 2px"><strong>@Tsrno.@result1 :</strong>&nbsp;@result2<br></td>
+							</tr>
+
+
+						}
+						else
+						{
+							<tr>
+								<td class="notice">@Tsrno.&nbsp;@qt1<br></td>
+							</tr>
+
+						}
+						{ Tsrno++; }
+					}
+
+				}
+
+			</table>
+			//</div>
+		}
+		@*<style>
+
+                * {
+                    margin: 0;
+                }
+
+                html, body {
+                    height: 100%;
+                }
+
+                .wrapper {
+                    min-height: 100%;
+                    height: auto !important;
+                    height: 100%;
+                    margin: 0 auto -155px; /* the bottom margin is the negative value of the footer's height */
+                }
+
+                .footer, .push {
+                    height: 155px; /* .push must be the same height as .footer */
+                }
+            </style>*@
+		@if (singleData.Company.InvoiceFooterContent != null)
+		{
+			@Html.Raw(singleData.Company.InvoiceFooterContent)
+			;
+		}
+		<table style="width: 100% " border="0">
+			@if (singleData.Company.InvoiceFooterImage != null)
+			{
+				<tr style="border:none !important;">
+					<td align="center" style="border:none !important; width:100%"><img src="~/upload/@singleData.Company.InvoiceFooterImage" height="@singleData.Company.InvoiceFooterHeight.Value.ToString()" width="@singleData.Company.InvoiceFooterWidth.Value.ToString()" /></td>
+				</tr>
+			}
+		</table>
+
+		@* Products images *@
+		@if ((singleData.Company.InvoiceTemplate != null && singleData.Company.InvoiceTemplate == AdvanceCRM.Masters.PrintTemplates.Template1) && (singleData.InvoiceProducts.Where(x => x.ProductsImage.IsNullOrEmpty() != true).Count() > 0))
+		{
+			List<AdvanceCRM.Sales.SalesProductsRow> t_Lst = new List<AdvanceCRM.Sales.SalesProductsRow>();
+			foreach (var item in singleData.InvoiceProducts.Where(x => x.ProductsImage.IsNullOrEmpty() != true))
+			{
+				t_Lst.Add(item);
+			}
+			<text>
+				<p style="page-break-before: always">
+					<div class="box">
+						<div class="box-header">
+							<h3 class="box-title ion-images"> Products Images</h3>
+						</div><!-- /.box-header -->
+						<div class="box-body no-padding">
+							<table class="table table-striped" style="border:groove">
+								<tr style="border:groove">
+									<th style="width: 10%">Product</th>
+									<th style="width: 40%">Image</th>
+									<th style="width: 10%">Product</th>
+									<th style="width: 40%">Image</th>
+								</tr>
+								@for (int i = 0; i < t_Lst.Count - 1; i++)
+								{
+									if (i > 0)
+									{
+										i++;
+									}
+
+									<text>
+										<tr style="border:groove">
+											<td style="text-align:right"><span class="badge bg-blue">@t_Lst.ElementAt(i).ProductsName</span></td>
+											<td style="text-align:center"><img src="~/upload/@t_Lst.ElementAt(i).ProductsImage" /></td>
+											@if (i < t_Lst.Count - 1)
+											{
+												<td style="text-align:right"><span class="badge bg-blue">@t_Lst.ElementAt(i + 1).ProductsName</span></td>
+												<td style="text-align:center"><img src="~/upload/@t_Lst.ElementAt(i + 1).ProductsImage" /></td>
+											}
+										</tr>
+									</text>
+								}
+							</table>
+						</div><!-- /.box-body -->
+					</div><!-- /.box -->
+			</text>
+		}
+	</body>
+}
+else if (listData != null)
+{
+
+	<body style="align-self:stretch; align-items:center; align-items:center">
+
+		@{
+			int index = 0;
+		}
+		@foreach (var item in listData)
+		{
+			<table style="width:100%" border="0">
+
+				@if (index == 0 && item.Company.InvoiceHeaderImage != null)
+				{
+					<tr style="border:none !important;">
+						<td align="center" style="border:none !important; width:100%">&nbsp; <img src="~/upload/@item.Company.InvoiceHeaderImage" height="@item.Company.InvoiceHeaderHeight.Value.ToString()" width="@item.Company.InvoiceHeaderWidth.Value.ToString()" />&nbsp;</td>
+					</tr>
+				}
+
+			</table>
+			if (index == 0 && item.Company.InvoiceHeaderContent != null)
+			{
+				@Html.Raw(item.Company.InvoiceHeaderContent)
+				;
+			}
+			if (index == 0)
+			{
+				<header class="clearfix">
+					@if (item.Company.CompanyDetails != null && item.Company.CompanyDetails == true)
+					{
+						if (item.Company.Logo[0] != null)
+						{
+							<div id="logo">
+								<img src="~/upload/@item.Company.Logo[0]" height="@item.Company.LogoHeight.Value.ToString()" width="@item.Company.LogoWidth.Value.ToString()" />
+							</div>
+						}
+						<div id="company">
+							<h4 class="name">@item.Company.Name[0]</h4>
+							<div>@item.Company.Address[0]</div>
+							<div>@item.Company.Phone[0]</div>
+							<div>GSTIN: @item.Company.GSTIN[0]</div>
+							<div>PAN No: @item.Company.PANNo[0]</div>
+						</div>
+					}
+				</header>
+
+				<table style="width:100%">
+					<tr>
+						<td>
+							<table style="width:100%; border-collapse:collapse" id="client">
+								<tr>
+									<td valign="top" style="width:10%;">
+										<strong>&nbsp;Name&nbsp;</strong>:&nbsp;
+									</td>
+									<td>@item.Invoice.ContactsName</td>
+									@{
+										int detailsRow = 4;
+										detailsRow += (item.Invoice.ContactPersonName.IsNullOrEmpty() ? 0 : 1);
+										detailsRow += (item.Invoice.ContactsGstin.IsNullOrEmpty() ? 0 : 1);
+										detailsRow += (item.Invoice.ContactsPanNo.IsNullOrEmpty() ? 0 : 1);
+									}
+									<td align="left" style="width:33%; padding: 5px; border-left: 2px solid lightgray;" valign="top" rowspan="@detailsRow">
+										@if (item.Invoice.BillingAddress == true)
+										{
+											<strong>Billing Address:&nbsp;</strong>
+											<span style="white-space: pre-line;">
+												@item.Invoice.ContactsAddress
+
+											</span>
+										}
+
+										<br />
+										@if (item.Invoice.OtherAddress == true)
+										{
+											<strong>Shipping Address:&nbsp;</strong>
+											<span style="white-space: pre-line;">
+
+												@if (item.Invoice.ShippingAddress != null)
+												{
+													@item.Invoice.ShippingAddress
+												}
+												else
+												{
+													@item.Invoice.ContactsAddress
+												}
+
+											</span>
+										}
+									</td>
+									<td align="right" style="width:33%" valign="middle" rowspan="@detailsRow">
+										<h3>Invoice<br /><small>@item.Invoice.InvoiceN</small></h3>
+										<strong>Date&nbsp;</strong>:&nbsp;@item.Invoice.Date.Value.ToString("dd MMM yyyy")
+										<br />
+										@if (item.Invoice.QuotationNo != null)
+										{
+											<text>
+												<strong>Quotation No&nbsp;</strong>:&nbsp;@item.Invoice.QuotationN
+												<br />
+												<strong>Quotation Date&nbsp;</strong>:&nbsp;@item.Invoice.QuotationDate.Value.ToString("dd MMM yyyy")
+												<br />
+											</text>
+										}
+										@if (item.Invoice.PurchaseOrderNo != null)
+										{
+											<text>
+												<strong>Purchase Order&nbsp;</strong>:&nbsp;@item.Invoice.PurchaseOrderNo
+												<br />
+												<strong>P.O Date&nbsp;</strong>:&nbsp;@item.Invoice.PurchaseOrderDate.Value.ToString("dd MMM yyyy")
+												<br />
+											</text>
+										}
+									</td>
+								</tr>
+								<tr>
+									<td valign="top">
+										<strong>&nbsp;Phone&nbsp;</strong>:&nbsp;
+									</td>
+									<td>@item.Invoice.ContactsPhone</td>
+								</tr>
+								<tr>
+									<td valign="top">
+										<strong>&nbsp;Email&nbsp;</strong>:&nbsp;
+									</td>
+									<td>@item.Invoice.ContactsEmail</td>
+								</tr>
+								<tr>
+									<td valign="top">
+										<strong>&nbsp;Address&nbsp;</strong>:&nbsp;
+									</td>
+									<td valign="top">@item.Invoice.ContactsAddress</td>
+								</tr>
+								@*@if (!item.Invoice.ContactPersonName.IsNullOrEmpty())
+                                {
+                                    <tr>
+                                        <td valign="top">
+                                            <strong>&nbsp;Person&nbsp;</strong>:&nbsp;
+                                        </td>
+                                        <td valign="top">@item.Invoice.ContactPersonName @(item.Invoice.ContactPersonPhone.IsNullOrEmpty() ? "" : "(" + item.Invoice.ContactPersonPhone + ")")</td>
+                                    </tr>
+                                }*@
+								@if (!item.Invoice.ContactsGstin.IsNullOrEmpty())
+								{
+									<tr>
+										<td valign="top">
+											<strong>&nbsp;GSTIN&nbsp;</strong>:&nbsp;
+										</td>
+										<td valign="top">@item.Invoice.ContactsGstin</td>
+									</tr>
+								}
+								@if (!item.Invoice.ContactsPanNo.IsNullOrEmpty())
+								{
+									<tr>
+										<td valign="top">
+											<strong>&nbsp;PAN No&nbsp;</strong>:&nbsp;
+										</td>
+										<td valign="top">@item.Invoice.ContactsPanNo</td>
+									</tr>
+								}
+							</table>
+						</td>
+					</tr>
+
+					@*Subject*@
+					@if (item.Invoice.Subject != null)
+					{
+						<tr>
+							<td>
+								<strong>Subject&nbsp;</strong>:&nbsp;@item.Invoice.Subject
+							</td>
+						</tr>
+					}
+					@*Reference*@
+					@if (item.Invoice.Reference != null)
+					{
+						<tr>
+							<td>
+								<strong>Reference&nbsp;</strong>:&nbsp;@item.Invoice.Reference
+							</td>
+						</tr>
+					}
+
+
+					@*Reference*@
+					@if (item.Invoice.Message != null)
+					{
+						<tr>
+							<td>
+								@item.Invoice.Message
+							</td>
+						</tr>
+					}
+
+
+					@* Products *@
+					<tr>
+						<td colspan="8" align="center" class="bg-gray-light">
+							&nbsp;
+						</td>
+					</tr>
+				</table>
+
+				<table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+
+
+					@{
+						bool stateChanged = item.Invoice.ContactsStateId != item.Company.StateId;
+						bool hasHSN = item.InvoiceProducts.Where(x => x.ProductsHsn.IsNullOrEmpty() != true).Count() > 0;
+						bool hasImage = (item.Company.InvoiceTemplate != null) && (item.Company.InvoiceTemplate == AdvanceCRM.Masters.PrintTemplates.Template2);
+
+						double discountTot = (item.InvoiceProducts.Sum(x => x.Discount.Value));
+						double discountAmtTot = (item.InvoiceProducts.Sum(x => x.DiscountAmount.Value));
+						bool hasDiscount = ((discountTot > 0) || (discountAmtTot > 0));
+						string currencyUnit = (item.taxable == true ? "" : item.Invoice.ToCurrency.GetEnumDescription(Localizer));
+						bool taxColumns = item.taxable && (item.Company.InvoiceTaxColumnIncluded ?? false);
+						bool discountedPrice = hasDiscount ? (item.Company.InvoiceDiscountedPriceIncluded ?? false) : false;
+						int totalColumns = 7;
+						totalColumns += (hasDiscount ? (discountedPrice ? 2 : 1) : 0);
+						totalColumns += (hasHSN ? 1 : 0);
+						totalColumns += (hasImage ? 1 : 0);
+						totalColumns += (taxColumns ? (stateChanged ? 1 : 2) : 0);
+					}
+
+					<tr class="bg-gray">
+						<th align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></th>
+						<th align="center"><strong>&nbsp;Contact Name.&nbsp;</strong></th>
+						@if (hasImage)
+						{
+							<th align="center"><strong>&nbsp;Image&nbsp;</strong></th>
+						}
+						@if (hasHSN)
+						{
+							<th align="center"><strong>&nbsp;HSN&nbsp;</strong></th>
+						}
+						<th align="center"><strong>&nbsp;Product / Service&nbsp;</strong></th>
+						<th align="center"><strong>&nbsp;Rate&nbsp;</strong></th>
+						@if (hasDiscount)
+						{
+							<th align="center"><strong>&nbsp;Discount&nbsp;</strong></th>
+							if (discountedPrice)
+							{
+								<th align="center"><strong>&nbsp;Price&nbsp;(Disc)&nbsp;</strong></th>
+							}
+						}
+						<th align="center"><strong>&nbsp;Qty&nbsp;</strong></th>
+						@if (taxColumns)
+						{
+							if (stateChanged)
+							{
+								<th align="center"><strong>&nbsp;Tax&nbsp;</strong></th>
+							}
+							else
+							{
+								<th align="center"><strong>&nbsp;Tax1&nbsp;</strong></th>
+								<th align="center"><strong>&nbsp;Tax2&nbsp;</strong></th>
+							}
+						}
+						<th align="center"><strong>Total</strong></th>
+						<th align="center"><strong>Grand Total</strong></th>
+					</tr>
+					@{
+						int srno = 1; decimal total = 0;
+						decimal taxTotal = 0;
+						decimal grandTotal = 0;
+
+					}
+					@foreach (var item1 in listData)
+					{
+						foreach (var qp in item1.InvoiceProducts)
+						{
+							<tr>
+								<td align="center">@srno</td>
+								<td align="center">@item1.Invoice.ContactPersonName @(item1.Invoice.ContactPersonPhone.IsNullOrEmpty() ? "" : "(" + item1.Invoice.ContactPersonPhone + ")")</td>
+								@if (hasImage)
+								{
+									<td align="center">
+										@if (!qp.ProductsImage.IsNullOrEmpty())
+										{
+											int imageSize = 1440 / totalColumns;
+											<img width="@imageSize px" src="~/upload/@qp.ProductsImage" />
+										}
+									</td>
+								}
+								@if (hasHSN)
+								{
+									<td align="Left">&nbsp;@qp.ProductsHsn</td>
+								}
+								<td align="left">
+									&nbsp;@qp.ProductsName<br />
+									<span style="white-space: pre-line; font-size:smaller"><i>@qp.Description</i></span>
+									@if (qp.ProductsTechSpecs.IsNullOrEmpty() == false)
+									{
+										<span style="white-space: pre-line; font-size:smaller">
+											<b>Tech Specs: </b><i>@qp.ProductsTechSpecs</i>
+										</span>
+									}
+									@if (qp.ProductsCode.IsNullOrEmpty() == false)
+									{
+										<span style="white-space: pre-line; font-size:smaller">
+											<b>Code: </b><i>@qp.ProductsCode</i>
+										</span>
+									}
+									@* Show travel details when From, To, and Date are filled *@
+									@if (!string.IsNullOrEmpty(qp.From) && !string.IsNullOrEmpty(qp.To) && qp.Date != null)
+									{
+										<div style="white-space: pre-line; font-size:smaller">
+											<b>Travel:</b> <i>@qp.From to @qp.To on @qp.Date</i>
+										</div>
+									}
+
+									@* Show hotel details when Destination is filled *@
+									@if (!string.IsNullOrEmpty(qp.Destination))
+									{
+										<div style="white-space: pre-line; font-size:smaller">
+											<b>Hotels:</b>
+											<i>Destination: @qp.Destination</i>
+											<i>Hotel: @qp.HotelName</i>
+											<i>Nights: @qp.Nights</i>
+											<i>Adults: @qp.Adults</i>
+											<i>Childrens: @qp.Childrens</i>
+											<i>MealPlan: @qp.MealPlan</i>
+										</div>
+									}
+									@if (qp.WarrantyStart.HasValue && qp.WarrantyEnd.HasValue)
+									{
+										<span style="white-space: pre-line; font-size:smaller">
+											<i>@qp.WarrantyStart.Value.ToShortDateString() To  @qp.WarrantyEnd.Value.ToShortDateString()</i>
+										</span>
+									}
+									@if (qp.Serial != null)
+									{
+										<span style="white-space: pre-line; font-size:smaller">
+											<i>SN: @qp.Serial</i>
+										</span>
+									}
+								</td>
+								<td align="right">&nbsp;@qp.Price.Value.ToString("#,##0.00")&nbsp;</td>
+								@if (hasDiscount)
+								{
+									<td align="center">
+										@if (qp.Discount.Value > 0)
+										{
+											<text>@qp.Discount.Value%&nbsp;</text>
+											if (qp.DiscountAmount.Value > 0)
+											{
+												<text>&amp; Amt: @qp.DiscountAmount.Value&nbsp;</text>
+
+												@currencyUnit
+											}
+										}
+										else
+										{
+											if (qp.DiscountAmount.Value > 0)
+											{
+												<text>Amt: @qp.DiscountAmount.Value&nbsp;</text>
+
+												@currencyUnit
+											}
+											else
+											{
+												<text>0%</text>
+											}
+										}
+									</td>
+									if (discountedPrice)
+									{
+										<td align="center">&nbsp;@qp.DiscPrice.Value.ToString("#,##0.00")&nbsp;</td>
+									}
+								}
+								<td align="center">@qp.Quantity.Value @qp.Unit&nbsp;</td>
+
+								@if (taxColumns)
+								{
+									if (stateChanged == true)
+									{
+										double totTA = (double)qp.Tax1Amount.Value + (double)qp.Tax2Amount;
+										<td align="center">
+											@if (totTA > 0)
+											{
+												<text>
+													IGST: (@(qp.Percentage1 + qp.Percentage2)%)
+													<br />Amount: @totTA.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;
+												</text>
+											}
+											else
+											{
+												<text>&nbsp; 0</text>
+											}
+										</td>
+									}
+									else
+									{
+										if (qp.Tax1Amount.HasValue())
+										{
+											<td align="center">@qp.TaxType1 (@qp.Percentage1%) <br />&nbsp;Amount: @qp.Tax1Amount.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+										}
+										if (qp.Tax2Amount.HasValue())
+										{
+											<td align="center">@qp.TaxType2 (@qp.Percentage2%) <br />&nbsp;Amount: @qp.Tax2Amount.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+										}
+									}
+
+								}
+								<td align="right">@qp.LineTotal.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+								<td align="right">@qp.GrandTotal.GetValueOrDefault().ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+
+								@{
+									// Update totals
+									total += qp.LineTotal ?? 0;
+									taxTotal += (qp.Tax1Amount ?? 0) + (qp.Tax2Amount ?? 0);
+									grandTotal += qp.GrandTotal ?? 0; srno++;
+								}
+							</tr>
+						}
+					}
+					@{
+						int diff;
+
+						if (item.Invoice.Lines != null)
+						{
+							diff = (int)item.Invoice.Lines - srno;
+						}
+						else
+						{
+							diff = 10 - srno;
+						}
+					}
+
+					@for (int i = diff; i > 0; i--)
+					{
+						<tr>
+							@for (int j = 0; j < totalColumns; ++j)
+							{
+								<td>&nbsp;</td>
+							}
+						</tr>
+					}
+
+					<tr>
+						<td colspan="@totalColumns" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">
+							&nbsp;
+						</td>
+
+					</tr>
+
+					@* Total *@
+					<tr>
+						@if (item.Invoice.DispatchDetails != null)
+						{
+							<td colspan="@(totalColumns - 3)" align="left">
+								<text>
+									&nbsp;
+									<strong> Dispatch Details: </strong> @item.Invoice.DispatchDetails
+								</text>
+							</td>
+							<td colspan="2" align="right"><strong> Total:&nbsp;</strong></td>
+						}
+						else
+						{
+							<td colspan="@(totalColumns - 1)" align="right"><strong> Total:&nbsp;</strong></td>
+						}
+						<td align="right"><strong>@(total.ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+					</tr>
+
+					@* TaxAmount *@
+					@if (item.taxable == true)
+					{
+						if (stateChanged == false)
+						{
+							@* Tax1Amount *@
+							foreach (var item1 in item.InvoiceProducts.Select(x => x.TaxType1).Distinct())
+							{
+								if ((!item1.IsEmptyOrNull()))
+								{
+									<tr>
+										<td colspan="@(totalColumns - 1)" align="right"><strong>@item :&nbsp;</strong></td>
+										<td align="right"><strong>@item.InvoiceProducts.Where(y => y.TaxType1 == item1).Sum(x => x.Tax1Amount ?? 0).ToString("#,##0.00")&nbsp;@currencyUnit &nbsp;</strong></td>
+									</tr>
+								}
+							}
+							@* Tax2Amount *@
+							foreach (var item1 in item.InvoiceProducts.Select(x => x.TaxType2).Distinct())
+							{
+								if ((!item1.IsEmptyOrNull()))
+								{
+									<tr>
+										<td colspan="@(totalColumns - 1)" align="right"><strong>@item :&nbsp;</strong></td>
+										<td align="right"><strong>@item.InvoiceProducts.Where(y => y.TaxType2 == item1).Sum(x => x.Tax2Amount ?? 0).ToString("#,##0.00")&nbsp;@currencyUnit &nbsp;</strong></td>
+									</tr>
+								}
+							}
+						}
+
+						@* Total Tax*@
+						<tr>
+							<td colspan="@(totalColumns - 1)" align="right"><strong> Total Tax @(stateChanged ? "(IGST)" : ""):&nbsp;</strong></td>
+							@{
+								decimal totax = (decimal)((item.Invoice.Tax1 ?? 0) + (item.Invoice.Tax2 ?? 0));
+							}
+							<td align="right"><strong>@(taxTotal.ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+						</tr>
+					}
+
+
+					@* Packaging Charges *@
+					@if (item.Invoice.PackagingCharges != null && item.Invoice.PackagingCharges != 0)
+					{
+						<tr>
+							<td colspan="@(totalColumns - 1)" align="right"><strong> Packaging Charges:&nbsp;</strong></td>
+							<td align="right"><strong>@item.Invoice.PackagingCharges.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+						</tr>
+					}
+
+					@* Freight Charges *@
+					@if (item.Invoice.FreightCharges != null && item.Invoice.FreightCharges != 0)
+					{
+						<tr>
+							<td colspan="@(totalColumns - 1)" align="right"><strong> Freight Charges:&nbsp;</strong></td>
+							<td align="right"><strong>@item.Invoice.FreightCharges.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+						</tr>
+					}
+
+					@* Advance *@
+					@if (item.Invoice.Advacne != null && item.Invoice.Advacne != 0)
+					{
+						<tr>
+							<td colspan="@(totalColumns - 1)" align="right"><strong> Advance:&nbsp;</strong></td>
+							<td align="right"><strong>@item.Invoice.Advacne.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+						</tr>
+					}
+
+					@* Roundup *@
+					@if (item.Invoice.Roundup != null && item.Invoice.Roundup != 0)
+					{
+						<tr>
+							<td colspan="@(totalColumns - 1)" align="right"><strong> Roundup:&nbsp;</strong></td>
+							<td align="right"><strong>@item.Invoice.Roundup&nbsp;@currencyUnit&nbsp;</strong></td>
+						</tr>
+					}
+					@{
+						decimal charges = 0, concessions = 0, percent = 0, gTotal = (decimal)(item.Invoice.GrandTotal ?? 0);
+					}
+					@if (item.SalesCharges != null)
+					{
+						foreach (var ch in item.SalesCharges)
+						{
+							charges += (decimal)(ch.ChargesPercentage.Value / 100) * grandTotal;
+							<tr>
+								<td align="right" colspan="@(totalColumns - 1)"><strong> @ch.ChargesName:&nbsp;</strong></td>
+								<td align="right"><strong>@(((decimal)(ch.ChargesPercentage.Value / 100) * gTotal).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+							</tr>
+						}
+					}
+
+
+
+					@if (item.SalesConcession != null)
+					{
+						foreach (var co in item.SalesConcession)
+						{
+							if (co.ConcessionPercentage.Value > 0)
+							{
+								concessions += (decimal)(co.ConcessionPercentage.Value / 100) * grandTotal;
+								<tr>
+									<td align="right" colspan="@(totalColumns - 1)"><strong> @co.ConcessionName:&nbsp;</strong></td>
+
+									<td align="right"><strong> -@(((decimal)(co.ConcessionPercentage.Value / 100) * grandTotal).ToString("#,##0.00")) &nbsp; @currencyUnit &nbsp;</strong></td>
+
+								</tr>
+							}
+							else if (co.ConcessionAmount.Value > 0)
+							{
+								// percent = (decimal)(co.ConcessionAmount.Value)
+								percent = ((decimal)(co.ConcessionAmount.Value) / grandTotal) * 100;
+								concessions += (decimal)(percent / 100) * gTotal;
+								<tr>
+									<td align="right" colspan="@(totalColumns - 1)"><strong> @co.ConcessionName:&nbsp;</strong></td>
+
+									<td align="right"><strong> -@(((decimal)(percent / 100) * grandTotal).ToString("#,##0.00")) &nbsp; @currencyUnit &nbsp;</strong></td>
+								</tr>
+
+							}
+						}
+					}
+
+					@* Grand Total *@
+					<tr>
+						<td colspan="@(totalColumns - 3)" align="left">
+							@if (item.Invoice.DueDate != null)
+							{
+								<text> &nbsp;<strong> Due Date: </strong> @item.Invoice.DueDate.Value.ToShortDateString() </text>
+							}
+						</td>
+						<td colspan="2" align="right"><strong> Grand Total:&nbsp;</strong></td>
+						<td align="right"><strong>@((grandTotal + charges - concessions).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+					</tr>
+
+					<tr>
+						<td colspan="@(totalColumns)" bgcolor="wheat">
+							<strong> &nbsp; Total in Words:</strong>
+							<script>document.write(toWords(@Convert.ToInt32(grandTotal + charges - concessions)))</script>
+							@currencyUnit Only
+						</td>
+					</tr>
+				</table>
+			}
+
+
+			@* Terms *@
+			<br />
+			@if (item.SalesTerms.Count > 0)
+			{
+
+				<table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+
+					<tr class="bg-gray">
+						<td style="text-align: center;font-size:16px">
+							<strong>
+								Terms &amp; Condition's
+							</strong>
+						</td>
+					</tr>
+					@{
+						int Tsrno = 1;
+					}
+					@foreach (var qt in item.SalesTerms)
+					{
+						var terms = qt.Terms.Split('$');
+						foreach (var qt1 in terms)
+						{
+							String substr1 = " | ";
+							string input = qt1;
+
+							bool con = input.Contains(substr1);
+							if (con == true)
+							{
+								string[] splitString = qt1.Split('|');
+								string result1 = splitString[0].Trim();
+								string result2 = splitString[1].Trim();
+
+
+								<tr>
+									<td class="notice" style="padding:1px 2px 1px 2px"><strong>@Tsrno.@result1 :</strong>&nbsp;@result2<br></td>
+								</tr>
+
+
+							}
+							else
+							{
+								<tr>
+									<td class="notice">@Tsrno.&nbsp;@qt1<br></td>
+								</tr>
+
+							}
+							{ Tsrno++; }
+						}
+
+					}
+
+				</table>
+
+			}
+			
+
+
+			@if (index == 0 && item.Company.InvoiceFooterContent != null)
+			{
+				@Html.Raw(item.Company.InvoiceFooterContent)
+				;
+			}
+			<table style="width: 100% " border="0">
+				@if (index == 0 && item.Company.InvoiceFooterImage != null)
+				{
+					<tr style="border:none !important;">
+						<td align="center" style="border:none !important; width:100%"><img src="~/upload/@item.Company.InvoiceFooterImage" height="@item.Company.InvoiceFooterHeight.Value.ToString()" width="@item.Company.InvoiceFooterWidth.Value.ToString()" /></td>
+					</tr>
+				}
+			</table>
+			
+
+			@* Products images *@
+			{ index++; }
+
+			// Increase the index
+
+
+			
+
+		}
+	</body>
+
+}
+else
+{
+	<p>No valid data found.</p>
+}

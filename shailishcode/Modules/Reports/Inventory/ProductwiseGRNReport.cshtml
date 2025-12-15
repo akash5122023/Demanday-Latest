@@ -1,0 +1,170 @@
+﻿@model AdvanceCRM.Reports.InventoryReportModel
+
+@{
+    // Filter the data in the view
+    var filteredGrn = Model.Grn;
+    var filteredGrnProducts = Model.GrnProducts;
+
+    // Apply Status filter if provided
+    if (Model.Request.Status.HasValue)
+    {
+        filteredGrn = filteredGrn
+            .Where(g => g.Status.HasValue && (int)(object)g.Status.Value == Model.Request.Status.Value)
+            .ToList();
+    }
+
+    // Apply PO Number filter if provided
+    if (Model.Request.PurchaseOrderNo.HasValue)
+    {
+        filteredGrn = filteredGrn.Where(g => g.Po == Model.Request.PurchaseOrderNo.Value.ToString()).ToList();
+    }
+
+    // Filter GRN Products to only include those from filtered GRNs
+    var filteredGrnIds = filteredGrn.Select(g => g.Id).ToList();
+    filteredGrnProducts = filteredGrnProducts
+        .Where(p => filteredGrnIds.Contains(p.GrnId))
+        .ToList();
+
+    var hasData = filteredGrnProducts.Count > 0;
+}
+
+<div style="font-family: Arial, sans-serif; padding: 20px; color: #333; position: relative; max-width: 100%; box-sizing: border-box;">
+    <!-- BizPlus Reports link -->
+    <div style="position: absolute; top: 20px; right: 20px;">
+        <a href="https://www.bizpluscrm.com/" target="_blank" style="color: #000; text-decoration: none;">
+            www.bizpluscrm.com
+        </a>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 15px;">
+        <h2 style="color: #222; margin-bottom: 5px;">Productwise GRN Report</h2>
+
+        <!-- Filter display -->
+        @*@if (Model.Request.Status.HasValue || Model.Request.PurchaseOrderNo.HasValue)
+        {
+            <div style="margin-bottom: 10px; font-size: 14px;">
+                <strong>Filters:</strong>
+                @if (Model.Request.Status.HasValue)
+                {
+                    <span style="margin: 0 10px;">Status: @Model.Request.Status</span>
+                }
+                @if (Model.Request.PurchaseOrderNo.HasValue)
+                {
+                    <span style="margin: 0 10px;">PO No: @Model.Request.PurchaseOrderNo</span>
+                }
+            </div>
+        }*@
+
+
+        @*@if (Model.Product != null && !string.IsNullOrEmpty(Model.Product.Name))
+        {
+            <div style="font-size: 16px; font-weight: bold;">
+                Product: @Model.Product.Name
+            </div>
+        }
+        else if (filteredGrnProducts.Count > 0)
+        {
+            <div style="font-size: 16px; font-weight: bold;">
+                Product: @filteredGrnProducts.First().ProductsName
+            </div>
+        }*@
+    </div>
+
+    <hr style="border: 1px solid #ccc; margin-bottom: 20px;" />
+
+    @if (hasData)
+    {
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <thead>
+                <tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
+                    <th style="padding: 10px; text-align: center;">Sr. No.</th>
+                    <th style="padding: 10px; text-align: center;">Date</th>
+                    <th style="padding: 10px; text-align: center;">Status</th>
+                    <th style="padding: 10px; text-align: center;">Supplier</th>
+                    <th style="padding: 10px; text-align: center;">PO No.</th>
+                    <th style="padding: 10px; text-align: center;">PO Date</th>
+                    <th style="padding: 10px; text-align: center;">Invoice No.</th>
+                    <th style="padding: 10px; text-align: center;">Invoice Date</th>
+                    <th style="padding: 10px; text-align: center;">Product</th>
+                    <th style="padding: 10px; text-align: center;">Ordered Qty</th>
+                    <th style="padding: 10px; text-align: center;">Received Qty</th>
+                    <th style="padding: 10px; text-align: center;">Extra Qty</th>
+                    <th style="padding: 10px; text-align: center;">Rejected Qty</th>
+                    <th style="padding: 10px; text-align: center;">Pending Qty</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int counter = 1;
+                    foreach (var item in filteredGrnProducts)
+                    {
+                        var grn = filteredGrn.FirstOrDefault(g => g.Id == item.GrnId);
+                        if (grn != null)
+                        {
+                            var pendingQty = item.OrderQuantity - item.ReceivedQuantity;
+                            <tr style="border-bottom: 1px solid #eee; background-color: @(counter % 2 == 0 ? "#fafafa" : "white")">
+                                <td style="padding: 8px; text-align: center;">@counter</td>
+                                <td style="padding: 8px; text-align: center;">
+                                    @(grn.GrnDate != null ? ((DateTime)grn.GrnDate).ToString("dd/MM/yyyy") : "N/A")
+                                </td>
+                                <td style="padding: 8px; text-align: center;">@grn.Status</td>
+                                <td style="padding: 8px; text-align: center;">@grn.ContactsName</td>
+                                <td style="padding: 8px; text-align: center;">@grn.Po</td>
+
+                                <td style="padding: 8px; text-align: center;">
+                                    @(grn.PoDate != null ? ((DateTime)grn.PoDate).ToString("dd/MM/yyyy") : "N/A")
+                                </td>
+                                <td style="padding: 8px; text-align: center;">@grn.InvoiceNo</td>
+                                <td style="padding: 8px; text-align: center;">
+                                    @(grn.InvoiceDate != null ? ((DateTime)grn.InvoiceDate).ToString("dd/MM/yyyy") : "N/A")
+                                </td>
+                                <td style="padding: 8px; text-align: center;">@item.ProductsName</td>
+                                <td style="padding: 8px; text-align: center;">@item.OrderQuantity</td>
+                                <td style="padding: 8px; text-align: center;">@item.ReceivedQuantity</td>
+                                <td style="padding: 8px; text-align: center;">@item.ExtraQuantity</td>
+                                <td style="padding: 8px; text-align: center;">@item.RejectedQuantity</td>
+                                <td style="padding: 8px; text-align: center;
+                                                    color: @(pendingQty > 0 ? "red" : "green");
+                                                    font-weight: @(pendingQty > 0 ? "bold" : "normal")">
+                                    @pendingQty
+                                </td>
+                            </tr>
+                            counter++;
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div style="text-align: center; padding: 20px; background-color: #f9f9f9; border-radius: 4px;">
+            @if (Model.Products == null)
+            {
+                <p style="color: #666; font-style: italic;">No product selected or product not found.</p>
+            }
+            else if (Model.Request.Status.HasValue || Model.Request.PurchaseOrderNo.HasValue)
+            {
+                <p style="color: #666; font-style: italic;">
+                    No GRN records found for the selected filters.
+                    @if (Model.Request.Status.HasValue)
+                    {
+                        <text>(Status: @Model.Request.Status)</text>
+                    }
+                    @if (Model.Request.PurchaseOrderNo.HasValue)
+                    {
+                        <text>(PO: @Model.Request.PurchaseOrderNo)</text>
+                    }
+                </p>
+            }
+@*             else
+            {
+                <p style="color: #666; font-style: italic;">No GRN records found for @(Model.Products != null ? Model.Products.Name : "the selected product").</p>
+            } *@
+        </div>
+    }
+
+    <div style="margin-top: 20px; text-align: center; font-size: 12px; color: #777;">
+        <em>Report generated on @DateTime.Now.ToString("dd/MM/yyyy hh:mm tt")</em>
+    </div>
+</div>

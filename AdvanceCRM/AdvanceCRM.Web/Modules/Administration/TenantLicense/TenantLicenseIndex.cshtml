@@ -1,0 +1,113 @@
+@model AdvanceCRM.Administration.Pages.TenantLicensePageModel
+@{
+    ViewData["Title"] = "Client License Monitor";
+}
+
+<div class="page-container tenant-license-page">
+    <h2 class="page-title">Client License Monitor</h2>
+
+    @if (!string.IsNullOrWhiteSpace(Model?.SuccessMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @Model.SuccessMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <form method="get" class="tenant-license-filter form-inline mb-3">
+        <div class="form-group mr-2 mb-2">
+            <label class="sr-only" for="tenant-license-search">Search</label>
+            <input id="tenant-license-search" name="searchTerm" value="@Model?.FilterTerm" class="form-control" placeholder="Search clients, subdomain or plan" />
+        </div>
+        <div class="form-group mr-2 mb-2">
+            <label class="sr-only" for="tenant-license-status">Status</label>
+            <select id="tenant-license-status" name="status" class="form-control">
+                <option value="" selected="@(string.IsNullOrEmpty(Model?.FilterStatus) ? "selected" : null)">All statuses</option>
+                <option value="active" selected="@(string.Equals(Model?.FilterStatus, "active", System.StringComparison.OrdinalIgnoreCase) ? "selected" : null)">Active</option>
+                <option value="expired" selected="@(string.Equals(Model?.FilterStatus, "expired", System.StringComparison.OrdinalIgnoreCase) ? "selected" : null)">Expired</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mb-2 mr-2">
+            <i class="fa fa-filter"></i> Apply
+        </button>
+        <a class="btn btn-light mb-2" href="@Url.Action("Index", "TenantLicense", new { area = "Administration" })">
+            <i class="fa fa-times"></i> Clear
+        </a>
+        <a class="btn btn-outline-danger mb-2 ml-auto" target="_blank" rel="noopener"
+           href="@Url.Action("ExportPdf", "TenantLicense", new { area = "Administration", searchTerm = Model?.FilterTerm, status = Model?.FilterStatus })">
+            <i class="fa fa-file-pdf-o"></i> Export PDF
+        </a>
+    </form>
+
+    @Html.Partial(MVC.Views.Administration.TenantLicense._TenantLicenseTable, Model)
+</div>
+
+@section Head {
+    <style>
+        .tenant-license-page .page-title {
+            margin-bottom: 1.5rem;
+        }
+
+        .tenant-license-table tr.expired {
+            background-color: #f8d7da;
+        }
+
+        .tenant-license-table .tenant-name {
+            font-weight: 600;
+        }
+
+        .tenant-license-table .tenant-user-link {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .tenant-license-table .tenant-user-link:hover .tenant-name {
+            text-decoration: underline;
+        }
+
+        .tenant-license-table .tenant-subdomain {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .tenant-license-table .badge {
+            font-size: 0.85rem;
+        }
+
+        .tenant-license-filter .form-control {
+            min-width: 200px;
+        }
+
+        .tenant-license-filter .form-group + .form-group {
+            margin-left: 0.5rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        jQuery(function () {
+            $('.tenant-license-table').on('click', '.tenant-user-link', function (e) {
+                var userId = $(this).data('userId');
+
+                if (!userId)
+                    return;
+
+                if (typeof AdvanceCRM === 'undefined' ||
+                    !AdvanceCRM.Administration ||
+                    !AdvanceCRM.Administration.UserDialog)
+                    return;
+
+                e.preventDefault();
+                new AdvanceCRM.Administration.UserDialog().loadByIdAndOpenDialog(userId);
+            });
+        });
+    </script>
+}

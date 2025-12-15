@@ -1,0 +1,125 @@
+﻿@model AdvanceCRM.Reports.AccountingReportModel
+
+
+@*<strong>All Supplier Outstanding Balance</strong>
+    <hr />
+    <div class="box-body no-padding">
+        <table class="table table-striped">
+            @{ int srno = 1; double ftot = 0;}
+            <tr><th style="text-align:center">Sr. No.</th><th style="text-align:left">Name</th><th style="text-align:right">Total</th></tr>
+            @foreach (var item in Model.Purchase.Select(y => y.PurchaseFromId).Distinct())
+            {
+                <tr>
+                    <td align="center">@srno</td>
+                    <td align="left">@Model.Purchase.FirstOrDefault(y => y.PurchaseFromId == item).PurchaseFromName</td>
+                    @{
+                        double t_tot = 0;
+
+                        double creditorsopening = 0;
+                        if (Model.Purchase.Count > 0)
+                        {
+                            if (Model.Purchase.Where(x => x.PurchaseFromId == item).FirstOrDefault().PurchaseFromCreditorsOpening.HasValue)
+                            {
+                                creditorsopening = (double)Model.Purchase.Where(x => x.PurchaseFromId == item).FirstOrDefault().PurchaseFromCreditorsOpening;
+                            }
+                        }
+
+                        t_tot = (double)Model.Purchase.Where(y => y.PurchaseFromId == item).Sum(x => x.Total) - (double)Model.Cash.Where(y => y.ContactsId == item).Sum(x => x.CashOut) + creditorsopening;
+
+                    }
+                    <td align="right">@t_tot.ToString("#,##0.00")</td>
+                </tr>
+                srno++;
+                ftot = ftot + t_tot;
+            }
+            <tr>
+                <td colspan="2" align="right"><strong> Total </strong></td>
+                <td align="right">@ftot.ToString("#,##0.00")</td>
+            </tr>
+        </table>
+        <hr />
+    </div>*@
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    All Supplier Outstanding Balance
+</div>
+
+<div class="box-body no-padding">
+    <table class="table table-striped">
+        @{ int srno = 1; double ftot = 0;}
+        <tr><th style="text-align:center">Sr. No.</th><th style="text-align:left">Name</th><th style="text-align:right">Total</th></tr>
+        @foreach (var item in Model.Purchase.Select(y => y.PurchaseFromId).Distinct())
+        {
+            <tr>
+                <td align="center">@srno</td>
+                <td align="left">@Model.Purchase.FirstOrDefault(y => y.PurchaseFromId == item).PurchaseFromName</td>
+                @{
+                    double t_tot = 0;
+
+                    double creditorsopening = 0;
+                    if (Model.Purchase.Count > 0)
+                    {
+                        if (Model.Purchase.Where(x => x.PurchaseFromId == item).FirstOrDefault().PurchaseFromCreditorsOpening.HasValue)
+                        {
+                            creditorsopening = (double)Model.Purchase.Where(x => x.PurchaseFromId == item).FirstOrDefault().PurchaseFromCreditorsOpening;
+                        }
+                    }
+
+                    t_tot = (double)Model.Purchase.Where(y => y.PurchaseFromId == item).Sum(x => x.Total) - (double)Model.Cash.Where(y => y.ContactsId == item).Sum(x => x.CashOut) + creditorsopening;
+
+                }
+                <td align="right">@t_tot.ToString("#,##0.00")</td>
+            </tr>
+            srno++;
+            ftot = ftot + t_tot;
+        }
+        <tr>
+            <td colspan="2" align="right"><strong> Total </strong></td>
+            <td align="right">@ftot.ToString("#,##0.00")</td>
+        </tr>
+    </table>
+</div>
+<div class="footer-note">
+    <em>Report generated automatically. Powered by Bizplus CRM.</em>
+</div>

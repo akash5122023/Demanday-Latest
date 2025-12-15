@@ -1,0 +1,718 @@
+﻿@*@using PagedList.Mvc*@
+@model  AdvanceCRM.Common.Mailbox.Classes.ReceiveMail
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Mailbox";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.min.css" />
+    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.print.css" media="print" />
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+    <script src="~/Scripts/fullcalendar/fullcalendar.min.js"></script>
+    <script src="~/Scripts/jquery.icheck.min.js"></script>
+    <script src="~/Scripts/adminlte/demo.js"></script>
+}
+
+@section ContentHeader {
+    <h1>@ViewData["Title"]@*<small> @Model.RecentCount new messages</small>*@</h1>
+}
+@using (Html.BeginForm("Inbox", "Mailbox", FormMethod.Get))
+{
+    @Html.HiddenFor(x => x.Flag)
+    @Html.HiddenFor(x => x.Page)
+    @Html.HiddenFor(x => x.PrePageNo)
+    @Html.HiddenFor(x => x.Min)
+    @Html.HiddenFor(x => x.Max)
+    @Html.HiddenFor(x => x.LastPage)
+    <div class="row">
+        <div class="col-md-2">
+            <a href="~/Mailbox/Compose" class="btn btn-primary btn-block margin-bottom">Compose</a>
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Folders</h3>
+                    <div class="box-tools">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body no-padding">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li class="active">
+                            <a href="~/Mailbox/Inbox?flag=Inbox&Search=&page=1&min=0&max=0&prepageNo=1">
+                                <i class="fa fa-inbox"></i>Inbox
+                                <span class="label label-primary pull-right">@Model.UnseenCount</span>
+                            </a>
+                        </li>
+                        <li id="LinkSentId"><a href="~/Mailbox/Inbox?flag=Sent"><i class="fa fa-envelope-o"></i>Sent</a></li>
+                        <li><a href="~/Mailbox/Inbox?flag=Drafts"><i class="fa fa-file-text-o"></i>Drafts</a></li>
+                        <li>
+                            <a href="~/Mailbox/Inbox?flag=Junk"><i class="fa fa-filter"></i>Junk</a>
+                        </li>
+                        @if (Model.ServerName == "Gmail")
+                        {
+                            <li>
+                                <a href="~/Mailbox/Inbox?flag=Starred"><i class="fa fa-star"></i>Starred</a>
+                            </li>
+                        }
+                        <li><a href="~/Mailbox/Inbox?flag=Trash"><i class="fa fa-trash-o"></i>Trash</a></li>
+                    </ul>
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+        <!-- /.col -->
+        <div class="col-md-10">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">@Model.TitleName</h3>
+                    <div class="box-tools pull-right">
+                        <div class="has-feedback">
+                            <div class="form-group-sm">
+                                @Html.TextBoxFor(m => m.Search, new { @class = "input-sm", @placeholder = "Search Mail" })
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                @if (!(Model.MailList == null))
+                {
+                    <div class="box-body no-padding">
+                        <div class="mailbox-controls">
+                            <!-- Check all button -->
+                            <button type="button" class="btn btn-default btn-sm checkbox-toggle">
+                                <i class="fa fa-square-o"></i>
+                            </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm DeleteBtn" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></button>
+                                <button type="button" class="btn btn-default btn-sm" onclick="location.href ='@Url.Action("Inbox", "Mailbox", new { flag = "Inbox",Search = "",page=1,min=0,max=0,prepageNo=1})';" data-toggle="tooltip" data-placement="top" title="Refresh"><i class="fa fa-refresh"></i></button>
+                                @*<button type="button" class="btn btn-default btn-sm ReplyBtn" data-toggle="tooltip" data-placement="top" title="Reply"><i class="fa fa-reply"></i></button>
+                                    <button type="button" class="btn btn-default btn-sm ForwardBtn" data-toggle="tooltip" data-placement="top" title="Forward"><i class="fa fa-share"></i></button>*@
+                            </div>
+                            <!-- /.btn-group -->
+                            @if (string.IsNullOrEmpty(Model.Search))
+                            {
+                                if (Model.Flag == "Inbox")
+                                {
+                                    <div class="pull-right">
+                                        @if (Model.Page == 1 && (Model.Page == Model.PrePageNo))
+                                        {
+                                            <text>@((Model.InboxCount - Model.Max) + 1) - @((Model.InboxCount - Model.Min)) of @Model.InboxCount</text>
+                                        }
+                                        else if (Model.Page > Model.PrePageNo)
+                                        {
+                                            <text>@((Model.InboxCount - Model.Max) + Model.Page) - @((Model.InboxCount - Model.Min) + Model.PrePageNo) of @Model.InboxCount</text>
+                                        }
+                                        else if (Model.Page < Model.PrePageNo)
+                                        {
+                                            <text>@((Model.InboxCount - Model.Max) + Model.Page) - @((Model.InboxCount - Model.Min)) of @Model.InboxCount</text>
+
+                                        }
+                                        <div class="btn-group">
+                                            @if (Model.Page == 1)
+                                            {
+                                                <button type="button" class="@(Model.Page == 1 ? "btn btn-default btn-sm disabled" : "btn btn-default btn-sm")"><i class="fa fa-chevron-left"></i></button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="@(Model.Page == 1 ? "btn btn-default btn-sm disabled" : "btn btn-default btn-sm")" onclick="location.href ='@Url.Action("Inbox", "Mailbox", new { flag = Model.Flag, Search = Model.Search, page = (Model.Page - 1), min = Model.Min, max = Model.Max, prepageNo = Model.Page })';"><i class="fa fa-chevron-left"></i></button>
+                                            }
+                                            @if (Model.Page == (Model.LastPage))
+                                            {
+                                                <button type="button" class="btn btn-default btn-sm disabled"><i class="fa fa-chevron-right"></i></button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" onclick="location.href ='@Url.Action("Inbox", "Mailbox", new { flag = Model.Flag, Search = Model.Search, page = (Model.Page + 1), min = Model.Min, max = Model.Max, prepageNo = Model.Page })';" class="btn btn-default btn-sm"><i class="fa fa-chevron-right"></i></button>
+                                            }
+                                        </div>
+                                        <!-- /.btn-group -->
+                                    </div>
+                                }
+                            }
+
+                            <!-- In future we can place paging here -->
+                        </div>
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped">
+                                <tbody>
+                                    @if (Model.MailList == null)
+                                    {
+                                        <text>No records to display</text>
+                                    }
+                                    else
+                                    {
+                                        foreach (var itm in Model.MailList)
+                                        {
+                                            if (itm != null)
+                                            {
+                                                string From;
+                                                <tr>
+                                                    <td><input type="checkbox" class="chkDelete" name="chkDeleteName" value="@itm.Index" /></td>
+                                                    @*<td>@itm.Flags.ToString()</td>
+                                                        <td>@itm.Index.ToString()</td>
+                                                        <td>@itm.UniqueId.Id.ToString()</td>*@
+                                                    @if (@itm.Flags.ToString() == "Flagged")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star"></i></a>
+                                                        </td>
+                                                        if (Model.Flag == "Sent")
+                                                        {
+
+                                                            if (itm.Envelope.To.ToString().Contains("<"))
+                                                            {
+
+                                                                From = itm.Envelope.To.ToString().Replace("\"", "");
+                                                                From = From.Substring(0, From.IndexOf("<"));
+                                                            }
+                                                            else
+                                                            {
+                                                                From = itm.Envelope.To.ToString();
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            if (itm.Envelope.From.ToString().Contains("<"))
+                                                            {
+
+                                                                From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                                From = From.Substring(0, From.IndexOf("<"));
+                                                            }
+                                                            else
+                                                            {
+                                                                From = itm.Envelope.From.ToString();
+                                                            }
+
+                                                        }
+
+                                                        <td class="mailbox-name col-lg-2" style="font-weight:bold"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From</a></td>
+                                                        <td class="mailbox-subject col-lg-6" style="font-weight:bold">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1" style="font-weight:bold">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3" style="font-weight:bold">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if (@itm.Flags.ToString() == "Seen, Flagged")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From</a></td>
+                                                        <td class="mailbox-subject col-lg-6">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1">
+                                                            <span class="mailbox-attachment-icon has-img"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if (@itm.Flags.ToString() == "Recent")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star-o"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        <td class="mailbox-name col-lg-2" style="font-weight:bold"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From</a></td>
+                                                        <td class="mailbox-subject col-lg-6" style="font-weight:bold">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1" style="font-weight:bold">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3" style="font-weight:bold">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if (@itm.Flags.ToString() == "None")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star-o"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        <td class="mailbox-name col-lg-2" style="font-weight:bold"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From</a></td>
+                                                        <td class="mailbox-subject col-lg-6" style="font-weight:bold">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1" style="font-weight:bold">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3" style="font-weight:bold">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if (@itm.Flags.ToString() == "Seen, Answered, Flagged")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From</a></td>
+                                                        <td class="mailbox-subject col-lg-6">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if (@itm.Flags.ToString() == "Seen, Recent")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star-o"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From</a></td>
+                                                        <td class="mailbox-subject col-lg-6">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if (@itm.Flags.ToString() == "Seen")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star-o"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From</a></td>
+                                                        <td class="mailbox-subject col-lg-6">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if ((@itm.Flags.ToString() == "Seen, Answered") || (@itm.Flags.ToString() == "Seen, Answered,Recent"))
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star-o"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From</a></td>
+                                                        <td class="mailbox-subject col-lg-6">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if ((@itm.Flags.ToString() == "Draft") || (@itm.Flags.ToString() == "Seen, Draft"))
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star-o"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        if (!string.IsNullOrEmpty(From))
+                                                        {
+                                                            <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From,<span class="text-red">Draft</span></a></td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag"><span class="text-red">Draft</span></a></td>
+                                                        }
+                                                        <td class="mailbox-subject col-lg-6">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if (@itm.Flags.ToString() == "Seen,Draft,Flagged")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        if (!string.IsNullOrEmpty(From))
+                                                        {
+                                                            <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From,<span class="text-red">Draft</span></a></td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag"><span class="text-red">Draft</span></a></td>
+                                                        }
+                                                        <td class="mailbox-subject col-lg-6">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                    else if (@itm.Flags.ToString() == "Seen,Flagged,Draft")
+                                                    {
+                                                        <td class="mailbox-star">
+                                                            <input class="itemid" type="hidden" value="@itm.Index" />
+                                                            <a href="#"><i class="fa text-yellow fa-star"></i></a>
+                                                        </td>
+                                                        if (itm.Envelope.From.ToString().Contains("<"))
+                                                        {
+                                                            From = itm.Envelope.From.ToString().Replace("\"", "");
+                                                            From = From.Substring(0, From.IndexOf("<"));
+                                                        }
+                                                        else
+                                                        {
+                                                            From = itm.Envelope.From.ToString();
+                                                        }
+                                                        @*<td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags">@From</a></td>*@
+                                                        if (!string.IsNullOrEmpty(From))
+                                                        {
+                                                            <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag">@From,<span class="text-red">Draft</span></a></td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="mailbox-name col-lg-2"><a href="~/Mailbox/Read?IndexId=@itm.Index&Flag=@itm.Flags&FolderName=@Model.Flag"><span class="text-red">Draft</span></a></td>
+                                                        }
+                                                        <td class="mailbox-subject col-lg-6">
+                                                            @itm.Envelope.Subject
+                                                        </td>
+                                                        <td class="mailbox-attachment col-lg-1">
+                                                            <span class="mailbox-attachment-icon"></span>
+                                                        </td>
+                                                        <td class="mailbox-date col-lg-3">@itm.Date.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                                    }
+                                                </tr>
+                                            }
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                            <!-- /.table -->
+                        </div>
+                        <!-- /.mail-box-messages -->
+                    </div>
+
+                    <!-- /.box-body -->
+                    <div class="box-footer no-padding">
+                        <div class="mailbox-controls">
+                            <!-- Check all button -->
+                            <button type="button" class="btn btn-default btn-sm checkbox-toggle">
+                                <i class="fa fa-square-o"></i>
+                            </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm DeleteBtn" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash-o"></i></button>
+                                @*<button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" data-placement="top" title="Reply"><i class="fa fa-reply"></i></button>
+                                    <button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" data-placement="top" title="Forward"><i class="fa fa-share"></i></button>*@
+                                <button type="button" class="btn btn-default btn-sm" onclick="location.href ='@Url.Action("Inbox", "Mailbox", new { flag = "Inbox", Search = "",page=1,min=0,max=0,prepageNo=1})';" data-toggle="tooltip" data-placement="top" title="Refresh"><i class="fa fa-refresh"></i></button>
+                            </div>
+                            <!-- /.btn-group -->
+
+                            @if (string.IsNullOrEmpty(Model.Search))
+                            {
+                                if (Model.Flag == "Inbox")
+                                {
+                                    <div class="pull-right">
+                                        @if (Model.Page == 1 && (Model.Page == Model.PrePageNo))
+                                        {
+                                            <text>@((Model.InboxCount - Model.Max) + 1) - @((Model.InboxCount - Model.Min)) of @Model.InboxCount</text>
+                                        }
+                                        else if (Model.Page > Model.PrePageNo)
+                                        {
+                                            <text>@((Model.InboxCount - Model.Max) + Model.Page) - @((Model.InboxCount - Model.Min) + Model.PrePageNo) of @Model.InboxCount</text>
+                                        }
+                                        else if (Model.Page < Model.PrePageNo)
+                                        {
+                                            <text>@((Model.InboxCount - Model.Max) + Model.Page) - @((Model.InboxCount - Model.Min)) of @Model.InboxCount</text>
+
+                                        }
+                                        <div class="btn-group">
+                                            @if (Model.Page == 1)
+                                            {
+                                                <button type="button" class="@(Model.Page == 1 ? "btn btn-default btn-sm disabled" : "btn btn-default btn-sm")"><i class="fa fa-chevron-left"></i></button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="@(Model.Page == 1 ? "btn btn-default btn-sm disabled" : "btn btn-default btn-sm")" onclick="location.href ='@Url.Action("Inbox", "Mailbox", new { flag = Model.Flag, Search = Model.Search, page = (Model.Page - 1), min = Model.Min, max = Model.Max, prepageNo = Model.Page })';"><i class="fa fa-chevron-left"></i></button>
+                                            }
+                                            @if (Model.Page == (Model.LastPage))
+                                            {
+                                                <button type="button" class="btn btn-default btn-sm disabled"><i class="fa fa-chevron-right"></i></button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" onclick="location.href ='@Url.Action("Inbox", "Mailbox", new { flag = Model.Flag, Search = Model.Search, page = (Model.Page + 1), min = Model.Min, max = Model.Max, prepageNo = Model.Page })';" class="btn btn-default btn-sm"><i class="fa fa-chevron-right"></i></button>
+                                            }
+                                        </div>
+                                        <!-- /.btn-group -->
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <br />
+                    <div class="table-responsive mailbox-messages">
+                        <table class="table table-hover table-striped">
+                            <tbody>
+                                <text>No records to display</text>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <br />
+                }
+            </div>
+            <!-- /. box -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+}
+
+<script>
+
+    $(function () {
+        $('.nav a').filter(function () { return this.href == location.href }).parent().addClass('active').siblings().removeClass('active')
+        $('.nav a').click(function () {
+            $(this).parent().addClass('active').siblings().removeClass('active')
+        })
+    })
+    $(function () {
+        //Enable iCheck plugin for checkboxes
+        //iCheck for checkbox and radio inputs
+        $('.mailbox-messages input[type="checkbox"]').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+
+        //Enable check and uncheck all functionality
+        $(".checkbox-toggle").click(function () {
+            var clicks = $(this).data('clicks');
+            if (clicks) {
+                //Uncheck all checkboxes
+                $(".mailbox-messages input[type='checkbox']").iCheck("uncheck");
+                $(".fa", this).removeClass("fa-check-square-o").addClass('fa-square-o');
+            } else {
+                //Check all checkboxes
+                $(".mailbox-messages input[type='checkbox']").iCheck("check");
+                $(".fa", this).removeClass("fa-square-o").addClass('fa-check-square-o');
+            }
+            $(this).data("clicks", !clicks);
+        });
+
+        //Handle starring for glyphicon and font awesome
+        $(".mailbox-star").click(function (e) {
+            //debugger;
+            //alert("Click");
+            var itemIndex = $(this).find("input").val();
+            //alert("Click1");
+            //detect type
+            var $this = $(this).find("a > i");
+            var glyph = $this.hasClass("glyphicon");
+            var fa = $this.hasClass("fa");
+            //var Unstarclass = $this.hasClass("fa text-yellow fa-star fa-star-o");
+            var Unstarclass = $this.hasClass("fa text-yellow fa-star-o");
+            var starclass = $this.hasClass("fa text-yellow fa-star");
+            var flag,f="0";
+
+            //Switch states
+            //if (glyph) {
+            //    $this.toggleClass("glyphicon-star");
+            //    $this.toggleClass("glyphicon-star-empty");
+            //}
+            //if (fa) {
+            //    $this.toggleClass("fa-star");
+            //    $this.toggleClass("fa-star-o");
+            //}
+            if (Unstarclass && f == "0" || (Unstarclass && !(f == "2"))) {
+                //alert("Unstarclass");
+                flag = true;
+                f = "1";
+                //$this.addClass("fa-star");
+                //$this.removeClass("fa text-yellow fa-star fa-star-o");
+                $this.removeClass("fa text-yellow fa-star-o");
+                $this.addClass("fa text-yellow fa-star");
+                //Starunstar(itemIndex, flag);
+                //$this.toggleClass("fa-star");
+            }
+            if ((starclass && f == "0") || (starclass && !(f == "1"))) {
+                //alert("starclass");
+                flag = false;
+                f = "2";
+                $this.removeClass("fa text-yellow fa-star");
+                //$this.addClass("fa text-yellow fa-star fa-star-o");
+                $this.addClass("fa text-yellow fa-star-o");
+                //Starunstar(itemIndex, flag);
+                //$this.toggleClass("fa-star-o");
+            }
+            Starunstar(itemIndex, flag,'@Model.Flag');
+            //alert("flag" + flag + "itemIndex" + itemIndex);
+        });
+
+        $(".DeleteBtn").on("click", function (e) {
+            //$("input[name='chkDeleteName']:checked").each(function () {
+            //    alert($(this).val());
+            //});
+            var confirmation = confirm("Are you sure?");
+            if (confirmation) {
+                e.preventDefault();
+                var data = [];
+                $("input[name='chkDeleteName']:checked").each(function () {
+                    data.push($(this).val());
+                });
+                if (data == "") {
+                    alert("Select Mail to delete");
+                    return false;
+                }
+                if (data != null || data!="")
+                {
+                    if ($("#Flag").val() == "Trash"){
+                        var confirmation = confirm("Delete Forever?");
+                        if (confirmation) {
+                            e.preventDefault();
+                             $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteMail")",
+                    data: { id: data, flag: $("#Flag").val() },
+                    traditional: true,
+                    success: function (result) {
+                        alert("Delete Success")
+                        //location.reload();
+                        location.href = '@Url.Action("Inbox", "Mailbox", new { flag = "Inbox", Search = "",page=1,min=0,max=0,prepageNo=1})';
+                    }
+                    })
+                        }
+                        else {
+                            return false;
+                        }
+
+                    }
+                    else {
+                    $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("DeleteMail")",
+                    data: { id: data ,flag: $("#Flag").val() },
+                    traditional: true,
+                    success: function (result) {
+                        alert("Delete Success")
+                        //location.reload();
+                        location.href = '@Url.Action("Inbox", "Mailbox", new { flag = "Inbox", Search = "",page=1,min=0,max=0,prepageNo=1})';
+                    }
+                    })
+                    }
+
+                }
+            }
+            else { alert("Delete Canceled"); }
+        });
+
+        function Starunstar(Id, flag,folderName) {
+            //alert("Id" + Id + "flag" + flag + "folderName" + folderName );
+            //StarUnstarAction(int Index, bool flag)
+            var serviceURL = "/Mailbox/StarUnstarAction"; //?Index=" + Id + "&flag=" + flag;
+            $.ajax({
+                url: serviceURL,
+                data: { Index: Id, flag: flag, FolderName: folderName },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: successFunc,
+                error: errorFunc
+            });
+            function successFunc(data, status) {
+                if (data.status) {
+                    //alert(data.message);
+                    location.href = '@Url.Action("Inbox", "Mailbox", new { flag = "Inbox", Search = "",page=1,min=0,max=0,prepageNo=1})';
+                    //location.reload();
+                } else {
+                    alert(data.message);
+                }
+            }
+            function errorFunc() {
+                alert('error');
+            }
+        }
+    });
+</script>
+

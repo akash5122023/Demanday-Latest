@@ -1,0 +1,45 @@
+﻿
+@{
+    ViewBag.Title = "SubscriberActivity";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@*<br />
+    <h3>Subscriber Activity for :<a href="/MailChimp/DetailSubscriber?EmailId=@ViewBag.EmailActivityAsync.EmailAddress.Trim()&listId=@ViewBag.EmailActivityAsync.ListId">@ViewBag.EmailActivityAsync.EmailAddress</a></h3>
+    <br />*@
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title">
+        <div class="title-text"><strong>Subscriber Activity for :</strong><a href="/MailChimp/DetailSubscriber?EmailId=@ViewBag.EmailActivityAsync.EmailAddress.Trim()&listId=@ViewBag.EmailActivityAsync.ListId">@ViewBag.EmailActivityAsync.EmailAddress</a></div>
+    </div>
+    <br />
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Action</th>
+                <th>Time</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ViewBag.EmailActivityAsync.Activity)
+            {
+            <tr>
+                @if (item.Url != null)
+                    {
+                <td>@item.Action : <a href=@item.Url>@item.Url</a></td>
+                    }
+                    else
+                    {
+                <td>
+                    @item.Action
+                </td>
+                    }
+                <td>@Convert.ToDateTime(item.Timestamp).ToString("D") @Convert.ToDateTime(item.Timestamp).ToString("t")</td>
+
+            </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+

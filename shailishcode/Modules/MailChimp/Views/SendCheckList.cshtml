@@ -1,0 +1,286 @@
+﻿@model  AdvanceCRM.Modules.MailChimp.Models.ModelCheckList
+@{
+    ViewBag.Title = "SendCheckList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<br />
+@*<link href="~/Content/font-awesome/css/font-awesome.min.css" rel="stylesheet" />*@
+<style>
+    .kv-reqd {
+        color: red;
+        font-family: monospace;
+        font-weight: normal;
+    }
+</style>
+@*<script src="~/Scripts/jquery-3.1.1.min.js"></script>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#SendCheckListFormId").hide();
+        $("#ScheduleId").click(function () {
+            $("#SendCheckListFormId").show();
+            location.href = "#scheduletime";
+        });
+        $("#BtnCancel").click(function () {
+            $("#SendCheckListFormId").hide();
+
+        });
+        $('#SendCheckListFormId').validate({
+            errorClass: 'help-block animation-slideDown',
+            errorElement: 'div',
+            errorPlacement: function (error, e) {
+                e.parents('.form-group > div').append(error);
+            },
+            highlight: function (e) {
+                $(e).closest('.form-group').removeClass('has-success has-error').addClass('has-error');
+                $(e).closest('.help-block').remove();
+            },
+            success: function (e) {
+                e.closest('.form-group').removeClass('has-success has-error');
+                e.closest('.help-block').remove();
+            },
+            rules: {
+                ScheduleDate: "required"
+
+            },
+            messages: {
+                ScheduleDate: "Please enter delivery date and time"
+
+            }
+
+        });
+    });
+</script>
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    @*<div class="grid-title">
+            <div class="title-text">Add a Subscriber</div>
+        </div>*@
+
+
+    <br />
+
+
+
+    @if (Model.CheckReady == true)
+    {
+    <center>
+        <h3>
+            You’re all set to send!
+        </h3>
+    </center>
+
+    }
+    else if (Model.CheckReady == false)
+    {
+    <center>
+        <h3 style="color:firebrick;">
+            Looks like there’s a problem
+        </h3>
+    </center>
+
+
+    @*foreach (var item in ViewBag.CheckList.CheckLists)
+        {
+            //if (item.Type == MailChimp.Net.Core.Result.Success) { }
+            if (item.Type == MailChimp.Net.Core.Result.Error)
+            {
+                <center>
+                    <h3 style="color:firebrick;">
+                        Looks like there’s a problem
+                    </h3>
+                </center>
+
+            }
+        }*@
+    }
+    <center><span>Review the feedback below before sending your campaign.</span></center>
+    <br />
+    <table class="table table-user-information" align="center">
+        <tbody>
+            @Html.HiddenFor(m => m.campaignId)
+            @foreach (var temp in ViewBag.CheckList.CheckLists)
+            {
+            <tr>
+                <td>
+                    @if (temp.Type == MailChimp.Net.Core.Result.Success && temp.Heading == "MonkeyRewards")
+                        {
+
+                        }
+                        else if (temp.Type == MailChimp.Net.Core.Result.Success)
+                        {
+                    <i style="color:darkcyan;" class="fa fa-check-circle fa-2x " aria-hidden="true"></i>
+                        }
+                        else if (temp.Type == MailChimp.Net.Core.Result.Warning)
+                        {
+                    <i style="color:gold;" class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i>
+                        }
+                        else if (temp.Type == MailChimp.Net.Core.Result.Error)
+                        {
+                    <i style="color:firebrick;" class="fa fa-times-circle fa-2x" aria-hidden="true"></i>
+                        }
+                </td>
+                <td>
+                    @if (temp.Type == MailChimp.Net.Core.Result.Success && temp.Heading == "MonkeyRewards")
+                        {
+
+                        }
+                        else
+                        {
+                    <h4>@temp.Heading</h4>
+                    <p><span>@temp.Details</span></p>
+
+                        }
+                    @if ((temp.Type == MailChimp.Net.Core.Result.Error && temp.Heading == "Default text content") || (temp.Type == MailChimp.Net.Core.Result.Error && temp.Heading == "HTML email"))
+                        {
+
+                    <div class="alert alert-danger" role="alert">We will redirect you to mailchimp server please resolve template related issue and refresh this page to continue, click here to resolve&nbsp;<a href='https://us16.admin.mailchimp.com/campaigns/wizard/neapolitan?id=@Model.TemplateResolveId' target="_viewCampaign" class="btn btn-danger">Resolve</a></div>
+
+                        }
+                    @if ((temp.Type == MailChimp.Net.Core.Result.Success && temp.Heading == "HTML email"))
+                        {
+
+                    <div class="alert alert-info" role="alert">We will redirect you to mailchimp server please edit template details and refresh this page to continue, click here to edit &nbsp;<a href='https://us16.admin.mailchimp.com/campaigns/wizard/neapolitan?id=@Model.TemplateResolveId' target="_viewCampaign" class="btn btn-primary">Edit</a></div>
+
+                        }
+                </td>
+                <td>
+                    @if (temp.Type == MailChimp.Net.Core.Result.Success)
+                        {
+                            if (temp.Heading == "Subject line" || temp.Heading == "Replies")
+                            {
+                    <a id="Edit" title="Edit" href='@Url.Action("UpdateCampaigns", "MailChimp", new { id = Model.campaignId })'><span class="btn btn-primary">Edit</span></a>
+                            }
+                        }
+                        else if (temp.Type == MailChimp.Net.Core.Result.Error)
+                        {
+                            if (temp.Heading == "Subject line" || temp.Heading == "Replies")
+                            {
+                    <button type="button" id="Resolve" name="Resolve" class="btn btn-block navbar-btn" title="Resolve" onclick="location.href = '@Url.Action("UpdateCampaigns", "MailChimp", new { id = Model.campaignId })';">Resolve</button>
+                            }
+                        }
+                    @*else if (temp.Type == MailChimp.Net.Core.Result.Warning)
+                        {
+                            if (temp.Heading == "Default text content")
+                            {
+                                <a id="Resolve" title="Resolve" href='https://us16.admin.mailchimp.com/campaigns/wizard/neapolitan?id=@Model.TemplateResolveId' target="_viewCampaign"><span class="btn btn-warning">Resolve</span></a>
+
+                            }
+                            if (temp.Heading == "Subject line" || temp.Heading == "Replies")
+                            {
+                                <button type="button" id="Edit" name="Edit" class="btn btn-warning" title="Edit" onclick="location.href = '@Url.Action("UpdateCampaigns", "Mailchimp", new { id = Model.campaignId })';">Edit</button>
+                            }
+                            if (temp.Heading == "HTML email")
+                            {
+                                <button type="button" id="Edit" name="Edit" class="btn btn-block navbar-btn" title="Edit" onclick="location.href = 'https://us16.admin.mailchimp.com/campaigns/wizard/neapolitan?id=@Model.TemplateResolveId'">Edit</button>
+                            }
+                        }*@
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    @if (Model.CheckReady == true)
+    {
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="col-sm-7"></div>
+            <div class="col-sm-2">
+                <button type="button" id="Send" name="Send" class="btn btn-block navbar-btn" title="Send" onclick="location.href = '@Url.Action("SendCheckListCamapign", "MailChimp", new { CampaignId = Model.campaignId, status = "Send"})';">Send Campaign </button>
+            </div>
+            <div class="col-sm-2">
+                <button type="button" id="ScheduleId" name="ScheduleId" class="btn btn-block navbar-btn" title="Schedule">Schedule</button>
+            </div>
+            <div class="col-sm-1">
+                <button type="button" id="Draft" name="Draft" class="btn btn-block navbar-btn" title="Draft" onclick="location.href = '@Url.Action("SendCheckListCamapign", "MailChimp", new { CampaignId = Model.campaignId, status = "Draft"})';">Draft</button>
+            </div>
+        </div>
+    </div>
+    }
+    @using (Html.BeginForm("ScheduleCampaign", "MailChimp", FormMethod.Post, new { @id = "SendCheckListFormId", @class = "form-horizontal", role = "form" }))
+    {
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.campaignId, new { @value = Model.campaignId })
+    <div class="container">
+        <form>
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group row">
+                        <div class="col-sm-1 col-md-1 col-lg-1">
+                            <i class="fa fa-clock-o fa-3x" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-sm-5 col-md-5 col-lg-5">
+                            <h5>
+                                <strong>Set Up Your Schedule</strong>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="scheduletime">
+                        <div class="col-sm-6 col-md-6 col-lg-6">
+                            <label for="LabelforDeliveryDate" class="col-form-label"> Delivery Date and Time <span class="kv-reqd">*</span></label>
+                            @Html.TextBoxFor(m => m.ScheduleDate, new { @class = "form-control", @type = "datetime-local" })
+                            @Html.ValidationMessageFor(m => m.ScheduleDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-6 col-md-6 col-lg-6">
+                            <div class="alert alert-info" role="alert">
+                                1. Enter format <strong>@DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")</strong><br />
+                                2. Schedule time may only be in <strong> 15 minutes intervals</strong>,e.g 10:15 not 10.10
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="offset-sm-2 col-sm-10">
+                            <button type="submit" class="btn btn-primary">Schedule Campaign</button>
+                            <button id="BtnCancel" name="BtnCancel" type="button" class="btn btn-primary" title="Cancel">Cancel</button>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-6">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    }
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

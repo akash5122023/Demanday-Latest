@@ -1,0 +1,72 @@
+@model AdvanceCRM.ReportTree
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Reports";
+}
+
+@functions {
+    public HtmlString RenderItems(AdvanceCRM.ReportTree.Category category)
+    {
+        var sb = new StringBuilder();
+        if (category.Reports != null)
+        {
+            var i = 0;
+            foreach (var x in category.Reports)
+            {
+                sb.AppendLine("<li class='report-item " + (i++ % 2 == 0 ? "odd" : "even") + "'>");
+                sb.AppendLine("    <a href='#' class='report-link' data-key='" + HtmlEncoder.Encode(x.Key) + "'>");
+                sb.AppendLine("        " + HtmlEncoder.Encode(x.Title));
+                sb.AppendLine("    </a>");
+                sb.AppendLine("</li>");
+            }
+        }
+        if (category.SubCategories != null)
+        {
+            foreach (var sub in category.SubCategories)
+            {
+                sb.Append(RenderTree(sub).ToString());
+            }
+        }
+        return new HtmlString(sb.ToString());
+    }
+
+    public HtmlString RenderTree(AdvanceCRM.ReportTree.Category category)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("<li class='category expanded'>");
+        sb.AppendLine("    <div class='line'><span class='toggle'></span><span class='caption'>" + HtmlEncoder.Encode(category.Title) + "</span></div>");
+        if ((category.SubCategories != null && category.SubCategories.Count > 0) ||
+            (category.Reports != null && category.Reports.Count > 0))
+        {
+            sb.AppendLine("    <ul class='" + (category.Reports != null ? "has-reports" : "") + "' style='display: block;'>");
+            sb.Append(RenderItems(category).ToString());
+            sb.AppendLine("    </ul>");
+        }
+        sb.AppendLine("</li>");
+        return new HtmlString(sb.ToString());
+    }
+}
+
+<div id="ReportPage" class="s-DataGrid">
+    <div class="grid-title">
+        <div class="title-text">Reports</div>
+    </div>
+    <div class="grid-toolbar s-Toolbar clearfix">
+        <div class="s-QuickSearchBar"><input /></div>
+    </div>
+    <div class="report-box">
+        <div class="report-list center">
+            <ul>
+                @RenderItems(Model.Root)
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Common.ReportPage($('#ReportPage'));
+        Q.initFullHeightGridPage($('#ReportPage'));
+    });
+</script>
+

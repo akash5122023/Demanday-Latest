@@ -1,0 +1,240 @@
+﻿@model AdvanceCRM.Reports.SignInReportModel
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "SignIn Report";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+}
+
+<!--<body>
+    <table style="width:100%; border:groove;">
+        <tr>
+            <td align="center">
+                <h3 style="text-decoration-color:burlywood">@Model.Company.Name</h3>
+                <h4>@Model.Company.Address</h4>
+                <h5>@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>
+    <strong>SignIn-Out Report</strong>
+    <hr />
+    <table style="width:100%; border:groove" , border="1">
+        <tr>
+            <th style="text-align:center" width="10%">Sr. No.</th>
+            <th style="text-align:center" width="40%">Name</th>
+            <th style="text-align:center" width="35%">DateTime</th>
+            <th style="text-align:center" width="15%">Task</th>
+
+
+            @*{ int cnt = 1; double d = 0;}*@
+
+            @foreach (var item in Model.all)
+            {
+                //tTime = 0;
+
+                //tDays = (double)Model.all.Where(y => y.NameDisplayName == item.DisplayName).Where(z => z.Type.Value.GetText() == "In").Count();
+
+                //lst = Model.Attendance.Where(z => z.NameDisplayName == item.DisplayName).Where(x => x.Type.Value.GetText() == "In").ToList<AttendanceRow>
+                //    ();
+
+                //foreach (var itm in lst)
+                //{
+                //    var inTime = Model.Attendance.Where(z => z.DateNTime.Value.ToShortDateString() == itm.DateNTime.Value.ToShortDateString()).Where(y => y.Type.Value.GetText() == "In").Where(x => x.NameDisplayName == item.DisplayName);
+
+                //    var outTime = Model.Attendance.Where(z => z.DateNTime.Value.ToShortDateString() == itm.DateNTime.Value.ToShortDateString()).Where(y => y.Type.Value.GetText() == "Out").Where(x => x.NameDisplayName == item.DisplayName);
+
+                //    if (inTime.Count() > 0)
+                //    {
+                //        if (outTime.Count() > 0)
+                //        {
+                //            tTime = tTime + (outTime.FirstOrDefault().DateNTime.Value.Subtract(inTime.FirstOrDefault().DateNTime.Value).TotalMinutes);
+                //        }
+                //    }
+                //}
+
+          <tr>
+            <td style="text-align:center; width:20%">
+                 @*cnt*@
+            </td>
+
+            <td>
+               @* &nbsp;&nbsp;@Html.DisplayFor(x => item)*@
+                @item.UserDisplayName
+            </td>
+            <td>@item.Date</td>
+
+            <td align="right">
+               @item.Type
+            </td>
+
+            @*<td align="right">
+            &nbsp;&nbsp;
+            @if (true)
+            {
+                <text>@(((tTime / 60)/tDays).ToString("####.00"))</text>
+            }
+            &nbsp;&nbsp;
+        </td>*@
+        </tr>
+
+                /*cnt = cnt + 1;*/
+
+            }
+    </table>
+
+</body>-->
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        /* text-align: center;*/
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        /*text-align: center;*/
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        /* text-align: center;
+        */
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<body style="font-family: Arial, sans-serif; margin: 20px;">
+
+    <table style="width:100%; border: 2px solid #333; border-collapse: collapse; text-align: center; background: #f8f9fa; padding: 10px;">
+        <tr>
+            <td>
+                <h2 style="color: #2c3e50; margin-bottom: 5px;">@Model.Company.Name</h2>
+                <h4 style="color: #7f8c8d; margin: 0;">@Model.Company.Address</h4>
+                <h5 style="color: #16a085; margin-top: 5px;">@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>
+
+    @*<h3 style="text-align: center; color: #2980b9; margin-top: 20px;">Sign-In / Sign-Out Report</h3>
+        <hr style="border: 1px solid #ddd;">*@
+    <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+        Sign-In / Sign-Out Report
+    </div>
+
+    <table>
+        <tr>
+            <th>Sr. No.</th>
+            <th>Name</th>
+            <th>DateTime</th>
+            <th>Task</th>
+
+
+            @{ int count = 1; double d = 0;}
+
+            @foreach (var item in Model.all)
+            {
+                //tTime = 0;
+
+                //tDays = (double)Model.all.Where(y => y.NameDisplayName == item.DisplayName).Where(z => z.Type.Value.GetText() == "In").Count();
+
+                //lst = Model.Attendance.Where(z => z.NameDisplayName == item.DisplayName).Where(x => x.Type.Value.GetText() == "In").ToList<AttendanceRow>
+                //    ();
+
+                //foreach (var itm in lst)
+                //{
+                //    var inTime = Model.Attendance.Where(z => z.DateNTime.Value.ToShortDateString() == itm.DateNTime.Value.ToShortDateString()).Where(y => y.Type.Value.GetText() == "In").Where(x => x.NameDisplayName == item.DisplayName);
+
+                //    var outTime = Model.Attendance.Where(z => z.DateNTime.Value.ToShortDateString() == itm.DateNTime.Value.ToShortDateString()).Where(y => y.Type.Value.GetText() == "Out").Where(x => x.NameDisplayName == item.DisplayName);
+
+                //    if (inTime.Count() > 0)
+                //    {
+                //        if (outTime.Count() > 0)
+                //        {
+                //            tTime = tTime + (outTime.FirstOrDefault().DateNTime.Value.Subtract(inTime.FirstOrDefault().DateNTime.Value).TotalMinutes);
+                //        }
+                //    }
+                //}
+
+            <tr>
+                <td>
+                    @count
+                </td>
+
+                <td>
+                    @* &nbsp;&nbsp;@Html.DisplayFor(x => item)*@
+                    @item.UserDisplayName
+                </td>
+                <td>@item.Date</td>
+
+                <td align="right">
+                    @item.Type
+                </td>
+
+                @*<td align="right">
+                        &nbsp;&nbsp;
+                        @if (true)
+                        {
+                            <text>@(((tTime / 60)/tDays).ToString("####.00"))</text>
+                        }
+                        &nbsp;&nbsp;
+                    </td>*@
+            </tr>
+
+            count = count + 1;
+
+        }
+        </table>
+
+    </body>
+

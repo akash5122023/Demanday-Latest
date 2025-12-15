@@ -1,0 +1,541 @@
+@{
+    ViewData["Title"] = "BizPlusCRM 360° Leaderboard";
+}
+
+<style>
+    .leaderboard-page {
+        padding: 32px 36px 48px;
+        background: linear-gradient(180deg, #f5f7fb 0%, #ffffff 24%);
+        min-height: calc(100vh - 140px);
+        font-family: "Inter", "Segoe UI", sans-serif;
+        color: #1f2933;
+    }
+
+    .leaderboard-hero {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 24px;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(31, 41, 51, 0.1);
+    }
+
+    .leaderboard-hero h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1b2a4b;
+    }
+
+    .leaderboard-hero p {
+        margin: 6px 0 0;
+        font-size: 16px;
+        color: #4f5b6b;
+        max-width: 640px;
+    }
+
+    .leaderboard-hero .hero-meta {
+        display: flex;
+        gap: 24px;
+    }
+
+    .leaderboard-hero .meta-item {
+        min-width: 140px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        text-align: right;
+    }
+
+    .leaderboard-hero .meta-label {
+        display: block;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #8a94a6;
+    }
+
+    .leaderboard-hero .meta-value {
+        display: block;
+        font-size: 20px;
+        font-weight: 600;
+        color: #0d1c38;
+    }
+
+    .leaderboard-weighting {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+        margin-bottom: 32px;
+    }
+
+    .leaderboard-weighting .weight-card {
+        background: #0f172a;
+        color: #ffffff;
+        padding: 20px 22px;
+        border-radius: 18px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+    }
+
+    .leaderboard-weighting .weight-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.4), transparent 55%);
+        pointer-events: none;
+    }
+
+    .leaderboard-weighting .weight-value {
+        font-size: 32px;
+        font-weight: 700;
+        display: block;
+    }
+
+    .leaderboard-weighting .weight-label {
+        font-size: 15px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-top: 4px;
+        margin-bottom: 10px;
+    }
+
+    .leaderboard-weighting .weight-desc {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.4;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .leaderboard-content {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    .leaderboard-empty {
+        border: 1px dashed rgba(59, 130, 246, 0.35);
+        border-radius: 16px;
+        padding: 48px;
+        background: rgba(239, 246, 255, 0.65);
+        text-align: center;
+        color: #1e3a8a;
+        font-size: 17px;
+        font-weight: 500;
+    }
+
+    .team-section {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 22px 40px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .team-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 26px 28px 0;
+    }
+
+    .team-title {
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+        max-width: 620px;
+    }
+
+    .team-title .team-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.35));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #1d4ed8;
+    }
+
+    .team-title h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #102a43;
+    }
+
+    .team-title p {
+        margin: 6px 0 0;
+        color: #61748f;
+        font-size: 14px;
+    }
+
+    .team-stats {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+    }
+
+    .team-stat {
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: rgba(59, 130, 246, 0.08);
+        min-width: 140px;
+        text-align: right;
+    }
+
+    .team-stat .label {
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #3b82f6;
+    }
+
+    .team-stat .value {
+        display: block;
+        font-size: 20px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .team-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 18px 28px 0;
+    }
+
+    .metric-chip {
+        background: rgba(15, 23, 42, 0.06);
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-size: 13px;
+        color: #1f2937;
+        font-weight: 500;
+    }
+
+    .team-table-wrapper {
+        overflow-x: auto;
+        padding: 18px 28px 32px;
+    }
+
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 880px;
+    }
+
+    .leaderboard-table thead th {
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        color: #6b7280;
+        padding: 12px 14px;
+        background: rgba(15, 23, 42, 0.04);
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .leaderboard-table tbody td {
+        padding: 16px 14px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        vertical-align: top;
+        font-size: 14px;
+        color: #1f2933;
+    }
+
+    .leaderboard-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .col-rank {
+        font-weight: 700;
+        font-size: 18px;
+        color: #1d4ed8;
+        width: 70px;
+    }
+
+    .col-person .member-name {
+        font-weight: 600;
+        font-size: 15px;
+    }
+
+    .col-person .member-role {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .score-breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .score-breakdown .score-value {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .score-breakdown .score-caption {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .col-final {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 18px;
+    }
+
+    .highlight-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .highlight-list li {
+        background: rgba(59, 130, 246, 0.12);
+        color: #1d4ed8;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .muted {
+        color: #9ca3af;
+        font-style: italic;
+    }
+
+    .loading-state {
+        padding: 48px;
+        text-align: center;
+        color: #3b82f6;
+        font-weight: 500;
+        border-radius: 18px;
+        background: rgba(59, 130, 246, 0.08);
+        border: 1px solid rgba(59, 130, 246, 0.22);
+    }
+
+    @@media (max-width: 1024px) {
+        .leaderboard-page {
+            padding: 24px 18px 32px;
+        }
+
+        .leaderboard-hero .hero-meta {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .team-stats {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .team-table-wrapper {
+            padding: 18px 20px 28px;
+        }
+    }
+</style>
+
+<div class="leaderboard-page">
+    <div class="leaderboard-hero">
+        <div class="hero-copy">
+            <h1>BizPlusCRM 360° Leaderboard</h1>
+            <p>
+                Unified performance intelligence across Sales, Product Engineering, Digital Marketing and Support
+                teams. Scores automatically blend target achievement, execution discipline, attendance and innovation
+                bonuses so leadership can recognise high performers at a glance.
+            </p>
+        </div>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <span class="meta-label">Updated</span>
+                <span class="meta-value" id="leaderboard-updated">--</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Participants</span>
+                <span class="meta-value" id="leaderboard-participants">--</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="leaderboard-weighting">
+        <div class="weight-card">
+            <span class="weight-value">40%</span>
+            <span class="weight-label">Primary Goal</span>
+            <p class="weight-desc">Sales & Marketing focus on targets, Development on delivery quality, Support on SLA discipline.</p>
+        </div>
+        <div class="weight-card">
+            <span class="weight-value">30%</span>
+            <span class="weight-label">Task Delivery</span>
+            <p class="weight-desc">Completion rate, punctuality of CRM tasks, sprint velocity and implementation checklists.</p>
+        </div>
+        <div class="weight-card">
+            <span class="weight-value">20%</span>
+            <span class="weight-label">Attendance & Punctuality</span>
+            <p class="weight-desc">Check-in compliance, productive presence and CRM discipline across every team.</p>
+        </div>
+        <div class="weight-card">
+            <span class="weight-value">10%</span>
+            <span class="weight-label">Bonus & Recognition</span>
+            <p class="weight-desc">Innovation, client feedback, knowledge sharing and collaboration bonuses.</p>
+        </div>
+    </div>
+
+    <div id="leaderboard-content" class="leaderboard-content">
+        <div class="loading-state">Loading leaderboard insights...</div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const $content = $('#leaderboard-content');
+        const $updated = $('#leaderboard-updated');
+        const $participants = $('#leaderboard-participants');
+
+        function htmlEncode(value) {
+            return Q.htmlEncode(value ?? '');
+        }
+
+        function formatScore(value, decimals = 1) {
+            if (value === undefined || value === null || isNaN(value)) {
+                return '--';
+            }
+            return Number(value).toFixed(decimals);
+        }
+
+        function formatComponent(score, maxScore, percent) {
+            const core = `<span class="score-value">${formatScore(score)}</span><span class="score-caption"> / ${formatScore(maxScore, 0)}</span>`;
+            if (percent === undefined || percent === null || isNaN(percent)) {
+                return `<div class="score-breakdown">${core}</div>`;
+            }
+
+            return `<div class="score-breakdown">${core}<span class="score-caption">${formatScore(percent)}% achieved</span></div>`;
+        }
+
+        function renderHighlights(highlights) {
+            if (!highlights || !highlights.length) {
+                return '<span class="muted">No highlight recorded</span>';
+            }
+
+            return `<ul class="highlight-list">${highlights.map(h => `<li>${htmlEncode(h)}</li>`).join('')}</ul>`;
+        }
+
+        function renderTeam(summary) {
+            const metadata = summary.Metadata;
+            const rows = summary.Entries.map(entry => {
+                const primaryPercent = entry.TargetAchievementPercent ?? null;
+                const taskPercent = entry.TaskCompletionPercent ?? null;
+                const attendancePercent = entry.AttendancePercent ?? null;
+
+                return `<tr>
+                    <td class="col-rank">${entry.Rank}</td>
+                    <td class="col-person">
+                        <div class="member-name">${htmlEncode(entry.EmployeeName)}</div>
+                        ${entry.Designation ? `<div class="member-role">${htmlEncode(entry.Designation)}</div>` : ''}
+                    </td>
+                    <td>${formatComponent(entry.TargetScore, metadata.TargetWeight, primaryPercent)}</td>
+                    <td>${formatComponent(entry.TaskScore, metadata.TaskWeight, taskPercent)}</td>
+                    <td>${formatComponent(entry.AttendanceScore, metadata.AttendanceWeight, attendancePercent)}</td>
+                    <td>${formatComponent(entry.BonusScore, metadata.BonusWeight, null)}</td>
+                    <td class="col-final">${formatScore(entry.FinalScore)}</td>
+                    <td>${renderHighlights(entry.Highlights)}</td>
+                </tr>`;
+            }).join('');
+
+            return `<section class="team-section">
+                <header class="team-header">
+                    <div class="team-title">
+                        <div class="team-icon"><i class="${htmlEncode(metadata.Icon)}"></i></div>
+                        <div>
+                            <h2>${htmlEncode(metadata.Name)}</h2>
+                            <p>${htmlEncode(metadata.Description)}</p>
+                        </div>
+                    </div>
+                    <div class="team-stats">
+                        <div class="team-stat">
+                            <span class="label">Period</span>
+                            <span class="value">${htmlEncode(summary.PeriodLabel)}</span>
+                        </div>
+                        <div class="team-stat">
+                            <span class="label">Top Score</span>
+                            <span class="value">${formatScore(summary.TopScore)}</span>
+                        </div>
+                        <div class="team-stat">
+                            <span class="label">Average</span>
+                            <span class="value">${formatScore(summary.AverageScore)}</span>
+                        </div>
+                    </div>
+                </header>
+                <div class="team-metrics">
+                    <span class="metric-chip">${htmlEncode(metadata.PrimaryMetricLabel)} · ${formatScore(metadata.TargetWeight, 0)}%</span>
+                    <span class="metric-chip">${htmlEncode(metadata.TaskMetricLabel)} · ${formatScore(metadata.TaskWeight, 0)}%</span>
+                    <span class="metric-chip">${htmlEncode(metadata.AttendanceMetricLabel)} · ${formatScore(metadata.AttendanceWeight, 0)}%</span>
+                    <span class="metric-chip">${htmlEncode(metadata.BonusMetricLabel)} · ${formatScore(metadata.BonusWeight, 0)}%</span>
+                </div>
+                <div class="team-table-wrapper">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Team Member</th>
+                                <th>${htmlEncode(metadata.PrimaryMetricLabel)}</th>
+                                <th>${htmlEncode(metadata.TaskMetricLabel)}</th>
+                                <th>${htmlEncode(metadata.AttendanceMetricLabel)}</th>
+                                <th>${htmlEncode(metadata.BonusMetricLabel)}</th>
+                                <th>Final Score</th>
+                                <th>Highlights</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div>
+            </section>`;
+        }
+
+        function renderResponse(response) {
+            if (!response || !response.Teams || !response.Teams.length) {
+                $content.html('<div class="leaderboard-empty">No leaderboard data is available for the selected period yet.</div>');
+                $updated.text('--');
+                $participants.text('0');
+                return;
+            }
+
+            const sections = response.Teams.map(renderTeam).join('');
+            $content.html(sections);
+
+            if (response.GeneratedAt) {
+                const generated = Q.parseISODateTime(response.GeneratedAt);
+                const formatted = generated ? Q.formatDate(generated, 'dd MMM yyyy hh:mm tt') : '--';
+                $updated.text(formatted);
+            } else {
+                $updated.text('--');
+            }
+
+            $participants.text(response.TotalParticipants ?? '--');
+        }
+
+        Q.serviceRequest('Services/Reports/Leaderboard/GetSummary', { LatestOnly: true }, function (response) {
+            renderResponse(response);
+        }, {
+            blockUI: true,
+            onError: function (error) {
+                console.error('Failed to load leaderboard data', error);
+                $content.html('<div class="leaderboard-empty">Unable to load leaderboard data right now. Please retry in a few moments.</div>');
+            }
+        });
+    })();
+</script>

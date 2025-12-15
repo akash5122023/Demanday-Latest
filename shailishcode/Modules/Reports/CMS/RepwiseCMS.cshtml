@@ -1,0 +1,82 @@
+﻿@model AdvanceCRM.Reports.CMSReportModel
+
+<strong>Representativewise CMS </strong>
+    &nbsp;&nbsp; - &nbsp;&nbsp; <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat() - &nbsp;&nbsp; <strong>Representative: </strong> @Model.Users.DisplayName
+    (@Model.Users.Username)
+    <hr />
+    <table style="width:100%; border:groove" , border="1">
+        <tr>
+            <th style="text-align:center">Sr. No.</th>
+            <th style="text-align:center">CMS No.</th>
+            <th style="text-align:center">Date</th>
+            <th style="text-align:center">CustomerName</th>
+            <th style="text-align:center">PhoneNo</th>
+            <th style="text-align:center">FollowupNote</th>
+            <th style="text-align:center">Details</th>
+            <th style="text-align:center">CMS Value</th>
+            <th style="text-align:center">Products</th>
+        </tr>
+
+        @{ int cnt = 1;}
+
+        @foreach (var item in Model.Followup)
+        {
+    <tr>
+        <td style="text-align:center; width:10%">
+            @cnt
+        </td>
+
+        <td style="text-align:center; width:10%">
+            @item.CMSId
+        </td>
+        <td>
+            &nbsp;&nbsp;@item.FollowupDate.Value.ToShortDateString()
+        </td>
+        <td>
+            &nbsp;&nbsp;@Model.Contacts.FirstOrDefault(x => x.Id == item.CMSContactsId).Name
+        </td>
+        <td>
+            &nbsp;&nbsp;@Model.Contacts.FirstOrDefault(x => x.Id == item.CMSContactsId).Phone
+        </td>
+
+        <td>
+            &nbsp;&nbsp;@item.FollowupNote
+        </td>
+
+        <td>
+            &nbsp;&nbsp;@item.Details
+        </td>
+
+
+        <td>
+            @*@if (item.CMSTotal.HasValue)
+            {
+                <text>&nbsp;&nbsp;@item.CMSTotal.Value.ToString("#,###.00")</text>
+            }
+            else
+            {
+                <text>&nbsp;&nbsp;0</text>
+            }*@
+
+        </td>
+        <td>
+            @{var str = ""; int i = 0;}
+
+            @foreach (var prd in Model.Products.Where(x => x.CMSId == item.CMSId))
+            {
+                if (i == 0)
+                {
+                    str = prd.ProductsName;
+                }
+                else
+                {
+                    str = str + ", " + prd.ProductsName;
+                }
+                i = i + 1;
+            }
+            &nbsp;&nbsp;@str
+        </td>
+    </tr>
+            cnt = cnt + 1;
+        }
+    </table>

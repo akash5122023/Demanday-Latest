@@ -1,0 +1,292 @@
+﻿@model AdvanceCRM.Reports.QuotationReportModel
+
+
+@*<strong>Quotation Detailed Report </strong>
+    &nbsp;&nbsp; - &nbsp;&nbsp; <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat()
+
+    <head>
+
+        <script src="https://cdn.anychart.com/releases/8.0.1/js/anychart-core.min.js"></script>
+            <script src="https://cdn.anychart.com/releases/8.0.1/js/anychart-pie.min.js"></script>
+        <script src="~/Scripts/RepChart/anychart-core.min.js"></script>
+        <script src="~/Scripts/RepChart/anychart-pie.min.js"></script>
+    </head>
+    <body>
+
+        <div id="container" style="width: 100%; height: 350px"></div>
+
+        <script>
+            anychart.onDocumentReady(function () {
+
+
+                // set the data
+                var data = [
+
+                    { x: "Total Quotation", value:  @Model.All.Count, data: 10 },
+                    { x: "Open Enquiries", value:  @Model.Open.Count },
+                     { x: "Close Enquiries", value:  @Model.Closed.Count },
+                      { x: "Won Enquiries", value:  @Model.Won.Count },
+                       { x: "Lost Enquiries", value:  @Model.Lost.Count }
+                ];
+
+                // create the chart
+                var chart = anychart.pie();
+
+                // set the chart title
+                chart.title("Enquiry Report");
+
+                // add the data
+                chart.data(data);
+
+                // display the chart in the container
+                chart.container('container');
+                chart.draw();
+
+            });
+        </script>
+    </body>
+
+
+    <table style="width:100%;height:50%; border:groove" , border="1">
+        <tr>
+            <th rowspan="2" style=" text-align: center">Sr. No.</th>
+            <th rowspan="2" style=" text-align: center">Employee</th>
+
+            <th rowspan="2" style=" text-align: center">Total</th>
+            <th colspan="2" style=" text-align: center">Quotation Status</th>
+            <th colspan="3" style=" text-align: center">Quotation Type</th>
+            <th colspan="2" style=" text-align: center">Closing Type</th>
+            <th rowspan="2" style=" text-align: center">Conversion</th>
+
+        </tr>
+        <tr>
+
+
+
+            <th style="text-align:center">Open</th>
+            <th style="text-align:center">Close</th>
+            <th style="text-align:center">Hot</th>
+            <th style="text-align:center">Warm</th>
+            <th style="text-align:center">Cold</th>
+            <th style="text-align:center">Unassigned</th>
+            <th style="text-align:center">Won</th>
+            <th style="text-align:center">Lost</th>
+            <th style="text-align:center">Revised/Unassigned</th>
+
+
+
+        </tr>
+
+        @{ int cnt = 1;}
+        @foreach (var item in Model.Alluser.Select(x => x.DisplayName).Distinct())
+        {
+            decimal EnqCt = Model.All.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count();
+            decimal EnqWon = Model.Won.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count();
+            decimal Enqcon;
+            if (EnqCt != 0 && EnqWon != 0)
+            {
+                Enqcon = Convert.ToDecimal(((EnqWon / EnqCt) * 100).ToString("0.00"));
+            }
+            else { Enqcon = 0; }
+            <tr>
+
+                <td style="text-align: center " rowspan="2">@cnt</td>
+                <td style="text-align: center " rowspan="2">@Html.DisplayFor(x => item)</td>
+
+                <td style="text-align: center ">@Model.All.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center ">@Model.Open.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center ">@Model.Closed.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center ">@Model.Hot.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center ">@Model.Warm.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center ">@Model.Cold.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center ">@Model.Typeunassigned.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+
+
+                <td style="text-align: center ">@Model.Won.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center ">@Model.Lost.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center ">@Model.closeunassigned.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Count()</td>
+                <td style="text-align: center " rowspan="2">@Enqcon %</td>
+            </tr>
+            <tr>
+
+                <td style="text-align: center "> @Model.All.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+                <td style="text-align: center "> @Model.Open.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+                <td style="text-align: center "> @Model.Closed.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total) </td>
+
+                <td style="text-align: center ">@Model.Hot.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+                <td style="text-align: center ">@Model.Warm.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+                <td style="text-align: center ">@Model.Cold.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+                <td style="text-align: center ">@Model.Typeunassigned.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+
+
+                <td style="text-align: center "> @Model.Won.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+                <td style="text-align: center "> @Model.Lost.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+                <td style="text-align: center ">@Model.closeunassigned.Where(y => y.AssignedDisplayName == Html.DisplayFor(x => item).ToString()).Sum(y => y.Total)</td>
+
+
+            </tr>
+            cnt = cnt + 1;
+        }
+
+        @{ decimal tEnqCt = Model.All.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count();
+            decimal tEnqWon = Model.Won.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count();
+            decimal tEnqcon;
+            if (tEnqCt != 0 && tEnqWon != 0)
+            {
+                tEnqcon = Convert.ToDecimal(((tEnqWon / tEnqCt) * 100).ToString("0.00"));
+            }
+            else { tEnqcon = 0; }
+        }
+        <tr>
+            <td style="text-align: center; width: 1%;" rowspan="2">
+            </td>
+            <td style="width: 9%; text-align: center; " rowspan="2">
+                <strong>Total</strong>
+            </td>
+
+            <td style="width: 9%; text-align: center">
+                <strong> @Model.All.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count()  </strong>
+            </td>
+            <td style="width: 9%; text-align: center">
+                <strong> @Model.Open.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count()  </strong>
+            </td>
+            <td style="width: 9%; text-align: center">
+                <strong> @Model.Closed.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count()  </strong>
+            </td>
+            <td style="width: 9%; text-align: center">
+                <strong> @Model.Hot.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count()  </strong>
+            </td>
+            <td style="width: 9%; text-align: center">
+                <strong> @Model.Warm.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count()  </strong>
+            </td>
+            <td style="width: 9%; text-align: center">
+                <strong> @Model.Cold.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count()  </strong>
+            </td>
+
+            <td style="width: 9%; text-align: center">
+                <strong> @Model.Won.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count()  </strong>
+            </td>
+            <td style="width: 9%; text-align: center">
+                <strong> @Model.Lost.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Count()  </strong>
+            </td>
+            <td style="width: 9%; text-align: center" rowspan="2">
+                <strong>@tEnqcon %</strong>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center "> @Model.All.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Sum(y => y.Total)</td>
+            <td style="text-align: center "> @Model.Open.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Sum(y => y.Total)</td>
+            <td style="text-align: center "> @Model.Closed.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Sum(y => y.Total)</td>
+            <td style="text-align: center "> @Model.Hot.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Sum(y => y.Total)</td>
+            <td style="text-align: center "> @Model.Warm.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Sum(y => y.Total)</td>
+            <td style="text-align: center "> @Model.Cold.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Sum(y => y.Total)</td>
+
+            <td style="text-align: center "> @Model.Won.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Sum(y => y.Total)</td>
+            <td style="text-align: center "> @Model.Lost.Where(y => y.Date >= Model.Request.DateFrom && y.Date <= Model.Request.DateTo && y.AssignedIsActive == 1).Sum(y => y.Total)</td>
+        </tr>
+        cnt = cnt + 1;
+            }
+    </table>
+
+    <br />
+
+    <p>Formula Of Conversion Rate : (Total No.Enquiry Won/Total No.Of Enquiry)*100</p>*@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation Detailed Report</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="~/Scripts/RepChart/anychart-core.min.js"></script>
+    <script src="~/Scripts/RepChart/anychart-pie.min.js"></script>
+</head>
+<body class="container mt-4">
+    <h2 class="text-center text-primary">Quotation Detailed Report</h2>
+    <p class="text-center"><strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat()</p>
+
+    <div class="card shadow p-3 mb-4">
+        <div id="chartContainer" style="width: 100%; height: 350px;"></div>
+    </div>
+
+    <script>
+        anychart.onDocumentReady(function () {
+            var data = [
+                { x: "Total Quotation", value: @Model.All.Count },
+                { x: "Open Enquiries", value: @Model.Open.Count },
+                { x: "Close Enquiries", value: @Model.Closed.Count },
+                { x: "Won Enquiries", value: @Model.Won.Count },
+                { x: "Lost Enquiries", value: @Model.Lost.Count }
+            ];
+            var chart = anychart.pie();
+            chart.title("Enquiry Report");
+            chart.data(data);
+            chart.container('chartContainer');
+            chart.draw();
+        });
+    </script>
+
+    <table class="table table-bordered table-striped text-center">
+        <thead class="table-primary">
+            <tr>
+                <th rowspan="2">Sr. No.</th>
+                <th rowspan="2">Employee</th>
+                <th rowspan="2">Total</th>
+                <th colspan="2">Quotation Status</th>
+                <th colspan="3">Quotation Type</th>
+                <th colspan="2">Closing Type</th>
+                <th rowspan="2">Conversion</th>
+            </tr>
+            <tr>
+                <th>Open</th>
+                <th>Close</th>
+                <th>Hot</th>
+                <th>Warm</th>
+                <th>Cold</th>
+                <th>Won</th>
+                <th>Lost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{ int cnt = 1; }
+            @foreach (var item in Model.Alluser.Select(x => x.DisplayName).Distinct())
+            {
+                decimal EnqCt = Model.All.Count(y => y.AssignedDisplayName == item);
+                decimal EnqWon = Model.Won.Count(y => y.AssignedDisplayName == item);
+                decimal Enqcon = (EnqCt != 0) ? (EnqWon / EnqCt * 100) : 0;
+                <tr>
+                    <td rowspan="2">@cnt</td>
+                    <td rowspan="2">@item</td>
+                    <td>@EnqCt</td>
+                    <td>@Model.Open.Count(y => y.AssignedDisplayName == item)</td>
+                    <td>@Model.Closed.Count(y => y.AssignedDisplayName == item)</td>
+                    <td>@Model.Hot.Count(y => y.AssignedDisplayName == item)</td>
+                    <td>@Model.Warm.Count(y => y.AssignedDisplayName == item)</td>
+                    <td>@Model.Cold.Count(y => y.AssignedDisplayName == item)</td>
+                    <td>@Model.Won.Count(y => y.AssignedDisplayName == item)</td>
+                    <td>@Model.Lost.Count(y => y.AssignedDisplayName == item)</td>
+                    <td rowspan="2">@Enqcon %</td>
+                </tr>
+                <tr>
+                    <td>@Model.All.Where(y => y.AssignedDisplayName == item).Sum(y => y.Total)</td>
+                    <td>@Model.Open.Where(y => y.AssignedDisplayName == item).Sum(y => y.Total)</td>
+                    <td>@Model.Closed.Where(y => y.AssignedDisplayName == item).Sum(y => y.Total)</td>
+                    <td>@Model.Hot.Where(y => y.AssignedDisplayName == item).Sum(y => y.Total)</td>
+                    <td>@Model.Warm.Where(y => y.AssignedDisplayName == item).Sum(y => y.Total)</td>
+                    <td>@Model.Cold.Where(y => y.AssignedDisplayName == item).Sum(y => y.Total)</td>
+                    <td>@Model.Won.Where(y => y.AssignedDisplayName == item).Sum(y => y.Total)</td>
+                    <td>@Model.Lost.Where(y => y.AssignedDisplayName == item).Sum(y => y.Total)</td>
+                </tr>
+                cnt++;
+            }
+        </tbody>
+    </table>
+
+    <div class="alert alert-info mt-3 text-center">
+        <p><strong>Formula Of Conversion Rate:</strong> (Total No. Enquiry Won / Total No. Of Enquiry) * 100</p>
+    </div>
+</body>
+</html>

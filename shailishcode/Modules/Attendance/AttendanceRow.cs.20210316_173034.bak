@@ -1,0 +1,660 @@
+﻿
+namespace AdvanceCRM.Attendance
+{
+    using Serenity;
+    using Serenity.ComponentModel;
+    using Serenity.Data;  using Microsoft.AspNetCore.Mvc;
+    using Serenity.Data.Mapping;
+    using System;
+    using System.ComponentModel;
+    using System.IO;
+
+    [ConnectionKey("Default"), Module("Attendance"), TableName("[dbo].[Attendance]")]
+    [DisplayName("Attendance"), InstanceName("Attendance")]
+    [ReadPermission("Attendance:Read")]
+    [ModifyPermission("Attendance:Manual Entry")]
+
+    public sealed class AttendanceRow : Row, IIdRow, INameRow, _Ext.IAuditLog
+    {
+        [DisplayName("Id"), Identity]
+        public Int32? Id
+        {
+            get { return Fields.Id[this]; }
+            set { Fields.Id[this] = value; }
+        }
+
+        [DisplayName("Name"), NotNull, ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jName"), TextualField("NameUsername")]
+        [Administration.UserEditor]
+        public Int32? Name
+        {
+            get { return Fields.Name[this]; }
+            set { Fields.Name[this] = value; }
+        }
+
+        [DisplayName("Date Time"), NotNull, DateTimeEditor(IntervalMinutes = 1)]
+        public DateTime? DateNTime
+        {
+            get { return Fields.DateNTime[this]; }
+            set { Fields.DateNTime[this] = value; }
+        }
+
+        [DisplayName("Type"), NotNull]
+        public Masters.AttendanceTypeMaster? Type
+        {
+            get { return (Masters.AttendanceTypeMaster?)Fields.Type[this]; }
+            set { Fields.Type[this] = (Int32?)value; }
+        }
+
+        [DisplayName("Coordinates"), Size(200), NotNull, QuickSearch]
+        public String Coordinates
+        {
+            get { return Fields.Coordinates[this]; }
+            set { Fields.Coordinates[this] = value; }
+        }
+
+        [DisplayName("Location/Additional Info"), Size(2000), NotNull, QuickSearch, TextAreaEditor(Rows = 4)]
+        public String Location
+        {
+            get { return Fields.Location[this]; }
+            set { Fields.Location[this] = value; }
+        }
+
+        [DisplayName("Approved By"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jApprovedBy"), TextualField("ApprovedByUsername")]
+        [Administration.UserEditor]
+        public Int32? ApprovedBy
+        {
+            get { return Fields.ApprovedBy[this]; }
+            set { Fields.ApprovedBy[this] = value; }
+        }
+
+        [DisplayName("Username"), Expression("jName.[Username]")]
+        public String NameUsername
+        {
+            get { return Fields.NameUsername[this]; }
+            set { Fields.NameUsername[this] = value; }
+        }
+
+        [DisplayName("Name"), Expression("jName.[DisplayName]")]
+        public String NameDisplayName
+        {
+            get { return Fields.NameDisplayName[this]; }
+            set { Fields.NameDisplayName[this] = value; }
+        }
+
+        [DisplayName("Name Email"), Expression("jName.[Email]")]
+        public String NameEmail
+        {
+            get { return Fields.NameEmail[this]; }
+            set { Fields.NameEmail[this] = value; }
+        }
+
+        [DisplayName("Name Source"), Expression("jName.[Source]")]
+        public String NameSource
+        {
+            get { return Fields.NameSource[this]; }
+            set { Fields.NameSource[this] = value; }
+        }
+
+        [DisplayName("Name Password Hash"), Expression("jName.[PasswordHash]")]
+        public String NamePasswordHash
+        {
+            get { return Fields.NamePasswordHash[this]; }
+            set { Fields.NamePasswordHash[this] = value; }
+        }
+
+        [DisplayName("Name Password Salt"), Expression("jName.[PasswordSalt]")]
+        public String NamePasswordSalt
+        {
+            get { return Fields.NamePasswordSalt[this]; }
+            set { Fields.NamePasswordSalt[this] = value; }
+        }
+
+        [DisplayName("Name Last Directory Update"), Expression("jName.[LastDirectoryUpdate]")]
+        public DateTime? NameLastDirectoryUpdate
+        {
+            get { return Fields.NameLastDirectoryUpdate[this]; }
+            set { Fields.NameLastDirectoryUpdate[this] = value; }
+        }
+
+        [DisplayName("Name User Image"), Expression("jName.[UserImage]")]
+        public String NameUserImage
+        {
+            get { return Fields.NameUserImage[this]; }
+            set { Fields.NameUserImage[this] = value; }
+        }
+
+        [DisplayName("Name Insert Date"), Expression("jName.[InsertDate]")]
+        public DateTime? NameInsertDate
+        {
+            get { return Fields.NameInsertDate[this]; }
+            set { Fields.NameInsertDate[this] = value; }
+        }
+
+        [DisplayName("Name Insert User Id"), Expression("jName.[InsertUserId]")]
+        public Int32? NameInsertUserId
+        {
+            get { return Fields.NameInsertUserId[this]; }
+            set { Fields.NameInsertUserId[this] = value; }
+        }
+
+        [DisplayName("Name Update Date"), Expression("jName.[UpdateDate]")]
+        public DateTime? NameUpdateDate
+        {
+            get { return Fields.NameUpdateDate[this]; }
+            set { Fields.NameUpdateDate[this] = value; }
+        }
+
+        [DisplayName("Name Update User Id"), Expression("jName.[UpdateUserId]")]
+        public Int32? NameUpdateUserId
+        {
+            get { return Fields.NameUpdateUserId[this]; }
+            set { Fields.NameUpdateUserId[this] = value; }
+        }
+
+        [DisplayName("Name Is Active"), Expression("jName.[IsActive]")]
+        public Int16? NameIsActive
+        {
+            get { return Fields.NameIsActive[this]; }
+            set { Fields.NameIsActive[this] = value; }
+        }
+
+        [DisplayName("Name Upper Level"), Expression("jName.[UpperLevel]")]
+        public Int32? NameUpperLevel
+        {
+            get { return Fields.NameUpperLevel[this]; }
+            set { Fields.NameUpperLevel[this] = value; }
+        }
+
+        [DisplayName("Name Upper Level2"), Expression("jName.[UpperLevel2]")]
+        public Int32? NameUpperLevel2
+        {
+            get { return Fields.NameUpperLevel2[this]; }
+            set { Fields.NameUpperLevel2[this] = value; }
+        }
+
+        [DisplayName("Name Upper Level3"), Expression("jName.[UpperLevel3]")]
+        public Int32? NameUpperLevel3
+        {
+            get { return Fields.NameUpperLevel3[this]; }
+            set { Fields.NameUpperLevel3[this] = value; }
+        }
+
+        [DisplayName("Name Upper Level4"), Expression("jName.[UpperLevel4]")]
+        public Int32? NameUpperLevel4
+        {
+            get { return Fields.NameUpperLevel4[this]; }
+            set { Fields.NameUpperLevel4[this] = value; }
+        }
+
+        [DisplayName("Name Upper Level5"), Expression("jName.[UpperLevel5]")]
+        public Int32? NameUpperLevel5
+        {
+            get { return Fields.NameUpperLevel5[this]; }
+            set { Fields.NameUpperLevel5[this] = value; }
+        }
+
+        [DisplayName("Name Host"), Expression("jName.[Host]")]
+        public String NameHost
+        {
+            get { return Fields.NameHost[this]; }
+            set { Fields.NameHost[this] = value; }
+        }
+
+        [DisplayName("Name Port"), Expression("jName.[Port]")]
+        public Int32? NamePort
+        {
+            get { return Fields.NamePort[this]; }
+            set { Fields.NamePort[this] = value; }
+        }
+
+        [DisplayName("Name SSL"), Expression("jName.[SSL]")]
+        public Boolean? NameSsl
+        {
+            get { return Fields.NameSsl[this]; }
+            set { Fields.NameSsl[this] = value; }
+        }
+
+        [DisplayName("Name Email Id"), Expression("jName.[EmailId]")]
+        public String NameEmailId
+        {
+            get { return Fields.NameEmailId[this]; }
+            set { Fields.NameEmailId[this] = value; }
+        }
+
+        [DisplayName("Name Email Password"), Expression("jName.[EmailPassword]")]
+        public String NameEmailPassword
+        {
+            get { return Fields.NameEmailPassword[this]; }
+            set { Fields.NameEmailPassword[this] = value; }
+        }
+
+        [DisplayName("Name Phone"), Expression("jName.[Phone]")]
+        public String NamePhone
+        {
+            get { return Fields.NamePhone[this]; }
+            set { Fields.NamePhone[this] = value; }
+        }
+
+        [DisplayName("Name Mcsmtp Server"), Expression("jName.[MCSMTPServer]")]
+        public String NameMcsmtpServer
+        {
+            get { return Fields.NameMcsmtpServer[this]; }
+            set { Fields.NameMcsmtpServer[this] = value; }
+        }
+
+        [DisplayName("Name Mcsmtp Port"), Expression("jName.[MCSMTPPort]")]
+        public Int32? NameMcsmtpPort
+        {
+            get { return Fields.NameMcsmtpPort[this]; }
+            set { Fields.NameMcsmtpPort[this] = value; }
+        }
+
+        [DisplayName("Name Mcimap Server"), Expression("jName.[MCIMAPServer]")]
+        public String NameMcimapServer
+        {
+            get { return Fields.NameMcimapServer[this]; }
+            set { Fields.NameMcimapServer[this] = value; }
+        }
+
+        [DisplayName("Name Mcimap Port"), Expression("jName.[MCIMAPPort]")]
+        public Int32? NameMcimapPort
+        {
+            get { return Fields.NameMcimapPort[this]; }
+            set { Fields.NameMcimapPort[this] = value; }
+        }
+
+        [DisplayName("Name Mc Username"), Expression("jName.[MCUsername]")]
+        public String NameMcUsername
+        {
+            get { return Fields.NameMcUsername[this]; }
+            set { Fields.NameMcUsername[this] = value; }
+        }
+
+        [DisplayName("Name Mc Password"), Expression("jName.[MCPassword]")]
+        public String NameMcPassword
+        {
+            get { return Fields.NameMcPassword[this]; }
+            set { Fields.NameMcPassword[this] = value; }
+        }
+
+        [DisplayName("Name Start Time"), Expression("jName.[StartTime]")]
+        public String NameStartTime
+        {
+            get { return Fields.NameStartTime[this]; }
+            set { Fields.NameStartTime[this] = value; }
+        }
+
+        [DisplayName("Name End Time"), Expression("jName.[EndTime]")]
+        public String NameEndTime
+        {
+            get { return Fields.NameEndTime[this]; }
+            set { Fields.NameEndTime[this] = value; }
+        }
+
+        [DisplayName("Name Branch Id"), Expression("jName.[BranchId]")]
+        public Int32? NameBranchId
+        {
+            get { return Fields.NameBranchId[this]; }
+            set { Fields.NameBranchId[this] = value; }
+        }
+
+        [DisplayName("Name Uid"), Expression("jName.[UID]")]
+        public String NameUid
+        {
+            get { return Fields.NameUid[this]; }
+            set { Fields.NameUid[this] = value; }
+        }
+
+        [DisplayName("Name Non Operational"), Expression("jName.[NonOperational]")]
+        public Boolean? NameNonOperational
+        {
+            get { return Fields.NameNonOperational[this]; }
+            set { Fields.NameNonOperational[this] = value; }
+        }
+
+        [DisplayName("Approved By Username"), Expression("jApprovedBy.[Username]")]
+        public String ApprovedByUsername
+        {
+            get { return Fields.ApprovedByUsername[this]; }
+            set { Fields.ApprovedByUsername[this] = value; }
+        }
+
+        [DisplayName("Approved By"), Expression("jApprovedBy.[DisplayName]")]
+        public String ApprovedByDisplayName
+        {
+            get { return Fields.ApprovedByDisplayName[this]; }
+            set { Fields.ApprovedByDisplayName[this] = value; }
+        }
+
+        [DisplayName("Approved By Email"), Expression("jApprovedBy.[Email]")]
+        public String ApprovedByEmail
+        {
+            get { return Fields.ApprovedByEmail[this]; }
+            set { Fields.ApprovedByEmail[this] = value; }
+        }
+
+        [DisplayName("Approved By Source"), Expression("jApprovedBy.[Source]")]
+        public String ApprovedBySource
+        {
+            get { return Fields.ApprovedBySource[this]; }
+            set { Fields.ApprovedBySource[this] = value; }
+        }
+
+        [DisplayName("Approved By Password Hash"), Expression("jApprovedBy.[PasswordHash]")]
+        public String ApprovedByPasswordHash
+        {
+            get { return Fields.ApprovedByPasswordHash[this]; }
+            set { Fields.ApprovedByPasswordHash[this] = value; }
+        }
+
+        [DisplayName("Approved By Password Salt"), Expression("jApprovedBy.[PasswordSalt]")]
+        public String ApprovedByPasswordSalt
+        {
+            get { return Fields.ApprovedByPasswordSalt[this]; }
+            set { Fields.ApprovedByPasswordSalt[this] = value; }
+        }
+
+        [DisplayName("Approved By Last Directory Update"), Expression("jApprovedBy.[LastDirectoryUpdate]")]
+        public DateTime? ApprovedByLastDirectoryUpdate
+        {
+            get { return Fields.ApprovedByLastDirectoryUpdate[this]; }
+            set { Fields.ApprovedByLastDirectoryUpdate[this] = value; }
+        }
+
+        [DisplayName("Approved By User Image"), Expression("jApprovedBy.[UserImage]")]
+        public String ApprovedByUserImage
+        {
+            get { return Fields.ApprovedByUserImage[this]; }
+            set { Fields.ApprovedByUserImage[this] = value; }
+        }
+
+        [DisplayName("Approved By Insert Date"), Expression("jApprovedBy.[InsertDate]")]
+        public DateTime? ApprovedByInsertDate
+        {
+            get { return Fields.ApprovedByInsertDate[this]; }
+            set { Fields.ApprovedByInsertDate[this] = value; }
+        }
+
+        [DisplayName("Approved By Insert User Id"), Expression("jApprovedBy.[InsertUserId]")]
+        public Int32? ApprovedByInsertUserId
+        {
+            get { return Fields.ApprovedByInsertUserId[this]; }
+            set { Fields.ApprovedByInsertUserId[this] = value; }
+        }
+
+        [DisplayName("Approved By Update Date"), Expression("jApprovedBy.[UpdateDate]")]
+        public DateTime? ApprovedByUpdateDate
+        {
+            get { return Fields.ApprovedByUpdateDate[this]; }
+            set { Fields.ApprovedByUpdateDate[this] = value; }
+        }
+
+        [DisplayName("Approved By Update User Id"), Expression("jApprovedBy.[UpdateUserId]")]
+        public Int32? ApprovedByUpdateUserId
+        {
+            get { return Fields.ApprovedByUpdateUserId[this]; }
+            set { Fields.ApprovedByUpdateUserId[this] = value; }
+        }
+
+        [DisplayName("Approved By Is Active"), Expression("jApprovedBy.[IsActive]")]
+        public Int16? ApprovedByIsActive
+        {
+            get { return Fields.ApprovedByIsActive[this]; }
+            set { Fields.ApprovedByIsActive[this] = value; }
+        }
+
+        [DisplayName("Approved By Upper Level"), Expression("jApprovedBy.[UpperLevel]")]
+        public Int32? ApprovedByUpperLevel
+        {
+            get { return Fields.ApprovedByUpperLevel[this]; }
+            set { Fields.ApprovedByUpperLevel[this] = value; }
+        }
+
+        [DisplayName("Approved By Upper Level2"), Expression("jApprovedBy.[UpperLevel2]")]
+        public Int32? ApprovedByUpperLevel2
+        {
+            get { return Fields.ApprovedByUpperLevel2[this]; }
+            set { Fields.ApprovedByUpperLevel2[this] = value; }
+        }
+
+        [DisplayName("Approved By Upper Level3"), Expression("jApprovedBy.[UpperLevel3]")]
+        public Int32? ApprovedByUpperLevel3
+        {
+            get { return Fields.ApprovedByUpperLevel3[this]; }
+            set { Fields.ApprovedByUpperLevel3[this] = value; }
+        }
+
+        [DisplayName("Approved By Upper Level4"), Expression("jApprovedBy.[UpperLevel4]")]
+        public Int32? ApprovedByUpperLevel4
+        {
+            get { return Fields.ApprovedByUpperLevel4[this]; }
+            set { Fields.ApprovedByUpperLevel4[this] = value; }
+        }
+
+        [DisplayName("Approved By Upper Level5"), Expression("jApprovedBy.[UpperLevel5]")]
+        public Int32? ApprovedByUpperLevel5
+        {
+            get { return Fields.ApprovedByUpperLevel5[this]; }
+            set { Fields.ApprovedByUpperLevel5[this] = value; }
+        }
+
+        [DisplayName("Approved By Host"), Expression("jApprovedBy.[Host]")]
+        public String ApprovedByHost
+        {
+            get { return Fields.ApprovedByHost[this]; }
+            set { Fields.ApprovedByHost[this] = value; }
+        }
+
+        [DisplayName("Approved By Port"), Expression("jApprovedBy.[Port]")]
+        public Int32? ApprovedByPort
+        {
+            get { return Fields.ApprovedByPort[this]; }
+            set { Fields.ApprovedByPort[this] = value; }
+        }
+
+        [DisplayName("Approved By SSL"), Expression("jApprovedBy.[SSL]")]
+        public Boolean? ApprovedBySsl
+        {
+            get { return Fields.ApprovedBySsl[this]; }
+            set { Fields.ApprovedBySsl[this] = value; }
+        }
+
+        [DisplayName("Approved By Email Id"), Expression("jApprovedBy.[EmailId]")]
+        public String ApprovedByEmailId
+        {
+            get { return Fields.ApprovedByEmailId[this]; }
+            set { Fields.ApprovedByEmailId[this] = value; }
+        }
+
+        [DisplayName("Approved By Email Password"), Expression("jApprovedBy.[EmailPassword]")]
+        public String ApprovedByEmailPassword
+        {
+            get { return Fields.ApprovedByEmailPassword[this]; }
+            set { Fields.ApprovedByEmailPassword[this] = value; }
+        }
+
+        [DisplayName("Approved By Phone"), Expression("jApprovedBy.[Phone]")]
+        public String ApprovedByPhone
+        {
+            get { return Fields.ApprovedByPhone[this]; }
+            set { Fields.ApprovedByPhone[this] = value; }
+        }
+
+        [DisplayName("Approved By Mcsmtp Server"), Expression("jApprovedBy.[MCSMTPServer]")]
+        public String ApprovedByMcsmtpServer
+        {
+            get { return Fields.ApprovedByMcsmtpServer[this]; }
+            set { Fields.ApprovedByMcsmtpServer[this] = value; }
+        }
+
+        [DisplayName("Approved By Mcsmtp Port"), Expression("jApprovedBy.[MCSMTPPort]")]
+        public Int32? ApprovedByMcsmtpPort
+        {
+            get { return Fields.ApprovedByMcsmtpPort[this]; }
+            set { Fields.ApprovedByMcsmtpPort[this] = value; }
+        }
+
+        [DisplayName("Approved By Mcimap Server"), Expression("jApprovedBy.[MCIMAPServer]")]
+        public String ApprovedByMcimapServer
+        {
+            get { return Fields.ApprovedByMcimapServer[this]; }
+            set { Fields.ApprovedByMcimapServer[this] = value; }
+        }
+
+        [DisplayName("Approved By Mcimap Port"), Expression("jApprovedBy.[MCIMAPPort]")]
+        public Int32? ApprovedByMcimapPort
+        {
+            get { return Fields.ApprovedByMcimapPort[this]; }
+            set { Fields.ApprovedByMcimapPort[this] = value; }
+        }
+
+        [DisplayName("Approved By Mc Username"), Expression("jApprovedBy.[MCUsername]")]
+        public String ApprovedByMcUsername
+        {
+            get { return Fields.ApprovedByMcUsername[this]; }
+            set { Fields.ApprovedByMcUsername[this] = value; }
+        }
+
+        [DisplayName("Approved By Mc Password"), Expression("jApprovedBy.[MCPassword]")]
+        public String ApprovedByMcPassword
+        {
+            get { return Fields.ApprovedByMcPassword[this]; }
+            set { Fields.ApprovedByMcPassword[this] = value; }
+        }
+
+        [DisplayName("Approved By Start Time"), Expression("jApprovedBy.[StartTime]")]
+        public String ApprovedByStartTime
+        {
+            get { return Fields.ApprovedByStartTime[this]; }
+            set { Fields.ApprovedByStartTime[this] = value; }
+        }
+
+        [DisplayName("Approved By End Time"), Expression("jApprovedBy.[EndTime]")]
+        public String ApprovedByEndTime
+        {
+            get { return Fields.ApprovedByEndTime[this]; }
+            set { Fields.ApprovedByEndTime[this] = value; }
+        }
+
+        [DisplayName("Approved By Branch Id"), Expression("jApprovedBy.[BranchId]")]
+        public Int32? ApprovedByBranchId
+        {
+            get { return Fields.ApprovedByBranchId[this]; }
+            set { Fields.ApprovedByBranchId[this] = value; }
+        }
+
+        [DisplayName("Approved By Uid"), Expression("jApprovedBy.[UID]")]
+        public String ApprovedByUid
+        {
+            get { return Fields.ApprovedByUid[this]; }
+            set { Fields.ApprovedByUid[this] = value; }
+        }
+
+        [DisplayName("Approved By Non Operational"), Expression("jApprovedBy.[NonOperational]")]
+        public Boolean? ApprovedByNonOperational
+        {
+            get { return Fields.ApprovedByNonOperational[this]; }
+            set { Fields.ApprovedByNonOperational[this] = value; }
+        }
+
+        IIdField IIdRow.IdField
+        {
+            get { return Fields.Id; }
+        }
+
+        StringField INameRow.NameField
+        {
+            get { return Fields.Coordinates; }
+        }
+
+        public static readonly RowFields Fields = new RowFields().Init();
+
+        public AttendanceRow()
+            : base(Fields)
+        {
+        }
+
+        public class RowFields : RowFieldsBase
+        {
+            public Int32Field Id;
+            public Int32Field Name;
+            public DateTimeField DateNTime;
+            public Int32Field Type;
+            public StringField Coordinates;
+            public StringField Location;
+            public Int32Field ApprovedBy;
+
+            public StringField NameUsername;
+            public StringField NameDisplayName;
+            public StringField NameEmail;
+            public StringField NameSource;
+            public StringField NamePasswordHash;
+            public StringField NamePasswordSalt;
+            public DateTimeField NameLastDirectoryUpdate;
+            public StringField NameUserImage;
+            public DateTimeField NameInsertDate;
+            public Int32Field NameInsertUserId;
+            public DateTimeField NameUpdateDate;
+            public Int32Field NameUpdateUserId;
+            public Int16Field NameIsActive;
+            public Int32Field NameUpperLevel;
+            public Int32Field NameUpperLevel2;
+            public Int32Field NameUpperLevel3;
+            public Int32Field NameUpperLevel4;
+            public Int32Field NameUpperLevel5;
+            public StringField NameHost;
+            public Int32Field NamePort;
+            public BooleanField NameSsl;
+            public StringField NameEmailId;
+            public StringField NameEmailPassword;
+            public StringField NamePhone;
+            public StringField NameMcsmtpServer;
+            public Int32Field NameMcsmtpPort;
+            public StringField NameMcimapServer;
+            public Int32Field NameMcimapPort;
+            public StringField NameMcUsername;
+            public StringField NameMcPassword;
+            public StringField NameStartTime;
+            public StringField NameEndTime;
+            public Int32Field NameBranchId;
+            public StringField NameUid;
+            public BooleanField NameNonOperational;
+
+            public StringField ApprovedByUsername;
+            public StringField ApprovedByDisplayName;
+            public StringField ApprovedByEmail;
+            public StringField ApprovedBySource;
+            public StringField ApprovedByPasswordHash;
+            public StringField ApprovedByPasswordSalt;
+            public DateTimeField ApprovedByLastDirectoryUpdate;
+            public StringField ApprovedByUserImage;
+            public DateTimeField ApprovedByInsertDate;
+            public Int32Field ApprovedByInsertUserId;
+            public DateTimeField ApprovedByUpdateDate;
+            public Int32Field ApprovedByUpdateUserId;
+            public Int16Field ApprovedByIsActive;
+            public Int32Field ApprovedByUpperLevel;
+            public Int32Field ApprovedByUpperLevel2;
+            public Int32Field ApprovedByUpperLevel3;
+            public Int32Field ApprovedByUpperLevel4;
+            public Int32Field ApprovedByUpperLevel5;
+            public StringField ApprovedByHost;
+            public Int32Field ApprovedByPort;
+            public BooleanField ApprovedBySsl;
+            public StringField ApprovedByEmailId;
+            public StringField ApprovedByEmailPassword;
+            public StringField ApprovedByPhone;
+            public StringField ApprovedByMcsmtpServer;
+            public Int32Field ApprovedByMcsmtpPort;
+            public StringField ApprovedByMcimapServer;
+            public Int32Field ApprovedByMcimapPort;
+            public StringField ApprovedByMcUsername;
+            public StringField ApprovedByMcPassword;
+            public StringField ApprovedByStartTime;
+            public StringField ApprovedByEndTime;
+            public Int32Field ApprovedByBranchId;
+            public StringField ApprovedByUid;
+            public BooleanField ApprovedByNonOperational;
+        }
+    }
+}

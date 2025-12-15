@@ -1,0 +1,29 @@
+From:
+Date: Sat, 13 Sep 2025 01:31:27 +0530
+Subject: Activate Your AdvanceCRM Account
+Message-Id: <9SY2KTHX6RU4.X0XWXDUX1BRN@648-21678>
+To: test@gmail.com
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+Content-Id: <XPG8KTHX6RU4.K5I64BNY735D2@648-21678>
+
+
+<html>
+<head>
+    <title>Activate your AdvanceCRM account</title>
+</head>
+<body>
+    <p>test,</p>
+
+    <p>We received a request to create a new account on AdvanceCRM with your e-mail address.</p>
+
+    <p>Click the link below to activate your account:</p>
+
+    <p><a href="http://localhost:59945/Account/Activate?t=CfDJ8OqxE3QPPJpAlU%2BM5S1xCgNhuBjcpviVv37ZSt0ayykTCfYMsdoY4fBWI%2Bnt4cP%2BrqCBrnFd2byjIljY66LxHkQ0eyMpChoincWyiLVWAS1wnZ%2F7vMudT3S%2FnztmQxgaFQ%3D%3D">http://localhost:59945/Account/Activate?t=CfDJ8OqxE3QPPJpAlU%2BM5S1xCgNhuBjcpviVv37ZSt0ayykTCfYMsdoY4fBWI%2Bnt4cP%2BrqCBrnFd2byjIljY66LxHkQ0eyMpChoincWyiLVWAS1wnZ%2F7vMudT3S%2FnztmQxgaFQ%3D%3D</a></p>
+
+    <p>If it wasn't you who requested this, you can ignore this email.</p>
+
+    Thanks,
+    The "AdvanceCRM" Team
+</body>
+</html>

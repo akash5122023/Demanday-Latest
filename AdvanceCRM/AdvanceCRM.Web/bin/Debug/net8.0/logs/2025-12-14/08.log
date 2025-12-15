@@ -1,0 +1,2 @@
+2025-12-14 08:44:32.7990 INFO AdvanceCRM.Startup :: Startup 
+2025-12-14 08:44:46.4327 INFO AdvanceCRM.Startup :: No HTTPS endpoint detected. Skipping HTTPS redirection to keep the application reachable behind HTTP-only reverse proxies. 

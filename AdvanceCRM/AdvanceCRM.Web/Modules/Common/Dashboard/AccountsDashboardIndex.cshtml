@@ -1,0 +1,113 @@
+﻿@model AdvanceCRM.Common.AccountsDashboardPageModel
+
+@{
+    ViewBag.Title = "Accounts Dashboard";
+}
+
+@section Head {
+
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css">
+    <link rel="stylesheet" href="~/Scripts/datepicker/datepicker3.css">
+    <link rel="stylesheet" href="~/Scripts/daterangepicker/daterangepicker-bs3.css">
+    <link rel="stylesheet" href="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <link href="~/Content/bootstrap-select.css" rel="stylesheet" />
+
+
+
+
+    <script src="~/Scripts/daterangepicker/moment.min.js"></script>
+    <script src="~/Scripts/daterangepicker/daterangepicker.js"></script>
+    <script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+    <script src="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js"></script>
+    <script src="~/Scripts/bootstrap-select.js"></script>
+
+
+
+
+    <style type="text/css">
+        .select2-container, .select2-container * {
+            box-sizing: border-box;
+        }
+
+        .kv-reqd {
+            color: red;
+            font-family: monospace;
+            font-weight: normal;
+        }
+    </style>
+}
+
+
+<script>
+    $(document).ready(function () {
+
+        $("div.id_listval select").on('change', function () {
+            $("#ListId").val(this.value);
+            $.ajax(
+                {
+                    url:'@Url.Action("LoadData", "AccountsDashboard")?ContactId=' + $("#ListId").val(),
+                    type: 'GET',
+                    data: "",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        $("#ContactDetailsDiv").html(data);
+                    },
+                    error: function () {
+                        alert("error");
+                    }
+                });
+
+        });
+
+    });
+</script>
+
+@section ContentHeader {
+    <h1>Accounts Dashboard<small>(Customer Relation)</small></h1>
+}
+
+@Html.HiddenFor(m => m.ListId)
+
+<div class="row">
+    <!-- Left col -->
+    <div class="col-md-12">
+        <!-- TABLE: LATEST ORDERS -->
+        <div class="box box-primary">
+            <div class="box-body">
+                <div class="form-group col-lg-5">
+
+                    <div class="id_listval" style='text-align:left;'>
+                        <label for="LabelforList" class="col-form-label">Select Contact<span class="kv-reqd">*</span></label>
+                        <div class="input-group">
+
+                            <select class="selectpicker"
+                                    name="ListId"
+                                    id="ListId"
+                                    data-show-subtext="true"
+                                    data-live-search="true"
+                                    required title="Select">
+                                @foreach (var item in ViewBag.ListData)
+                                {
+                                    <option value="@item.Id">
+                                        @item.Name
+                                    </option>
+                                }
+                            </select>
+                            <input type="hidden" name="SearchButton" value="true">
+                        </div>
+                    </div>
+
+                </div>
+
+                <script type="text/javascript">
+                function SetListVal() {
+                $("div.id_listval select").val('@Model.ListId');
+                }
+                SetListVal();
+                </script>
+            </div><!-- /.box-body -->
+        </div><!-- /.box -->
+    </div><!-- /.col -->
+</div><!-- /.row -->
+<div id="ContactDetailsDiv">
+</div>

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: advancecrm-web
+spec:
+  selector:
+    app: advancecrm-web
+  # Expose outside cluster (adjust as needed: LoadBalancer in cloud, or keep ClusterIP + Ingress)
+  type: NodePort
+  ports:
+    - name: http
+      port: 80          # Cluster-visible port
+      targetPort: 8080  # Container port
+      nodePort: 30080   # Node external port (ensure firewall allows this, or switch to LoadBalancer in cloud)

@@ -1,0 +1,100 @@
+﻿
+@model  AdvanceCRM.Modules.MailChimp.Models.ModelSubscriber
+@{
+    ViewBag.Title = "UpdateSubscriber";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    .kv-reqd {
+        color: red;
+        font-family: monospace;
+        font-weight: normal;
+    }
+</style>
+<!-- jQuery -->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#UpdateSubscriberFormId').validate({
+            errorClass: 'help-block animation-slideDown', // You can change the animation class for a different entrance animation - check animations page
+            errorElement: 'div',
+            errorPlacement: function (error, e) {
+                e.parents('.form-group > div').append(error);
+            },
+            highlight: function (e) {
+
+                $(e).closest('.form-group').removeClass('has-success has-error').addClass('has-error');
+                $(e).closest('.help-block').remove();
+            },
+            success: function (e) {
+                e.closest('.form-group').removeClass('has-success has-error');
+                e.closest('.help-block').remove();
+            },
+            rules: {
+                FirstName: "required",
+                LastName: "required",
+                EmailAddress: {
+                    required: true,
+                    email: true
+                }
+            },
+            // Specify the validation error messages
+            messages: {
+                FirstName: "Please enter first name",
+                LastName: "Please enter last name",
+                EmailAddress: "Please enter a valid email address"
+            }
+            //submitHandler: function (form) {
+            //    form.submit();
+            //}
+        });
+    });
+</script>
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">Edit Subscriber</div></div>
+    <br />
+
+
+    @using (Html.BeginForm("UpdateSubscriber", "MailChimp", FormMethod.Post, new { @id = "UpdateSubscriberFormId", @class = "form-horizontal", role = "form" }))
+    {
+    @Html.AntiForgeryToken()
+    <div class="container" style="width:100%">
+        <form>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforEmailAddress" class="col-form-label">Email Address <span class="kv-reqd">*</span></label>
+                    @Html.TextBoxFor(model => model.EmailAddress, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.EmailAddress)
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforFirstName" class="col-form-label">First Name<span class="kv-reqd">*</span></label>
+                    @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforLasttName" class="col-form-label">Last Name<span class="kv-reqd">*</span></label>
+                    @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="offset-sm-2 col-sm-10">
+                    @Html.HiddenFor(m => m.Id)
+                    @Html.HiddenFor(m => m.ListId)
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-primary" title="Cancel" onclick="location.href = '@Url.Action("Members", "Mailchimp",new {id=Model.ListId })';">Cancel</button>
+                    @*@Html.ActionLink("Cancel","Members",new {id=Model.ListId})*@
+                </div>
+            </div>
+        </form>
+    </div>
+    }
+
+</div>
+
+

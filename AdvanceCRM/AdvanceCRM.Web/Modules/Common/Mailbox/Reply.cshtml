@@ -1,0 +1,214 @@
+﻿@model AdvanceCRM.Common.Mailbox.Classes.EmailDetails
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Reply";
+}
+
+@section Head {
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="http://hayageek.github.io/jQuery-Upload-File/4.0.11/jquery.uploadfile.min.js"></script>
+    <link rel="stylesheet" href="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" />
+    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.min.css" />
+    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.print.css" media="print" />
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css" />
+    <link href="http://hayageek.github.io/jQuery-Upload-File/4.0.11/uploadfile.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+    <script src="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js"></script>
+    @*<script src="https://cdn.ckeditor.com/4.8.0/standard/ckeditor.js"></script>*@
+    <script src="~/Scripts/fullcalendar/fullcalendar.min.js"></script>
+    <script src="~/Scripts/jquery.icheck.min.js"></script>
+    <script src="~/Scripts/adminlte/demo.js"></script>
+}
+
+@section ContentHeader {
+    <h1>Mailbox</h1>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#fileuploader").uploadFile({
+            url: "UploadFile",
+            multiple: true,
+            dragDrop: true,
+            fileName: "file",
+            showStatusAfterSuccess: true,
+            showAbort: true,
+
+            ////dragDropStr: "Drag Drop",
+
+            ////abortStr: "Abort",
+
+            ////cancelStr: "Cancel",
+
+            ////doneStr: "Fail",
+
+            onSuccess: function (files, data, xhr, pd) {
+                //alert("Url" + data.url + "AttachedFiles" + $('#AttachedFiles').val());
+                //files: list of files
+                //data: response from server
+                //xhr : jquer xhr object
+                $('#AttachedFiles').val($('#AttachedFiles').val() + ',' + data.url);
+            }
+
+        });
+    });
+    function checkvalue() {
+        var mystring = document.getElementById('ToAddress').value;
+        if (!mystring.match(/\S/)) {
+            toastr.error("<br/><button type='button' id='ConfirmYes' class='btn clear'>OK</button>", 'Please enter atleast one Receipent?',
+                {
+                    "closeButton": true,
+                    "debug": false,
+                    "newestOnTop": true,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": true,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "3000",
+                    "timeOut": 0,
+                    "extendedTimeOut": 0,
+                    "tapToDismiss": false,
+                    "allowHtml": true,
+                    onShown: function (toast) {
+                        $("#ConfirmYes").click(function () {
+                            location.reload();
+                        });
+                    }
+                });
+            return false;
+        } else {
+            return true;
+        }
+    }
+    function ShowDivCC() {
+        $("#DivCC").show();
+    }
+    function ShowDivBCC() {
+        $("#DivBCC").show();
+    }
+</script>
+
+<div class="row">
+    @using (Html.BeginForm("Reply", "Mailbox", FormMethod.Post, new { @id = "ReplyId", enctype = "multipart/form-data", onsubmit = "return checkvalue(this);" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.AttachedFiles)
+        @Html.HiddenFor(m => m.ToName)
+        <div class="col-md-2">
+            <a href="~/Mailbox/Inbox" class="btn btn-primary btn-block margin-bottom">Back to Inbox</a>
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Folders</h3>
+                    <div class="box-tools">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body no-padding">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li>
+                            <a href="~/Mailbox/Inbox">
+                                <i class="fa fa-inbox"></i> Inbox
+                                <span class="label label-primary pull-right">12</span>
+                            </a>
+                        </li>
+                        <li><a href="~/Mailbox/Inbox?flag=Sent"><i class="fa fa-envelope-o"></i>Sent</a></li>
+                        <li><a href="~/Mailbox/Inbox?flag=Drafts"><i class="fa fa-file-text-o"></i>Drafts</a></li>
+                        <li>
+                            <a href="~/Mailbox/Inbox?flag=Junk"><i class="fa fa-filter"></i>Junk</a>
+                        <li><a href="~/Mailbox/Inbox?flag=Trash"><i class="fa fa-trash-o"></i>Trash</a></li>
+                    </ul>
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+        <!-- /.col -->
+
+        <div class="col-md-10">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Reply</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="form-group">
+                        @Html.TextBoxFor(m => m.ToAddress, new { @class = "form-control", @placeholder = "To:" })
+                        <span class="pull-right"><label id="LblCC" onclick="ShowDivCC()">Cc</label> <label id="LblBCC" onclick="ShowDivBCC()">Bcc</label></span>
+                    </div>
+                    <div class="form-group" hidden id="DivCC">
+                        @Html.TextBoxFor(m => m.CCAddress, new { @class = "form-control", @placeholder = "Cc:" })
+                    </div>
+                    <div class="form-group" hidden id="DivBCC">
+                        @Html.TextBoxFor(m => m.BCCAddress, new { @class = "form-control", @placeholder = "Bcc:" })
+                    </div>
+                    <div class="form-group">
+                        @Html.TextBoxFor(m => m.Subject, new { @class = "form-control", @placeholder = "Subject:" })
+                    </div>
+                    <div class="form-group">
+                        @{
+                            var str = "";
+                            if (!(@Model.TextBody.IsEmptyOrNull()))
+                            {
+                                str = Model.TextBody.Replace("\n", "<br>");
+                            }
+                        }
+                        <textarea id="TextBody" name="TextBody" class="form-control" style="height: 300px">                   
+                            On @Model.Date.ToString("f"), @Model.FromName @Model.FromAddress wrote: <br />
+
+
+                        
+                             @if (Model.HtmlBody.IsNullOrEmpty())
+                              {
+                                    @Html.Raw(str)
+                              }
+                              else
+                              {
+                                    @Html.Raw(Model.HtmlBody)
+                              }
+                    </textarea>
+                        @*<script>
+                                 CKEDITOR.replace('TextBody');
+                            </script>*@
+                    </div>
+                    <div class="form-group">
+                        <div id="fileuploader">Upload</div>
+                    </div>
+
+                    @*<div class="form-group">
+                            <div class="btn btn-default btn-file">
+                                <i class="fa fa-paperclip"></i> Attachment
+                                @Html.TextBoxFor(model => model.File, "", new { @type = "file", @multiple = "multiple" })
+                            </div>
+                            <p class="help-block">Max. 32MB</p>
+                        </div>*@
+                </div>
+                <!-- /.box-body -->
+                <div class="box-footer">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default"><i class="fa fa-pencil"></i> Draft</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-envelope-o"></i>Send</button>
+                    </div>
+                    <button type="reset" value="Cancel" class="btn btn-default" onclick="location.href ='@Url.Action("Inbox", "Mailbox", new { flag = "Inbox", Search = "" })';"><i class="fa fa-times"></i>Discard</button>
+                </div>
+                <!-- /.box-footer -->
+            </div>
+            <!-- /. box -->
+        </div>
+
+        <!-- /.col -->
+    }
+</div>
+<!-- /.row -->
+
+<script>
+    $(function () {
+        //Add text editor
+        $("#TextBody").wysihtml5();
+    });
+</script>
+
+
+

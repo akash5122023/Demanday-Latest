@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Module Pricing";
+}
+
+@section Head {
+    <style>
+        .module-pricing .box-body {
+            background-color: #fff;
+        }
+
+        .module-pricing .module-pricing-table th,
+        .module-pricing .module-pricing-table td {
+            vertical-align: middle;
+        }
+
+        .module-pricing .module-pricing-table .price-column,
+        .module-pricing .module-pricing-table .currency-column {
+            width: 160px;
+        }
+
+        .module-pricing .module-pricing-table input.form-control {
+            max-width: 140px;
+        }
+
+        .module-pricing.is-loading .js-save {
+            pointer-events: none;
+        }
+
+        .module-pricing tbody tr.has-error input {
+            border-color: #dd4b39;
+        }
+
+        .module-pricing .table-responsive {
+            margin-top: 12px;
+        }
+    </style>
+}
+
+<div id="ModulePricingPanel" class="box box-primary module-pricing">
+    <div class="box-header with-border">
+        <h3 class="box-title">Module Pricing</h3>
+    </div>
+    <div class="box-body">
+        <p class="text-muted">
+            Update the price and currency for each module below, then click <strong>Update Pricing</strong> to save your changes.
+        </p>
+        <div class="table-responsive">
+            <table class="table table-striped module-pricing-table">
+                <thead>
+                    <tr>
+                        <th>Module</th>
+                        <th>Code</th>
+                        <th class="price-column">Price</th>
+                        <th class="currency-column">Currency</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="box-footer text-right">
+        <button type="button" class="btn btn-primary js-save">
+            <i class="fa fa-save"></i> Update Pricing
+        </button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Settings.ModulePricingPage($('#ModulePricingPanel'));
+    });
+</script>

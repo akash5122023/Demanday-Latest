@@ -1,0 +1,92 @@
+﻿
+@model IEnumerable<MailChimp.Net.Models.Member>
+@{
+    ViewBag.Title = "Members";
+}
+
+
+
+<script type="text/javascript">
+    function DeleteMember(lId, EAddress) {
+        toastr.error("<br/><button type='button' id='ConfirmYes' class='btn clear'>Yes</button>", 'Do you want to delete this Subscriber?',
+            {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "3000",
+                "timeOut": 0,
+                "extendedTimeOut": 0,
+                "tapToDismiss": false,
+                "allowHtml": true,
+                onShown: function (toast) {
+                    $("#ConfirmYes").click(function () {
+                        location.href = "/MailChimp/DeleteSubscriber?listId=" + lId + "&EmailAddress=" + EAddress;
+                    });
+                }
+            });
+    }
+    //$('input').rating();
+</script>
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">Subscribers</div></div>
+    <br />
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Source</th>
+                <th>Email marketing</th>
+                <th>Contact Rating</th>
+                <th>Date Added</th>
+                <th>Last Changed</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+            <tr>
+                <td>
+                    @Html.ActionLink(
+                                        @item.EmailAddress,
+                                        "DetailSubscriber",
+                                        "MailChimp",
+                                        new { EmailId = @item.EmailAddress, listId = @item.ListId },
+                                        new { title = "View Profile" })
+                </td>
+                <td>@item.EmailClient</td>
+                <td><span class="badge">@item.Status</span></td>
+                @*<td> <input type="hidden" class="rating" data-filled="fa fa-bell fa-3x" data-empty="fa fa-bell-o fa-3x" /></td>*@
+                <td>@item.MemberRating</td>
+                <td>@item.TimestampSignup.ToString()</td>
+                <td>@item.LastChanged.ToString()</td>
+                @if (item.Status.ToString() == "Subscribed")
+                    {
+                <td><span class="glyphicon glyphicon-edit" aria-hidden="true" onclick="location.href = '@Url.Action("UpdateSubscriber", "Mailchimp", new { listId=@item.ListId,EmailAddress=@item.EmailAddress})';"></span></td>
+                <td><span class="glyphicon glyphicon-trash" aria-hidden="true" onclick="DeleteMember('@item.ListId','@item.EmailAddress');"></span></td>
+                    }
+                    else if (item.Status.ToString() == "Unsubscribed")
+                    {
+                <td></td>
+                <td><span class="glyphicon glyphicon-trash" aria-hidden="true" onclick="DeleteMember('@item.ListId','@item.EmailAddress');"></span></td>
+                    }
+            </tr>
+            }
+
+        </tbody>
+    </table>
+    <div class="row">
+        <div class="col-sm-1">
+            <button type="button" id="Back" name="Back" class="btn btn-block navbar-btn" title="Back to List" onclick="location.href = '@Url.Action("GetList", "MailChimp")';">Back</button>
+        </div>
+    </div>
+</div>
+
+

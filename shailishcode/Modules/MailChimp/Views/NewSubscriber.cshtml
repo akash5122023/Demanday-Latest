@@ -1,0 +1,140 @@
+﻿
+@model  AdvanceCRM.Modules.MailChimp.Models.ModelSubscriber
+@{
+    ViewBag.Title = "NewSubscriber";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-select.css" rel="stylesheet" />
+<style>
+    .kv-reqd {
+        color: red;
+        font-family: monospace;
+        font-weight: normal;
+    }
+</style>
+<!-- jQuery -->
+
+<script src="~/Scripts/bootstrap-select.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        jQuery.validator.addMethod("aFunction",
+            function (value, element) {
+                if (value == "none")
+                    return false;
+                else
+                    return true;
+            },
+            "Please select value");
+
+        $('#SubscriberFormId').validate({
+            errorClass: 'help-block animation-slideDown', // You can change the animation class for a different entrance animation - check animations page
+            errorElement: 'div',
+            errorPlacement: function (error, e) {
+                e.parents('.form-group > div').append(error);
+            },
+            highlight: function (e) {
+
+                $(e).closest('.form-group').removeClass('has-success has-error').addClass('has-error');
+                $(e).closest('.help-block').remove();
+            },
+            success: function (e) {
+                e.closest('.form-group').removeClass('has-success has-error');
+                e.closest('.help-block').remove();
+            },
+            rules: {
+                ListId: {
+                    required: true,
+                    aFunction: true
+                },
+                FirstName: "required",
+                LastName: "required",
+                EmailAddress: {
+                    required: true,
+                    email: true
+                }
+            },
+            // Specify the validation error messages
+            messages: {
+                ListId: "Please Select List",
+                FirstName: "Please enter first name",
+                LastName: "Please enter last name",
+                EmailAddress: "Please enter a valid email address"
+            }
+            //submitHandler: function (form) {
+            //    form.submit();
+            //}
+        });
+    });
+</script>
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title">
+        <div class="title-text">Add a Subscriber</div>
+    </div>
+
+
+    <br />
+    @using (Html.BeginForm("NewSubscriber", "MailChimp", FormMethod.Post, new { @id = "SubscriberFormId", @class = "form-horizontal", role = "form" }))
+    {
+    @Html.AntiForgeryToken()
+    <div class="container">
+        <form>
+
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforEmailAddress" class="col-form-label">Email Address <span class="kv-reqd">*</span></label>
+                    @Html.TextBoxFor(model => model.EmailAddress, new { @class = "form-control", @type = "email" })
+                    @Html.ValidationMessageFor(m => m.EmailAddress, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforList" class="col-form-label">List <span class="kv-reqd">*</span></label>
+                    <select class="selectpicker bs-select form-control"
+                            name="ListId"
+                            data-show-subtext="true"
+                            data-live-search="true" title="Select List">
+                        @if (ViewBag.ListData is IEnumerable<MailChimp.Net.Models.List> lists)
+                        {
+                            foreach (var item in lists)
+                            {
+                                <option value="@item.Id">
+                                    @item.Name
+                                </option>
+                            }
+                        }
+                    </select>
+                    <input type="hidden" name="SearchButton" value="true">
+                    @Html.ValidationMessageFor(m => m.ListId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforFirstName" class="col-form-label">First Name<span class="kv-reqd">*</span></label>
+                    @Html.EditorFor(m => m.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 col-md-3 col-lg-3">
+                    <label for="LabelforLasttName" class="col-form-label">Last Name<span class="kv-reqd">*</span></label>
+                    @Html.EditorFor(m => m.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(m => m.LastName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="offset-sm-2 col-sm-10">
+                    @Html.HiddenFor(m => m.Id)
+                    <button type="submit" class="btn btn-primary">Subscribe</button>
+                    <button type="button" class="btn btn-primary" title="Cancel" onclick="location.href = '@Url.Action("GetList", "Mailchimp")';">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    }
+</div>
+
+

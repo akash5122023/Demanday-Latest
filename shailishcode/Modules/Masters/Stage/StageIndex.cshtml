@@ -1,0 +1,14 @@
+﻿@inject Serenity.ITextLocalizer Localizer
+@{
+     ViewData["Title"] = Localizer.Get("Db.Masters.Stage.EntityPlural");
+}
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Masters.StageGrid($('#GridDiv'), {}).init();
+
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });
+</script>

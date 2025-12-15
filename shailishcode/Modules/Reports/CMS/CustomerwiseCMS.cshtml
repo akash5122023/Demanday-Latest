@@ -1,0 +1,239 @@
+﻿@model AdvanceCRM.Reports.CMSReportModel
+
+@*<strong>CustomerWise CMS</strong>
+    &nbsp;&nbsp; - &nbsp;&nbsp; <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() <strong>To:</strong>  @Model.Request.DateTo.ToDateFormat() &nbsp;&nbsp; - &nbsp;&nbsp; <strong>Client Name:</strong> @Model.Customers.Name
+    <hr />
+    <table style="width:100%; border:groove" , border="1">
+        <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">CMS No.</th><th style="text-align:center">Project Name</th><th style="text-align:center">Complaint Name</th><th style="text-align:center">Stages.</th><th style="text-align:center">Details</th><th style="text-align:center">Date</th></tr>
+
+        @{ int cnt = 1;}
+
+        @foreach (var item in Model.Projects)
+        {
+            <tr>
+                <td style="text-align:center; width:10%">
+                    @cnt
+                </td>
+
+                <td style="text-align:center; width:10%">
+                    @item.Id
+                </td>
+
+                <td style="width:15%">
+                    &nbsp;&nbsp;@item.Project
+                </td>
+                <td style="width:25%">
+                    &nbsp;&nbsp;@item.ComplaintComplaintType
+                </td>
+                <td style="width:25%">
+                    &nbsp;&nbsp;@item.Stage
+                </td>
+                <td style="width:55%">
+                    &nbsp;&nbsp;@item.Instructions
+                </td>
+                <td style="width:35%">
+                    &nbsp;&nbsp;@item.Date.Value.ToShortDateString()
+                </td>
+
+
+            </tr>
+            cnt = cnt + 1;
+        }
+    </table>*@
+
+
+
+
+
+<style>
+    .limiter {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    table {
+        border-spacing: 1;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        width: 100%;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .container-table100 {
+        width: 100%;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 33px 30px;
+    }
+
+    .wrap-table100 {
+        width: 100%;
+    }
+
+    table thead tr {
+        height: 60px;
+        background: #36304a;
+    }
+
+    .table100-head th {
+        font-family: OpenSans-Regular;
+        font-size: 18px;
+        color: #fff;
+        line-height: 1.2;
+        font-weight: unset;
+    }
+
+    .column1 {
+        width: 100px;
+        padding-left: 40px;
+    }
+
+    .column2 {
+        width: 100px;
+    }
+
+    .column3 {
+        width: 180px;
+    }
+
+    .column4 {
+        width: 210px;
+    }
+
+    .column5 {
+        width: 250px;
+    }
+
+    .column6 {
+        width: 200px;
+    }
+
+    .column7 {
+        width: 100px;
+    }
+
+    .column8 {
+        width: 250px;
+    }
+
+    .column9 {
+        width: 150px;
+    }
+
+    .column10 {
+        width: 200px;
+    }
+
+    /*table td, table th {
+            text-align: left;
+        }
+            */
+    table td, table th {
+        padding-left: 8px;
+    }
+
+    table * {
+        position: relative;
+    }
+
+    tbody {
+        display: table-row-group;
+        vertical-align: middle;
+        unicode-bidi: isolate;
+        border-color: inherit;
+    }
+
+        tbody tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+    table tbody tr {
+        height: 50px;
+    }
+
+    tbody tr {
+        font-family: OpenSans-Regular;
+        color: #808080;
+        line-height: 1.2;
+        font-weight: unset;
+        font-size: 20px;
+    }
+
+        tbody tr:hover {
+            color: #555555;
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+</style>
+<div class="limiter">
+
+    <div class="container-table100">
+        <div class="wrap-table100">
+            <div class="table100">
+
+                <h3>CustomerWise CMS</h3>
+                <br /> <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() <strong>To:</strong>  @Model.Request.DateTo.ToDateFormat() &nbsp;&nbsp; - &nbsp;&nbsp; <strong>Client Name:</strong> @Model.Customers.Name
+
+                <hr />
+                <table>
+                    <thead>
+                        <tr class="table100-head">
+                            <th class="column1">Sr No.</th>
+                            <th class="column2">CMS No.</th>
+                            <th class="column3">Date</th>
+                            <th class="column4">Project Name</th>
+                            <th class="column5">Complaint Name</th>
+                            <th class="column6">Stages</th>
+                            <th class="column7">Details</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{int cnt = 1;}
+
+                        @foreach (var item in Model.Projects)
+                        {
+                            <tr>
+                                <td class="column1">
+                                    @cnt
+                                </td>
+
+                                <td class="column2">
+                                    @item.Id
+                                </td>
+                                <td class="column3">
+                                    @item.Date.Value.ToShortDateString()
+                                </td>
+                                <td class="column4">
+                                    @item.Project
+                                </td>
+                                <td class="column5">
+                                    @item.ComplaintComplaintType
+                                </td>
+                                <td class="column6">
+                                    @item.Stage
+                                </td>
+                                <td class="column7">
+                                    @item.Instructions
+                                </td>
+
+
+                            </tr>
+                            cnt = cnt + 1;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

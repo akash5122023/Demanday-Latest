@@ -1,0 +1,191 @@
+﻿@model AdvanceCRM.Reports.InventoryReportModel
+
+<!--<strong>Divisionwise Stock Report, Division: @Model.Division.ProductsDivision </strong>
+<hr />
+<table style="width:100%; border:groove" , border="1">
+    <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">Product</th><th style="text-align:center">Quantity</th><th style="text-align:center">Avg Value</th>@*<th style="text-align:center">Current Value</th>*@</tr>
+
+  @*  @{ int cnt = 1; double pqty = 0; double sqty = 0; double prqty = 0; double srqty = 0; double cqty = 0; double qty = 0;}
+
+    @foreach (var item in Model.Products)
+    {
+        double avgsum = 0;
+
+        pqty = (double)Model.PurchaseProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+        sqty = (double)Model.SalesProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+        prqty = (double)Model.PurchaseReturnProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+
+        srqty = (double)Model.SalesReturnProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+        cqty = (double)Model.ChallanProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+        qty = (pqty + srqty) - (sqty + prqty + cqty);
+
+        if (pqty > 0)
+        {
+            avgsum = (double)Model.PurchaseProducts.Where(y => y.ProductsName == item.Name).Average(x => x.Price);
+        }
+
+        if (qty != 0)
+        {
+    <tr>
+        <td style="text-align:center; width:20%">
+            @cnt
+        </td>
+
+        <td>
+            &nbsp;&nbsp;@item.Name
+        </td>
+        <td style="text-align:right">
+            @qty &nbsp;&nbsp;
+        </td>
+        <td style="text-align:right">
+            @{double amt = avgsum * qty;}
+            @amt.ToString("#,##0.00") &nbsp;&nbsp;
+        </td>
+        @*<td>
+                    @{double actamt = (double)item. * pqty;}
+                    &nbsp;&nbsp; @amt
+            </td>*@
+    </tr>
+
+            cnt = cnt + 1;
+        }
+    }
+</table>-->
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    Divisionwise Stock Report, Division: @Model.Division.ProductsDivision
+</div>
+
+<table>
+    <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">Product</th><th style="text-align:center">Quantity</th><th style="text-align:center">Avg Value</th>@*<th style="text-align:center">Current Value</th>*@</tr>
+
+    @{ int cnt = 1; double pqty = 0; double sqty = 0; double prqty = 0; double srqty = 0; double cqty = 0; double qty = 0;}
+
+    @foreach (var item in Model.Products)
+    {
+        double avgsum = 0;
+
+        pqty = (double)Model.PurchaseProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+        sqty = (double)Model.SalesProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+        prqty = (double)Model.PurchaseReturnProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+
+        srqty = (double)Model.SalesReturnProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+        cqty = (double)Model.ChallanProducts.Where(y => y.ProductsName == item.Name).Sum(x => x.Quantity);
+
+        qty = (pqty + srqty) - (sqty + prqty + cqty);
+
+        if (pqty > 0)
+        {
+            avgsum = (double)Model.PurchaseProducts.Where(y => y.ProductsName == item.Name).Average(x => x.Price);
+        }
+
+        if (qty != 0)
+        {
+            <tr>
+                <td style="text-align:center; width:20%">
+                    @cnt
+                </td>
+
+                <td>
+                    &nbsp;&nbsp;@item.Name
+                </td>
+                <td style="text-align:right">
+                    @qty &nbsp;&nbsp;
+                </td>
+                <td style="text-align:right">
+                    @{double amt = avgsum * qty;}
+                    @amt.ToString("#,##0.00") &nbsp;&nbsp;
+                </td>
+                @*<td>
+                            @{double actamt = (double)item. * pqty;}
+                            &nbsp;&nbsp; @amt
+                    </td>*@
+            </tr>
+
+            cnt = cnt + 1;
+        }
+    }
+</table>
+
+<div class="footer-note">
+    <em>Report generated automatically. Powered by BizPlus ERP.</em>
+</div>

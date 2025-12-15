@@ -1,0 +1,207 @@
+﻿
+@model AdvanceCRM.Reports.CMSReportModel
+
+<style>
+    .limiter {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    table {
+        border-spacing: 1;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        width: 100%;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .container-table100 {
+        width: 100%;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 33px 30px;
+    }
+
+    .wrap-table100 {
+        width: 100%;
+    }
+
+    table thead tr {
+        height: 60px;
+        background: #36304a;
+    }
+
+    .table100-head th {
+        font-family: OpenSans-Regular;
+        font-size: 18px;
+        color: #fff;
+        line-height: 1.2;
+        font-weight: unset;
+    }
+
+    .column1 {
+        width: 100px;
+        padding-left: 40px;
+    }
+
+    .column2 {
+        width: 100px;
+    }
+
+    .column3 {
+        width: 180px;
+    }
+
+    .column4 {
+        width: 210px;
+    }
+
+    .column5 {
+        width: 250px;
+    }
+
+    .column6 {
+        width: 100px;
+    }
+
+    .column7 {
+        width: 250px;
+    }
+
+    .column8 {
+        width: 250px;
+    }
+
+    .column9 {
+        width: 150px;
+    }
+
+    .column10 {
+        width: 200px;
+    }
+
+    /*table td, table th {
+            text-align: left;
+        }
+            */
+    table td, table th {
+        padding-left: 8px;
+    }
+
+    table * {
+        position: relative;
+    }
+
+    tbody {
+        display: table-row-group;
+        vertical-align: middle;
+        unicode-bidi: isolate;
+        border-color: inherit;
+    }
+
+        tbody tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+    table tbody tr {
+        height: 50px;
+    }
+
+    tbody tr {
+        font-family: OpenSans-Regular;
+        color: #000;
+        line-height: 1.2;
+        font-weight: unset;
+        font-size: 20px;
+    }
+
+        tbody tr:hover {
+            color: #555555;
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+</style>
+<div class="limiter">
+
+    <div class="container-table100">
+        <div class="wrap-table100">
+            <div class="table100">
+
+                <h3>ProjectWise CMS</h3>
+                <br /> <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() <strong>To:</strong>  @Model.Request.DateTo.ToDateFormat() &nbsp;&nbsp; - &nbsp;&nbsp; <strong>Project:</strong> @Model.ProjectName.Project
+
+                <hr />
+                <table>
+                    <thead>
+                        <tr class="table100-head">
+                            <th class="column1">Sr No.</th>
+                            <th class="column2">CMS No.</th>
+                            <th class="column3">Date</th>
+                            <th class="column4">Client Name</th>
+                            <th class="column5">Product Name</th>
+                            <th class="column6">Quantity</th>
+                            <th class="column7">Complaint</th>
+                            <th class="column8">Detail</th>
+                            <th class="column9">Assigned By</th>
+                            <th class="column10">Representative Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{int cnt = 1;}
+
+                        @foreach (var item in Model.Projects)
+                        {
+                            <tr>
+                                <td class="column1">
+                                    @cnt
+                                </td>
+
+                                <td class="column2">
+                                    @item.Id
+                                </td>
+                                <td class="column3">
+                                    &nbsp;&nbsp;@item.Date.Value.ToShortDateString()
+                                </td>
+                                <td class="column4">
+                                    &nbsp;&nbsp;@item.ContactsName
+                                </td>
+                                <td class="column5">
+                                    &nbsp;&nbsp;@item.ProductsName
+                                </td>
+                                <td class="column6">
+                                    &nbsp;&nbsp;@item.Qty
+                                </td>
+                                <td class="column7">
+                                    &nbsp;&nbsp;@item.ComplaintComplaintType
+                                </td>
+                                <td class="column8">
+                                    &nbsp;&nbsp;@item.Instructions
+                                </td>
+                                <td class="column9">
+                                    &nbsp;&nbsp;@item.AssignedToDisplayName
+                                </td>
+                                <td class="column10">
+                                    &nbsp;&nbsp;@item.Representative
+                                </td>
+
+
+
+                            </tr>
+                            cnt = cnt + 1;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,885 @@
+﻿@model AdvanceCRM.Purchase.PurchaseOrderReportData
+@inject Serenity.ITextLocalizer Localizer
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    #datatable {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #datatable td, #datatable th {
+            border: 1px solid #ddd;
+            padding: 2px
+        }
+
+    header {
+        padding: 10px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #AAAAAA;
+    }
+
+    #logo {
+        float: left;
+        margin-top: 8px;
+    }
+
+    #company {
+        width: 50%;
+        float: right;
+        text-align: right;
+    }
+
+    #client {
+        border-left: 6px solid #0087C3;
+    }
+
+    /* #terms {
+        padding-left: 6px;
+        border-left: 6px solid #0087C3;
+    }*/
+</style>
+
+<script type="text/javascript">
+
+    var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+    var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function toWords(num) {
+        if ((num = num.toString()).length > 9) return 'overflow';
+        n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return; var str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only ' : '';
+        return str.trim();
+    }
+</script>
+
+
+
+
+
+
+
+<body>
+    <table style="width: 100% " border="0">
+        @if (Model.Company.HeaderImage != null)
+        {
+            <tr style="border:none !important;">
+                @{ var headerHeight = Model.Company.HeaderHeight?.ToString();
+                   var headerWidth = Model.Company.HeaderWidth?.ToString(); }
+                <td align="center" style="border:none !important; width:100%">
+                    <img src="~/upload/@Model.Company.HeaderImage"
+                         height="@headerHeight" width="@headerWidth" />
+                </td>
+            </tr>
+        }
+    </table>
+    @if (Model.Company.HeaderContent != null)
+    {
+        @Html.Raw(Model.Company.HeaderContent);
+    }
+    <header class="clearfix">
+        @if (Model.Company.CompanyDetails != null && Model.Company.CompanyDetails == true)
+        {
+            if (Model.Company.Logo != null)
+            {
+                <div id="logo">
+                    <img src="~/upload/@Model.Company.Logo" height="@Model.Company.LogoHeight.Value.ToString()" width="@Model.Company.LogoWidth.Value.ToString()" />
+                </div>
+            }
+            <div id="company">
+                <h4 class="name">@Model.Company.Name</h4>
+                <div>@Model.Company.Address</div>
+                <div>@Model.Company.Phone</div>
+                <div>GSTIN: @Model.Company.GSTIN</div>
+                <div>PAN No: @Model.Company.PANNo</div>
+            </div>
+        }
+    </header>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <table style="width:100%">
+        <tr>
+            <td>
+                <table style="width:100%; border-collapse:collapse" id="client">
+                    <tr>
+                        <td valign="top" style="width: 30%; padding: 10px;">
+                            <strong>&nbsp; Name </strong>: @Model.PurchaseOrder.ContactsName<br />
+                            <strong>&nbsp; Phone </strong>: @Model.PurchaseOrder.ContactsPhone<br />
+                            <strong>&nbsp; Address </strong>: @Model.PurchaseOrder.ContactsAddress<br />
+                            @if (Model.PurchaseOrder.ContactsGstin != null)
+                            {
+                                <strong>&nbsp; GSTIN :</strong> @Model.PurchaseOrder.ContactsGstin <br />
+                            }
+                            @if (Model.PurchaseOrder.ContactsPanNo != null)
+                            {
+                                <strong>&nbsp; PAN No :</strong> @Model.PurchaseOrder.ContactsPanNo <br />
+                            }
+                        </td>
+
+
+                        <td valign="top" style="width: 40%; padding: 10px;">
+                            <strong>Billing Address:</strong>
+                            <span style="white-space: pre-line;">
+                                @Model.PurchaseOrder.ContactsAddress
+                            </span>
+                            <br /><br />
+                            <strong>Shipping Address:</strong>
+                            <span style="white-space: pre-line;">
+                                @if (Model.PurchaseOrder.ShippingAddress != null)
+                                {
+                                    @Model.PurchaseOrder.ShippingAddress
+                                }
+                                else
+                                {
+                                    @Model.PurchaseOrder.ContactsAddress
+                                }
+                            </span>
+                        </td>
+
+
+
+                        <td align="right" style="width: 30%; padding: 10px; vertical-align: middle;">
+                            <h3>Purchase Order<br /></h3>
+
+                            <strong>&nbsp; PO No </strong>:
+                            @if (Model.PurchaseOrder.Date.HasValue)
+                            {
+                                @Model.PurchaseOrder.Date.Value.Year.ToString()
+                            }
+                            /@Model.PurchaseOrder.PurchaseOrderNo
+                            <br />
+
+                            <strong> Date </strong>:
+                            @if (Model.PurchaseOrder.Date.HasValue)
+                            {
+                                @Model.PurchaseOrder.Date.Value.ToString("dd MMM yyyy")
+                            }
+                            else
+                            {
+                                @:N/A
+                            }
+                            <br />
+
+                            <strong>&nbsp; Valid Date </strong>:
+                            @if (Model.PurchaseOrder.DueDate.HasValue)
+                            {
+                                @Model.PurchaseOrder.DueDate.Value.ToString("dd MMM yyyy");
+                            }
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+
+        @*Description*@
+        @if (Model.PurchaseOrder.Description != null)
+        {
+            <tr>
+                <td>
+                    &nbsp;&nbsp;&nbsp; @Model.PurchaseOrder.Description
+                </td>
+            </tr>
+        }
+
+
+        @* Products *@
+        <tr>
+            <td colspan="8" align="center" class="bg-gray-light">
+                &nbsp;
+            </td>
+        </tr>
+    </table>
+
+    @{
+        bool stateChanged = false;
+
+        if (Model.PurchaseOrder.ContactsStateId != Model.Company.StateId)
+        {
+            stateChanged = true;
+        }
+        else
+        {
+            stateChanged = false;
+        }
+    }
+
+    <table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+        @{ double discountTot = (Model.PurchaseOrderProducts.Sum(x => x.Discount.Value)); double discountAmtTot = (Model.PurchaseOrderProducts.Sum(x => x.DiscountAmount.Value));
+            string currencyUnit = (Model.taxable ? "" : Model.PurchaseOrder.ToCurrency.GetEnumDescription(Localizer));}
+
+        @if ((discountTot > 0) || (discountAmtTot > 0))
+        {
+            <tr class="bg-gray">
+                <th align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;HSN&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;Product / Service&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;Rate&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;Qty&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;Discount&nbsp;</strong></th>
+                @if (Model.PurchaseOrder.Conversion == null)
+                {
+                    <th align="center"><strong>&nbsp;Tax1&nbsp;</strong></th>
+                    <th align="center"><strong>&nbsp;Tax2&nbsp;</strong></th>
+                    if (Model.taxable == true)
+                    {
+                        <th align="center"><strong>Tax</strong></th>
+                    }
+                }
+                <th align="center"><strong>Total</strong></th>
+                <th align="center"><strong>Grand Total</strong></th>
+            </tr>
+        }
+        else
+        {
+            <tr class="bg-gray">
+                <th align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;HSN&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;Product / Service&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;Rate&nbsp;</strong></th>
+                <th align="center"><strong>&nbsp;Qty&nbsp;</strong></th>
+                @if (Model.PurchaseOrder.Conversion == null)
+                {
+                    <th align="center"><strong>&nbsp;Tax1&nbsp;</strong></th>
+                    <th align="center"><strong>&nbsp;Tax2&nbsp;</strong></th>
+                    if (Model.taxable == true)
+                    {
+                        <th align="center"><strong>Tax</strong></th>
+                    }
+                }
+                <th align="center"><strong>Total</strong></th>
+                <th align="center"><strong>Grand Total</strong></th>
+            </tr>
+        }
+
+        @{ int srno = 1; decimal Total = 0; decimal gTotal = 0; decimal Tax1Total = 0; decimal Tax2Total = 0;}
+        @foreach (var qp in Model.PurchaseOrderProducts)
+        {
+            if ((discountTot > 0) || (discountAmtTot > 0))
+            {
+                <tr>
+                    <td align="center">@srno</td>
+                    <td align="Left">&nbsp;@qp.ProductsHsn</td>
+                    <td align="left">
+                        &nbsp;@qp.ProductsName
+                        <br />
+                        <span style="white-space: pre-line; font-size:smaller">
+                            <i>@qp.ProductsDescription</i>
+                            @if (qp.ProductsTechSpecs.IsNullOrEmpty() == false)
+                            {
+                                <b>Tech Specs: </b><i>@qp.ProductsTechSpecs</i>
+                            }
+                        </span>
+                    </td>
+                    @if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        decimal pri = Convert.ToDecimal(@qp.Price.Value);
+                        decimal pric = (pri) * Convert.ToDecimal(Model.PurchaseOrder.Conversion.Value);
+                        <td align="right">&nbsp;@pric.ToString("#,##0.00")&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td align="right">&nbsp;@qp.Price.Value.ToString("#,##0.00")&nbsp;</td>
+                    }
+                    <td align="center">@qp.Quantity.Value @qp.Unit&nbsp;</td>
+                    <td align="right">
+                        @qp.Discount.Value%&nbsp;@if (qp.DiscountAmount.Value > 0)
+                        {<text>&amp; Amt:</text>@qp.DiscountAmount.Value}
+                    </td>
+                    @if (Model.PurchaseOrder.Conversion == null)
+                    {
+                        if (stateChanged == true)
+                        {
+                            double totTA = (double)qp.Tax1Amount.Value + (double)qp.Tax2Amount;
+                            <td align="center">
+                                @if (totTA > 0)
+                                {
+                                    <text>
+                                        IGST: (@(qp.Percentage1 + qp.Percentage2)%)
+                                        <br />Amount: @totTA.ToString("#,##0.00")&nbsp;
+                                    </text>
+                                }
+                                else
+                                {
+                                    <text>&nbsp; 0</text>
+                                }
+                            </td>
+                            <td align="center">&nbsp;0</td>
+                        }
+                        else
+                        {
+                            <td align="center">@qp.TaxType1 (@qp.Percentage1%) <br />&nbsp;Amount: @qp.Tax1Amount.Value.ToString("#,##0.00")&nbsp;</td>
+                            <td align="center">@qp.TaxType2 (@qp.Percentage2%) <br />&nbsp;Amount: @qp.Tax2Amount.Value.ToString("#,##0.00")&nbsp;</td>
+                        }
+                    }
+                    @if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        decimal line = Convert.ToDecimal(qp.LineTotal.Value);
+                        decimal linet = (line) * Convert.ToDecimal(Model.PurchaseOrder.Conversion.Value);
+                        <td align="right">&nbsp;@linet.ToString("#,##0.00")&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td align="right">@qp.LineTotal.Value.ToString("#,##0.00")&nbsp;</td>
+                    }
+                    @if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        decimal gra = Convert.ToDecimal(qp.GrandTotal.Value);
+                        decimal grand = (gra) * Convert.ToDecimal(Model.PurchaseOrder.Conversion.Value);
+                        <td align="right">&nbsp;@grand.ToString("#,##0.00")&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td align="right">@qp.GrandTotal.Value.ToString("#,##0.00")&nbsp;</td>
+                    }
+
+
+                    @{
+                        Tax1Total = Tax1Total + (decimal)qp.Tax1Amount.Value;
+                        Tax2Total = Tax2Total + (decimal)qp.Tax2Amount.Value;
+
+                        Total = Total + qp.LineTotal.Value;
+                        gTotal = gTotal + qp.GrandTotal.Value;
+
+                        srno++;
+                    }
+
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td align="center">@srno</td>
+                    <td align="Left">&nbsp;@qp.ProductsHsn</td>
+                    <td align="left">
+                        &nbsp;@qp.ProductsName
+                        <br />
+                        <span style="white-space: pre-line; font-size:smaller">
+                            <i>@qp.ProductsDescription</i>
+                            @if (qp.ProductsTechSpecs.IsNullOrEmpty() == false)
+                            {
+                                <b>Tech Specs: </b><i>@qp.ProductsTechSpecs</i>
+                            }
+                        </span>
+                    </td>
+                    @if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        decimal pri = Convert.ToDecimal(@qp.Price.Value);
+                        // decimal pric = (pri) * Convert.ToDecimal(Model.PurchaseOrder.Conversion.Value);
+                        <td align="right">&nbsp;@pri.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td align="right">&nbsp;@qp.Price.Value.ToString("#,##0.00")&nbsp;</td>
+                    }
+                    <td align="center">@qp.Quantity.Value @qp.Unit&nbsp;</td>
+                    @if (Model.PurchaseOrder.Conversion == null)
+                    {
+                        if (stateChanged == true)
+                        {
+                            double totTA = (double)qp.Tax1Amount.Value + (double)qp.Tax2Amount;
+                            <td align="center">
+                                @if (totTA > 0)
+                                {
+                                    <text>
+                                        IGST: (@(qp.Percentage1 + qp.Percentage2)%)
+                                        <br />Amount: @totTA.ToString("#,##0.00")&nbsp;
+                                    </text>
+                                }
+                                else
+                                {
+                                    <text>&nbsp; 0</text>
+                                }
+                            </td>
+                            <td align="center">&nbsp;0</td>
+                        }
+                        else
+                        {
+                            <td align="center">@qp.TaxType1 (@qp.Percentage1%) <br />&nbsp;Amount: @qp.Tax1Amount.Value.ToString("#,##0.00")&nbsp;</td>
+                            <td align="center">@qp.TaxType2 (@qp.Percentage2%) <br />&nbsp;Amount: @qp.Tax2Amount.Value.ToString("#,##0.00")&nbsp;</td>
+                        }
+                    }
+                    @if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        decimal line = Convert.ToDecimal(qp.LineTotal.Value);
+                        // decimal linet = (line) * Convert.ToDecimal(Model.PurchaseOrder.Conversion.Value);
+                        <td align="right">&nbsp;@line.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td align="right">@qp.LineTotal.Value.ToString("#,##0.00")&nbsp;</td>
+                    }
+                    @if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        decimal gra = Convert.ToDecimal(qp.LineTotal.Value);
+                        // decimal grand = (gra) * Convert.ToDecimal(Model.PurchaseOrder.Conversion.Value);
+                        <td align="right">&nbsp;@gra.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td align="right">@qp.GrandTotal.Value.ToString("#,##0.00")&nbsp;</td>
+                    }
+
+
+                    @{
+                        Tax1Total = Tax1Total + (decimal)qp.Tax1Amount.Value;
+                        Tax2Total = Tax2Total + (decimal)qp.Tax2Amount.Value;
+
+                        Total = Total + qp.LineTotal.Value;
+                        gTotal = gTotal + qp.GrandTotal.Value;
+
+                        srno++;
+                    }
+
+                </tr>
+            }
+        }
+
+        @{ int diff;
+
+            if (Model.PurchaseOrder.Lines != null)
+            {
+                diff = (int)Model.PurchaseOrder.Lines - srno;
+            }
+            else
+            {
+                diff = 10 - srno;
+            }
+        }
+
+        @for (int i = diff; i > 0; i--)
+        {
+            <tr>
+
+                @if ((discountTot > 0) || (discountAmtTot > 0))
+                {
+                    if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    }
+                }
+                else
+                {
+                    if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    }
+                }
+            </tr>
+        }
+
+        <tr>
+            @if (Model.taxable == true)
+            {
+                if ((discountTot > 0) || (discountAmtTot > 0))
+                {
+                    if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        <td colspan="8" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td colspan="11" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+                    }
+                }
+                else
+                {
+                    if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        <td colspan="8" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td colspan="10" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+                    }
+                }
+            }
+            else
+            {
+                if ((discountTot > 0) || (discountAmtTot > 0))
+                {
+                    if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        <td colspan="8" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td colspan="10" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+                    }
+                }
+                else
+                {
+                    if (Model.PurchaseOrder.Conversion != null)
+                    {
+                        <td colspan="7" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+                    }
+                    else
+                    {
+                        <td colspan="9" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+                    }
+
+                }
+            }
+        </tr>
+
+        @* Total *@
+        <tr>
+            @if ((discountTot > 0) || (discountAmtTot > 0))
+            {
+                if (Model.PurchaseOrder.Conversion != null)
+                {
+                    decimal gtt = (Total);
+                    <td colspan="6" align="right"><strong> Total:&nbsp;</strong></td>
+                    <td align="right"><strong>@gtt.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+                }
+                else
+                {
+                    <td colspan="8" align="right"><strong> Total:&nbsp;</strong></td>
+                    <td align="right"><strong>@Total.ToString("#,##0.00")&nbsp;</strong></td>
+                }
+            }
+            else
+            {
+                if (Model.PurchaseOrder.Conversion != null)
+                {
+                    decimal gtt = (Total);
+                    <td colspan="6" align="right"><strong> Total:&nbsp;</strong></td>
+                    <td align="right"><strong>@gtt.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+                }
+                else
+                {
+                    <td colspan="8" align="right"><strong> Total:&nbsp;</strong></td>
+
+                    <td align="right"><strong> @Total.ToString("#,##0.00") &nbsp;</strong></td>
+
+                }
+            }
+
+        </tr>
+
+        @* Tax1Amount *@
+        <tr>
+            @foreach (var item in Model.PurchaseOrderProducts.Select(x => x.TaxType1).Distinct())
+            {
+                if ((!item.IsEmptyOrNull()))
+                {
+                    if (stateChanged == true)
+                    {
+                        double totIGST = (double)Tax1Total + (double)Tax2Total;
+
+                        if ((discountTot > 0) || (discountAmtTot > 0))
+                        {
+                            if (Model.PurchaseOrder.Conversion == null)
+
+                            {
+                                <td colspan="9" align="right"><strong> IGST:&nbsp;</strong></td>
+                            }
+                        }
+                        else
+                        {
+                            if (Model.PurchaseOrder.Conversion == null)
+                            {
+                                <td colspan="8" align="right"><strong> IGST:&nbsp;</strong></td>
+                            }
+                        }
+                        if (Model.PurchaseOrder.Conversion == null)
+                        {
+                            <td align="right"><strong>@totIGST.ToString("#,##0.00")&nbsp;</strong></td>
+                        }
+                    }
+                    else
+                    {
+                        if ((discountTot > 0) || (discountAmtTot > 0))
+                        {
+                            if (Model.PurchaseOrder.Conversion == null)
+                            {
+                                <td colspan="9" align="right"><strong> @item:&nbsp;</strong></td>
+                            }
+
+                        }
+                        else
+                        {
+                            if (Model.PurchaseOrder.Conversion == null)
+                            {
+                                <td colspan="8" align="right"><strong> @item:&nbsp;</strong></td>
+                            }
+
+                        }
+                        if (Model.PurchaseOrder.Conversion == null)
+                        {
+                            <td align="right"><strong> @Tax1Total.ToString("#,##0.00") &nbsp;</strong></td>
+                        }
+                    }
+                }
+            }
+        </tr>
+
+        @* Tax2Amount *@
+        <tr>
+            @foreach (var item in Model.PurchaseOrderProducts.Select(x => x.TaxType2).Distinct())
+            {
+                if ((!item.IsEmptyOrNull()))
+                {
+                    if (stateChanged == true)
+                    {
+
+                    }
+                    else
+                    {
+                        if ((discountTot > 0) || (discountAmtTot > 0))
+                        {
+                            if (Model.PurchaseOrder.Conversion == null)
+                            {
+                                <td colspan="9" align="right"><strong> @item:&nbsp;</strong></td>
+                            }
+                        }
+                        else
+                        {
+                            if (Model.PurchaseOrder.Conversion == null)
+                            {
+                                <td colspan="8" align="right"><strong> @item:&nbsp;</strong></td>
+                            }
+                        }
+                        if (Model.PurchaseOrder.Conversion == null)
+                        {
+                            <td align="right"><strong>@Tax2Total.ToString("#,##0.00")&nbsp;</strong></td>
+                        }
+                    }
+                }
+            }
+        </tr>
+
+        @* TaxTotalAmount *@
+        <tr>
+            @{ decimal TotalTax = Tax1Total + Tax2Total;}
+            @if ((discountTot > 0) || (discountAmtTot > 0))
+            {
+                if (Model.PurchaseOrder.Conversion == null)
+                {
+                    <td colspan="9" align="right"><strong> Total Tax:&nbsp;</strong></td>
+                    <td align="right"><strong>@TotalTax.ToString("#,##0.00")&nbsp;</strong></td>
+                }
+            }
+            else
+            {
+                if (Model.PurchaseOrder.Conversion == null)
+                {
+                    <td colspan="8" align="right"><strong> Total Tax:&nbsp;</strong></td>
+                    <td align="right"><strong>@TotalTax.ToString("#,##0.00")&nbsp;</strong></td>
+                }
+            }
+        </tr>
+
+
+        @* Grand Total *@
+        <tr>
+            @if ((discountTot > 0) || (discountAmtTot > 0))
+            {
+                if (Model.PurchaseOrder.Conversion != null)
+                {
+                    decimal gtg = (Total);
+                    <td colspan="7" align="right"><strong>  Grand Total:&nbsp;</strong></td>
+                    <td align="right"><strong>@gtg.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+                }
+                else
+                {
+                    <td colspan="9" align="right"><strong> Grand Total:&nbsp;</strong></td>
+                    <td align="right"><strong>@gTotal.ToString("#,##0.00")&nbsp;</strong></td>
+                }
+            }
+            else
+            {
+                if (Model.PurchaseOrder.Conversion != null)
+                {
+
+
+                    @*decimal gtg = (Total);
+                        <td colspan="6" align="right"><strong>  Grand Total:&nbsp;</strong></td>
+                        <td align="right"><strong>@gtg.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>*@
+
+
+                    <td colspan="5" align="right">
+                        @if (Model.PurchaseOrder.DueDate != null)
+                        {
+                            <text><strong>Valid Date:</strong> @Model.PurchaseOrder.DueDate.Value.ToShortDateString() &nbsp;</text>
+                        }
+
+                    </td>
+                    decimal gtg = (Total);
+                    <td align="right"><strong>Grand Total:&nbsp;</strong></td>
+                    <td align="right"><strong>@gtg.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+
+
+
+                }
+                else
+                {
+                    @*<td colspan="8" align="right">
+                            @if (Model.PurchaseOrder.DueDate != null)
+                            {
+                                <text> &nbsp;<strong> Valid Date: </strong> @Model.PurchaseOrder.DueDate.Value.ToShortDateString() </text>
+                            }
+                        </td>*@
+                    <td colspan="8" align="right"><strong> Grand Total: &nbsp;</strong></td>
+
+                    <td align="right"><strong> @gTotal.ToString("#,##0.00") &nbsp;</strong></td>
+                }
+            }
+        </tr>
+        <tr>
+            @if (Model.PurchaseOrder.Conversion == null)
+            {
+                if ((discountTot > 0) || (discountAmtTot > 0))
+                {
+                    <td colspan="10" bgcolor="wheat">
+                        <strong>Total in Words:</strong>
+                        <script>document.write(toWords(@Convert.ToInt32(gTotal)))</script>
+                    </td>
+                }
+                else
+                {
+                    <td colspan="9" bgcolor="wheat">
+                        <strong>Total in Words:</strong>
+                        <script>document.write(toWords(@Convert.ToInt32(gTotal)))</script>
+                        Only
+                    </td>
+                }
+            }
+        </tr>
+    </table>
+
+    @* Terms *@
+    <br />
+    @if (Model.PurchaseOrderTerms.Count > 0)
+
+    {
+        //<div id="terms">
+
+        <table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+
+            <tr class="bg-gray">
+                <td style="text-align: center;font-size:16px">
+                    <strong>
+                        Terms &amp; Condition's
+                    </strong>
+                </td>
+            </tr>
+            @{ int Tsrno = 1;}
+            @foreach (var qt in Model.PurchaseOrderTerms)
+            {
+                var terms = qt.Terms.Split('$');
+                foreach (var qt1 in terms)
+                {
+                    String substr1 = " | ";
+                    string input = qt1;
+
+                    bool con = input.Contains(substr1);
+                    if (con == true)
+                    {
+                        string[] splitString = qt1.Split('|');
+                        string result1 = splitString[0].Trim();
+                        string result2 = splitString[1].Trim();
+
+
+                        <tr>
+                            <td class="notice" style="padding:1px 2px 1px 2px"><strong>@Tsrno.@result1 :</strong>&nbsp;@result2<br></td>
+                        </tr>
+
+
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="notice">@Tsrno.&nbsp;@qt1<br></td>
+                        </tr>
+
+                    }
+                    { Tsrno++; }
+                }
+
+            }
+
+        </table>
+        //</div>
+    }
+
+    @if (Model.Company.FooterImage != null)
+    {
+        <table>
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%">&nbsp; <img src="~/upload/@Model.Company.FooterImage" height="@Model.Company.FooterHeight?.ToString()" width="@Model.Company.FooterWidth?.ToString()" />&nbsp;</td>
+            </tr>
+        </table>
+    }
+
+</body>

@@ -1,0 +1,60 @@
+﻿@model AdvanceCRM.Reports.InventoryReportModel
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "Inventory Report";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+}
+
+<body>
+    <table style="width:100%; border:groove;">
+        <tr>
+            <td align="center">
+                <h3 style="text-decoration-color:burlywood">@Model.Company.Name</h3>
+                <h4>@Model.Company.Address</h4>
+                <h5>@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>
+    @if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.Branchwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.BranchwiseStockReport, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.AllBranchwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.AllBranchwiseStockReport, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.AllBranchDivisionWise)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.AllBranchDivisionStockReport, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.AllBranchProductWise)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.AllBranchProductStockReport, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.Divisionwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.DivisionwiseStockReport, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.Groupwise)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.GroupwiseStockReport, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.Reorder)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.ReorderStockReport, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.GRNReport)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.GRNReport, Model)
+        ;
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.StockReportType.ProductwiseGRNReport)
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.ProductwiseGRNReport, Model)
+        ;
+    }
+    else
+    {
+        @Html.Partial(MVC.Views.Reports.Inventory.StockReport, Model);
+    }
+</body>

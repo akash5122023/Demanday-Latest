@@ -1,0 +1,94 @@
+﻿@model AdvanceCRM.Reports.VisitReportModel
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "Visit Report";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+}
+
+<body>
+    <table style="width:100%; border:groove;">
+        <tr>
+            <td align="center">
+                <h3 style="text-decoration-color:burlywood">@Model.Company.Name</h3>
+                <h4>@Model.Company.Address</h4>
+                <h5>@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>
+   
+
+    <hr />
+    @if (Model.Request.Type == AdvanceCRM.Reports.AttendanceReportType.All)
+    {
+        @Html.Partial(MVC.Views.Reports.Visit.AllVisitReport, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.AttendanceReportType.Representativewise)
+    {
+        @Html.Partial(MVC.Views.Reports.Visit.RepwiseVisit, Model);
+    }
+
+    @*<table style="width:100%; border:groove" , border="1">
+            <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">Name</th><th style="text-align:center">Total Time</th><th style="text-align:center">Total Days</th>
+            <th style="text-align:center">Hour/Days</th><th style="text-align:center">Total Distance</th></tr>
+
+            @{ int cnt = 1; double tTime = 0; double tDays = 0; double tkm = 0;}
+
+                @foreach (var item in Model.Users)
+                {
+                    tTime = 0;
+                    tkm = 0;
+
+                    tDays = (double)Model.Attendance.Where(y => y.NameDisplayName == item.DisplayName).Count();
+                    // tkm=(double)Model.Attendance.
+
+                    //  lst = Model.Attendance.Where(z => z.NameDisplayName == item.DisplayName).Where(x => x.Type.Value.GetText() == "In")();
+
+                    foreach (var itm in Model.Attendance)
+                    {
+                        //  var totlkm = Model.Attendance.where(z => z.Distance.value == itm.Distance.Value).Where(x => x.NameDisplayName == item.DisplayName);
+                        var inTime = Model.Attendance.Where(z => z.PunchIn.Value.ToShortDateString() == itm.PunchIn.Value.ToShortDateString()).Where(x => x.NameDisplayName == item.DisplayName);
+
+                        var outTime = Model.Attendance.Where(z => z.PunchOut.Value.ToShortDateString() == itm.PunchOut.Value.ToShortDateString()).Where(x => x.NameDisplayName == item.DisplayName);
+
+                        if (inTime.Count() > 0)
+                        {
+                            if (outTime.Count() > 0)
+                            {
+                                tTime = tTime + (outTime.FirstOrDefault().PunchOut.Value.Subtract(inTime.FirstOrDefault().PunchIn.Value).TotalMinutes);
+                            }
+                        }
+                        tkm =  (double)Model.Attendance.Sum(x => x.Distance);
+                    }
+
+        <tr>
+            <td style="text-align:center; width:20%">
+                @cnt
+            </td>
+
+            <td style="text-align: center">
+                &nbsp;&nbsp;@item.DisplayName
+            </td>
+            <td align="center">
+                @((tTime / 60).ToString("####.00")) Hrs. &nbsp;&nbsp;
+            </td>
+            <td align="center">
+                &nbsp;&nbsp; @tDays &nbsp;&nbsp;
+            </td>
+            <td align="center">
+                &nbsp;&nbsp;
+                @if (true)
+                {
+                    <text>@(((tTime / 60)/tDays).ToString("####.00")) Hrs.</text>
+                }
+                &nbsp;&nbsp;
+            </td>
+            <td align="center">
+                &nbsp;&nbsp; @tkm km &nbsp;&nbsp;
+            </td>
+        </tr>
+
+                    cnt = cnt + 1;
+
+                    }
+        </table>*@
+</body>

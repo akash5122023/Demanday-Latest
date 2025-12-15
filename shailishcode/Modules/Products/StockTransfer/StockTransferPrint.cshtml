@@ -1,0 +1,311 @@
+﻿@model AdvanceCRM.Products.StockTransferReportData
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+	Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+</style>
+
+<script type="text/javascript">
+
+	var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+	var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+	function toWords(num) {
+		if ((num = num.toString()).length > 9) return 'overflow';
+		n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+		if (!n) return; var str = '';
+		str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+		str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+		str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+		str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+		str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only ' : '';
+		return str.trim();
+	}
+</script>
+
+<body style="align-self:stretch; align-items:center; align-items:center">
+    <table style="width:100%" border="0">
+        @if (Model.Company != null && Model.Company.HeaderImage != null)
+                {
+        <tr style="border:none !important;">
+            <td align="center" style="border:none !important; width:100%">&nbsp; <img src="~/upload/@Model.Company.HeaderImage" height="@(Model.Company.HeaderHeight?.ToString() ?? "")" width="@(Model.Company.HeaderWidth?.ToString() ?? "")" />&nbsp;</td>
+        </tr>
+}
+        <tr>
+            <td align="center" style="border:outset; width:100%"><h4> Stock Transfer </h4></td>
+        </tr>
+    </table>
+    <table style="width:100%" border="1">
+        <tr>
+            <td>
+                <table style="width:100%; border-collapse:collapse" border="1" cellpadding="10 !important" cellspacing="10">
+                    <tr>
+                        <td align="left">
+                            <strong>&nbsp; Transfer No </strong>: @Model.ST.Date.Value.Year.ToString()/@Model.ST.Id.Value<br />&nbsp; <strong> Date </strong>: @Model.ST.Date.Value.ToString("dd MMM yyyy")<br />
+                        </td>
+
+                        <td align="left">
+                            <strong>&nbsp; From </strong>
+                            : @Model.ST.FromBranchBranch<br />
+                            <strong>&nbsp; Address: </strong>
+                            <span style="white-space: pre-line;">
+                                &nbsp; @Model.ST.FromBranchAddress
+                            </span>
+                        </td>
+
+                        <td align="left">
+                            <strong>&nbsp; To </strong>
+                            : @Model.ST.ToBranchBranch<br />
+                            <strong>&nbsp; Address: </strong>
+                            <span style="white-space: pre-line;">
+                                &nbsp; @Model.ST.FromBranchAddress
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        @* Products *@
+        <tr>
+            <td colspan="8" align="center" class="bg-gray-light">
+                &nbsp;
+            </td>
+        </tr>
+    </table>
+
+    @{
+		bool stateChanged = false;
+
+		if (Model.ST.FromBranchStateId != Model.ST.ToBranchStateId)
+		{
+			stateChanged = true;
+		}
+		else
+		{
+			stateChanged = false;
+		}
+    }
+
+    <table cellpadding="100" cellspacing="100" border="1" style="width:100%">
+        <tr>
+            <td align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></td>
+            <td align="center"><strong>&nbsp;HSN&nbsp;</strong></td>
+            <td align="center"><strong>&nbsp;Product / Service&nbsp;</strong></td>
+            <td align="center"><strong>&nbsp;Rate&nbsp;</strong></td>
+            <td align="center"><strong>&nbsp;Qty&nbsp;</strong></td>
+            <td align="center"><strong>&nbsp;Tax1&nbsp;</strong></td>
+            <td align="center"><strong>&nbsp;Tax2&nbsp;</strong></td>
+            @*@if (Model.taxable == true)
+                {
+                    <td align="center"><strong>Tax</strong></td>
+                }*@
+            <td align="center"><strong>Total</strong></td>
+            <td align="center"><strong>Grand Total</strong></td>
+        </tr>
+        @{ int srno = 1; decimal Total = 0; decimal gTotal = 0; decimal Tax1Total = 0; decimal Tax2Total = 0;}
+        @foreach (var qp in Model.STP)
+		{
+        <tr>
+            <td align="center">@srno</td>
+            <td align="Left">&nbsp;@qp.ProductsHsn</td>
+            <td align="left" style="padding:3px;">
+                &nbsp;@qp.ProductsName<br />
+                <span style="white-space: pre-line; font-size:smaller"><i>@qp.ProductsDescription</i></span>
+                @if (qp.ProductsTechSpecs.IsNullOrEmpty() == false)
+					{
+                <text>
+                    <span style="white-space: pre-line; font-size:smaller">
+                        <b>Tech Specs: </b><i>@qp.ProductsTechSpecs</i>
+                    </span>
+                </text>
+					}
+            </td>
+            <td align="right">&nbsp;@qp.TransferPrice.Value &nbsp;</td>
+            <td align="center">@qp.Quantity.Value&nbsp;</td>
+
+            @if (stateChanged == true)
+				{
+					double totTA = (double)qp.Tax1Amount.Value + (double)qp.Tax2Amount;
+            <td align="center">
+                @if (totTA > 0)
+						{
+                <text>
+                    IGST: (@(qp.Percentage1 + qp.Percentage2)%)
+                    <br />Amount: @totTA.ToString("#,##0.00")&nbsp;
+                </text>
+						}
+						else
+						{
+                <text>&nbsp; 0</text>
+						}
+            </td>
+            <td align="center">&nbsp;0</td>
+				}
+				else
+				{
+            <td align="center">@qp.TaxType1 (@qp.Percentage1%) <br />&nbsp;Amount: @qp.Tax1Amount.Value.ToString("#,##0.00")&nbsp;</td>
+            <td align="center">@qp.TaxType2 (@qp.Percentage2%) <br />&nbsp;Amount: @qp.Tax2Amount.Value.ToString("#,##0.00")&nbsp;</td>
+				}
+
+            <td align="right">@qp.LineTotal.Value.ToString("#,##0.00")&nbsp;</td>
+            <td align="right">@qp.GrandTotal.Value.ToString("#,##0.00")&nbsp;</td>
+
+            @{ Total = Total + qp.LineTotal.Value;
+					gTotal = gTotal + qp.GrandTotal.Value;
+					Tax1Total = Tax1Total + qp.Tax1Amount.Value;
+					Tax2Total = Tax2Total + qp.Tax2Amount.Value;
+					srno++;
+            }
+        </tr>
+		}
+
+        @{
+			int diff = 10;
+
+			//if (Model.ST.Lines != null)
+			//{
+			//	diff = (int)Model.ST.Lines - srno;
+			//}
+			//else
+			//{
+			//	diff = 10 - srno;
+			//}
+        }
+
+        @for (int i = diff; i > 0; i--)
+		{
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+		}
+
+        <tr>
+            <td colspan="10" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">
+                &nbsp;
+            </td>
+        </tr>
+
+        @* Tax1Amount *@
+
+        <tr>
+            @foreach (var item in Model.STP.Select(x => x.TaxType1).Distinct())
+			{
+				if ((!item.IsEmptyOrNull()))
+				{
+					if (stateChanged == true)
+					{
+						double totIGST = (double)Tax1Total + (double)Tax2Total;
+
+            <td colspan="8" align="right"><strong>IGST :&nbsp;</strong></td>
+            <td align="right"><strong>@totIGST.ToString("#,##0.00") &nbsp;</strong></td>
+					}
+					else
+					{
+            <td colspan="8" align="right"><strong>@item :&nbsp;</strong></td>
+            <td align="right"><strong>@Model.STP.Where(y => y.TaxType1 == item).Sum(x => x.Tax1Amount).Value.ToString("#,##0.00") &nbsp;</strong></td>
+					}
+				}
+			}
+        </tr>
+
+
+        @* Tax2Amount *@
+
+        <tr>
+            @foreach (var item in Model.STP.Select(x => x.TaxType2).Distinct())
+			{
+				if ((!item.IsEmptyOrNull()))
+				{
+					if (stateChanged == true)
+					{
+
+					}
+					else
+					{
+            <td colspan="8" align="right"><strong>@item :&nbsp;</strong></td>
+            <td align="right"><strong>@Model.STP.Where(y => y.TaxType2 == item).Sum(x => x.Tax2Amount).Value.ToString("#,##0.00") &nbsp;</strong></td>
+					}
+				}
+			}
+        </tr>
+
+        @* Total Tax*@
+        <tr>
+            <td colspan="8" align="right"><strong> Total Tax:&nbsp;</strong></td>
+            @{ decimal totax = Tax1Total + Tax2Total;}
+            <td align="right"><strong>@(totax.ToString("#,##0.00"))&nbsp;</strong></td>
+        </tr>
+
+        @* Total *@
+        <tr>
+            <td colspan="8" align="right"><strong> Total:&nbsp;</strong></td>
+            <td align="right"><strong>@Total.ToString("#,##0.00")&nbsp;</strong></td>
+        </tr>
+
+        @* Grand Total *@
+        <tr>
+            <td align="right" colspan="8"><strong> Grand Total:&nbsp;</strong></td>
+            <td align="right"><strong>@(gTotal.ToString("#,##0.00"))&nbsp;</strong></td>
+        </tr>
+
+        <tr>
+            <td colspan="9" bgcolor="wheat">
+                <strong> &nbsp; Total in Words:</strong>
+                <script>document.write(toWords(@Convert.ToInt32(gTotal)))</script>
+            </td>
+        </tr>
+    </table>
+
+    <style>
+        * {
+            margin: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        .wrapper {
+            min-height: 100%;
+            height: auto !important;
+            height: 100%;
+            margin: 0 auto -155px; /* the bottom margin is the negative value of the footer's height */
+        }
+
+        .footer, .push {
+            height: 155px; /* .push must be the same height as .footer */
+        }
+    </style>
+    @if (Model.Company != null && Model.Company.FooterImage != null)
+        {
+    <div class="footer">
+        <table>
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%"><img src="~/upload/@Model.Company.FooterImage" height="@(Model.Company.FooterHeight?.ToString() ?? "")" width="@(Model.Company.FooterWidth?.ToString() ?? "")" /></td>
+            </tr>
+        </table>
+    </div>
+        }
+
+</body>

@@ -1,0 +1,659 @@
+@using Microsoft.Extensions.Configuration
+@inject Serenity.ITextLocalizer Localizer
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{ 
+    ViewData["Title"] = Texts.Forms.Membership.SignUp.FormTitle.ToString(Localizer);
+    ViewData["PageId"] = "SignUp";
+    ViewData["BodyClass"] = "register-page";
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    var trialDays = Configuration.GetValue<int?>("TrialSettings:DefaultDays");
+    var hasTrialMessage = trialDays.HasValue && trialDays.Value > 0;
+    var trialMessage = hasTrialMessage
+        ? $"Free signup for {trialDays.Value} days"
+        : Texts.Forms.Membership.SignUp.FormInfo.ToString(Localizer);
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/Content/iCheck/square/blue.css" />
+    <script src="~/Scripts/jquery.icheck.min.js"></script>
+    <style>
+        body.register-page {
+            background: radial-gradient(circle at 18% 18%, rgba(31, 124, 255, 0.35), transparent 52%),
+                radial-gradient(circle at 82% 12%, rgba(138, 104, 255, 0.28), transparent 50%),
+                radial-gradient(circle at 65% 82%, rgba(26, 203, 190, 0.18), transparent 55%),
+                linear-gradient(140deg, #0c1735 0%, #152753 45%, #0c1a3a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .signup-wrapper {
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .signup-card {
+            display: flex;
+            flex-wrap: wrap;
+            background: rgba(9, 14, 34, 0.65);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 26px 60px rgba(8, 10, 40, 0.55);
+            border: 1px solid rgba(120, 149, 255, 0.18);
+        }
+
+        .signup-hero {
+            flex: 1 1 340px;
+            background: linear-gradient(165deg, rgba(39, 115, 255, 0.98), rgba(132, 99, 255, 0.96) 55%, rgba(76, 226, 210, 0.92));
+            color: #fdfdff;
+            padding: 60px 52px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-hero::before,
+        .signup-hero::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.16);
+            filter: blur(0.5px);
+        }
+
+        .signup-hero::before {
+            width: 220px;
+            height: 220px;
+            top: -70px;
+            right: -20px;
+        }
+
+        .signup-hero::after {
+            width: 260px;
+            height: 260px;
+            bottom: -110px;
+            left: -70px;
+        }
+
+        .signup-hero::after,
+        .signup-hero::before {
+            box-shadow: inset 0 0 35px rgba(255, 255, 255, 0.22);
+        }
+
+        .signup-hero::after {
+            opacity: 0.9;
+        }
+
+        .signup-hero::before {
+            opacity: 0.75;
+        }
+
+        .signup-hero::after {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .signup-hero::before {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .signup-hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            height: 100%;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+            border-radius: 24px;
+            padding: 8px 0;
+        }
+
+        .signup-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: rgba(8, 15, 36, 0.25);
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .signup-hero h2 {
+            font-size: 34px;
+            line-height: 1.25;
+            margin: 0;
+            text-shadow: 0 8px 18px rgba(12, 25, 68, 0.35);
+        }
+
+        .signup-hero p {
+            margin: 0;
+            font-size: 16px;
+            opacity: 0.92;
+            max-width: 440px;
+            line-height: 1.55;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .module-card {
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.08));
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 120px;
+            box-shadow: 0 14px 26px rgba(7, 15, 40, 0.38);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .module-card i {
+            font-size: 22px;
+            color: rgba(12, 25, 68, 0.9);
+            background: rgba(255, 255, 255, 0.9);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            box-shadow: 0 12px 22px rgba(9, 16, 44, 0.25);
+        }
+
+        .module-card strong {
+            font-size: 16px;
+            letter-spacing: 0.01em;
+            color: #0f1e46;
+        }
+
+        .module-card span {
+            font-size: 13px;
+            opacity: 0.85;
+            line-height: 1.45;
+            color: rgba(15, 30, 70, 0.85);
+        }
+
+        .signup-hero-footer {
+            margin-top: auto;
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .signup-form-area {
+            flex: 1 1 420px;
+            padding: 44px 52px;
+            background: linear-gradient(180deg, rgba(12, 23, 45, 0.7), rgba(12, 23, 45, 0.4));
+        }
+
+        .register-box {
+            width: 100%;
+            margin: 0;
+        }
+
+        .register-logo {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .register-logo .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            color: #f3f6ff;
+        }
+
+        .register-logo .brand-mark {
+            width: 62px;
+            height: 62px;
+            border-radius: 18px;
+            background: transparent url('@Url.Content("~/Content/site/images/AdvanceCRM1.png")') no-repeat center center;
+            background-size: contain;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 16px 28px rgba(22, 43, 95, 0.45);
+        }
+
+        .register-logo .brand-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .register-logo .brand-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .register-logo .brand-subtitle {
+            font-size: 12px;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .register-box-body {
+            max-width: none;
+            padding: 36px;
+            border-radius: 26px;
+            background: linear-gradient(160deg, rgba(244, 247, 255, 0.98), rgba(231, 238, 255, 0.92));
+            box-shadow: 0 24px 46px rgba(8, 10, 40, 0.45);
+            position: relative;
+        }
+
+        .signup-loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px 24px;
+            z-index: 20;
+            color: #1f2559;
+        }
+
+        .signup-loading-overlay .overlay-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            max-width: 320px;
+        }
+
+        .signup-loading-overlay .spinner {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 4px solid rgba(111, 115, 255, 0.25);
+            border-top-color: #6f73ff;
+            animation: signup-spin 1s linear infinite;
+        }
+
+        .signup-loading-overlay .message {
+            font-weight: 600;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        @@keyframes signup-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .register-box-body .page-title {
+            font-weight: 700;
+            color: #1f2559;
+            margin-bottom: 6px;
+        }
+
+        .register-box-body .login-box-msg {
+            margin-bottom: 24px;
+            color: #5f6c8f;
+        }
+
+        .s-SignUpPanel .propertygrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 18px 24px;
+        }
+
+        .s-SignUpPanel .propertygrid .field {
+            margin: 0;
+        }
+
+        .s-SignUpPanel .propertygrid .caption {
+            font-weight: 600;
+            color: #2d2f55;
+            margin-bottom: 6px;
+        }
+
+        .s-SignUpPanel .propertygrid input.editor {
+            height: 46px;
+            border-radius: 12px;
+            border: 1px solid #d8deed;
+            padding: 10px 14px;
+            box-shadow: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Subdomain composite styling */
+    .subdomain-group { display:flex; align-items:stretch; }
+    .subdomain-group input { flex:1 1 auto; min-width:0; border-top-right-radius:0; border-bottom-right-radius:0; }
+    .subdomain-suffix { display:inline-flex; align-items:center; padding:0 14px; background:#eef2f9; border:1px solid #d8deed; border-left:none; border-top-right-radius:12px; border-bottom-right-radius:12px; font-size:14px; color:#44506a; white-space:nowrap; }
+    .subdomain-group input:focus + .subdomain-suffix { border-color:#6f73ff; box-shadow:0 0 0 3px rgba(111,115,255,0.18); }
+    /* Hide the caption for subdomain field entirely */
+    .field.Subdomain .caption { display:none !important; }
+
+        .s-SignUpPanel .propertygrid input.editor:focus {
+            border-color: #6f73ff;
+            box-shadow: 0 0 0 3px rgba(111, 115, 255, 0.18);
+        }
+
+        .signup-meta {
+            margin-top: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .trial-info {
+            display: none;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 18px;
+            background: linear-gradient(140deg, rgba(89, 118, 255, 0.22), rgba(96, 229, 214, 0.28));
+            border: 1px solid rgba(108, 155, 255, 0.42);
+            color: #0f1f46;
+        }
+
+        .trial-info.is-visible {
+            display: flex;
+        }
+
+        .trial-info .trial-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4466ff;
+            box-shadow: 0 14px 26px rgba(24, 42, 92, 0.25);
+            flex-shrink: 0;
+        }
+
+        .trial-info .trial-icon i {
+            font-size: 18px;
+        }
+
+        .trial-info .trial-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .trial-info .trial-title {
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: rgba(15, 30, 70, 0.6);
+        }
+
+        .trial-info .trial-text {
+            font-size: 15px;
+            color: #0f1f46;
+        }
+
+        .signup-footer-links {
+            margin-top: 26px;
+            text-align: center;
+        }
+
+        .signup-footer-links a {
+            color: #2f47d7;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .signup-footer-links a:hover {
+            color: #1bd1c0;
+        }
+
+        .btn.btn-primary.btn-flat {
+            height: 50px;
+            border-radius: 16px;
+            font-weight: 700;
+            background: linear-gradient(118deg, #516bff, #42d7c4 55%, #a244ff);
+            border: none;
+            box-shadow: 0 16px 28px rgba(46, 85, 255, 0.32);
+            letter-spacing: 0.04em;
+        }
+
+        .btn.btn-primary.btn-flat:hover {
+            background: linear-gradient(118deg, #435fff, #2fc9b4 55%, #9038f5);
+        }
+
+
+        @@media (max-width: 992px) {
+
+            .signup-card {
+                flex-direction: column;
+                background: rgba(12, 23, 45, 0.75);
+            }
+
+            .signup-hero {
+                padding: 50px 40px;
+            }
+
+            .signup-form-area {
+                padding: 32px 32px 44px;
+            }
+        }
+
+        @@media (max-width: 640px) {
+
+            body.register-page {
+                padding: 24px 16px;
+            }
+
+            .signup-form-area {
+                padding: 26px 20px 36px;
+            }
+
+            .register-box-body {
+                padding: 26px 22px;
+            }
+
+            .signup-meta {
+                gap: 14px;
+            }
+
+            .trial-info {
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .module-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 12px;
+            }
+
+            .module-card {
+                min-height: 0;
+                padding: 16px;
+            }
+        }
+    </style>
+}
+
+<script id="Template_Membership_SignUpPanel" type="text/template">
+    <div class="s-Form">
+        <form id="~_Form" action="">
+            <div class="fieldset">
+                <div id="~_PropertyGrid"></div>
+                <div class="clear"></div>
+            </div>
+
+            <div class="signup-meta">
+                <div id="~_TrialInfo" class="trial-info" role="status" aria-live="polite">
+                    <span class="trial-icon"><i class="fa fa-calendar-check-o"></i></span>
+                    <span class="trial-copy">
+                        <span class="trial-title">Trial period</span>
+                        <span id="~_TrialInfoText" class="trial-text">@trialMessage</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 24px; align-items: center;">
+                <div class="col-sm-7 col-xs-12">
+                    <div class="checkbox icheck">
+                        <label>
+                            <input id="~_AcceptTerms" type="checkbox"> @Texts.Forms.Membership.SignUp.AcceptTerms.ToString(Localizer)
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-5 col-xs-12">
+                    <button id="~_SubmitButton" type="submit" class="btn btn-primary btn-block btn-flat" disabled="disabled">@Texts.Forms.Membership.SignUp.SubmitButton.ToString(Localizer)</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</script>
+
+<div class="signup-wrapper">
+    <div class="signup-card">
+        <div class="signup-hero">
+            <div class="signup-hero-content">
+                <span class="signup-hero-badge"><i class="fa fa-bolt"></i> BizPlus ERP Suite</span>
+                <div>
+                    <h2>Run every department with confidence</h2>
+                    <p>BizPlus ERP delivers a cohesive experience so that leadership, operations and customer-facing teams stay aligned on one intelligent platform.</p>
+                </div>
+                <ul class="module-grid">
+                    <li class="module-card">
+                        <i class="fa fa-line-chart"></i>
+                        <strong>Sales &amp; CRM</strong>
+                        <span>Capture enquiries, manage pipelines and close deals faster.</span>
+                    </li>
+                    <li class="module-card">
+                        <i class="fa fa-shopping-cart"></i>
+                        <strong>Purchase Control</strong>
+                        <span>Optimise procurement, vendor management and approvals.</span>
+                    </li>
+                    <li class="module-card">
+                        <i class="fa fa-cubes"></i>
+                        <strong>Inventory &amp; Products</strong>
+                        <span>Track stock, transfers and fulfilment in real-time.</span>
+                    </li>
+                    <li class="module-card">
+                        <i class="fa fa-money"></i>
+                        <strong>Accounting</strong>
+                        <span>Maintain ledgers, expenses and compliance effortlessly.</span>
+                    </li>
+                    <li class="module-card">
+                        <i class="fa fa-users"></i>
+                        <strong>HR &amp; Attendance</strong>
+                        <span>Onboard teams, record shifts and automate payroll-ready data.</span>
+                    </li>
+                    <li class="module-card">
+                        <i class="fa fa-headphones"></i>
+                        <strong>Service &amp; Support</strong>
+                        <span>Deliver after-sales service, AMC and ticket management with ease.</span>
+                    </li>
+                    <li class="module-card">
+                        <i class="fa fa-bar-chart"></i>
+                        <strong>Reports &amp; Dashboards</strong>
+                        <span>Monitor KPIs with role-based analytics and alerts.</span>
+                    </li>
+                    <li class="module-card">
+                        <i class="fa fa-plug"></i>
+                        <strong>Integrations</strong>
+                        <span>Connect telephony, ecommerce and marketing tools.</span>
+                    </li>
+                </ul>
+                <div class="signup-hero-footer">
+                    Trusted by growth-focused companies to orchestrate their daily operations.
+                </div>
+            </div>
+        </div>
+        <div class="signup-form-area">
+            <div class="register-box">
+                <div class="register-logo">
+                    <span class="brand">
+                        <span class="brand-mark" role="img" aria-label="BizPlus ERP"></span>
+                        <span class="brand-copy">
+                            <span class="brand-title">BizPlus ERP</span>
+                            <span class="brand-subtitle">Enterprise Suite</span>
+                        </span>
+                    </span>
+                </div>
+                <div class="register-box-body">
+                    <h3 class="page-title">@Texts.Forms.Membership.SignUp.FormTitle.ToString(Localizer)</h3>
+                    <p class="login-box-msg">@trialMessage</p>
+                    <div id="SignUpPanel" data-trial-message="@trialMessage" data-trial-visible="@(hasTrialMessage ? "true" : "false")">
+                    </div>
+                    <div class="signup-footer-links">
+                        <a href="~/Account/Login">@Texts.Forms.Membership.SignUp.BackToLogin.ToString(Localizer)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function() {
+    new AdvanceCRM.Membership.SignUpPanel($('#SignUpPanel')).init();
+    $('.field.DisplayName,.field.Email,.field.ConfirmEmail,.field.Password,.field.ConfirmPassword').addClass("has-icon");
+    $('.field.DisplayName input').after("<span class='glyphicon glyphicon-user form-control-feedback'></span>");
+    $('.emaildomain').after("<span class='glyphicon glyphicon-envelope form-control-feedback'></span>");
+    $('.field.Password input').after("<span class='glyphicon glyphicon-lock form-control-feedback'></span>");
+    $('.field.ConfirmPassword input').after("<span class='glyphicon glyphicon-log-in form-control-feedback'></span>");
+    $('.checkbox.icheck input[type="checkbox"]').iCheck({
+        checkboxClass: 'icheckbox_square-blue',
+        radioClass: 'iradio_square-blue',
+        increaseArea: '20%'
+    });
+
+    // Transform Subdomain field to show suffix
+    var subField = $('.field.Subdomain');
+    if (subField.length && !subField.data('suffix-applied')) {
+        var input = subField.find('input');
+        if (input.length) {
+            input.attr('maxlength', '30');
+            input.attr('placeholder', 'mycompany');
+            input.wrap('<div class="subdomain-group" />');
+            input.after('<span class="subdomain-suffix">.bizpluserp.com</span>');
+            // Remove caption entirely per request
+            subField.find('.caption').remove();
+            subField.data('suffix-applied', 'true');
+        }
+    }
+
+    // Enhance MobileNumber with Area Code selector
+    var mobileField = $('.field.MobileNumber');
+    if (mobileField.length && !mobileField.data('areacode-applied')) {
+        var input = mobileField.find('input');
+        if (input.length) {
+            input.attr('placeholder', '5551234567');
+            input.wrap('<div class="phone-group" style="display:flex; align-items:stretch;" />');
+            var select = $('<select id="AreaCodeSelect" aria-label="Country/Area Code" style="flex:0 0 120px; border:1px solid #d8deed; border-right:none; border-radius:12px 0 0 12px; background:#eef2f9; padding:0 6px; font-size:13px;">\
+                <option value="+1">+1 US</option>\
+                <option value="+44">+44 UK</option>\
+                <option value="+91" selected>+91 IN</option>\
+                <option value="+971">+971 AE</option>\
+                <option value="+92">+92 PK</option>\
+                <option value="+61">+61 AU</option>\
+                <option value="+49">+49 DE</option>\
+                <option value="+33">+33 FR</option>\
+                <option value="+34">+34 ES</option>\
+            </select>');
+            input.before(select);
+            input.css({borderTopLeftRadius:0, borderBottomLeftRadius:0});
+            mobileField.data('areacode-applied','true');
+        }
+    }
+});
+</script>
+
+

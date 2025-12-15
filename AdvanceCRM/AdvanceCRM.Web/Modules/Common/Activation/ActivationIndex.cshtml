@@ -1,0 +1,535 @@
+﻿@model AdvanceCRM.Common.Activation.ActivationModel
+
+
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Activation";
+    ViewData["PageId"] = "Activation";
+    Layout = "~/Views/Shared/_LayoutHeader.cshtml";
+}
+
+@section Head {
+
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css">
+    <link rel="stylesheet" href="~/Scripts/datepicker/datepicker3.css">
+    <link rel="stylesheet" href="~/Scripts/daterangepicker/daterangepicker-bs3.css">
+    <link rel="stylesheet" href="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <link rel="stylesheet" href="~/Content/bootstrap-select.min.css" />
+    <link rel="stylesheet" href="~/Content/iCheck/all.css" />
+    <link rel="stylesheet" href="~/Content/bootstrap-switch/bootstrap3/bootstrap-switch.min.css" />
+
+    <script src="~/Scripts/daterangepicker/moment.min.js"></script>
+    <script src="~/Scripts/daterangepicker/daterangepicker.js"></script>
+    <script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>
+    <script src="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js"></script>
+    <script src="~/Scripts/bootstrap-select.min.js"></script>
+    <script src="~/Scripts/jquery.icheck.min.js"></script>
+    <script src="~/Scripts/bootstrap-switch.min.js"></script>
+
+    <style type="text/css">
+        .select2-container, .select2-container * {
+            box-sizing: border-box;
+        }
+
+        .kv-reqd {
+            color: red;
+            font-family: monospace;
+            font-weight: normal;
+        }
+    </style>
+}
+
+
+<body>
+    <div class="well active table-responsive mailbox-messages" style='background: white;box-shadow: 10px 10px 5px #888888;text-align:left;'>
+        <h4>Select Modules:</h4><hr />
+
+        <div class="row">
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkProforma" value="optionProforma">
+                    Proforma
+                </label>
+            </div>
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkSales" value="optionSales">
+                    Sales
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkChallan" value="optionChallan">
+                    Challan
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkCEO" value="optionCEO">
+                    CEO
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkPO" value="optionPO">
+                    PO
+                </label>
+            </div>
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkPurchase" value="optionPurchase">
+                    Purchase
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkCashbook" value="optionCashbook">
+                    Cashbook
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkExpenseManagement" value="optionExpenseManagement">
+                    Expense Management
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkCMS" value="optionCMS">
+                    CMS
+                </label>
+            </div>
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkAMC" value="optionAMC">
+                    AMC
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkTeleCalling" value="optionTeleCalling">
+                    TeleCalling
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkTicket" value="optionTicket">
+                    Ticket
+                </label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkDMS" value="optionDMS">
+                    DMS
+                </label>
+            </div>
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkChannelManagement" value="optionChannelManagement">
+                    Channel Management
+                </label>
+            </div>
+        </div>
+        <hr />
+        <h4>Integrations:</h4><hr />
+        <div class="row">
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkMailChimp" value="optionMailChimp">
+                    MailChimp
+                </label>
+            </div>
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkIVR" value="optionIVR">
+                    IVR
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkIndiaMART" value="optionIndiaMART">
+                    India MART
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkJustDial" value="optionJustDial">
+                    Just Dial
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkTradeIndia" value="optionTradeIndia">
+                    Trade India
+                </label>
+            </div>
+
+            <div class="col-md-3">
+                <label>
+                    <input type="checkbox" class="minimal" id="chkFacebook" value="optionFacebook">
+                    Facebook
+                </label>
+            </div>
+        </div>
+
+        <hr />
+
+        <form class="form-horizontal">
+            <div class="box-body">
+                <div class="form-group">
+                    <label for="LabelforAdapter" class="col-sm-2 control-label">Select Adapter<span class="kv-reqd">*&nbsp;</span></label>
+                    <div class="col-sm-4">
+                        <div class="input-group">
+                            <select class="selectpicker"
+                                    name="AdapterId"
+                                    id="AdapterId"
+                                    data-show-subtext="true"
+                                    data-live-search="true"
+                                    required title="Select">
+                                @foreach (var item in Model.nics)
+                                {
+                                    if (item.Name.Contains("*") == false)
+                                    {
+                                        if (item.Name.Contains("Loop") == false)
+                                        {
+                                            if (item.Name.Contains("#") == false)
+                                            {
+                                                if (item.Name.Contains("VMware") == false)
+                                                {
+                                                    <option value="@item.GetPhysicalAddress().ToString()">
+                                                        @item.Name
+                                                    </option>
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                <option value="00-0C-65-D0-4C">
+                                    Local Area Connection
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ActivationDates" class="col-sm-2 control-label">Date Range &nbsp;</span></label>
+                    <div class="col-sm-4">
+                        <div id="ActivationDates" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                            <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                            <span></span> <b class="caret"></b>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputUserslbl" class="col-sm-2 control-label">Operational Users<span class="kv-reqd">*&nbsp;</span></label>
+                    <div class="col-sm-1">
+                        <input type="number" min="2" step="1" class="form-control input-group" id="inputUsers" onkeypress="return isNumber(event)">
+                        <script type="text/javascript">
+                            function isNumber(evt) {
+                                evt = (evt) ? evt : window.event;
+                                var charCode = (evt.which) ? evt.which : evt.keyCode;
+                                if ((charCode > 31 && charCode < 48) || charCode > 57) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                        </script>
+                    </div>
+                    <label for="inputNOUserslbl" class="col-sm-2 control-label">Non Operational Users<span class="kv-reqd">*&nbsp;</span></label>
+
+                    <div class="col-sm-1">
+                        <input type="number" min="2" step="1" class="form-control input-group" id="inputNOUsers" onkeypress="return isNumberNO(event)">
+                        <script type="text/javascript">
+                            function isNumberNO(evt) {
+                                evt = (evt) ? evt : window.event;
+                                var charCode = (evt.which) ? evt.which : evt.keyCode;
+                                if ((charCode > 31 && charCode < 48) || charCode > 57) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                        </script>
+                    </div>
+
+                </div>
+                <div class="form-group">
+                    <label for="chkMultiCompany" class="col-sm-2 control-label">Multi Company &nbsp;</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" id="chkMultiCompany" value="optionMultiCompany" data-bootstrap-switch data-size="small" data-on-text="Yes" data-off-text="No">
+                    </div>
+                    <label for="chkMultiLocation" class="col-sm-2 control-label">Multi Location &nbsp;</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" id="chkMultiLocation" value="optionMultiLocation" data-bootstrap-switch data-size="small" data-on-text="Yes" data-off-text="No">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputRequestKey" class="col-sm-2 control-label">Request Key &nbsp;</label>
+                    <div class="col-sm-6">
+                        <input type="text" readonly class="form-control input-group" id="inputRequestKey" placeholder="Request Key">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputActivationKey" class="col-sm-2 control-label">Activation Key &nbsp;</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control input-group" id="inputActivationKey" placeholder="Activation Key">
+                    </div>
+                </div>
+            </div><!-- /.box-body -->
+        </form>
+        <hr />
+        <div class="form-group">
+            <table style="width:100%">
+                <tr>
+                    <td style="text-align:right">
+                        <label class="control-label" for="submit"></label>
+                    </td>
+                    <td style="text-align:center">
+                        <div>
+                            <button id="submit" name="submit" class="btn btn-primary" value="1" onclick="GenerateHashActivation('', '', '', '');">Activate CRM</button>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+            var STARTDate; var ENDDate;
+
+            $(function () {
+
+                var start = moment();
+                var end = moment().add(1, 'year');
+
+                STARTDate = moment().format('MM/DD/YYYY');
+                ENDDate = moment().add(1, 'year').format('MM/DD/YYYY');
+
+                function cb(start, end) {
+                    $('#ActivationDates span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                }
+
+                $('#ActivationDates').daterangepicker({
+                    startDate: start,
+                    endDate: end,
+                }, cb);
+
+                cb(start, end);
+
+                $('input[type="checkbox"].minimal').iCheck({
+          checkboxClass: 'icheckbox_minimal-blue'
+                });
+                // Initialize bootstrapSwitch with a single options object (avoids deprecation warning)
+                if ($.fn.bootstrapSwitch) {
+                    $("input[data-bootstrap-switch]").each(function () {
+                        var $el = $(this);
+                        $el.bootstrapSwitch({
+                            state: $el.prop('checked'),
+                            size: $el.data('size') || 'small',
+                            // jQuery converts data-on-text => onText
+                            onText: $el.data('onText') || $el.data('on-text') || 'Yes',
+                            offText: $el.data('offText') || $el.data('off-text') || 'No'
+                        });
+                    });
+                }
+            });
+
+            $('#ActivationDates').on('apply.daterangepicker', function (ev, picker){
+                STARTDate = picker.startDate.format('MM/DD/YYYY');
+                ENDDate = picker.endDate.format('MM/DD/YYYY');
+            });
+
+
+            function GenerateHashActivation(modulesT, usersT, NOusersT, daterangeT, requestkeyT) {
+
+                modulesT = "";
+
+                usersT = $("#inputUsers").val();
+
+                NOusersT = $("#inputNOUsers").val();
+
+                daterangeT = STARTDate + "-" + ENDDate;
+                requestkeyT = $("#inputRequestKey").val();
+
+                if ($('#chkMultiCompany').prop('checked')) {
+                    modulesT = modulesT + "MultiCompany,";
+                }
+
+                if ($('#chkMultiLocation').prop('checked')) {
+                    modulesT = modulesT + "MultiLocation,";
+                }
+
+                //Never miss the sequnce of check with AdvanceCRM cshtml
+                if ($('#chkProforma').prop('checked')) {
+                    modulesT = modulesT + "Proforma,";
+                }
+
+                if ($('#chkSales').prop('checked')) {
+                    modulesT = modulesT + "Sales,";
+                }
+
+                 if ($('#chkChallan').prop('checked')) {
+                    modulesT = modulesT + "Challan,";
+                }
+
+                 if ($('#chkCEO').prop('checked')) {
+                    modulesT = modulesT + "CEO,";
+                }
+
+                 if ($('#chkPO').prop('checked')) {
+                    modulesT = modulesT + "PurchaseOrder,";
+                }
+
+                 if ($('#chkPurchase').prop('checked')) {
+                    modulesT = modulesT + "Purchase,";
+                }
+
+                 if ($('#chkCashbook').prop('checked')) {
+                    modulesT = modulesT + "Cashbook,";
+                }
+
+                 if ($('#chkExpenseManagement').prop('checked')) {
+                    modulesT = modulesT + "ExpenseManagement,";
+                }
+
+                if ($('#chkCMS').prop('checked')) {
+                    modulesT = modulesT + "CMS,";
+                }
+
+                if ($('#chkAMC').prop('checked')) {
+                    modulesT = modulesT + "AMC,";
+                }
+
+                if ($('#chkTeleCalling').prop('checked')) {
+                    modulesT = modulesT + "TeleCalling,";
+                }
+
+                if ($('#chkTicket').prop('checked')) {
+                    modulesT = modulesT + "Ticket,";
+                }
+
+                if ($('#chkDMS').prop('checked')) {
+                    modulesT = modulesT + "DMS,";
+                }
+
+                if ($('#chkChannelManagement').prop('checked')) {
+                    modulesT = modulesT + "ChannelManagement,";
+                }
+
+                if ($('#chkMailChimp').prop('checked')) {
+                    modulesT = modulesT + "MailChimp,";
+                }
+
+                if ($('#chkIVR').prop('checked')) {
+                    modulesT = modulesT + "IVR,";
+                }
+
+                if ($('#chkIndiaMART').prop('checked')) {
+                    modulesT = modulesT + "IndiaMART,";
+                }
+
+                if ($('#chkJustDial').prop('checked')) {
+                    modulesT = modulesT + "JustDial,";
+                }
+
+                if ($('#chkTradeIndia').prop('checked')) {
+                    modulesT = modulesT + "TradeIndia,";
+                }
+
+                if ($('#chkFacebook').prop('checked')) {
+                    modulesT = modulesT + "Facebook,";
+                }
+                if (modulesT.length > 0)
+                    modulesT = modulesT.slice(0, -1);
+
+                activationfieldT = $("#inputActivationKey").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GenrateCryptoActivationRazor", "Activation")',
+                    data: { modules: modulesT, users: usersT, NOusers: NOusersT, daterange: daterangeT, requestkey: requestkeyT, enddate: ENDDate, activationfield: activationfieldT },
+                    success: function (data) {
+                        //alert(data);
+                        if (data == "Success") {
+                            toastr.success('Activation successfull');
+                            GenerateExternalSettings(modulesT, usersT, NOusersT, daterangeT, requestkeyT, ENDDate, activationfieldT);
+                            location.href = "/Account/Login";
+                        }
+                        else {
+                            toastr.error('Activation failed');
+                        }
+                    }
+                });
+            }
+
+            function GenerateExternalSettings(modulesT, usersT, NOusersT, daterangeT, requestkeyT, endDateT, activationkeyT) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GenerateExternalSettings", "Activation")',
+                    data: { modules: modulesT, users: usersT, NOusers: NOusersT, daterange: daterangeT, requestkey: requestkeyT, endDate: endDateT, activationkey: activationkeyT },
+                    success: function (data) {
+                        if (data != "Success") {
+                            toastr.error('Failed saving configuration settings');
+                        }
+                    }
+                });
+            }
+
+            function GenerateHashRequestKey(requestkeyT) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GenrateCrypto", "Activation")',
+                    data: { requestKey: requestkeyT },
+
+                    success: function (data) {
+                        if (data != "Error") {
+                            $("#inputRequestKey").val(data);
+                        }
+
+                        else {
+                                toastr.error("Error", 'Error',
+                                {
+                                    "closeButton": true,
+                                    "debug": false,
+                                    "newestOnTop": true,
+                                    "progressBar": false,
+                                    "positionClass": "toast-top-center",
+                                    "preventDuplicates": true,
+                                    "onclick": null,
+                                    "showDuration": "300",
+                                    "hideDuration": "3000",
+                                    "timeOut": 0,
+                                    "extendedTimeOut": 0,
+                                    "tapToDismiss": false,
+                                    "allowHtml": true
+                                });
+
+                        }
+                    }
+                });
+            }
+
+            $("#AdapterId").on('change', function () {
+                GenerateHashRequestKey(this.value);
+            });
+
+    </script>
+
+    @* End Activation Page *@
+
+</body>

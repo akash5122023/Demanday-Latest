@@ -1,0 +1,38 @@
+﻿@model AdvanceCRM.Reports.EnquiryReportModel
+
+
+<strong>Divisionwise Enquiry </strong>
+    &nbsp;&nbsp; - &nbsp;&nbsp; <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat()
+    <hr />
+    <table style="width:100%; border:groove" , border="1">
+        <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">Division</th><th style="text-align:center">Quantity</th><th style="text-align:center">Amount</th></tr>
+
+        @{ int cnt = 1;}
+
+        @foreach (var item in Model.Products.Select(x => x.ProductsDivisionId).Distinct())
+        {
+            <tr>
+                <td style="text-align:center; width:10%">
+                    @cnt
+                </td>
+
+                <td style="width:50%">
+                    @foreach (var pd in Model.Divisions)
+                    {
+                        if (Html.DisplayFor(x => item).ToString() == pd.Id.ToString())
+                        {
+                            <text> &nbsp;&nbsp;@pd.ProductsDivision </text>
+                        }
+                    }
+                </td>
+
+                <td style="width:20%; text-align:center">
+                    &nbsp;&nbsp;@Model.Products.Where(y => y.ProductsDivisionId.ToString() == Html.DisplayFor(x => item).ToString()).Sum(y => y.Quantity.Value)
+                </td>
+                <td style="width:20%; text-align:right">
+                    &nbsp;&nbsp;@Model.Products.Where(y => y.ProductsDivisionId.ToString() == Html.DisplayFor(x => item).ToString()).Sum(y => (double)y.LineTotal) &nbsp;&nbsp;
+                </td>
+            </tr>
+            cnt = cnt + 1;
+        }
+    </table>

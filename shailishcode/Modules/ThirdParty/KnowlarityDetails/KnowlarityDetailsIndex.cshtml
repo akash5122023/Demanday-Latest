@@ -1,0 +1,46 @@
+﻿@*@{
+         ViewData["Title"] = Localizer.Get("Db.ThirdParty.KnowlarityDetails.EntityPlural");
+    }
+
+    <div id="GridDiv"></div>
+
+    <script type="text/javascript">
+        // jQuery(function () {
+           // new AdvanceCRM.ThirdParty.KnowlarityDetailsGrid($('#GridDiv'), {}).init();
+            jQuery(function () {
+                var ivrGrid = new AdvanceCRM.ThirdParty.KnowlarityDetailsGrid($('#GridDiv'), {
+                });
+
+                var q = Q.parseQueryString();
+                if (q.CallDurationState != null && q.CallDurationState.length) {
+                    ivrGrid.set_CallDurationState(parseInt(q.CallDurationState, 10));
+                }
+
+
+            Q.initFullHeightGridPage($('#GridDiv'));
+        });
+    </script>*@
+
+
+@inject Serenity.ITextLocalizer Localizer
+@{
+     ViewData["Title"] = Localizer.Get("Db.ThirdParty.KnowlarityDetails.EntityPlural");
+}
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    //jQuery(function () {
+    //    new AdvanceCRM.ThirdParty.KnowlarityDetailsGrid($('#GridDiv'), {}).init();
+    jQuery(function () {
+        var ivrGrid = new AdvanceCRM.ThirdParty.KnowlarityDetailsGrid($('#GridDiv'), {
+        });
+
+        var q = Q.parseQueryString();
+        if (q.CallDurationState != null && q.CallDurationState.length) {
+            ivrGrid.set_CallDurationState(parseInt(q.CallDurationState, 10));
+        }
+
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });
+</script>

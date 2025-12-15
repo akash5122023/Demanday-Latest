@@ -1,0 +1,59 @@
+﻿@inject Serenity.Web.IDynamicScriptManager DynamicScriptManager 
+
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<link rel="home" id="ApplicationPath" href="~/" />
+<link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+<script>var AdvanceCRM = window.AdvanceCRM || {};</script>
+
+@* existing Serenity bundles *@
+@Html.StyleBundle("Base")
+@Html.StyleBundle("Site")
+@if (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft)
+{
+    @Html.Stylesheet("~/Content/site/site.rtl.css")
+}
+
+@* additional fonts/css *@
+<link rel="stylesheet" href="~/Content/font-poppins.css" asp-append-version="true" />
+
+@* ─── your custom CSS from wwwroot/Content ─── *@
+@* <link rel="stylesheet" href="~/Content/site.css" asp-append-version="true" /> *@
+<link rel="stylesheet" href="~/Content/site/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/Content/custom-overrides.css" asp-append-version="true" />
+
+
+<script type="application/json" id="ScriptCulture">
+    @Html.Raw(Serenity.JSON.Stringify(new ScriptCulture()))
+</script>
+<script type="text/javascript">
+    window.paceOptions = {
+        startOnPageLoad: false,
+        ajax: { trackMethods: ['GET','POST'], trackWebSockets: false, ignoreURLs: [] }
+    };
+</script>
+
+@Html.ScriptBundle("Base")
+@Html.ScriptBundle("Site")
+
+
+@* ─── your custom JS from wwwroot/Scripts ─── *@
+
+
+<script src="~/Scripts/react.development.js" asp-append-version="true"></script>
+<script src="~/Scripts/react-dom.development.js" asp-append-version="true"></script>
+
+<script src="~/Scripts/adminlte/app.js" asp-append-version="true"></script>
+<script src="~/Scripts/jquery.vide.js" asp-append-version="true"></script>
+
+<script type="text/html" id="ValidationMessage">
+    <span class="field-validation-error"></span>
+</script>
+
+@Html.LocalTextScript("Site")
+<script type="text/javascript">
+    @Html.Raw(DynamicScriptManager.GetScriptText("Lookup.Administration.Language"))
+    @Html.Raw(DynamicScriptManager.GetScriptText("RegisteredScripts"))
+</script>

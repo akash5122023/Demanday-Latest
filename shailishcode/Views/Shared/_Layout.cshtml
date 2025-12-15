@@ -1,0 +1,555 @@
+﻿@using System.Configuration;
+@using System.Globalization;
+@using System.Xml;
+@using Microsoft.AspNetCore.Html;
+@using System.IO;
+
+<!DOCTYPE html>
+@*<style>    h1 {
+            text-align: right;
+        }
+
+    button {
+      margin: 5px;
+    }
+
+    #punch-out, #bye {
+      display: none;
+    }
+
+    .btn-default {
+      color: #bcbcbc;
+    }
+
+    .fa-undo, .fa-redo {
+      margin-right: 10px;
+    }</style>*@
+
+@{
+    Func<string, IHtmlContent> json = x => new HtmlString(Serenity.JSON.Stringify(x));
+    var hideNav = Context.Request.Query["hideNav"] == "1";
+    var logged = Serenity.Authorization.Username;
+    var themeCookie = Context.Request.Cookies["ThemePreference"];
+    var theme = !string.IsNullOrEmpty(themeCookie) ? themeCookie : "azure-light";
+    var darkSidebar = theme != null && theme.IndexOf("light") < 0;
+    var rtl = System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
+    var user = (UserDefinition)Serenity.Authorization.UserDefinition;
+    var userImage = (user == null || string.IsNullOrEmpty(user.UserImage)) ? "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAABaCAMAAAAPdrEwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURT0oHC0tLTIwLzQzMzo2NDs4Njo6OkQrHUMtIEkuIEYwIkgyI0o0KkI7NkM+O0g/O1M3K1c7KUFAPkpBPFdAK1pCLVFEPlhANWJHOWJJMWpONGlQNnJZO0FBQU5EQEpJRkxLS1JHQVNKRVBOTF1OR1JRTl5QSlFRUVhWVFlYVltbWmJUTGtRRWpWTGBeWmtbUXVcQXZbT3hURGNhXnhhRnVkW3hhVntlWmRkZG1qZWxranBsZ3FuaXRxbHt0bXNzc3l2cHx4coVQOIBcSopbRoVxWpRwX55yXYNtYYtvYYxxZIN/eZV1ZZV7bZt6aqZhQ65hQb1oQ6J9a+w4Puw9QsdlPMhnPsVrRcVuSclrQ8RxTMxyTMV1UsR4VsF7XMt2Uc55U859WtB6VdF9WcB/YexGS+5cYfBkafFtcfF3evJ4fIWBe4mFfpSEcJWHeZ6Pf6mDb6mKer6Far2IbrCJdbyMdLiPerCQfruRfM+CX9OAXMCAYsCSfNWFYdaJZteKaNiMatmQbtuTc9qXe92Yd96ZeuCdfYSEhIuHgI2JgoqKipKNhpmNhJWRiZmUjJ6ZkJ2dnaKWjKGck62dlLWTgbqXhLmZh7ibirifkKWgl6ahmKiimaqkm6umnKymna6onrailLWpnbiplbusmq+poKmpqbCqoLKsorOtpLWroLSsorSupLWwprexqLm5ucOXgMaZgcuchdKdg8iijcaol82mkdCgh9Ojit+gg9mmjdypjtKqld2qkNiumN6znMS9tOqKiuGfgPOChvSMj/SNkOKjhOOmieWqjOWtkeKumOiukeawlOG1numyluq1muy4ne28o+u+qsPBv8vBtsvFv+/Apu3CrezEsu/It/DAp/DBqPHHsfHJtPLNusPDw8rGwc7JwtbW1tjU0d/b19vb2+/RxeDb1+nd1/nCw/nKzPPTwvTXyPTZy/Xd0fvW2Pva2/fg0/jl2+Tj4+jk4evr6/fo4fnr5fzt7Pvx7PTz8/318/349v7+/gAAAAAAAAAAAIt9dAgAAAEAdFJOU////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wBT9wclAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAGXRFWHRTb2Z0d2FyZQBwYWludC5uZXQgNC4wLjEzNANbegAAClFJREFUaEO1mX90FFcVx0k3efVHGzWxVbRT1tJ0YKNHNHrYxNJW688ey6mEFjYbSdxFqqb+KBSNsRuW0Y1GJFREsYCEtJJ4slo5WKxiK+LpZNZt3+zj6Iaz20DLkfoTrKQcCun84b1v3mzm1+6SP/ye/Jh9797P3Ln3vjczyby0v/YQqYwIqIZIOB+QtwlzP5VDp2+uxA7AJM43BFpHhb1XvujgzVt3P9xggvzE0ZwtkYbtwskjXzQJcKGrvwifE+yh7WPCzyl/NMYFl42u/uJUwa4JBHcLR4d80U3gg9UyARXEDWoCAbLFJ3Bf9AerMi2hIZAJ2SpcbfJFP1whFS7h9QVIbdMub6e40WNbbmlZ1MQ7wFSVC4BpjDpQs/AnglCSJ+ptmONAjfAEVWELA3Kb8J+VNyHDaGh2nulkrjy3PGOeLvHJ9RB6lRacybZ3izjCMXsPtQr3ktzobVtH07ehAw9csAOCwz+KQ0vcAkXchfSgF5GewVIVxW9B8VUpM2RQICx5EjLWUkeg6Ja9+bOyuI0ktQiCJTd6SAIypAC2TZRY7ILhVS0uF24iSUGBsORGjw6iFdjD9oROwhMxDvH9q+bGQzfhB7QAG4Gw5EnIfbOghR9vfkMtCE4yezZLAL76a6x4Px8y0XsFQsiDbuVW6Pt+ViwWC4VikR26c2lzc/MNjfW1V/BoQXWN796B8+wGtDWvrBpaFujAUjYJrkifxAP8ZuzZZ5/63aEdO3b86vfIxblDHI3sauixBWbMpPlYEQI2/fEAvyfzpTFLheL9tdwe3FyN7Ub/FO5baFn/lBsC8hkqFvN3inRXK+NetIF0LBeO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"
+        : Url.Content("~/upload/" + user.UserImage);
+
+    var sessionTimeout = 20; //minutes
+    var userIdValue = user?.UserId ?? 0;
+    var UICulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+<html lang="@UICulture" class="no-js@(hideNav ? " no-navigation" : "")" @Html.Raw(rtl ? " dir=\"rtl\"" : "")>
+<head>
+    <script>var AdvanceCRM = window.AdvanceCRM || {};</script>
+    <script src="~/Scripts/jquery-3.5.1.min.js" asp-append-version="true"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/Scripts/adminlte/app.js" asp-append-version="true"></script>
+    @{
+        Html.RenderPartial(MVC.Views.Shared._LayoutHead);
+    }
+    @RenderSection("Head", false)
+    <title>@(ViewData["Title"]) - @Texts.Site.Layout.WhiteLabel CRM</title>
+</head>
+<body id="s-@(ViewData["PageId"])Page" class="@(ViewData["BodyClass"]) fixed sidebar-mini hold-transition skin-@theme @(darkSidebar ? "dark-sidebar" : "light-sidebar")@(hideNav ? " no-navigation" : " has-layout-event")@(rtl ? " rtl" : "")">
+    <div id="PageBackground" style="display: none"></div>
+    @if (hideNav)
+    {
+        <script type="text/javascript">
+            $(function () {
+            @RenderSection("PageInitScript", false)
+            });
+        </script>
+        <div id="page-outer-nonav">
+            <div id="page-container" class="page-container-common">
+                @RenderBody()
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="wrapper">
+            <header class="main-header">
+                <a href="~/" class="logo">
+                    <span class="logo-mini"><i></i></span>
+                    <span class="logo-lg">
+                        <i></i>
+                        <script type="text/javascript">
+                            document.write(AdvanceCRM.Administration.CompanyDetailsRow.getLookup().itemById[@user.CompanyId].Name)
+                        </script>
+                        @* Helper property was referencing a local variable and
+                           caused Razor compilation errors. Replace it with a
+                           simple inline expression instead. *@
+                    <script type="text/javascript">
+                        window.SessionTimeout = (function() {
+                            var _timeLeft, _popupTimer, _countDownTimer;
+
+                            var stopTimers = function() {
+                                window.clearTimeout(_popupTimer);
+                                window.clearTimeout(_countDownTimer);
+                            };
+
+                            var updateCountDown = function() {
+                                var min = Math.floor(_timeLeft / 60);
+                                var sec = _timeLeft % 60;
+                                if(sec < 10)
+                                    sec = "0" + sec;
+
+                                document.getElementById("CountDownHolder").innerHTML = min + ":" + sec;
+
+                                if(_timeLeft > 0) {
+                                    _timeLeft--;
+                                    _countDownTimer = window.setTimeout(updateCountDown, 1000);
+                                }
+                                else
+                                {
+                                    window.location.replace = "/Account/Signout";
+                                }
+                            };
+
+                            var showPopup = function() {
+                                _timeLeft = 60;
+                                updateCountDown();
+                                ClientTimeoutPopup.Show();
+                            };
+
+                            var schedulePopup = function() {
+                                stopTimers();
+                                _popupTimer = window.setTimeout(showPopup, @((sessionTimeout - 1) * 60000));
+                            };
+
+                            var sendKeepAlive = function() {
+                                stopTimers();
+                                ClientTimeoutPopup.Hide();
+                                SessionTimeout.schedulePopup();
+                            };
+
+                            return {
+                                schedulePopup: schedulePopup,
+                                sendKeepAlive: sendKeepAlive
+                            };
+
+                                                })();
+
+
+                    </script>
+
+
+                    </span>
+                </a>
+                <nav class="navbar navbar-static-top" role="navigation">
+                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                        <span class="sr-only">Toggle navigation</span>
+                    </a>
+
+                    @{
+                        string configFile = System.IO.Path.Combine(AppContext.BaseDirectory, "ExternalAppSetting.config");
+                        XmlDocument xml = new XmlDocument();
+                        xml.Load(configFile);
+
+                        foreach (XmlNode node in xml.SelectNodes("/appSettings/add"))
+                        {
+                            string key = node.Attributes["key"].Value;
+                            string value = node.Attributes["value"].Value;
+                            ConfigurationManager.AppSettings.Set(key, value);
+                        }
+
+                        var EndDate = ConfigurationManager.AppSettings["EndDate"].ToString();
+                    }
+
+                    <p class="nav navbar-brand" style="font-size:14px; font-weight:500;">
+                        @if (EndDate.IsNullOrEmpty() == false)
+                        {
+                            if (((Convert.ToDateTime(EndDate, CultureInfo.InvariantCulture)).Subtract(DateTime.Now).TotalDays <= 7) && ((Convert.ToDateTime(EndDate, CultureInfo.InvariantCulture)).Subtract(DateTime.Now).TotalDays >= 0))
+                            {
+                                int remday = (int)DateTime.Now.Subtract(Convert.ToDateTime(EndDate, CultureInfo.InvariantCulture)).TotalDays * -1;
+                                <text><marquee>Your license is going to expire in @remday days</marquee> </text>
+                            }
+                        }
+                    </p>
+                    <div class="navbar-custom-menu">
+                        <ul class="nav navbar-nav">
+
+                            <!-- Add Punch In and Punch Out buttons here -->
+                            @*<li>
+            <a href="javascript:;" class="btn btn-success navbar-btn" onclick="punchIn()" style="padding: 5px 10px; font-size: 12px;">
+                <i class="fa fa-sign-in"></i> Punch In
+            </a>
+        </li>
+        <li>
+            <a href="javascript:;" class="btn btn-danger navbar-btn" onclick="punchOut()" style="padding: 5px 10px; font-size: 12px;">
+                <i class="fa fa-sign-out"></i> Punch Out
+            </a>
+        </li>
+
+        <li class="dropdown notifications-menu">
+            @{Html.RenderPartial(MVC.Views.Shared.Notifications, new AdvanceCRM.Notifications.NotificationsModel()); }
+
+        </li>*@
+
+                            <li class="d-flex justify-content-center align-items-center flex-column my-3" style="padding-top: 8px; padding-right: 8px;">
+                                <button class="btn btn-success mb-2 px-4 py-2" id="punchInButton" data-toggle="tooltip" data-placement="bottom" title="Punch In" onclick="punchIn()">
+                                    <i class="fa fa-clock-o"></i> Punch In
+                                </button>
+                                <button class="btn btn-danger px-4 py-2" id="punchOutButton" data-toggle="tooltip" data-placement="bottom" title="Punch Out" onclick="punchOut()" style="display: none;">
+                                    <i class="fa fa-clock-o"></i> Punch Out
+                                </button>
+                            </li>
+
+                            <li>
+                                <a href="~/Mailbox/Inbox?flag=Inbox&Search=&page=1&min=0&max=0&prepageNo=1" data-toggle="tooltip" data-placement="bottom" title="Mailbox">
+                                    <i class="fa fa-envelope"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="~/Calendar" data-toggle="tooltip" data-placement="bottom" title="Calendar">
+                                    <i class="fa fa-calendar"></i>
+                                </a>
+                            </li>
+
+                            <li class="dropdown user user-menu">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <img src="@userImage" class="user-image" alt="User Image">
+                                    <span class="hidden-xs">@Serenity.Authorization.Username</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <!-- User image -->
+                                    <li class="user-header">
+                                        <img src="@userImage" class="img-circle" alt="User Image">
+
+                                        <p>
+                                            @(user != null ? user.DisplayName : "")
+                                        </p>
+                                    </li>
+
+                                    <!-- Menu Footer-->
+                                    <li class="user-footer">
+                                        <div class="pull-left">
+                                            <a href="~/Account/ChangePassword" class="btn btn-default btn-flat"><i class="fa fa-lock fa-fw"></i> @Texts.Forms.Membership.ChangePassword.FormTitle</a>
+                                        </div>
+                                        <div class="pull-right">
+                                            <a href="~/Account/Signout" class="btn btn-default btn-flat"><i class="fa fa-sign-out fa-fw"></i> @Texts.Navigation.LogoutLink</a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li>
+                                <a href="#" data-toggle="control-sidebar"><i class="fa fa-sliders"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+
+            <aside class="main-sidebar">
+                <section class="sidebar">
+                    <form action="#" method="get" class="sidebar-form">
+                        <div class="input-group">
+                            <input type="text" id="SidebarSearch" name="q" class="form-control" autocomplete="off">
+                            <span class="input-group-btn">
+                                <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i></button>
+                            </span>
+                        </div>
+                    </form>
+                    <ul class="sidebar-menu" id="SidebarMenu">
+                        @{
+                            Html.RenderPartial(MVC.Views.Shared.LeftNavigation, new AdvanceCRM.Navigation.NavigationModel());
+                        }
+                    </ul>
+                </section>
+            </aside>
+
+            <div class="content-wrapper">
+                @if (IsSectionDefined("ContentHeader"))
+                {
+                    <section class="content-header">
+                        @RenderSection("ContentHeader")
+                    </section>
+                }
+                <section class="content">
+                    @RenderBody()
+                </section>
+            </div>
+
+            <footer class="main-footer">
+                <div class="pull-right hidden-xs">
+                    @Html.Raw(Texts.Site.Layout.FooterInfo)
+                </div>
+                <strong>@Texts.Site.Layout.FooterCopyright</strong> @Texts.Site.Layout.FooterRights
+            </footer>
+
+            <aside class="control-sidebar control-sidebar-dark">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="control-sidebar-settings-tab">
+                        <form method="post">
+                            <h3 class="control-sidebar-heading">@Texts.Site.Layout.GeneralSettings</h3>
+
+                            <div class="form-group">
+                                <label class="control-sidebar-subheading">@Texts.Site.Layout.Language</label>
+                                <select id="LanguageSelect" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label class="control-sidebar-subheading">@Texts.Site.Layout.Theme</label>
+                                <select id="ThemeSelect" class="form-control"></select>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </aside>
+            <div class="control-sidebar-bg"></div>
+        </div>
+
+
+        <!-- jQuery Script to Handle Click Events -->
+        @*<script>
+                function punchIn() {
+                    Q.confirm("Are you sure you want to punch in?", () => {
+                        Q.serviceCall({
+                            service: 'Attendance/PunchIn',
+                            request: {},
+                            onSuccess: () => {
+                                Q.notifySuccess("Punched in successfully!");
+                            },
+                            onError: () => {
+                                Q.notifyError("Failed to punch in.");
+                            }
+                        });
+                    });
+                }
+
+                function punchOut() {
+                    Q.confirm("Are you sure you want to punch out?", () => {
+                        Q.serviceCall({
+                            service: 'Attendance/PunchOut',
+                            request: {},
+                            onSuccess: () => {
+                                Q.notifySuccess("Punched out successfully!");
+                            },
+                            onError: () => {
+                                Q.notifyError("Failed to punch out.");
+                            }
+                        });
+                    });
+                }
+
+            </script>*@
+
+
+
+
+
+
+        @*<script>
+                function getAddressFromCoordinates(lat, lon, callback) {
+                    // Use OpenStreetMap Nominatim API for free reverse geocoding
+                    let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                callback(data.display_name);
+                            } else {
+                                callback("Unknown Location");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Geocoding error:", error);
+                            callback("Unknown Location");
+                        });
+                }
+
+                function punchIn() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((position) => {
+                            let latitude = position.coords.latitude;
+                            let longitude = position.coords.longitude;
+                            let coordinates = latitude + "," + longitude;
+
+                            getAddressFromCoordinates(latitude, longitude, (location) => {
+                                Q.serviceRequest('Attendance/PunchIn', {
+                                    Entity: {
+                                        Coordinates: coordinates,
+                                        Location: location // Send the actual location
+                                    }
+                                }, (response) => {
+                                    Q.notifySuccess("Punched in successfully!");
+                                }, {
+                                    onError: (err) => {
+                                        Q.notifyError(err.Message);
+                                    }
+                                });
+                            });
+                        }, (error) => {
+                            Q.notifyError("Unable to fetch location: " + error.message);
+                        });
+                    } else {
+                        Q.notifyError("Geolocation is not supported by this browser.");
+                    }
+                }
+
+                function punchOut() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((position) => {
+                            let latitude = position.coords.latitude;
+                            let longitude = position.coords.longitude;
+                            let coordinates = latitude + "," + longitude;
+
+                            Q.serviceRequest('Attendance/PunchOut', {
+                                Entity: {
+                                    Coordinates: coordinates,
+                                    Location: "Fetching..."
+                                }
+                            }, (response) => {
+                                Q.notifySuccess("Punched out successfully!");
+                            }, {
+                                onError: (err) => {
+                                    Q.notifyError(err.Message);
+                                }
+                            });
+                        }, (error) => {
+                            Q.notifyError("Unable to fetch location: " + error.message);
+                        });
+                    } else {
+                        Q.notifyError("Geolocation is not supported by this browser.");
+                    }
+                }
+            </script>*@
+        <script>
+                     document.addEventListener("DOMContentLoaded", function () {
+                         CheckPunchStatus(); // Check status on page load
+
+                document.getElementById("punchInButton").addEventListener("click", function () {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            var latitude = position.coords.latitude;
+                            var longitude = position.coords.longitude;
+                            var coordinates = latitude + "," + longitude;
+
+                            var apiKey = "YOUR_GOOGLE_API_KEY"; // Replace with your actual API key
+                            var location = "Office";
+                            var userId = @userIdValue; // Ensure Razor renders this correctly
+
+                            var apiUrl = `/api/Leads/PunchIn?UserId=${userId}&Location=${encodeURIComponent(location)}&Coordinates=${encodeURIComponent(coordinates)}`;
+
+                            $.ajax({
+                                url: apiUrl,
+                                type: 'POST',
+                                success: function (response) {
+                                    alert(response);
+                                    CheckPunchStatus(); // Refresh button states
+                                },
+                                error: function (xhr, status, error) {
+                                    alert("Error: " + error);
+                                }
+                            });
+
+                        }, function (error) {
+                            alert("Geolocation error: " + error.message);
+                        });
+                    } else {
+                        alert("Geolocation is not supported by this browser.");
+                    }
+                });
+
+                document.getElementById("punchOutButton").addEventListener("click", function () {
+                    var userId = @userIdValue;
+                    var apiUrl = `/api/Leads/PunchOut?UserId=${userId}`;
+
+                    $.ajax({
+                        url: apiUrl,
+                        type: 'POST',
+                        success: function (response) {
+                            document.getElementById("punchInButton").style.display = "none";
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Error: " + error);
+                        }
+                    });
+                });
+            });
+
+                        function CheckPunchStatus() {
+                var userId = @userIdValue;
+
+                fetch(`/api/Leads/CheckPunchStatus?UserId=${userId}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log(data);
+                        if (data === "PunchedIn") {
+
+                            document.getElementById("punchInButton").style.display = "none";
+                           document.getElementById("punchOutButton").style.display = "inline-block";
+                        }
+                    });
+            }
+
+        </script>
+        <script type="text/javascript">
+
+            function PunchIn() {
+
+              //  var url ="/Attendance/Approve"
+                var Name = @userIdValue;
+                var dd = Date.now.toString("yyyy-MM-dd");
+
+                document.getElementById("demo").innerHTML =  window.location.hostname;
+
+                //// if (txtid.length != 0 || txtname.length != 0 || txtsalary.length != 0 || txtcity.length != 0)
+                //{
+                //    var connection = new ActiveXObject("ADODB.Connection");
+                //    var connectionstring = "Data Source=.;Initial Catalog=EmpDetail;Persist Security Info=True;User ID=sa;Password=****;Provider=SQLOLEDB";
+                //    connection.Open(connectionstring);
+                //    var rs = new ActiveXObject("ADODB.Recordset");
+                //    rs.Open("insert into Emp_Info values('" + txtid + "','" + txtname + "','" + txtsalary + "','" + txtcity + "')", connection);
+                //    alert("Insert Record Successfuly");
+                //    txtid.value = " ";
+                //    connection.close();
+                //}
+                //else {
+                //    alert("Please Enter Employee \n Id \n Name \n Salary \n City ");
+                //}
+            }
+
+
+
+            $().ready(function () {
+                new AdvanceCRM.Common.SidebarSearch($('#SidebarSearch'), $('#SidebarMenu')).init();
+                new AdvanceCRM.Common.LanguageSelection($('#LanguageSelect'), '@(System.Globalization.CultureInfo.CurrentUICulture.Name)');
+                new AdvanceCRM.Common.ThemeSelection($('#ThemeSelect'));
+            @RenderSection("PageInitScript", false);
+
+                var doLayout = function () {
+                    height = (this.window.innerHeight > 0) ? this.window.innerHeight : this.screen.height;
+                    height -= $('header.main-header').outerHeight() || 0;
+                    height -= $('section.content-header').outerHeight() || 0;
+                    height -= $('footer.main-footer').outerHeight() || 0;
+                    if (height < 200) height = 200;
+                    $("section.content").css("min-height", (height) + "px");
+
+                    $('body').triggerHandler('layout');
+                };
+
+                $(window).bind("load resize layout", doLayout);
+                doLayout();
+            });
+
+            Serenity.setupUIOverrides();
+
+            $.sessionTimeout({
+                logoutUrl: "/Account/Signout",
+                redirUrl: "#",
+                warnAfter: ((@sessionTimeout*60000) - 60000),
+                redirAfter: @sessionTimeout* 60000,
+                keepAlive: false,
+                ignoreUserActivity: false,
+                countdownBar: true
+            });
+        </script>
+    }
+</body>
+</html>

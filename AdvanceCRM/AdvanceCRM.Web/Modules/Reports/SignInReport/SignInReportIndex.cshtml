@@ -1,0 +1,12 @@
+﻿@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "SignIn Report";
+}
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">jQuery(function () {
+        new AdvanceCRM.Reports.SignInReportPanel($('#GridDiv'), {}).init();
+
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });</script>

@@ -1,0 +1,18 @@
+﻿
+namespace _Ext.Pages
+{
+    using Serenity;
+    using Serenity.Web;
+    using Microsoft.AspNetCore.Mvc;
+    using _Ext.Entities;
+
+    [PageAuthorize(typeof(AuditLogRow))]
+    public class AuditLogController : Controller
+    {
+        [Route("_Ext/AuditLog")]
+        public ActionResult Index()
+        {
+            return View("~/Modules/_Ext/AuditLog/AuditLogIndex.cshtml");
+        }
+    }
+}

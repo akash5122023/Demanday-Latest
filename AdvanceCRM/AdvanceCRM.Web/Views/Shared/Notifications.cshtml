@@ -1,0 +1,168 @@
+﻿@using AdvanceCRM.Masters
+
+
+@model AdvanceCRM.Notifications.NotificationsModel
+<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+    <i class="fa fa-bell-o"></i>
+    @if (Model.count > 0)
+    {
+        <span class="label label-warning">@Model.count</span>
+    }
+</a>
+<ul class="dropdown-menu">
+    <li class="header">You have @Model.count new notifications</li>
+    <li>
+        <!-- inner menu: contains the actual data -->
+        <ul class="menu">
+            @foreach (var item in Model.Items)
+            {
+                if (item.IsChecked.Value)
+                {
+                    <li>
+                        <a href="#" onclick="clearNotification(@item.Id, '@item.NotificationsUrl');">
+                            @if (item.NotificationsModule.Value == NotificationModules.Contacts)
+                            {
+                                <i class="fa fa-address-book"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Enquiry)
+                            {
+                                <i class="fa fa-group"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Quotation)
+                            {
+                                <i class="fa fa-file-text"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Proforma)
+                            {
+                                <i class="fa icon-book-open"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Sales)
+                            {
+                                <i class="fa icon-docs"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Challan)
+                            {
+                                <i class="fa fa-file-text-o"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.SalesReturn)
+                            {
+                                <i class="fa fa-reply-all"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Purchase)
+                            {
+                                <i class="fa icon-basket-loaded"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.PurchaseReturn)
+                            {
+                                <i class="fa fa-reply-all"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.PurchaseOrder)
+                            {
+                                <i class="fa fa-cart-arrow-down"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.AMC)
+                            {
+                                <i class="fa fa-file-code-o"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.CMS)
+                            {
+                                <i class="fa fa-support"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.TeleCalling)
+                            {
+                                <i class="fa fa-phone"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Tasks)
+                            {
+                                <i class="fa fa-edit"></i>
+                            }
+                            @item.NotificationsText
+                            <h6 class="align-right text-gray">@item.NotificationsInsertDate</h6>
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li style="background-color:lightblue">
+                        <a href="#" onclick="clearNotification(@item.Id, '@item.NotificationsUrl');">
+                            @if (item.NotificationsModule.Value == NotificationModules.Contacts)
+                            {
+                                <i class="fa fa-address-book"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Enquiry)
+                            {
+                                <i class="fa fa-group"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Quotation)
+                            {
+                                <i class="fa fa-file-text"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Proforma)
+                            {
+                                <i class="fa icon-book-open"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Sales)
+                            {
+                                <i class="fa icon-docs"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Challan)
+                            {
+                                <i class="fa fa-file-text-o"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.SalesReturn)
+                            {
+                                <i class="fa fa-reply-all"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Purchase)
+                            {
+                                <i class="fa icon-basket-loaded"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.PurchaseReturn)
+                            {
+                                <i class="fa fa-reply-all"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.PurchaseOrder)
+                            {
+                                <i class="fa fa-cart-arrow-down"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.AMC)
+                            {
+                                <i class="fa fa-file-code-o"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.CMS)
+                            {
+                                <i class="fa fa-support"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.TeleCalling)
+                            {
+                                <i class="fa fa-phone"></i>
+                            }
+                            else if (item.NotificationsModule.Value == NotificationModules.Tasks)
+                            {
+                                <i class="fa fa-edit"></i>
+                            }
+                            @item.NotificationsText
+                            <h6 class="align-right text-gray">@item.NotificationsInsertDate</h6>
+                        </a>
+                    </li>
+                }
+            }
+        </ul>
+    </li>
+    <li class="footer"><a href="~/Common/Notifications">View all</a></li>
+</ul>
+
+<script type="text/javascript">
+    function clearNotification(id, url) {
+
+
+        new AdvanceCRM.Common.NotificationUsersService.ClearNotification({
+            Id: id
+        },
+            response => {
+
+                location.href = url;
+            }
+        );
+    }
+</script>

@@ -1,0 +1,20 @@
+﻿@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "CRM Setup";
+}
+
+
+@section ContentHeader {
+
+    <h1>CRM Customization</h1>
+    
+}
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+     new AdvanceCRM.Settings.CRMDialog().loadByIdAndOpenDialog(1, true)
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });
+</script>

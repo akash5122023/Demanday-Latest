@@ -1,0 +1,46 @@
+﻿@model AdvanceCRM.Reports.AccountingReportModel
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "Accounting Report";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+}
+
+<body>
+    <table style="width:100%; border:groove;">
+        <tr>
+            <td align="center">
+                <h3 style="text-decoration-color:burlywood">@Model.Company.Name</h3>
+                <h4>@Model.Company.Address</h4>
+                <h5>@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>
+    @if (Model.Request.Type == AdvanceCRM.Reports.AccountingReportType.AllOutstanding)
+    {
+        @Html.Partial(MVC.Views.Reports.Accounting.AllOutstanding, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.AccountingReportType.Cashbook)
+    {
+        @Html.Partial(MVC.Views.Reports.Accounting.Cashbook, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.AccountingReportType.LedgerBalance)
+    {
+        @Html.Partial(MVC.Views.Reports.Accounting.LedgerBalance, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.AccountingReportType.OutstandingBalance)
+    {
+        @Html.Partial(MVC.Views.Reports.Accounting.OutstandingBalance, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.AccountingReportType.AllSupplierOutstanding)
+    {
+        @Html.Partial(MVC.Views.Reports.Accounting.SupplierAllOutstanding, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.AccountingReportType.SupplierOutstandingBalance)
+    {
+        @Html.Partial(MVC.Views.Reports.Accounting.SupplierOutstandingBalance, Model);
+    }
+    else if (Model.Request.Type == AdvanceCRM.Reports.AccountingReportType.ContactwiseCashbook)
+    {
+        @Html.Partial(MVC.Views.Reports.Accounting.ContactwiseCashbook, Model);
+    }
+</body>

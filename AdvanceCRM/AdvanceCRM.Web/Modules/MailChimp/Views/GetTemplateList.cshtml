@@ -1,0 +1,89 @@
+﻿
+@model IEnumerable<MailChimp.Net.Models.Template>
+@{
+    ViewBag.Title = "GetTemplateList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<link href="~/Content/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.1.1.min.js"></script>*@
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+    $(function () {
+        $('[data-toggle="popover"]').popover();
+    })
+    $(document).ready(function () {
+        $("#BtnTemplate").click(function () {
+            setTimeout(function () {
+                window.open('https://us16.admin.mailchimp.com/templates/create-template', '_blank');
+            }, 15000);
+        });
+    });
+</script>
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">Template</div></div>
+    <div class="row">
+        <div class="col-sm-10"></div>
+        <div class="col-sm-2">
+
+            <button id="BtnTemplate" class="btn btn-block navbar-btn" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="left" data-content="You  will be redirected to mailchimp server please create template and refresh the page here to continue">
+                Create Template
+            </button>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-sm-2">
+            <div class="dropdown" data-toggle="tooltip" data-placement="top" title="Sorts template by oldest first, newest first, A-Z and Z-A">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    Sort By
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a href="/MailChimp/GetTemplateList?sort=A-Z">A-Z</a></li>
+                    <li><a href="/MailChimp/GetTemplateList?sort=Z-A">Z-A</a></li>
+                    <li><a href="/MailChimp/GetTemplateList?sort=oldest first">oldest first</a></li>
+                    <li><a href="/MailChimp/GetTemplateList?sort=newest first">newest first</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-sm-10">
+        </div>
+    </div>
+    <br />
+    <table class="table table-user-information">
+        <tbody>
+            @foreach (var temp in Model)
+            {
+            <tr>
+                <td><img src="@temp.Thumbnail" style="height:180px;width:180px;" /></td>
+                <td>
+                    <h5>
+                        <a href="https://us16.admin.mailchimp.com/templates/edit?id=@temp.Id" data-toggle="tooltip" data-placement="top" title="@temp.Name">@temp.Name</a>
+                    </h5>
+                    <p>
+                        <span class="msg">
+                            Created on @Convert.ToDateTime(temp.DateCreated).ToString("D") @Convert.ToDateTime(temp.DateCreated).ToString("t")  by @temp.CreatedBy
+
+                        </span>
+                    </p>
+                </td>
+                <td>
+                    <p><span></span> </p>
+                    <p>
+                        <a href="@temp.Thumbnail" target="_viewTemplate">Preview Template &raquo;</a>
+                    </p>
+                </td>
+                <td>
+                    <button type="button" id="CreateCampaign" name="CreateCampaign" class="btn btn-block navbar-btn" data-toggle="tooltip" data-placement="top" title="Create Campaign" onclick="location.href = '@Url.Action("CreateCampaigns", "Mailchimp",new {TemplateId=temp.Id})';">Create Campaign</button>
+                </td>
+
+
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

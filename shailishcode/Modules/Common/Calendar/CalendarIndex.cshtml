@@ -1,0 +1,487 @@
+﻿@model AdvanceCRM.Common.Calendar.CalendarModel
+
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Appointment Calendar";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.min.css">
+    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.print.css" media="print">
+    <script src="~/Scripts/daterangepicker/moment.min.js"></script>
+    <script src="~/Scripts/fullcalendar/fullcalendar.min.js"></script>
+    <style type="text/css">
+        .tab-content {
+            display: block;
+        }
+
+            .tab-content > .tab-pane {
+                visibility: hidden;
+            }
+
+            .tab-content > .active {
+                visibility: visible;
+            }
+    </style>
+}
+
+@section ContentHeader {
+    <h1 style="text-align:center">
+        @ViewData["Title"]
+    </h1>
+}
+<div>
+    <table class="table">
+        <tr>
+            <td><h5><span style="background-color:#f2be54">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - TeleCalling</h5></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><h5><span style="background-color:#cdd4ca">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - Enquiry</h5></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><h5><span style="background-color:#87AEB4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - Quotation</h5></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><h5><span style="background-color: #153e5c ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - Proforma</h5></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td><h5><span style="background-color:#FEFBD8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - AMC</h5></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>
+                <!-- Toggle Switch -->
+                <label class="switch">
+                    <input type="checkbox" id="toggleSwitch" checked>
+                    <span class="slider round"></span>
+                </label>
+            </td>
+            <td align="right">
+                <div class="input-group">
+                    <select class="filter" id="type_filter" multiple="multiple" style="width: 200px !important;">
+                        @foreach (var d in Model.Users)
+                        {
+                            <option value="@d">@d</option>
+                        }
+                    </select>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<style>
+    /* Toggle Switch Styles */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #4CAF50; /* Green when ON */
+        transition: .4s;
+        border-radius: 24px;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    input:checked + .slider {
+        background-color: #4CAF50;
+    }
+
+    input:not(:checked) + .slider {
+        background-color: #ccc;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-0"></div>
+    <div class="col-md-12">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#tab_1" data-toggle="tab">My Calendar</a></li>
+                <li><a href="#tab_2" data-toggle="tab">Team Calendar</a></li>
+            </ul>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="tab_1">
+                    <div id="calendar"></div>
+                </div><!-- /.tab-pane -->
+                <div role="tabpanel" class="tab-pane" id="tab_2">
+                    <div id="teamCalendar"></div>
+                </div><!-- /.tab-pane -->
+            </div><!-- /.tab-content -->
+        </div><!-- nav-tabs-custom -->
+    </div><!-- /.col -->
+    <div class="col-md-0"></div>
+</div><!-- /.row -->
+
+<script>
+    var isInitialised = false;
+    var teamEvents = [
+        @foreach (var d in Model.TeleCalling)
+        {
+            if (d.RepresentativeId.Value.ToString().Trim() != Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    title: '@Model.Contacts.Where(x => x.Id == d.TeleCallingContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
+                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
+                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Services/TeleCalling#edit/'+ @d.TeleCallingId + '"',
+                    backgroundColor: "#f2be54",
+                    borderColor: "#f2be54",
+                    textColor: "black",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }
+        @foreach (var d in Model.Enquiry)
+        {
+            if (d.RepresentativeId.Value.ToString().Trim() != Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    title: '@Model.Contacts.Where(x => x.Id == d.EnquiryContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
+                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
+                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Enquiry#edit/'+ @d.EnquiryId + '"',
+                    backgroundColor: "#cdd4ca",
+                    borderColor: "#cdd4ca",
+                    textColor: "Black",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }
+        @foreach (var d in Model.Quotation)
+        {
+            if (d.RepresentativeId.Value.ToString().Trim() != Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    title: '@Model.Contacts.Where(x => x.Id == d.QuotationContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
+                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
+                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Quotation#edit/'+ @d.QuotationId + '"',
+                    backgroundColor: "#87AEB4",
+                    borderColor: "#87AEB4",
+                    textColor: "Black",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }
+        @foreach (var d in Model.Proforma)
+        {
+            if (d.RepresentativeId.Value.ToString().Trim() != Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    title: '@Model.Contacts.Where(x => x.Id == d.InvoiceContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
+                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
+                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Proforma#edit/'+ @d.InvoiceId + '"',
+                    backgroundColor: "#153e5c",
+                    borderColor: "#153e5c",
+                    textColor: "White",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }
+        @foreach (var d in Model.AMC)
+                {
+                    if (d.AssignedTo.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+                    {
+                    <text>
+                    {
+                        @{
+                            var visitdetails = "";
+
+                            if(d.VisitDetails.IsNullOrEmpty() == false)
+                            {
+                                visitdetails = d.VisitDetails;
+                            }
+                        }
+
+                        title: '@Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault().Name\n @visitdetails.Replace("\n",", ")',
+                        start: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.ToString("HH:mm")',
+                        end: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.AddMinutes(60).ToString("HH:mm")',
+                        allDay: false,
+                        url: 'javascript: location.href = "/Services/AMC#edit/'+ @d.AMCId + '"',
+                        backgroundColor: "#FEFBD8",
+                        borderColor: "#FEFBD8",
+                        textColor: "Black"
+                    },
+                    </text>
+                    }
+                }
+
+    ];
+
+    var myEvents = [
+        @foreach (var d in Model.TeleCalling)
+        {
+            if (d.RepresentativeId.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    title: '@Model.Contacts.Where(x => x.Id == d.TeleCallingContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
+                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
+                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Services/TeleCalling#edit/'+ @d.TeleCallingId + '"',
+                    backgroundColor: "#f2be54",
+                    borderColor: "#f2be54",
+                    textColor: "black",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }
+        @foreach (var d in Model.Enquiry)
+        {
+            if (d.RepresentativeId.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    title: '@Model.Contacts.Where(x => x.Id == d.EnquiryContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
+                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
+                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Enquiry#edit/'+ @d.EnquiryId + '"',
+                    backgroundColor: "#cdd4ca",
+                    borderColor: "#cdd4ca",
+                    textColor: "Black",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }
+        @foreach (var d in Model.Quotation)
+        {
+            if (d.RepresentativeId.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    title: '@Model.Contacts.Where(x => x.Id == d.QuotationContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
+                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
+                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Quotation#edit/'+ @d.QuotationId + '"',
+                    backgroundColor: "#87AEB4",
+                    borderColor: "#87AEB4",
+                    textColor: "Black",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }
+        @*@foreach (var d in Model.Proforma)
+        {
+            if (d.RepresentativeId.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    title: '@Model.Contacts.Where(x => x.Id == d.InvoiceContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
+                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
+                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Proforma#edit/'+ @d.InvoiceId + '"',
+                    backgroundColor: "#153e5c",
+                    borderColor: "#153e5c",
+                    textColor: "White",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }*@
+        @*@foreach (var d in Model.AMC)
+        {
+            if (d.AssignedTo.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+            {
+                <text>
+                {
+                    //title: '@Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault().Name\n @d.VisitDetails.Replace("\n",", ")',
+                    title: '@Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault()?.Name\n @(d.VisitDetails?.Replace("\n", ", ") ?? "")',
+
+                    start: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.ToString("HH:mm")',
+                    end: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.AddMinutes(60).ToString("HH:mm")',
+                    allDay: false,
+                    url: 'javascript: location.href = "/Services/AMC#edit/'+ @d.AMCId + '"',
+                    backgroundColor: "#FEFBD8",
+                    borderColor: "#FEFBD8",
+                    textColor: "Black",
+                    status: '@d.Status' // Add status field
+                },
+                </text>
+            }
+        }*@
+@foreach (var d in Model.AMC)
+{
+    if (d.AssignedTo.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+    {
+        // Get the contact name, or use an empty string if not found
+        var contact = Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault();
+        var contactName = contact != null ? contact.Name : ""; // If contact is null, set an empty string
+
+        // Replace \n with ", " in VisitDetails, or use an empty string if VisitDetails is null
+        var visitDetails = d.VisitDetails != null ? d.VisitDetails.Replace("\n", ", ") : "";
+
+        <text>
+        {
+            title: '@contactName\n @visitDetails',
+            start: '@d.VisitDate.Value.ToString("yyyy-MM-dd")' + 'T' + '@d.VisitDate.Value.ToString("HH:mm")',
+            end: '@d.VisitDate.Value.ToString("yyyy-MM-dd")' + 'T' + '@d.VisitDate.Value.AddMinutes(60).ToString("HH:mm")',
+            allDay: false,
+            url: 'javascript: location.href = "/Services/AMC#edit/' + @d.AMCId + '"',
+            backgroundColor: "#FEFBD8",
+            borderColor: "#FEFBD8",
+            textColor: "Black",
+            status: '@d.Status' // Add status field
+        },
+        </text>
+    }
+}
+
+                @*@foreach (var d in Model.AMC)
+          {
+        if (d.AssignedTo.HasValue && d.AssignedTo.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
+        {
+        <text>
+        {
+            title: '@Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault()?.Name',
+            start: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.ToString("HH:mm")',
+            end: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.AddMinutes(60).ToString("HH:mm")',
+            allDay: false,
+            url: 'javascript: location.href = "/Services/AMC#edit/'+ @d.AMCId + '"',
+            backgroundColor: "#FEFBD8",
+            borderColor: "#FEFBD8",
+            textColor: "Black",
+            status: '@d.Status' // Add status field
+        },
+        </text>
+         }
+       }*@
+
+    ];
+
+    $(function () {
+        // Filter events to show only Open Appointments on initial load
+        var filteredMyEvents = myEvents.filter(function(event) {
+            return event.status === 'Open';
+        });
+        var filteredTeamEvents = teamEvents.filter(function(event) {
+            return event.status === 'Open';
+        });
+
+        $("#type_filter").select2({
+            placeholder: "Filter Users",
+            allowClear: true
+        });
+
+        $('.filter').on('change', function () {
+            $('#teamCalendar').fullCalendar('rerenderEvents');
+        });
+        /* initialize the calendar
+         -----------------------------------------------------------------*/
+
+
+        // Initialize the calendar with filtered events
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            buttonText: {
+                today: 'today',
+                month: 'month',
+                week: 'week',
+                day: 'day',
+                list: 'list'
+            },
+            events: filteredMyEvents, // Show only Open Appointments initially
+            editable: false
+        });
+
+
+        $('#teamCalendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            buttonText: {
+                today: 'today',
+                month: 'month',
+                week: 'week',
+                day: 'day',
+                list: 'list'
+            },
+            eventRender: function (event, element, view) {
+
+                var show_type = true;
+                var types = $('#type_filter').val();
+
+                if (types && types.length > 0) {
+                    if (types[0] == "all") {
+                        show_type = true;
+                    } else {
+                        show_type = types.indexOf(event.type) >= 0;
+                    }
+                }
+
+
+                return show_type;
+
+            },
+            events: filteredTeamEvents, // Show only Open Appointments initially
+            editable: false
+        });
+
+        // Toggle switch functionality
+        $('#toggleSwitch').change(function() {
+            var showOpen = $(this).is(':checked');
+            var updatedMyEvents = myEvents.filter(function(event) {
+                return showOpen ? event.status === 'Open' : event.status === 'Closed';
+            });
+            var updatedTeamEvents = teamEvents.filter(function(event) {
+                return showOpen ? event.status === 'Open' : event.status === 'Closed';
+            });
+
+            $('#calendar').fullCalendar('removeEvents');
+            $('#calendar').fullCalendar('addEventSource', updatedMyEvents);
+
+            $('#teamCalendar').fullCalendar('removeEvents');
+            $('#teamCalendar').fullCalendar('addEventSource', updatedTeamEvents);
+        });
+    });
+</script>

@@ -1,0 +1,272 @@
+﻿@model AdvanceCRM.Reports.AccountingReportModel
+
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        /* text-align: center;*/
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        /*text-align: center;*/
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        /*text-align: center;*/
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    Ledger Balance
+</div>
+
+<div>
+    <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat()
+</div>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    <strong>Ledger:</strong> @Model.Head.Head1
+</div>
+
+@if ((Model.Head.Head1 == "Salaries") || (Model.Head.Head1 == "Employee"))
+{
+    <strong>Employee Name :</strong> @Model.EmployeeName.EmployeeName}
+
+@if (Model.Head.Head1 == "Project Cost" || Model.Head.Head1 == "Projects")
+{
+    <strong>Project Name :</strong> @Model.ProjectName.ProjectName
+    @*@if (Model.Head.Head1 == "Project") {
+         <span style="margin-left: 10px;"><strong>Employee Name :</strong></span> @Model.EmployeeName.EmployeeName
+        }*@
+
+    <hr />
+
+    <div>
+        <table>
+            <tr>
+                <th style="text-align:center">Sr. No.</th>
+                <th style="text-align:center">Cost Amount</th>
+                <th style="text-align:center">Date</th>
+                <th style="text-align:center">Employee Name</th>
+                <th style="text-align:center">Purpose</th>
+                <th style="text-align:center">Narration</th>
+                <th style="text-align:center">Receipt</th>
+                <th style="text-align:center">BankName / Cash</th>
+                <th style="text-align:right">CashIn</th>
+                <th style="text-align:right">CashOut</th>
+            </tr>
+
+            @{
+                double opencashCredit = 0; double opencashDebit = 0;
+
+                opencashCredit = (double)Model.OpeningBal.Sum(x => x.CashIn);
+                opencashDebit = (double)Model.OpeningBal.Sum(x => x.CashOut);
+            }
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="4" align="right"><strong> Opening Balance </strong></td>
+                <td></td>
+                <td align="right">@opencashCredit.ToString("#,##0.00")</td>
+                <td align="right">@opencashDebit.ToString("#,##0.00")</td>
+            </tr>
+
+            @{ int srno = 1;}
+
+            @foreach (var item in Model.Cash)
+            {
+                <tr>
+                    <td style="text-align:center">@srno</td>
+                    <td style="text-align:center">@item.ProjectAmtIn</td>
+                    <td style="text-align:center">@item.Date.Value.ToString("dd-MMM-yyyy")</td>
+                    <td style="text-align:center">@item.EmployeeName</td>
+                    <td style="text-align:center">@item.Purpose</td>
+
+                    <td style="text-align:center">@item.Narration</td>
+                    <td style="text-align:center">@item.Id</td>
+                    <td style="text-align:center">@item.BankBankName</td>
+                    @if (item.CashIn != null)
+                    {
+                        <td style="text-align:right;color:green">@item.CashIn.Value.ToString("#,##0.00")</td>
+                    }
+                    else
+                    {
+                        <td style="text-align:right">-</td>
+                    }
+                    @if (item.CashOut != null)
+                    {
+                        <td style="text-align:right;color:red">@item.CashOut.Value.ToString("#,##0.00")</td>
+                    }
+                    else
+                    {
+                        <td style="text-align:right">-</td>
+                    }
+                </tr>
+
+                srno = srno + 1;
+
+                if (item.CashIn != null)
+                {
+                    opencashCredit = opencashCredit + (double)item.CashIn;
+                }
+
+                if (item.CashOut != null)
+                {
+                    opencashDebit = opencashDebit + (double)item.CashOut;
+                }
+
+            }
+
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td colspan="4" align="right"><strong> Closing Balance </strong></td>
+                <td></td>
+                <td align="right">@opencashCredit.ToString("#,##0.00")</td>
+                <td align="right">@opencashDebit.ToString("#,##0.00")</td>
+            </tr>
+        </table>
+        <hr />
+    </div>
+}
+else
+{
+    <hr />
+
+    <div class="box-body no-padding">
+        <table class="table table-striped">
+            <tr>
+                <th style="text-align:center">Sr. No.</th>
+                <th style="text-align:center">Date</th>
+                <th style="text-align:center">Narration</th>
+                <th style="text-align:center">Receipt</th>
+                <th style="text-align:center">BankName / Cash</th>
+                <th style="text-align:right">Credit</th>
+                <th style="text-align:right">Debit</th>
+            </tr>
+
+            @{
+                double opencashCredit = 0; double opencashDebit = 0;
+
+                opencashCredit = (double)Model.OpeningBal.Sum(x => x.CashIn);
+                opencashDebit = (double)Model.OpeningBal.Sum(x => x.CashOut);
+            }
+            <tr>
+                <td colspan="4" align="right"><strong> Opening Balance </strong></td>
+                <td></td>
+                <td align="right">@opencashCredit.ToString("#,##0.00")</td>
+                <td align="right">@opencashDebit.ToString("#,##0.00")</td>
+            </tr>
+
+            @{ int srno = 1;}
+
+            @foreach (var item in Model.Cash)
+            {
+                <tr>
+                    <td style="text-align:center">@srno</td>
+                    <td style="text-align:center">@item.Date.Value.ToString("dd-MMM-yyyy")</td>
+                    <td style="text-align:center">@item.Narration</td>
+                    <td style="text-align:center">@item.Id</td>
+                    <td style="text-align:center">@item.BankBankName</td>
+                    @if (item.CashIn != null)
+                    {
+                        <td style="text-align:right;color:green">@item.CashIn.Value.ToString("#,##0.00")</td>
+                    }
+                    else
+                    {
+                        <td style="text-align:right">-</td>
+                    }
+                    @if (item.CashOut != null)
+                    {
+                        <td style="text-align:right;color:red">@item.CashOut.Value.ToString("#,##0.00")</td>
+                    }
+                    else
+                    {
+                        <td style="text-align:right">-</td>
+                    }
+                </tr>
+
+                srno = srno + 1;
+
+                if (item.CashIn != null)
+                {
+                    opencashCredit = opencashCredit + (double)item.CashIn;
+                }
+
+                if (item.CashOut != null)
+                {
+                    opencashDebit = opencashDebit + (double)item.CashOut;
+                }
+
+            }
+
+            <tr>
+                <td colspan="4" align="right"><strong> Closing Balance </strong></td>
+                <td></td>
+                <td align="right">@opencashCredit.ToString("#,##0.00")</td>
+                <td align="right">@opencashDebit.ToString("#,##0.00")</td>
+            </tr>
+        </table>
+        <hr />
+    </div>
+}
+<div class="footer-note">
+    <em>Report generated automatically. Powered by Bizplus CRM.</em>
+</div>

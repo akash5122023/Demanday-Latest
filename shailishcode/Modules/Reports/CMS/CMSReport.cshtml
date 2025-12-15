@@ -1,0 +1,37 @@
+﻿@model AdvanceCRM.Reports.CMSReportModel
+@{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    ViewData["Title"] = "CMS Report";
+    ViewData["IgnoreImmediatePrint"] = "Yes";
+}
+
+<body>
+    <table style="width:100%; border:groove;">
+        <tr>
+            <td align="center">
+                <h3 style="text-decoration-color:burlywood">@Model.Company.Name</h3>
+                <h4>@Model.Company.Address</h4>
+                <h5>@Model.Company.Phone</h5>
+            </td>
+        </tr>
+    </table>
+    @if (Model.Request.Type == AdvanceCRM.Reports.CMSReportType.Customerwise)
+    {
+        @Html.Partial(MVC.Views.Reports.CMS.CustomerwiseCMS, Model);
+    }
+   
+    @*else if (Model.Request.Type == AdvanceCRM.Reports.CMSReportType.Representativewise)
+    {
+        @Html.Partial(MVC.Views.Reports.CMS.RepwiseCMS, Model);
+    }*@
+    
+    else if (Model.Request.Type == AdvanceCRM.Reports.CMSReportType.ProjectWise)
+    {
+        @Html.Partial(MVC.Views.Reports.CMS.ProjectCMSReport, Model);
+    }
+
+    else
+    {
+        @Html.Partial(MVC.Views.Reports.CMS.CMSStatistics, Model);
+    }
+</body>

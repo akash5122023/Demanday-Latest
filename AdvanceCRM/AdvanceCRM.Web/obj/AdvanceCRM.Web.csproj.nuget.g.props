@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <RestoreSuccess Condition=" '$(RestoreSuccess)' == '' ">True</RestoreSuccess>
+    <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
+    <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
+    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\dudhe\.nuget\packages\;C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages</NuGetPackageFolders>
+    <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">7.0.0</NuGetToolVersion>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <SourceRoot Include="C:\Users\dudhe\.nuget\packages\" />
+    <SourceRoot Include="C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages\" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Content Include="$(NuGetPackageRoot)serenity.assets\6.0.5\contentFiles\any\net6.0\package.json" Condition="Exists('$(NuGetPackageRoot)serenity.assets\6.0.5\contentFiles\any\net6.0\package.json')">
+      <NuGetPackageId>Serenity.Assets</NuGetPackageId>
+      <NuGetPackageVersion>6.0.5</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Pack>false</Pack>
+      <Private>False</Private>
+      <Link>package.json</Link>
+    </Content>
+  </ItemGroup>
+  <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)serenity.scripts\6.0.8\buildTransitive\Serenity.Scripts.props" Condition="Exists('$(NuGetPackageRoot)serenity.scripts\6.0.8\buildTransitive\Serenity.Scripts.props')" />
+    <Import Project="$(NuGetPackageRoot)serenity.assets\6.0.5\buildTransitive\Serenity.Assets.props" Condition="Exists('$(NuGetPackageRoot)serenity.assets\6.0.5\buildTransitive\Serenity.Assets.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.typescript.msbuild\5.0.4\build\Microsoft.TypeScript.MSBuild.props" Condition="Exists('$(NuGetPackageRoot)microsoft.typescript.msbuild\5.0.4\build\Microsoft.TypeScript.MSBuild.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.entityframeworkcore\7.0.9\buildTransitive\net6.0\Microsoft.EntityFrameworkCore.props" Condition="Exists('$(NuGetPackageRoot)microsoft.entityframeworkcore\7.0.9\buildTransitive\net6.0\Microsoft.EntityFrameworkCore.props')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.entityframeworkcore.design\7.0.9\build\net6.0\Microsoft.EntityFrameworkCore.Design.props" Condition="Exists('$(NuGetPackageRoot)microsoft.entityframeworkcore.design\7.0.9\build\net6.0\Microsoft.EntityFrameworkCore.Design.props')" />
+  </ImportGroup>
+  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <PkgSentry Condition=" '$(PkgSentry)' == '' ">C:\Users\dudhe\.nuget\packages\sentry\3.36.0</PkgSentry>
+    <PkgMicrosoft_TypeScript_MSBuild Condition=" '$(PkgMicrosoft_TypeScript_MSBuild)' == '' ">C:\Users\dudhe\.nuget\packages\microsoft.typescript.msbuild\5.0.4</PkgMicrosoft_TypeScript_MSBuild>
+    <PkgMicrosoft_EntityFrameworkCore_Tools Condition=" '$(PkgMicrosoft_EntityFrameworkCore_Tools)' == '' ">C:\Users\dudhe\.nuget\packages\microsoft.entityframeworkcore.tools\7.0.9</PkgMicrosoft_EntityFrameworkCore_Tools>
+    <PkgMicrosoft_CodeAnalysis_Analyzers Condition=" '$(PkgMicrosoft_CodeAnalysis_Analyzers)' == '' ">C:\Users\dudhe\.nuget\packages\microsoft.codeanalysis.analyzers\2.9.3</PkgMicrosoft_CodeAnalysis_Analyzers>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,557 @@
+﻿@model AdvanceCRM.Enquiry.EnquiryReportData
+@{
+    if ((bool?)ViewData["Printing"] == true)
+    {
+        Layout = MVC.Views.Shared._LayoutNoNavigation;
+    }
+}
+
+<style>
+
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    #datatable {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #datatable td, #datatable th {
+            border: 1px solid #ddd;
+            padding: 2px
+        }
+
+    header {
+        padding: 10px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #AAAAAA;
+    }
+
+    #logo {
+        float: left;
+        margin-top: 8px;
+    }
+
+    #company {
+        width: 50%;
+        float: right;
+        text-align: right;
+    }
+
+    #client {
+        border-left: 6px solid #0087C3;
+    }
+
+    #terms {
+        padding-left: 6px;
+        border-left: 6px solid #0087C3;
+    }
+</style>
+
+<script type="text/javascript">
+
+    var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+    var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function toWords(num) {
+        alert(num)
+        if ((num = num.toString()).length > 9) return 'overflow';
+        n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return; var str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + ' ' : '';
+        return str.trim();
+    }
+</script>
+<body>
+    <table style="width: 100% " border="0">
+        @if (Model.Company.HeaderImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%"><img src="~/upload/@Model.Company.HeaderImage" height="@Model.Company.HeaderHeight.Value.ToString()" width="@Model.Company.HeaderWidth.Value.ToString()" /></td>
+            </tr>
+        }
+    </table>
+    @if (Model.Company.HeaderContent != null)
+    {
+        @Html.Raw(Model.Company.HeaderContent);
+    }
+    <header class="clearfix">
+        @if (Model.Company.CompanyDetails != null && Model.Company.CompanyDetails == true)
+        {
+            if (Model.Company.Logo != null)
+            {
+                <div id="logo">
+                    <img src="~/upload/@Model.Company.Logo" height="@Model.Company.LogoHeight.Value.ToString()" width="@Model.Company.LogoWidth.Value.ToString()" />
+                </div>
+            }
+            <div id="company">
+                <h4 class="name">@Model.Company.Name</h4>
+                <div>@Model.Company.Address</div>
+                <div>@Model.Company.Phone</div>
+                <div>GSTIN: @Model.Company.GSTIN</div>
+                <div>PAN No: @Model.Company.PANNo</div>
+            </div>
+        }
+    </header>
+    <table style="width:100%">
+        <tr>
+            <td>
+                <table style="width:100%; border-collapse:collapse" id="client">
+                    <tr>
+                        <td valign="top" style="width:10%;">
+                            <strong>&nbsp;Name&nbsp;</strong>:&nbsp;
+                        </td>
+                        <td valign="top">@Model.Enquiry.ContactsName</td>
+                        @{
+                            int detailsRow = 4;
+                            detailsRow += (Model.Enquiry.ContactPersonName.IsNullOrEmpty() ? 0 : 1);
+                            detailsRow += (Model.Enquiry.ContactsGstin.IsNullOrEmpty() ? 0 : 1);
+                            detailsRow += (Model.Enquiry.ContactsPanNo.IsNullOrEmpty() ? 0 : 1);
+                        }
+                        <td align="right" style="width:40%" valign="middle" rowspan="@detailsRow">
+                            <h3>Enquiry<br /><small>@Model.Enquiry.Date.Value.Year.ToString()/@Model.Enquiry.Id</small></h3>
+                            <strong>Date&nbsp;</strong>:&nbsp;@Model.Enquiry.Date.Value.ToString("dd MMM yyyy")
+                            <br />
+                            @*@if (Model.Enquiry.Id != null)
+                            {
+                                <text>
+                                    <strong>Enquiry No&nbsp;</strong>:&nbsp;@Model.Enquiry.Date.Value.Year.ToString()/@Model.Enquiry.Id
+                                    <br />
+                                    <strong>Enquiry Date&nbsp;</strong>:&nbsp;@Model.Enquiry.Date.Value.ToString("dd MMM yyyy")
+                                    <br />
+                                </text>
+                            }*@
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="top">
+                            <strong>&nbsp;Phone&nbsp;</strong>:&nbsp;
+                        </td>
+                        <td>@Model.Enquiry.ContactsPhone</td>
+                    </tr>
+                    <tr>
+                        <td valign="top">
+                            <strong>&nbsp;Email&nbsp;</strong>:&nbsp;
+                        </td>
+                        <td>@Model.Enquiry.ContactsEmail</td>
+                    </tr>
+                    <tr>
+                        <td valign="top">
+                            <strong>&nbsp;Address&nbsp;</strong>:&nbsp;
+                        </td>
+                        <td valign="top">@Model.Enquiry.ContactsAddress</td>
+                    </tr>
+                    @if (!Model.Enquiry.ContactPersonName.IsNullOrEmpty())
+                    {
+                        <tr>
+                            <td valign="top">
+                                <strong>&nbsp;Person&nbsp;</strong>:&nbsp;
+                            </td>
+                            <td valign="top">@Model.Enquiry.ContactPersonName @(Model.Enquiry.ContactPersonPhone.IsNullOrEmpty() ? "" :"(" +Model.Enquiry.ContactPersonPhone + ")")</td>
+                        </tr>
+                    }
+                    @if (!Model.Enquiry.ContactsGstin.IsNullOrEmpty())
+                    {
+                        <tr>
+                            <td valign="top">
+                                <strong>&nbsp;GSTIN&nbsp;</strong>:&nbsp;
+                            </td>
+                            <td valign="top">@Model.Enquiry.ContactsGstin</td>
+                        </tr>
+                    }
+                    @if (!Model.Enquiry.ContactsPanNo.IsNullOrEmpty())
+                    {
+                        <tr>
+                            <td valign="top">
+                                <strong>&nbsp;PAN No&nbsp;</strong>:&nbsp;
+                            </td>
+                            <td valign="top">@Model.Enquiry.ContactsPanNo</td>
+                        </tr>
+                    }
+                </table>
+            </td>
+        </tr>
+
+        @*Subject*@
+        @*@if (Model.Enquiry.Subject != null)
+        {
+            <tr>
+                <td>
+                    <strong>Subject&nbsp;</strong>:&nbsp;@Model.Enquiry.Subject
+                </td>
+            </tr>
+        }*@
+        @*Reference*@
+        @*@if (Model.Enquiry.Reference != null)
+        {
+            <tr>
+                <td>
+                    <strong>Reference&nbsp;</strong>:&nbsp;@Model.Enquiry.Reference
+                </td>
+            </tr>
+        }*@
+
+        @*Reference*@
+        @*@if (Model.Enquiry.Message != null)
+        {
+            <tr>
+                <td>
+                    <strong>@Model.Enquiry.Message</strong>
+                </td>
+            </tr>
+        }*@
+
+        @* Products *@
+        <tr>
+            <td align="center" class="bg-gray-light">
+                &nbsp;
+            </td>
+        </tr>
+    </table>
+
+    <table cellpadding="100" cellspacing="100" style="width:100%" id="datatable">
+        @{
+            bool stateChanged = Model.Enquiry.ContactsStateId != Model.Company.StateId;
+            bool hasHSN = Model.EnquiryProducts.Where(x => x.ProductsHsn.IsNullOrEmpty() != true).Count() > 0;
+            bool hascapacity = Model.EnquiryProducts.Where(x => x.Capacity.IsNullOrEmpty() != true).Count() > 0;
+            //  bool hasImage = (Model.Company.EnquiryTemplate != null) && (Model.Company.EnquiryTemplate == AdvanceCRM.Masters.PrintTemplates.Template2);
+
+            double discountTot = (Model.EnquiryProducts.Sum(x => x.Discount.Value));
+            //double discountAmtTot = (Model.EnquiryProducts.Sum(x => x.DiscountAmount.Value));
+            // bool hasDiscount = ((discountTot > 0) || (discountAmtTot > 0));
+            double FinalDiscount = 0;
+            double Total = 0;
+            double grandTotal = 0;
+            //string currencyUnit = (Model.taxable ? "" : Model.Enquiry.ToCurrency.GetEnumDescription());
+            //bool taxColumns = Model.taxable && Model.Company.EnquiryTaxColumnIncluded.Value;
+            //bool discountedPrice = hasDiscount ? Model.Company.EnquiryDiscountedPriceIncluded.Value : false;
+            int totalColumns = 7;
+            //totalColumns += (hasDiscount ? (discountedPrice ? 2 : 1) : 0);
+            totalColumns += (hasHSN ? 1 : 0);
+            // totalColumns += (hasImage ? 1 : 0);
+            // totalColumns += (taxColumns ? (stateChanged ? 1 : 2) : 0);
+        }
+
+        <tr class="bg-gray">
+            <th align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></th>
+            @*@if (hasImage)
+            {
+                <th align="center"><strong>&nbsp;Image&nbsp;</strong></th>
+            }*@
+            @if (hasHSN)
+            {
+                <th align="center"><strong>&nbsp;HSN&nbsp;</strong></th>
+            }
+            <th align="center"><strong>&nbsp;Product / Service&nbsp;</strong></th>
+            @if (hascapacity)
+            {
+                <th align="center"><strong>&nbsp;Capacity&nbsp;</strong></th>
+            }
+            <th align="center"><strong>&nbsp;Rate&nbsp;</strong></th>
+            @*@if (hasDiscount)
+            {
+                <th align="center"><strong>&nbsp;Discount&nbsp;</strong></th>
+                if (discountedPrice)
+                {
+                    <th align="center"><strong>&nbsp;Price&nbsp;(Disc)&nbsp;</strong></th>
+                }
+            }*@
+            <th align="center"><strong>&nbsp;Qty&nbsp;</strong></th>
+            @*@if (taxColumns)
+            {
+                if (stateChanged)
+                {
+                    <th align="center"><strong>&nbsp;Tax&nbsp;</strong></th>
+                }
+                else
+                {
+                    <th align="center"><strong>&nbsp;Tax1&nbsp;</strong></th>
+                    <th align="center"><strong>&nbsp;Tax2&nbsp;</strong></th>
+                }
+            }*@
+            <th align="center"><strong>Total</strong></th>
+            <th align="center"><strong>Grand Total</strong></th>
+        </tr>
+
+        @{ int srno = 1;}
+        @foreach (var qp in Model.EnquiryProducts)
+        {
+            <tr>
+                <td align="center">@srno</td>
+                @*@if (hasImage)
+                {
+                    <td align="center">
+                        @if (!qp.ProductsImage.IsNullOrEmpty())
+                        {
+                            int imageSize = 1440 / totalColumns;
+                            <img width="@imageSize px" src="~/upload/@qp.ProductsImage" />
+                        }
+                    </td>
+                }*@
+                @if (hasHSN)
+                {
+                    <td align="Left">&nbsp;@qp.ProductsHsn</td>
+                }
+                <td align="left">
+                    &nbsp;@qp.ProductsName<br />
+                    <span style="white-space: pre-line; font-size:smaller"><i>@qp.Description</i></span>
+                    @if (qp.ProductsTechSpecs.IsNullOrEmpty() == false)
+                    {
+                        <span style="white-space: pre-line; font-size:smaller">
+                            <b>Tech Specs: </b><i>@qp.ProductsTechSpecs</i>
+                        </span>
+                    }
+                    @if (qp.ProductsCode.IsNullOrEmpty() == false)
+                    {
+                        <span style="white-space: pre-line; font-size:smaller">
+                            <b>Code: </b><i>@qp.ProductsCode</i>
+                        </span>
+                    }
+                </td>
+                @if (hascapacity)
+                {
+                    <td align="right">&nbsp;@qp.Capacity&nbsp;</td>
+                }
+                <td align="right">&nbsp;@qp.Price.Value.ToString("#,##0.00")&nbsp;</td>
+                @*@if (hasDiscount)
+                {
+                    <td align="center">
+                        @if (qp.Discount.Value > 0)
+                        {
+                            <text>@qp.Discount.Value%&nbsp;</text>
+                            if (qp.DiscountAmount.Value > 0)
+                            {
+                                <text>&amp; Amt: @qp.DiscountAmount.Value&nbsp;</text>@currencyUnit
+                            }
+                        }
+                        else
+                        {
+                            if (qp.DiscountAmount.Value > 0)
+                            {
+                                <text>Amt: @qp.DiscountAmount.Value&nbsp;</text>@currencyUnit
+                            }
+                            else
+                            {
+                                <text>0%</text>
+                            }
+                        }
+                    </td>
+                    if (discountedPrice)
+                    {
+                        <td align="center">&nbsp;@qp.DiscPrice.Value.ToString("#,##0.00")&nbsp;</td>
+                    }
+                }*@
+                <td align="center">@qp.Quantity.Value @qp.Unit&nbsp;</td>
+                @*@if (taxColumns)
+                {
+                    if (stateChanged == true)
+                    {
+                        double totTA = (double)qp.Tax1Amount.Value + (double)qp.Tax2Amount;
+                        <td align="center">
+                            @if (totTA > 0)
+                            {
+                                <text>
+                                    IGST: (@(qp.Percentage1 + qp.Percentage2)%)
+                                    <br />Amount: @totTA.ToString("#,##0.00")&nbsp;
+                                </text>
+                            }
+                            else
+                            {
+                                <text>&nbsp; 0</text>
+                            }
+                        </td>
+                    }
+                    else
+                    {
+                        if (qp.Tax1Amount.HasValue())
+                        {
+                            <td align="center">@qp.TaxType1 (@qp.Percentage1%) <br />&nbsp;Amount: @qp.Tax1Amount.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+                        }
+                        if (qp.Tax2Amount.HasValue())
+                        {
+                            <td align="center">@qp.TaxType2 (@qp.Percentage2%) <br />&nbsp;Amount: @qp.Tax2Amount.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>
+                        }
+                    }
+                }*@
+
+                <td align="right">@qp.LineTotal.Value.ToString("#,##0.00")&nbsp;</td>
+                @*<td align="right">@qp.GrandTotal.Value.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</td>*@
+
+                @{
+                   // FinalDiscount = FinalDiscount + (double)((qp.Price.Value * qp.Quantity.Value) * (qp.Discount.Value / 100)) + (double)(qp.DiscountAmount.Value);
+                    Total = Total + (double)((qp.LineTotal.Value));
+                    // grandTotal = grandTotal + (double)((qp.GrandTotal.Value));
+
+                    srno++;
+                }
+
+
+
+            </tr>
+        }
+
+        @*@{
+            int diff;
+
+            if (Model.Enquiry.Lines != null)
+            {
+                diff = (int)Model.Enquiry.Lines - srno;
+            }
+            else
+            {
+                diff = 10 - srno;
+            }
+        }
+
+        @for (int i = diff; i > 0; i--)
+        {
+            <tr>
+                @for (int j = 0; j < totalColumns; ++j)
+                {
+                    <td>&nbsp;</td>
+                }
+            </tr>
+        }*@
+
+        <tr>
+            <td colspan="@(totalColumns)" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">&nbsp;</td>
+        </tr>
+
+        @* Discount *@
+        @*@if (FinalDiscount > 0)
+        {
+            <tr>
+                <td colspan="@(totalColumns - 1)" align="right"><strong> Discount:&nbsp;</strong></td>
+                <td align="right"><strong>@FinalDiscount.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>
+            </tr>
+        }*@
+
+        @* Total *@
+        <tr>
+            <td colspan="@(totalColumns - 1)" align="right"><strong> Total:&nbsp;</strong></td>
+            @*<td align="right"><strong>@Total.ToString("#,##0.00")&nbsp;@currencyUnit&nbsp;</strong></td>*@
+        </tr>
+
+        @* TaxAmount *@
+        @*@if (Model.taxable == true)
+        {
+            if (stateChanged == false)
+            {*@
+                @* Tax1Amount *@
+                @*foreach (var item in Model.EnquiryProducts.Select(x => x.TaxType1).Distinct())
+                {
+                    if ((!item.IsEmptyOrNull()))
+                    {
+                        <tr>
+                            <td colspan="@(totalColumns - 1)" align="right"><strong>@item :&nbsp;</strong></td>
+                            <td align="right"><strong>@Model.EnquiryProducts.Where(y => y.TaxType1 == item).Sum(x => x.Tax1Amount).Value.ToString("#,##0.00")&nbsp;@currencyUnit &nbsp;</strong></td>
+                        </tr>
+                    }
+                }*@
+                @* Tax2Amount *@
+                @*foreach (var item in Model.EnquiryProducts.Select(x => x.TaxType2).Distinct())
+                {
+                    if ((!item.IsEmptyOrNull()))
+                    {
+                        <tr>
+                            <td colspan="@(totalColumns - 1)" align="right"><strong>@item :&nbsp;</strong></td>
+                            <td align="right"><strong>@Model.EnquiryProducts.Where(y => y.TaxType2 == item).Sum(x => x.Tax2Amount).Value.ToString("#,##0.00")&nbsp;@currencyUnit &nbsp;</strong></td>
+                        </tr>
+                    }
+                }
+            }*@
+
+            @* Total Tax*@
+            @*<tr>
+                <td colspan="@(totalColumns - 1)" align="right"><strong> Total Tax @(stateChanged ? "(IGST)" : ""):&nbsp;</strong></td>
+                @{ decimal totax = (decimal)((Model.Enquiry.Tax1 ?? 0) + (Model.Enquiry.Tax2 ?? 0));}
+                <td align="right"><strong>@(totax.ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+            </tr>*@
+        }
+
+        @*@{ decimal charges = 0, concessions = 0, gTotal = (decimal)(grandTotal);}
+        @if (Model.EnquiryCharges != null)
+        {
+            foreach (var ch in Model.EnquiryCharges)
+            {
+                charges += (decimal)(ch.ChargesPercentage.Value / 100) * gTotal;
+                <tr>
+                    <td align="right" colspan="@(totalColumns - 1)"><strong> @ch.ChargesName:&nbsp;</strong></td>
+                    <td align="right"><strong>@(((decimal)(ch.ChargesPercentage.Value / 100) * gTotal).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+                </tr>
+            }
+        }*@
+
+        @*@if (Model.EnquiryConcession != null)
+        {
+            foreach (var co in Model.EnquiryConcession)
+            {
+                concessions += (decimal)(co.ConcessionPercentage.Value / 100) * gTotal;
+                <tr>
+                    <td align="right" colspan="@(totalColumns - 1)"><strong> @co.ConcessionName:&nbsp;</strong></td>
+                    <td align="right"><strong>-@(((decimal)(co.ConcessionPercentage.Value / 100) * gTotal).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+                </tr>
+            }
+        }*@
+
+        @* Grand Total *@
+        @*<tr>
+            <td colspan="@(totalColumns - 1)" align="right"><strong> Grand Total:&nbsp;</strong></td>
+            <td align="right"><strong>@((gTotal + charges - concessions).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+            <td align="right"><strong>@((gTotal+ charges - concessions).ToString("#,##0.00"))&nbsp;@currencyUnit&nbsp;</strong></td>
+        </tr>*@
+
+        @*<tr>
+            <td colspan="@(totalColumns)" bgcolor="wheat">
+                <strong> &nbsp; Total in Words:</strong>
+                <script>document.write(toWords(@Convert.ToInt32(gTotal + charges - concessions)))</script>
+                @currencyUnit Only
+            </td>
+        </tr>*@
+    </table>
+
+    @* Terms *@
+    <br />
+    @*@if (Model.EnquiryTerms.Count > 0)
+    {
+        <div id="terms">
+            <div>
+                <strong>
+                    Terms &amp; Condition's
+                </strong>
+            </div>
+            @{ int Tsrno = 1;}
+            @foreach (var qt in Model.EnquiryTerms)
+            {
+                <div class="notice">@Tsrno.&nbsp;@qt.Terms</div>
+                { Tsrno++; }
+            }
+        </div>
+    }*@
+    @if (Model.Company.FooterContent != null)
+    {
+        @Html.Raw(Model.Company.FooterContent);
+    }
+
+    <table style="width: 100% " border="0">
+        @if (Model.Company.FooterImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%"><img src="~/upload/@Model.Company.FooterImage" height="@Model.Company.FooterHeight.Value.ToString()" width="@Model.Company.FooterWidth.Value.ToString()" /></td>
+            </tr>
+        }
+    </table>
+
+  
+</body>

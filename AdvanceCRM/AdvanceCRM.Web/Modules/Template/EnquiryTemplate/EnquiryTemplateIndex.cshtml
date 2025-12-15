@@ -1,0 +1,11 @@
+﻿
+@inject Serenity.ITextLocalizer Localizer
+@{
+     ViewData["Title"] = Localizer.Get("Db.Template.EnquiryTemplate.EntityPlural");
+}
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Template.EnquiryTemplateDialog().loadByIdAndOpenDialog(-1, true);
+    });
+</script>

@@ -1,0 +1,753 @@
+﻿@import "site.theme.less";
+@import "site.mixins.less";
+@import "site.administration.less";
+@import "site.membership.less";
+@import "site.masters.less";
+@import "site.products.less";
+@import "site.tasks.less";
+@import "site.enquiry.less";
+@import "site.quotation.less";
+@import "site.appointment.less";
+@import "site.template.less";
+@import "site.settings.less";
+@import "site._ext.less";
+@import "site.services.less";
+@import "site.purchase.less";
+@import "site.attendance.less";
+@import "site.sales.less";
+@import "site.premium.less";
+@import "site.acoounting.less";
+@import "site.dms.less";
+@import "site.thirdparty.less";
+@import "site.wte.less";
+@import "site.advancecrm.less";
+@import "site.default.less";
+@import "site.deafult.less";
+@import "site.quality check.less";
+@import "site.qualitycheck.less";
+@import "site.rejectionoutward.less";
+@import "site.grntwo.less";
+@import "site.grnproductstwo.less";
+@import "site.indent.less";
+@import "site.indentproducts.less";
+@import "site.bom.less";
+@import "site.bomproducts.less";
+
+
+
+
+.main-header {
+    .logo {
+        width: 400px;
+        overflow: visible;
+    }
+}
+.tab-panel {
+    height: 335px;
+    width: 100%;
+}
+
+.s-Common-QuickEmailDialog {
+    > .size {
+        .widthAndMin(600px);
+    }
+
+    .caption {
+        width: 150px;
+        margin-bottom: 2px;
+        text-align: left;
+        flex-basis: 100%;
+    }
+
+    .field {
+        flex-wrap: wrap;
+    }
+}
+
+.s-Common-QuickSMSDialog {
+    > .size {
+        .widthAndMin(480px);
+    }
+
+    .caption {
+        width: 150px;
+        margin-bottom: 2px;
+        text-align: left;
+        flex-basis: 100%;
+    }
+
+    .field {
+        flex-wrap: wrap;
+    }
+}
+
+
+.slider-full-height-width {
+    width: calc(~'100% - 10px') !important;
+    height: 100% !important;
+    display: block !important;
+    padding: 10px !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.s-BooleanSwitchEditor > input[type="checkbox"] {
+    display: none;
+}
+
+.s-BooleanSwitchEditor > label {
+    cursor: pointer;
+    height: 0px;
+    position: relative;
+    width: 40px;
+}
+
+.s-BooleanSwitchEditor > label::before {
+    background: rgb(0, 0, 0);
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    content: '';
+    height: 16px;
+    margin-top: -8px;
+    position: absolute;
+    opacity: 0.3;
+    transition: all 0.4s ease-in-out;
+    width: 40px;
+}
+
+.s-BooleanSwitchEditor > label::after {
+    background: rgb(255, 255, 255);
+    border-radius: 16px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+    content: '';
+    height: 24px;
+    left: -4px;
+    margin-top: -8px;
+    position: absolute;
+    top: -4px;
+    transition: all 0.3s ease-in-out;
+    width: 24px;
+}
+
+.s-BooleanSwitchEditor > input[type="checkbox"]:checked + label::before {
+    background: inherit;
+    opacity: 0.5;
+}
+
+.s-BooleanSwitchEditor > input[type="checkbox"]:checked + label::after {
+    background: inherit;
+    left: 20px;
+}
+
+.s-BooleanSwitchEditor.readonly {
+    background-color: transparent;
+}
+
+.s-BooleanSwitchEditor.readonly > label {
+    cursor: not-allowed;
+}
+
+.tooltip-inner {
+    max-width: 350px;
+    width: 90px;
+}
+
+.s-Contacts-ContactsGrid {
+    .quick-filters-bar {
+        display: none
+    }
+}
+
+.s-Enquiry-EnquiryGrid {
+    .quick-filters-bar {
+        display: none
+    }
+}
+
+.s-Quotation-QuotationGrid {
+    .quick-filters-bar {
+        display: none
+    }
+}
+
+.s-Sales-InvoiceGrid {
+    .quick-filters-bar {
+        display: none
+    }
+}
+
+.s-Sales-SalesGrid {
+    .quick-filters-bar {
+        display: none
+    }
+}
+
+.s-Masters-AreaDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-BranchDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-CategoryDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-CityDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-GradeDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-StateDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Default-PayrollConfigurationDialog {
+    > .size {
+        width: 890px;
+        height: 630px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+
+    @media only screen and (min-width: 600px) {
+        .field.FinancialYearStart, .field.BusinessType {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.ContactPerson, .field.IncorporationDate, .field.CorporateIdentificationNo, .field.PfNo {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.RegistrationDate, .field.SignatoryName, .field.SignatoryDesignation, .field.SignatorysFatherName, .field.PfRules {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.EsiNumber, .field.EsiRegistrationDate, .field.EsiSignatoryName, .field.EsiSignatoryDesignation, .field.EsiSignatorysFatherName, .field.PtNo, .field.PtRegistrationDate {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.PtSignatoryName, .field.Pan {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.Tan, .field.TanCircle, .field.Cit {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.ItName, .field.ItDesignation, .field.ItFathersName {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.ItAddress, .field.ItState {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.ItPinCode, .field.ItEmailId {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.ItCompanyEmailId, .field.ItResponsiblePan {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.ItMobileNo, .field.LabourSignatoryName {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.LabourAddress, .field.CalculationOfBasicSalary {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.BasicofSalary, .field.MinimumWages {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.SalaryDefination, .field.DifferentholidayCalendar {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.MaxRestrictedHolidays, .field.CompoffTreatment {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.LocationCapRestrictedHolidays, .field.BaseDays {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.CutOffDay, .field.CutOffRule {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.AttendanceCutOffLocationwise, .field.CuttOffLocationwise {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.NewjoineeCuttOffLocation, .field.SendEmail {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.EmpInfoIsEditable, .field.EmpConfirmationOn {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.DisableSalaryDetails, .field.AllowSubLeave {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.LeaveCreditRule, .field.ProrateExemption {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.AllowEditofLeaveEncashment, .field.ApplyTaxWithoutPan {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.AllowEditofEmpLoan, .field.StandardEarningProjection {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.AllowEditofNoticePeriod, .field.AllowEditofFbp {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.Lwf, .field.ActivateAttendanceRules, .field.AllowEditGratuity {
+            flex: auto;
+            min-width: 350px;
+        }
+    }
+}
+
+.s-Default-SalaryComponentsMasterDialog {
+    > .size {
+        width: 870px;
+        height: 600px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+
+    @media only screen and (min-width: 600px) {
+        .field.Name, .field.Abbreviation {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.JvCode, .field.MapTo, .field.EffectiveDate, .field.PayType {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.PaidComponent, .field.VariableComponent, .field.FixedComponent, .field.Taxable {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.NonTaxable, .field.TaxDistributedacrossyear {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.CalculationType, .field.IsAnFbpComponent, .field.AttendanceDependant {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.PartOfCtc, .field.CreatedependentComponent {
+            flex: auto;
+            min-width: 350px;
+        }
+
+        .field.IsanFfsComponent, .field.PayableIffullMonthLop {
+            flex: auto;
+            min-width: 450px;
+        }
+
+        .field.PayableIfEmpjoinedonorbefore, .field.ValueFormula, .field.OvertimeCalculationunit, .field.MaxUnitofOvertime {
+            flex: auto;
+            min-width: 350px;
+        }
+    }
+}
+
+.s-Masters-ProductsDivisionDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-ProductsGroupDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-TaxDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+
+.s-Enquiry-EnquiryGrid .hot-enquiry .col-unit-Enqcolor {
+    background-color: orangered;
+    color: #fff;
+}
+
+.s-Enquiry-EnquiryGrid .warm-enquiry .col-unit-Enqcolor {
+    background-color: #FEC007;
+    color: #fff;
+}
+
+.s-Enquiry-EnquiryGrid .cold-enquiry .col-unit-Enqcolor {
+    background-color: yellow;
+    color: #fff;
+}
+
+.s-Quotation-QuotationGrid .hot-quotation .col-unit-Quotcolor {
+    background-color: orangered;
+    color: #fff;
+}
+
+.s-Quotation-QuotationGrid .warm-quotation .col-unit-Quotcolor {
+    background-color: #FEC007;
+    color: #fff;
+}
+
+.s-Quotation-QuotationGrid .cold-quotation .col-unit-Quotcolor {
+    background-color: yellow;
+    color: #fff;
+}
+
+.s-Masters-SourceDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-StageDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-ComplaintTypeDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+
+.s-Reports-ReportsDialog {
+    > .size {
+        width: 350px;
+        height: auto;
+    }
+
+    .caption {
+        width: 100px;
+    }
+}
+
+
+.s-Reports-ReportsDialogAttendance {
+    > .size {
+        width: 350px;
+        height: auto;
+    }
+
+    .caption {
+        width: 100px;
+    }
+}
+
+.s-Reports-BulkTransferDialog {
+    > .size {
+        width: 250px;
+        height: auto;
+    }
+
+    .caption {
+        width: 100px;
+    }
+}
+
+.s-Reports-BulkTransferDialog {
+    > .size {
+        width: 350px;
+        height: auto;
+    }
+
+    .caption {
+        width: 100px;
+    }
+}
+
+.s-Masters-TermsMasterDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-TaskTypeDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Masters-BankMasterDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-NotesEditor {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    ul {
+        padding: 0;
+        min-height: 110px;
+        overflow-y: auto;
+        list-style: none;
+    }
+
+    li {
+        margin: 10px;
+        border-radius: 4px;
+        border: 1px solid #C3C2C2;
+        background-color: #F5E7DC;
+        padding: 8px;
+        position: relative;
+    }
+
+    .note-text {
+        padding-right: 24px;
+        display: block;
+    }
+
+    .note-delete {
+        background-image: url('../serenity/images/delete2.png');
+        display: block;
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        right: 6px;
+        top: 6px;
+        opacity: 0.4;
+    }
+
+    .note-delete:hover {
+        opacity: 1;
+    }
+
+    .note-date {
+        margin-top: 6px;
+        display: block;
+        text-align: right;
+        color: rgb(42, 64, 132);
+        font-style: italic;
+    }
+
+    .s-Toolbar {
+        background-color: #eee;
+        padding: 4px;
+    }
+}
+
+.s-NoteDialog {
+    > .size {
+        width: 465px;
+    }
+
+    .ui-dialog-content {
+        padding-bottom: 10px;
+    }
+}
+
+/*.s-MultipleImageUploadEditor {
+
+    ul {
+        padding: 0;
+        min-height: 240px;
+        overflow-y: auto;
+        list-style: none;
+    }
+}*/
+
+.s-Tasks-TasksDialog {
+    > .size {
+        width: 650px;
+    }
+
+    .caption {
+        width: 150px;
+    }
+}
+
+.s-Common-BulkSMSDialog {
+    > .size {
+        .widthAndMin(480px);
+    }
+
+    .caption {
+        width: 150px;
+        margin-bottom: 2px;
+        text-align: left;
+        flex-basis: 100%;
+    }
+
+    .field {
+        flex-wrap: wrap;
+    }
+}
+
+.s-Dialog {
+    > .size {
+        width: 650px;
+    }
+}
+
+.s-VisitDialog {
+    > .size { width: 650px; }
+    .caption { width: 150px; }
+}
+
+.s-KnowlarityDetailsDialog {
+    > .size { width: 650px; }
+    .caption { width: 150px; }
+}
+
+.s-CompanyDetailsDialog {
+    > .size { width: 650px; }
+    .caption { width: 150px; }
+}
+
+.s-IndiaMartDialog {
+    > .size { width: 650px; }
+    .caption { width: 150px; }
+}
+
+.s-IndiaMartDetailsDialog {
+    > .size { width: 650px; }
+    .caption { width: 150px; }
+}
+
+.s-SIndiaMartDetailsDialog {
+    > .size { width: 650px; }
+    .caption { width: 150px; }
+}
+
+.s-PurposeDialog {
+    > .size { width: 650px; }
+    .caption { width: 150px; }
+}
+
+.s-EmployeeAssestsDialog {
+    > .size { width: 650px; }
+    .caption { width: 150px; }
+}

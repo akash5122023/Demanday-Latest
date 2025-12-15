@@ -1,0 +1,164 @@
+﻿@model IEnumerable<MailChimp.Net.Models.List>
+@{
+    ViewBag.Title = "GetList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/bootstrap-tour.min.css" rel="stylesheet" />
+<script src="~/Scripts/bootstrap-tour.min.js"></script>
+<script src="~/Scripts/MailChimpTour.js"></script>
+
+
+<script>
+ $(function () {
+     $('[data-toggle="tooltip"]').tooltip()
+})
+ function DeleteList(Id)
+ {
+ toastr.error("<br/><button type='button' id='ConfirmYes' class='btn clear'>Yes</button>", 'Do you want to delete this List?',
+  {
+      "closeButton": true,
+      "debug": false,
+      "newestOnTop": true,
+      "progressBar": false,
+      "positionClass": "toast-top-center",
+      "preventDuplicates": true,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "3000",
+      "timeOut": 0,
+      "extendedTimeOut": 0,
+      "tapToDismiss": false,
+      "allowHtml": true,
+      onShown: function (toast) {
+          $("#ConfirmYes").click(function () {
+              location.href="/MailChimp/Delete?id="+Id;
+
+          });
+      }
+  });
+ }
+ function openModal(ListId) {
+     $.ajax({
+         type: "Get",
+         url: '@Url.Action("DetailList", "MailChimp")',
+         data: { id: ListId },
+         success: function (data) {
+             $('#Preview').html(data);
+             $('#myModal').modal('show');
+         }
+     })
+ }
+
+</script>
+@*<div class="well active" data-backdrop="true" style='background:white' ;>
+    <h2>Lists</h2>*@
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">Lists</div></div>
+    @*<div class="row">
+            <div class="col-sm-10"></div>
+            <div class="col-sm-2">
+                <button type="button" id="CreateList" class="btn btn-block navbar-btn" data-toggle="tooltip" data-placement="bottom" title="Create List" onclick="location.href = '@Url.Action("CreateList", "MailChimp")';">Create List</button>
+            </div>
+        </div>*@
+
+
+    <div class="row">
+        <div class="col-sm-10"></div>
+        @*<div class="col-sm-2">
+                <button type="button" id="TourId" class="btn btn-block navbar-btn">Tour</button>
+            </div>*@
+        <div class="col-sm-2">
+            <button type="button" id="CreateList" class="btn btn-block navbar-btn" data-toggle="tooltip" data-placement="bottom" title="Create List" onclick="location.href = '@Url.Action("CreateList", "MailChimp")';">Create List</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+
+            <div class="dropdown" data-toggle="tooltip" data-placement="top" title="Sorts list by Created date, Recent, A-Z and Z-A">
+                <button class="btn btn-primary" id="selectButton" data-toggle="dropdown">
+                    Sort By
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu scrollable-menu" id="ulGenres">
+                    <li>
+                        <a href="/MailChimp/GetList?sort=BydateDesc" data-pdsa-dropdown-val="1">Recent</a>
+                    </li>
+                    <li>
+                        <a href="/MailChimp/GetList?sort=BydateAsc" data-pdsa-dropdown-val="2">Date Created</a>
+                    </li>
+                    <li>
+                        <a href="/MailChimp/GetList?sort=Asc" data-pdsa-dropdown-val="3">A-Z</a>
+                    </li>
+                    <li><a href="/MailChimp/GetList?sort=Desc" data-pdsa-dropdown-val="4">Z-A</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-sm-10"></div>
+    </div>
+    <br />
+    <div id="LoadData">
+        <table class="table table-user-information">
+            <tbody>
+                @foreach (var listM in Model)
+                {
+                <tr>
+                    <td class="col-lg-6">
+                        <h5>
+
+                            <a href="#" onclick="openModal('@listM.Id.ToString()')" data-toggle="tooltip" data-placement="bottom" title="List Details">@listM.Name</a>
+                        </h5>
+                        <p>
+                            <span class="msg">
+                                Created @listM.DateCreated.ToLongDateString() @listM.DateCreated.ToShortTimeString()
+                            </span>
+                        </p>
+                    </td>
+                    <td class="col-lg-1">
+                        <span class="badge">@listM.Stats.MemberCount</span>
+                        <p>
+                            <a href="/MailChimp/Members?id=@listM.Id" data-toggle="tooltip" data-placement="bottom" title="Manage Contacts">Subscribers</a>
+                        </p>
+                    </td>
+                    <td class="col-lg-1">
+                        <strong>@listM.Stats.OpenRate.ToString("0.00") %</strong>
+                        <p><h5>Opens</h5></p>
+                    </td>
+                    <td class="col-lg-1"><strong>@listM.Stats.ClickRate.ToString("0.00")%</strong> <p><h5>Clicks</h5></p></td>
+                    <td class="col-lg-1">
+                        <span id="BtnAddSubscriber" data-toggle="tooltip" data-placement="bottom" title="Add Subscriber" onclick="location.href = '@Url.Action("AddSubscriber", "Mailchimp", new { id=listM.Id})';"><i class="fa fa-user-plus fa-2x" aria-hidden="true"></i> </span>
+                    </td>
+                    <td class="col-lg-1">
+                        <span id="BtnEditList" data-toggle="tooltip" data-placement="bottom" title="Edit List" style="color:dodgerblue;font-size:20px;" class="glyphicon glyphicon-edit" aria-hidden="true" onclick="location.href = '@Url.Action("EditList", "Mailchimp", new { id=listM.Id})';"></span>
+                    </td>
+                    <td class="col-lg-1">
+                        <span id="BtnDeleteList" data-toggle="tooltip" data-placement="bottom" title="Delete List" style="color:red;font-size:20px;" class="glyphicon glyphicon-trash" aria-hidden="true" onclick="DeleteList('@listM.Id');"></span>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">List Details</h4>
+                </div>
+                <div class="modal-body" id="Preview">
+                    @ViewBag.ListObject
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+

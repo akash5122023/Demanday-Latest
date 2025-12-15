@@ -1,0 +1,2406 @@
+﻿@model AdvanceCRM.Modules.QuotationDashboardPageModel
+
+@{
+	ViewBag.Title = "QuotationDashboard";
+}
+
+<h2>Quotation</h2>
+<!-- Styles -->
+<style>
+    #QuotationStagesFunnel {
+        width: 100%;
+        height: 250px;
+    }
+
+    #QuotationAnalysisPyramid {
+        width: 100%;
+        height: 250px;
+    }
+
+    #QuotationStatus {
+        width: 100%;
+        height: 360px;
+    }
+
+    #MostQuotProduct {
+        width: 100%;
+        height: 300px;
+    }
+
+    #LeastQuotationProduct {
+        width: 100%;
+        height: 300px;
+    }
+
+    #QuotationTypes {
+        width: 100%;
+        height: 350px;
+        margin: auto;
+    }
+
+    #MediawiseQuotation {
+        width: 100%;
+        height: 360px;
+    }
+
+    #ProductwiseDivisionQuotation {
+        width: 100%;
+        height: 350px;
+    }
+
+    #MonthlyQuotationAnalysis {
+        width: 100%;
+        height: 550px;
+    }
+
+    #OverallTargetQuotation {
+        width: 100%;
+        height: 300px;
+    }
+
+    #OverallTargetQuotationAmt {
+        width: 100%;
+        height: 300px;
+    }
+
+    #MonthlyWonLossAnalysis {
+        width: 100%;
+        height: 300px;
+    }
+
+    #CitywiseQuotationAnalysis {
+        width: 100%;
+        height: 500px;
+        font-size: 11px;
+    }
+
+    #BranchwiseQuotation {
+        width: 100%;
+        height: 300px;
+    }
+
+    .amcharts-pie-slice {
+        transform: scale(1);
+        transform-origin: 50% 50%;
+        transition-duration: 0.3s;
+        transition: all .3s ease-out;
+        -webkit-transition: all .3s ease-out;
+        -moz-transition: all .3s ease-out;
+        -o-transition: all .3s ease-out;
+        cursor: pointer;
+        box-shadow: 0 0 30px 0 #000;
+    }
+
+        .amcharts-pie-slice:hover {
+            transform: scale(1.1);
+            filter: url(#shadow);
+        }
+</style>
+
+
+<link rel="stylesheet" href="~/Scripts/daterangepicker/daterangepicker-bs3.css" />
+<link rel="stylesheet" href="~/Content/iCheck/all.css" />
+<link rel="stylesheet" href="~/Scripts/colorpicker/bootstrap-colorpicker.min.css" />
+<link rel="stylesheet" href="~/Scripts/timepicker/bootstrap-timepicker.min.css" />
+
+<script src="~/Scripts/input-mask/jquery.inputmask.js"></script>
+<script src="~/Scripts/input-mask/jquery.inputmask.date.extensions.js"></script>
+<script src="~/Scripts/input-mask/jquery.inputmask.extensions.js"></script>
+<script src="~/Scripts/daterangepicker/moment.min.js"></script>
+<script src="~/Scripts/daterangepicker/daterangepicker.js"></script>
+<script src="~/Scripts/colorpicker/bootstrap-colorpicker.min.js"></script>
+<script src="~/Scripts/timepicker/bootstrap-timepicker.min.js"></script>
+<script src="~/Scripts/jquery.icheck.min.js"></script>
+<script src="~/Scripts/adminlte/demo.js"></script>
+
+
+<!-- Resources -->
+<script src="~/amcharts/amcharts.js"></script>
+@*3D PIE CHART,3D Donut Chart,Simple Pie Chart*@
+<script src="~/amcharts/pie.js"></script>
+@*3D FUNNEL AND PYRAMID*@
+<script src="~/amcharts/funnel.js"></script>
+@*3D Cylinder Chart,Stacked bar chart with negative values,Column and Line mix,Reversed Value Axis*@
+<script src="~/amcharts/serial.js"></script>
+@*Solid Gauge,Animated gauge*@
+<script src="~/amcharts/gauge.js"></script>
+<script src="~/amcharts/plugins/export/export.min.js"></script>
+<link href="~/amcharts/plugins/export/export.css" rel="stylesheet" />
+<script src="~/amcharts/themes/light.js"></script>
+<script src="~/amcharts/plugins/responsive/responsive.min.js"></script>
+
+
+<!-- Chart code -->
+<script>
+	//Quotation Stages Funnel
+	var chart = AmCharts.makeChart("QuotationStagesFunnel", {
+		"type": "funnel",
+		"theme": "light",
+		"responsive": {
+			"enabled": true
+		},
+		"dataProvider": [
+			@foreach (var item in Model.QuotationStages.GroupBy(y => y.Stage).Select(y => new { Stage = y.Key, Count = y.Count(),Sum = ((int)y.Sum(x => x.Total)).ToString("0,0##.##") }).OrderByDescending(z => z.Count).ToList())
+			{
+				<text>
+				{
+					"title": '@item.Stage',
+					"value": '@item.Count',
+					"sum" :'@item.Sum'
+				},
+				</text>
+			}
+			],
+			"balloon": {
+				"fixedPosition": true
+			},
+			"valueField": "value",
+			"titleField": "title",
+			"labelText": "[[title]]([[value]], Amt:[[sum]])",
+			"marginRight": 240,
+			"marginLeft": 50,
+			"startX": -500,
+			"depth3D": 100,
+			"angle": 40,
+			"outlineAlpha": 1,
+			"outlineColor": "#FFFFFF",
+			"outlineThickness": 2,
+			"labelPosition": "right",
+			"balloonText": "[[title]](Count:[[value]], Amt:[[sum]])",
+			"export": {
+				"enabled": true
+			}
+	});
+
+   //Quotation Analysis Pyramid
+	var chart = AmCharts.makeChart("QuotationAnalysisPyramid", {
+			"type": "funnel",
+			"theme": "light",
+			"responsive": {
+				"enabled": true
+			},
+			"dataProvider": [{
+				"title": "Total",
+				"value": '@Model.TotalQuotationTypes'
+			},
+			{
+				"title": "Open",
+				"value": '@Model.QuotationStatusOpen'
+			},
+			{
+				"title": "Closed",
+				"value": '@Model.QuotationStatusClosed'
+			},
+			{
+				"title": "Pending",
+				"value": '@Model.QuotationStatusPending'
+			},
+			{
+				"title": "Won",
+				"value": '@Model.QuotationWon'
+			}, {
+				"title": "Lost",
+				"value": '@Model.QuotationLost'
+			}],
+
+			"balloon": {
+				"fixedPosition": true
+			},
+			"valueField": "value",
+			"titleField": "title",
+			"marginRight": 240,
+			"marginLeft": 50,
+			"startX": -500,
+			"rotate": true,
+			"labelPosition": "right",
+			"balloonText": "[[title]]: [[value]]",
+			"export": {
+				"enabled": true
+			}
+		});
+
+	//Quotation Status 3D PIE CHART
+	var chart = AmCharts.makeChart("QuotationStatus", {
+		"type": "pie",
+		"theme": "light",
+		"labelText": "[[title]]:[[value]]",
+		"autoMargins": false,
+		"marginTop": 0,
+		"marginBottom": 0,
+		"marginLeft": 0,
+		"marginRight": 0,
+		"pullOutRadius": 20,
+		"responsive": {
+			"enabled": true
+		},
+		"dataProvider": [{
+			"country": "Open",
+			"value": '@Model.QuotationStatusOpen'
+		}, {
+			"country": "Closed",
+			"value": '@Model.QuotationStatusClosed'
+		}, {
+			"country": "Pending",
+			"value": '@Model.QuotationStatusPending'
+		}],
+		"valueField": "value",
+		"titleField": "country",
+		"outlineAlpha": 0.4,
+		"depth3D": 15,
+		"balloonText": "[[title]]:<span style='font-size:14px'><b>[[percents]]%</b>([[value]])</span>",
+		"angle": 30,
+		"export": {
+			"enabled": true
+		}
+	});
+
+	AmCharts.addInitHandler(function (chart) {
+		// check if there are graphs with autoColor: true set
+		for (var i = 0; i < chart.graphs.length; i++) {
+			var graph = chart.graphs[i];
+			if (graph.autoColor !== true)
+				continue;
+			var colorKey = "autoColor-" + i;
+			graph.lineColorField = colorKey;
+			graph.fillColorsField = colorKey;
+			for (var x = 0; x < chart.dataProvider.length; x++) {
+				var color = chart.colors[x]
+				chart.dataProvider[x][colorKey] = color;
+			}
+		}
+
+	}, ["serial"]);
+
+
+	//Most Quotation Product 3D Cylinder Chart
+	var chart = AmCharts.makeChart("MostQuotProduct", {
+		"theme": "light",
+		"responsive": {
+			"enabled": true
+		},
+		"type": "serial",
+		"startDuration": 2,
+		"dataProvider": [
+			@foreach (var line in Model.MostQuotationProduct.GroupBy(info => info.ProductsName).Select(group => new
+			{
+				Name = group.Key,
+				Count = group.Count(),
+				Sum = group.Sum(x=>x.Quantity)
+			}).OrderByDescending(x => x.Count).Take(15))
+			{
+
+					<text>
+					{
+						"country": '@line.Name',
+						"visits": @line.Count,
+
+					},
+				</text>
+			}
+			],
+		"valueAxes": [{
+			"position": "left",
+			"axisAlpha": 0,
+			"gridAlpha": 0
+		}],
+		"graphs": [{
+			"balloonText": "[[category]]: <b>[[value]]</b>",
+			"autoColor": true,
+			"fillAlphas": 0.85,
+			"lineAlpha": 0.1,
+			"type": "column",
+			"topRadius": 1,
+			"valueField": "visits"
+		}],
+		"depth3D": 40,
+		"angle": 30,
+		"chartCursor": {
+			"categoryBalloonEnabled": false,
+			"cursorAlpha": 0,
+			"zoomable": false
+		},
+		"categoryField": "country",
+		"categoryAxis": {
+			"gridPosition": "start",
+			"gridAlpha": 0,
+			"autoWrap": true
+		},
+		"marginLeft": 100,
+		"export": {
+			"enabled": true
+		}
+	}, 0);
+
+
+
+	//LeastQuotationProduct 3D Cylinder Chart
+	var chart = AmCharts.makeChart("LeastQuotationProduct", {
+		"theme": "light",
+		"responsive": {
+			"enabled": true
+		},
+		"type": "serial",
+		"startDuration": 2,
+		"dataProvider": [
+			@foreach (var line in Model.LeastQuotationProduct.GroupBy(info => info.ProductsName).Select(group => new
+			{
+				Name = group.Key,
+				Count = group.Count(),
+				Sum = group.Sum(x=>x.Quantity)
+			}).OrderBy(x => x.Count).Take(15))
+			{
+
+					<text>
+					{
+						"country": '@line.Name',
+						"visits": @line.Count,
+
+					},
+				</text>
+			}
+			],
+		"valueAxes": [{
+			"position": "left",
+			"axisAlpha": 0,
+			"gridAlpha": 0
+		}],
+		"graphs": [{
+			"balloonText": "[[category]]: <b>[[value]]</b>",
+			"autoColor": true,
+			"fillAlphas": 0.85,
+			"lineAlpha": 0.1,
+			"type": "column",
+			"topRadius": 1,
+			"valueField": "visits"
+		}],
+		"depth3D": 40,
+		"angle": 30,
+		"chartCursor": {
+			"categoryBalloonEnabled": false,
+			"cursorAlpha": 0,
+			"zoomable": false
+		},
+		"categoryField": "country",
+		"categoryAxis": {
+			"gridPosition": "start",
+			"gridAlpha": 0,
+			"autoWrap": true
+		},
+		"marginLeft": 100,
+		"export": {
+			"enabled": true
+		}
+	}, 0);
+
+//QuotationTypes Solid Guage
+	var gaugeChart = AmCharts.makeChart("QuotationTypes", {
+		"type": "gauge",
+		"responsive": {
+			"enabled": true
+		},
+		"theme": "light",
+		"axes": [{
+			"axisAlpha": 0,
+			"tickAlpha": 0,
+			"labelsEnabled": false,
+			"startValue": 0,
+			"endValue": 100,
+			"startAngle": 0,
+			"endAngle": 270,
+			"bands": [{
+				"color": "#eee",
+				"startValue": 0,
+				"endValue": 100,
+				"radius": "80%",
+				"innerRadius": "65%"
+			}, {
+				"color": "#fdd400",
+				"startValue": 0,
+				"endValue":@Model.HotEndvalue, //Actual value
+				"radius": "80%",
+				"innerRadius": "65%",
+				"balloonText": "@Model.HotEndvalue%(Count:@Model.HotQuotation)"//Actual value
+			}, {
+				"color": "#eee",
+				"startValue": 0,
+				"endValue": 100,
+				"radius": "60%",
+				"innerRadius": "45%"
+			}, {
+				"color": "#cc4748",
+				"startValue": 0,
+				"endValue": @Model.WarmEndvalue, //Actual value
+				"radius": "60%",
+				"innerRadius": "45%",
+				"balloonText": "@Model.WarmEndvalue%(Count:@Model.WarmQuotation)"//Actual value
+			}, {
+				"color": "#eee",
+				"startValue": 0,
+				"endValue": 100,
+				"radius": "40%",
+				"innerRadius": "25%"
+			}, {
+				"color": "#67b7dc",
+				"startValue": 0,
+				"endValue": @Model.ColdEndvalue, //Actual value
+				"radius": "40%",
+				"innerRadius": "25%",
+				"balloonText": "@Model.ColdEndvalue%(Count:@Model.ColdQuotation)"//Actual value
+			}]
+		}],
+		"allLabels": [{
+			"text": "Hot Quotation",
+			"x": "49%",
+			"y": "15%",
+			"size": 15,
+			"bold": true,
+			"color": "#fdd400",
+			"align": "right"
+		}, {
+			"text": "Warm Quotation",
+			"x": "49%",
+			"y": "24%",
+			"size": 15,
+			"bold": true,
+			"color": "#cc4748",
+			"align": "right"
+		}, {
+			"text": "Cold Quotation",
+			"x": "49%",
+			"y": "33%",
+			"size": 15,
+			"bold": true,
+			"color": "#67b7dc",
+			"align": "right"
+		}],
+		"export": {
+			"enabled": true
+		}
+	});
+
+	//MonthlyWonLossAnalysis Reversed Value Axis
+	var chart = AmCharts.makeChart("MonthlyWonLossAnalysis", {
+		"type": "serial",
+		"responsive": {
+			"enabled": true
+		},
+		"theme": "light",
+		"legend": {
+			"useGraphSettings": true
+		},
+		"dataProvider": [
+		@{ var dtlst = Model.QuotationWonLost.Where(x => x.ClosingType != null).Select(x => x.Date).Distinct();}
+		@foreach (var itm in dtlst)
+		{   <text>
+			{
+				"day": '@itm.Value.ToString("dd/MM")',
+				"won": '@Model.QuotationWonLost.Where(x => x.Date == itm).Where(y => y.ClosingType == (AdvanceCRM.Masters.ClosingTypeMaster)1).Count()',
+				"lost": '@Model.QuotationWonLost.Where(x => x.Date == itm).Where(y => y.ClosingType == (AdvanceCRM.Masters.ClosingTypeMaster)2).Count()'
+			},
+			</text>
+		}
+		],
+		"valueAxes": [{
+			"integersOnly": true,
+			"maximum": 6,
+			"minimum": 1,
+			"reversed": true,
+			"axisAlpha": 0,
+			"dashLength": 5,
+			"gridCount": 10,
+			"position": "left",
+			"title": "Won Loss Anaylsis"
+		}],
+		"startDuration": 0.5,
+		"graphs": [{
+			"balloonText": "Day-[[category]]: Won-[[value]]",
+			"bullet": "round",
+			//"hidden": true,
+			"title": "Won",
+			"valueField": "won",
+			"fillAlphas": 0
+		},{
+			"balloonText": "Day-[[category]]: Lost-[[value]]",
+			"bullet": "round",
+			"title": "Lost",
+			"valueField": "lost",
+			"fillAlphas": 0
+		}],
+		"chartCursor": {
+			"cursorAlpha": 0,
+			"zoomable": true
+		},
+		"categoryField": "day",
+		"categoryAxis": {
+			"gridPosition": "start",
+			"axisAlpha": 0,
+			"fillAlpha": 0.05,
+			"fillColor": "#000000",
+			"gridAlpha": 0,
+			"position": "top"
+		},
+		"export": {
+			"enabled": true,
+			"position": "bottom-right"
+		}
+	});
+
+	//Mediawise Quotation
+	var chart = AmCharts.makeChart("MediawiseQuotation", {
+		"type": "pie",
+		"responsive": {
+			"enabled": true
+		},
+		"theme": "light",
+		"labelText": "[[title]]\n([[value]], Amt:[[sum]])",
+		"autoMargins": false,
+		"marginTop": 0,
+		"marginBottom": 0,
+		"marginLeft": 0,
+		"marginRight": 0,
+		"pullOutRadius":15,
+		"dataProvider":[
+		@foreach (var item in Model.QuotationSource.GroupBy(y => y.Source).Select(y => new { Source = y.Key, Count = y.Count(), Sum = ((int)y.Sum(x => x.Total)).ToString("0,0##.##") }).OrderByDescending(z => z.Count).ToList())
+		{
+			<text>
+			{
+				"title": '@item.Source',
+				"value": '@item.Count',
+				"sum":'@item.Sum'
+			},
+			</text>
+		}
+		],
+		"valueField": "value",
+		"titleField": "title",
+		"balloonText": "[[title]]\n(Count:[[value]], Amt:[[sum]])",
+		"balloon": {
+			"fixedPosition": true
+		},
+		"export": {
+			"enabled": true
+		},
+		"listeners": [{
+			"event": "init",
+			"method": function (event) {
+				// apply slice colors to their labels
+				var chart = event.chart;
+				if (chart.labelColorField === undefined)
+					chart.labelColorField = "labelColor";
+				for (var i = 0; i < chart.chartData.length; i++) {
+					chart.dataProvider[i][chart.labelColorField] = chart.chartData[i].color;
+				}
+				chart.validateData();
+				chart.animateAgain();
+			}
+		}]
+	});
+
+	//ProductwiseDivisionQuotation 3D Donut Chart
+	var chart = AmCharts.makeChart("ProductwiseDivisionQuotation", {
+		"type": "pie",
+		"responsive": {
+			"enabled": true
+		},
+		"theme": "light",
+		"labelRadius": -35,
+		"labelText": "[[title]]:[[value]]",
+		"autoMargins": false,
+		"marginTop": 0,
+		"marginBottom": 0,
+		"marginLeft": 0,
+		"marginRight": 0,
+		"pullOutRadius": 20,
+		"titles": [{
+			"text": "",
+			"size": 16
+		}],
+		"dataProvider": [
+			@foreach (var line in Model.ProductwiseDivisionQuotation.GroupBy(info => info.ProductsDivisionId).Select(group => new
+			{
+				DivID = group.Key,
+				Count = group.Count()
+			}))
+			{
+
+					<text>
+					{
+						"country": '@Model.DivisionList.FirstOrDefault(x => x.Id == line.DivID).ProductsDivision',
+						"visits": @line.Count,
+
+					},
+				</text>
+			}
+			],
+		"valueField": "visits",
+		"titleField": "country",
+		"startEffect": "elastic",
+		"startDuration": 2,
+		"labelRadius": 15,
+		"innerRadius": "50%",
+		"depth3D": 10,
+		"balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+		"angle": 15,
+		"export": {
+			"enabled": true
+		}
+});
+
+//MonthlyQuotationAnalysis Stacked bar chart with negative values
+	var chart = AmCharts.makeChart("MonthlyQuotationAnalysis", {
+		"type": "serial",
+		"responsive": {
+			"enabled": true,
+			"addDefaultRules": false,
+			"rules": [
+				{
+					"maxWidth": 400,
+					"overrides": {
+						"legend": {
+							"enabled": false
+						}
+					}
+				}
+			]
+		},
+		"theme": "light",
+		"rotate": true,
+		"marginBottom": 50,
+		"dataProvider": [
+		@{ var dt = DateTime.Now;}
+			@for (int i = 1; i < DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month); i++)
+			{
+
+				var age = dt.ToShortDateString();
+				var male = Model.QuotationAnalysisList.Where(x => x.Date.Value.ToShortDateString() == dt.ToShortDateString()).Select(x => x.Id).Count();
+				var female = Model.QuotationAnalysisList.Where(x => x.Date.Value.ToShortDateString() == dt.AddMonths(-1).ToShortDateString()).Count();
+					<text>
+					{
+						"age": '@dt.ToString("dd MMM") | @dt.AddMonths(-1).ToString("dd MMM")',
+						"male": -@male, //This Month
+						"female": @female, //Last Month
+					},
+					</text>
+				dt = dt.AddDays(-1);
+			}
+
+			],
+		"startDuration": 1,
+		"graphs": [{
+			"fillAlphas": 0.8,
+			"lineAlpha": 0.2,
+			"type": "column",
+			"valueField": "male",
+			"title": "Male",
+			"labelText": "[[value]]",
+			"clustered": false,
+			"labelFunction": function (item) {
+				return Math.abs(item.values.value);
+			},
+			"balloonText": "[[category]]"
+		}, {
+			"fillAlphas": 0.8,
+			"lineAlpha": 0.2,
+			"type": "column",
+			"valueField": "female",
+			"title": "Female",
+			"labelText": "[[value]]",
+			"clustered": false,
+			"labelFunction": function (item) {
+				return Math.abs(item.values.value);
+			},
+			"balloonText": "[[category]]"
+		}],
+		"categoryField": "age",
+		"categoryAxis": {
+			"gridPosition": "start",
+			"gridAlpha": 0.2,
+			"axisAlpha": 0
+		},
+		"valueAxes": [{
+			"gridAlpha": 0,
+			"ignoreAxisWidth": true,
+			"labelFunction": function (value) {
+				return Math.abs(value);
+			},
+			"guides": [{
+				"value": 0,
+				"lineAlpha": 0.2
+			}]
+		}],
+		"balloon": {
+			"fixedPosition": true
+		},
+		"chartCursor": {
+			"valueBalloonsEnabled": false,
+			"cursorAlpha": 0.05,
+			"fullWidth": true
+		},
+		"allLabels": [{
+			"text": "This Month(@DateTime.Now.ToString("MMM"))", //Male
+			"x": "28%",
+			"y": "97%",
+			"bold": true,
+			"align": "middle"
+		}, {
+			"text": "Last Month(@DateTime.Now.AddMonths(-1).ToString("MMM"))", //Female
+			"x": "75%",
+			"y": "97%",
+			"bold": true,
+			"align": "middle"
+		}],
+		"export": {
+			"enabled": true
+		}
+
+	});
+
+
+	var citychart = AmCharts.makeChart("CitywiseQuotationAnalysis", {
+			"type": "pie",
+			"startDuration": 0,
+			"theme": "light",
+			"responsive": {
+				"enabled": true
+			},
+			"addClassNames": true,
+			"legend": {
+				"position": "right",
+				"marginRight": 100,
+				"autoMargins": false
+			},
+			"innerRadius": "30%",
+			"defs": {
+				"filter": [{
+					"id": "shadow",
+					"width": "200%",
+					"height": "200%",
+					"feOffset": {
+						"result": "offOut",
+						"in": "SourceAlpha",
+						"dx": 0,
+						"dy": 0
+					},
+					"feGaussianBlur": {
+						"result": "blurOut",
+						"in": "offOut",
+						"stdDeviation": 5
+					},
+					"feBlend": {
+						"in": "SourceGraphic",
+						"in2": "blurOut",
+						"mode": "normal"
+					}
+				}]
+			},
+			"dataProvider":[
+			@foreach (var item in Model.CitywiseQuotationList.GroupBy(y => y.ContactsCityId).Select(y => new { CityId = y.Key, Count = y.Count(), Sum = (int)y.Sum(x => x.Total) }).OrderByDescending(z => z.Count).ToList())
+			{
+
+				<text>
+				{
+					@{
+						var cityid = "City not selected";
+						if(item.CityId.HasValue == true)
+						{
+							cityid = Model.City.SingleOrDefault(x => x.Id == item.CityId).City;
+						}
+					}
+					"country": '@cityid',
+					"litres": '@item.Count',
+					"sum" :'@item.Sum'
+				},
+				</text>
+			}
+			],
+			"valueField": "litres",
+			"titleField": "country",
+			"labelText": "[[country]]([[litres]], Amt:[[sum]])",
+			"balloonText": "[[country]](Count:[[litres]], Amt:[[sum]])",
+			"autoMargins": false,
+			"marginTop": 0,
+			"marginBottom": 0,
+			"marginLeft": 0,
+			"marginRight": 0,
+			"pullOutRadius": 10,
+			"export": {
+				"enabled": true
+			}
+	});
+
+	citychart.addListener("init", handleInit);
+
+	citychart.addListener("rollOverSlice", function (e) {
+		handleRollOver(e);
+	});
+
+	function handleInit() {
+		citychart.legend.addListener("rollOverItem", handleRollOver);
+	}
+
+	function handleRollOver(e) {
+		var wedge = e.dataItem.wedge.node;
+		wedge.parentNode.appendChild(wedge);
+	}
+
+	//BranchwiseQuotation Chart
+	var chart = AmCharts.makeChart("BranchwiseQuotation", {
+			"theme": "light",
+			"type": "serial",
+			"startDuration": 2,
+			"dataProvider":[
+			@foreach (var item in Model.BranchwiseQuotationList.GroupBy(y => y.BranchId).Select(y => new { BranchID = y.Key, Count = y.Count(), Sum = (int)y.Sum(x => x.Total) }).OrderByDescending(z => z.Count).ToList())
+			{
+
+				<text>
+				{
+					@{  var branchid = "Branch N/A";
+						if(item.BranchID.HasValue == true)
+						{
+							branchid = Model.Branch.SingleOrDefault(x => x.Id ==        item.BranchID).Branch;
+						}
+					}
+					"country": '@branchid'+'\n'+'(Amt:@item.Sum)',
+					"visits": '@item.Count',
+					"sum" :'@item.Sum'
+				},
+				</text>
+			}
+			],
+			"valueAxes": [{
+				"position": "left",
+				"title": "Count"
+			}],
+			"responsive": {
+				"enabled": true
+			},
+			"graphs": [{
+				"balloonText": "[[category]]: <b>[[value]]</b>",
+				"autoColor":true,
+				"fillColorsField": "color",
+				"fillAlphas": 1,
+				"lineAlpha": 0.1,
+				"type": "column",
+				"valueField": "visits"
+			}],
+			"depth3D": 20,
+			"angle": 30,
+			"chartCursor": {
+				"categoryBalloonEnabled": false,
+				"cursorAlpha": 0,
+				"zoomable": false
+			},
+			"categoryField": "country",
+			"categoryAxis": {
+				"gridPosition": "start",
+				"labelRotation": 90
+			},
+			"export": {
+				"enabled": true
+			}
+
+	});
+
+	//OverallTargetQuotation Animated gauge
+	$(function () {
+
+		$("#ReqTCnt").text(@Model.RequiredTargetCount);
+		$("#AchTarCnt").text(@Model.AchievedTargetCount);
+
+		var chartGuage = AmCharts.makeChart("OverallTargetQuotation", {
+			"theme": "light",
+			"type": "gauge",
+			"axes": [{
+				"topTextFontSize": 20,
+				"topTextYOffset": 70,
+				"axisColor": "#31d6ea",
+				"axisThickness": 1,
+				"endValue": 100,
+				"gridInside": true,
+				"inside": true,
+				"radius": "50%",
+				"valueInterval": 20,
+				"tickColor": "#67b7dc",
+				"startAngle": -90,
+				"endAngle": 90,
+				"unit": "%",
+				"bandOutlineAlpha": 0,
+				"bands": [{
+					"color": "#0080ff",
+					"endValue": 100,
+					"innerRadius": "105%",
+					"radius": "170%",
+					"gradientRatio": [0.1, 0, -0.1],
+					"startValue": 0
+				}, {
+					"color": "#3cd3a3",
+					"endValue": @Model.QuotationTargetCount.ToString(), //Change here
+					"innerRadius": "105%",
+					"radius": "170%",
+					"gradientRatio": [0.1, 0, -0.1],
+					"startValue": 0
+				}]
+			}],
+			"arrows": [{
+				"alpha": 1,
+				"innerRadius": "35%",
+				"nailRadius": 0,
+				"radius": "170%"
+			}],
+			"export": {
+				"enabled": true
+			}
+		});
+
+		setInterval(randomValue1, 2000);
+
+
+		function randomValue1() {
+			var value = Math.round(@Model.QuotationTargetCount.ToString()); //and here
+			chartGuage.arrows[0].setValue(value);
+			chartGuage.axes[0].setTopText(value + " %");
+
+                        chartGuage.axes[0].bands[1].endValue = value;
+                        chartGuage.validateNow();
+		}
+	});
+
+
+	$(function () {
+
+		$("#ReqTAmt").text(@Model.RequiredTargetAmount);
+		$("#AchTarAmt").text(@Model.AchievedTargetAmount);
+		//OverallTargetQuotationAmt Animated gauge
+		var chartEnqAmt = AmCharts.makeChart("OverallTargetQuotationAmt", {
+			"theme": "light",
+			"type": "gauge",
+			"axes": [{
+				"topTextFontSize": 20,
+				"topTextYOffset": 70,
+				"axisColor": "#31d6ea",
+				"axisThickness": 1,
+				"endValue": 100,
+				"gridInside": true,
+				"inside": true,
+				"radius": "50%",
+				"valueInterval": 20,
+				"tickColor": "#67b7dc",
+				"startAngle": -90,
+				"endAngle": 90,
+				"unit": "%",
+				"bandOutlineAlpha": 0,
+				"bands": [{
+					"color": "#0080ff",
+					"endValue": 100,
+					"innerRadius": "105%",
+					"radius": "170%",
+					"gradientRatio": [0.5, 0, -0.5],
+					"startValue": 0
+				}, {
+					"color": "#3cd3a3",
+					"endValue": @Model.QuotationTargetAmount.ToString(), //Change here
+					"innerRadius": "105%",
+					"radius": "170%",
+					"gradientRatio": [0.5, 0, -0.5],
+					"startValue": 0
+				}]
+			}],
+			"arrows": [{
+				"alpha": 1,
+				"innerRadius": "35%",
+				"nailRadius": 0,
+				"radius": "170%"
+			}],
+			"export": {
+				"enabled": true
+			}
+		});
+
+
+		setInterval(randomValueAmt, 2000);
+
+
+		function randomValueAmt() {
+			var value = Math.round(@Model.QuotationTargetAmount.ToString()); //and here
+			chartEnqAmt.arrows[0].setValue(value);
+			chartEnqAmt.axes[0].setTopText(value + " %");
+
+                        chartEnqAmt.axes[0].bands[1].endValue = value;
+                        chartEnqAmt.validateNow();
+		}
+	});
+
+
+
+
+
+	 $(function () {
+			//Date range picker for Quotation Stages
+			 $('input[name="QuotationStagesDateRange"]').daterangepicker({
+				startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+				endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+			});
+
+			//On date change Quotation Stages
+			$('input[name="QuotationStagesDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+				var sDate = picker.startDate.format('MM/DD/YYYY');
+				var eDate = picker.endDate.format('MM/DD/YYYY');
+				$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+				$("#QuotationStagesFunnel").load('@Url.Action("QuotationStagesFunnelChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+					if (JSON.parse(data).length != 0) {
+						$("#lblMsgQuotationStages").text("");
+					}
+					else {
+						$("#lblMsgQuotationStages").text("Data is not available for last 30 days,kindly select Date range");
+					}
+
+					var chart = AmCharts.makeChart("QuotationStagesFunnel", {
+						"type": "funnel",
+						"theme": "light",
+						"responsive": {
+							"enabled": true
+						},
+						"dataProvider": JSON.parse(data),
+						"balloon": {
+							"fixedPosition": true
+						},
+						"valueField": "value",
+						"titleField": "title",
+						"labelText": "[[title]]([[value]], Amt:[[sum]])",
+						"marginRight": 240,
+						"marginLeft": 50,
+						"startX": -500,
+						"depth3D": 100,
+						"angle": 40,
+						"outlineAlpha": 1,
+						"outlineColor": "#FFFFFF",
+						"outlineThickness": 2,
+						"labelPosition": "right",
+						"balloonText": "[[title]](Count:[[value]], Amt:[[sum]])",
+						"export": {
+							"enabled": true
+						}
+					});
+				});
+
+			});
+		  //End of Quotation Stages
+
+		  //Date range picker for QuotationStatus
+			$('input[name="QuotationStatusDateRange"]').daterangepicker({
+				startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+				endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+			});
+
+			//On date change QuotationStatus
+			$('input[name="QuotationStatusDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+				var sDate = picker.startDate.format('MM/DD/YYYY');
+				var eDate = picker.endDate.format('MM/DD/YYYY');
+
+				$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+				$("#QuotationStatus").load('@Url.Action("QuotationStatusChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+					if (JSON.parse(data).length != 0) {
+						$("#lblMsgQuotationStatus").text("");
+					}
+					else {
+						$("#lblMsgQuotationStatus").text("Data is not available for last 30 days,kindly select Date range");
+					}
+
+					//Quotation Status 3D PIE CHART
+					var chart = AmCharts.makeChart("QuotationStatus", {
+						"type": "pie",
+						"theme": "light",
+						"labelText": "[[title]]:[[value]]",
+						"autoMargins": false,
+						"marginTop": 0,
+						"marginBottom": 0,
+						"marginLeft": 0,
+						"marginRight": 0,
+						"pullOutRadius": 20,
+						"responsive": {
+							"enabled": true
+						},
+						"dataProvider": JSON.parse(data),
+						"valueField": "value",
+						"titleField": "country",
+						"outlineAlpha": 0.4,
+						"depth3D": 15,
+						"balloonText": "[[title]]:<span style='font-size:14px'><b>[[percents]]%</b>([[value]])</span>",
+						"angle": 30,
+						"export": {
+							"enabled": true
+						}
+					});
+				});
+
+			});
+			//End of Quotation Status
+
+		   //Date range picker for MonthlyWonLossAnalysis
+			$('input[name="MonthlyWonLossAnalysisDateRange"]').daterangepicker({
+				startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+				endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+			});
+
+			//On date change Quotation Won Loss
+			$('input[name="MonthlyWonLossAnalysisDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+				var sDate = picker.startDate.format('MM/DD/YYYY');
+				var eDate = picker.endDate.format('MM/DD/YYYY');
+
+				$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+				$("#MonthlyWonLossAnalysis").load('@Url.Action("QuotationWonLossChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+					if (JSON.parse(data).length != 0) {
+						$("#lblMsgQuotationWonLost").text("");
+					}
+					else {
+						$("#lblMsgQuotationWonLost").text("Data is not available for last 30 days,kindly select Date range");
+					}
+
+					var chart = AmCharts.makeChart("MonthlyWonLossAnalysis", {
+						"type": "serial",
+						"responsive": {
+							"enabled": true
+						},
+						"theme": "light",
+						"legend": {
+							"useGraphSettings": true
+						},
+						"dataProvider": JSON.parse(data),
+						"valueAxes": [{
+							"integersOnly": true,
+							"maximum": 6,
+							"minimum": 1,
+							"reversed": true,
+							"axisAlpha": 0,
+							"dashLength": 5,
+							"gridCount": 10,
+							"position": "left",
+							"title": "Won Loss Anaylsis"
+						}],
+						"startDuration": 0.5,
+						"graphs": [{
+							"balloonText": "Day-[[category]]: Won-[[value]]",
+							"bullet": "round",
+							//"hidden": true,
+							"title": "Won",
+							"valueField": "won",
+							"fillAlphas": 0
+						}, {
+							"balloonText": "Day-[[category]]: Lost-[[value]]",
+							"bullet": "round",
+							"title": "Lost",
+							"valueField": "lost",
+							"fillAlphas": 0
+						}],
+						"chartCursor": {
+							"cursorAlpha": 0,
+							"zoomable": true
+						},
+						"categoryField": "day",
+						"categoryAxis": {
+							"gridPosition": "start",
+							"axisAlpha": 0,
+							"fillAlpha": 0.05,
+							"fillColor": "#000000",
+							"gridAlpha": 0,
+							"position": "top"
+						},
+						"export": {
+							"enabled": true,
+							"position": "bottom-right"
+						}
+					});
+				});
+
+			});
+			//End of Quotation Won Loss
+
+		   //QuotationAnalysis Pyramid
+			//Date range picker for QuotationAnalysisPyramid
+			$('input[name="QuotationAnalysisDateRange"]').daterangepicker({
+				@*startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+				endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'*@
+			});
+
+			//On date change Quotation AnalysisPyramid
+			$('input[name="QuotationAnalysisDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+				var sDate = picker.startDate.format('MM/DD/YYYY');
+				var eDate = picker.endDate.format('MM/DD/YYYY');
+
+				$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+				$("#QuotationAnalysisPyramid").load('@Url.Action("QuotationAnalysisChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+					if (JSON.parse(data) == "") {
+
+						$("#lblMsgQuotationAnalysisPyramid").text("Data is not available for last 30 days,kindly select Date range");
+					}
+					else {
+						$("#lblMsgQuotationAnalysisPyramid").text("");
+
+					}
+
+					var chart = AmCharts.makeChart("QuotationAnalysisPyramid", {
+						"type": "funnel",
+						"theme": "light",
+						"responsive": {
+							"enabled": true
+						},
+						"dataProvider": JSON.parse(data),
+						"balloon": {
+							"fixedPosition": true
+						},
+						"valueField": "value",
+						"titleField": "title",
+						"marginRight": 240,
+						"marginLeft": 50,
+						"startX": -500,
+						"rotate": true,
+						"labelPosition": "right",
+						"balloonText": "[[title]]: [[value]]",
+						"export": {
+							"enabled": true
+						}
+					});
+				});
+
+			});
+			//End of Quotation Analysis
+
+		  //Start of MediawiseQuotation
+			//Date range picker for MediawiseQuotation
+			$('input[name="MediawiseQuotationDateRange"]').daterangepicker({
+				startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+				endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+			});
+
+			//On date change MediawiseQuotation
+			$('input[name="MediawiseQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+				var sDate = picker.startDate.format('MM/DD/YYYY');
+				var eDate = picker.endDate.format('MM/DD/YYYY');
+
+				$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+
+				$("#MediawiseQuotation").load('@Url.Action("MediawiseQuotationChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+					if (JSON.parse(data).length != 0) {
+						$("#lblMsgQuotationSource").text("");
+					}
+					else {
+						$("#lblMsgQuotationSource").text("Data is not available for last 30 days,kindly select Date range");
+					}
+
+					var chart = AmCharts.makeChart("MediawiseQuotation", {
+					"type": "pie",
+					"theme": "light",
+					"responsive": {
+						"enabled": true
+					},
+
+					"labelText": "[[title]]\n([[value]], Amt:[[sum]])",
+					"autoMargins": false,
+					"marginTop": 0,
+					"marginBottom": 0,
+					"marginLeft": 0,
+					"marginRight": 0,
+					"pullOutRadius":15,
+					"dataProvider":JSON.parse(data),
+					"valueField": "value",
+					"titleField": "title",
+					"balloon": {
+					"fixedPosition": true
+					},
+						"balloonText": "[[title]]\n(Count:[[value]], Amt:[[sum]])",
+					"export": {
+						"enabled": true
+					},
+					"listeners": [{
+						"event": "init",
+						"method": function (event) {
+							// apply slice colors to their labels
+							var chart = event.chart;
+							if (chart.labelColorField === undefined)
+								chart.labelColorField = "labelColor";
+							for (var i = 0; i < chart.chartData.length; i++) {
+								chart.dataProvider[i][chart.labelColorField] = chart.chartData[i].color;
+							}
+							chart.validateData();
+							chart.animateAgain();
+						}
+					}]
+				});
+
+
+				});
+
+			});
+			//End of Mediawise Quotation
+
+			$(function () {
+				//Start MostQuotationProduct
+				//Date range picker for MostQuotationProduct
+				$('input[name="MostQuotationProductDateRange"]').daterangepicker({
+					startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+					endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+				});
+
+				//On date change LeastQuotationProduct
+				$('input[name="MostQuotationProductDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+					var sDate = picker.startDate.format('MM/DD/YYYY');
+					var eDate = picker.endDate.format('MM/DD/YYYY');
+
+					$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+					$("#MostQuotProduct").load('@Url.Action("MostQuotationProductChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+						if (JSON.parse(data).length != 0) {
+							$("#lblMsgMostQuotationProduct").text("");
+						}
+						else {
+							$("#lblMsgMostQuotationProduct").text("Data is not available for last 30 days,kindly select Date range");
+						}
+
+						//LeastQuotationProduct 3D Cylinder Chart
+						var chart = AmCharts.makeChart("MostQuotProduct", {
+							"theme": "light",
+							"autoMarginOffset": 30,
+							"responsive": {
+								"enabled": true
+							},
+							"type": "serial",
+							"startDuration": 1,
+							"dataProvider": JSON.parse(data),
+							"valueAxes": [{
+								"position": "left",
+								"axisAlpha": 0,
+								"gridAlpha": 0
+							}],
+							"graphs": [{
+								"balloonText": "[[category]]: <b>[[value]]</b>",
+								"autoColor": true,
+								"fillAlphas": 0.85,
+								"lineAlpha": 0.1,
+								"type": "column",
+								"topRadius": 1,
+								"valueField": "visits"
+							}],
+							"depth3D": 40,
+							"angle": 30,
+							"chartCursor": {
+								"categoryBalloonEnabled": false,
+								"cursorAlpha": 0,
+								"zoomable": false
+							},
+							"categoryField": "country",
+							"categoryAxis": {
+								"gridPosition": "start",
+								"gridAlpha": 0,
+								"autoWrap": true
+							},
+							"marginLeft": 100,
+							"export": {
+								"enabled": true
+							}
+						}, 0);
+
+
+					});
+
+				});
+				//End of Most Quotation Product
+			});
+
+
+
+			//Start LeastQuotationProduct
+			//Date range picker for LeastQuotationProduct
+			$('input[name="LeastQuotationProductDateRange"]').daterangepicker({
+				startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+				endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+			});
+
+			//On date change LeastQuotationProduct
+			$('input[name="LeastQuotationProductDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+				var sDate = picker.startDate.format('MM/DD/YYYY');
+				var eDate = picker.endDate.format('MM/DD/YYYY');
+
+				$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+				$("#LeastQuotationProduct").load('@Url.Action("LeastQuotationProductChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+					if (JSON.parse(data).length != 0) {
+						$("#lblMsgLeastQuotationProduct").text("");
+					}
+					else {
+						$("#lblMsgLeastQuotationProduct").text("Data is not available for last 30 days,kindly select Date range");
+					}
+
+					//LeastQuotationProduct 3D Cylinder Chart
+					var chart = AmCharts.makeChart("LeastQuotationProduct", {
+						"theme": "light",
+						"autoMarginOffset": 30,
+						"responsive": {
+							"enabled": true
+						},
+						"type": "serial",
+						"startDuration": 1,
+						"dataProvider": JSON.parse(data),
+						"valueAxes": [{
+							"position": "left",
+							"axisAlpha": 0,
+							"gridAlpha": 0
+						}],
+						"graphs": [{
+							"balloonText": "[[category]]: <b>[[value]]</b>",
+							"autoColor": true,
+							"fillAlphas": 0.85,
+							"lineAlpha": 0.1,
+							"type": "column",
+							"topRadius": 1,
+							"valueField": "visits"
+						}],
+						"depth3D": 40,
+						"angle": 30,
+						"chartCursor": {
+							"categoryBalloonEnabled": false,
+							"cursorAlpha": 0,
+							"zoomable": false
+						},
+						"categoryField": "country",
+						"categoryAxis": {
+							"gridPosition": "start",
+							"gridAlpha": 0,
+							"autoWrap": true
+						},
+						"marginLeft": 100,
+						"export": {
+							"enabled": true
+						}
+					}, 0);
+
+
+				});
+
+			});
+			//End of Least Quotation Product
+
+	//Start ProductwiseDivisionQuotation
+	 //Date range picker for ProductwiseDivisionQuotation
+			$('input[name="ProductwiseDivisionQuotationDateRange"]').daterangepicker({
+			startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+			endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+		});
+
+		//On date change ProductwiseDivisionQuotation
+			$('input[name="ProductwiseDivisionQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+			var sDate = picker.startDate.format('MM/DD/YYYY');
+			var eDate = picker.endDate.format('MM/DD/YYYY');
+
+			$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+			$("#ProductwiseDivisionQuotation").load('@Url.Action("ProductwiseDivisionQuotationChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+				if (JSON.parse(data).length != 0) {
+					$("#lblMsgProductwiseDivisionQuotation").text("");
+				}
+				else {
+					$("#lblMsgProductwiseDivisionQuotation").text("Data is not available for last 30 days,kindly select Date range");
+				}
+				var chart = AmCharts.makeChart("ProductwiseDivisionQuotation", {
+					"type": "pie",
+					"responsive": {
+						"enabled": true
+					},
+					"theme": "light",
+					"labelRadius": -35,
+					"labelText": "[[title]]:[[value]]",
+					"autoMargins": false,
+					"marginTop": 0,
+					"marginBottom": 0,
+					"marginLeft": 0,
+					"marginRight": 0,
+					"pullOutRadius": 0,
+					"titles": [{
+						"text": "",
+						"size": 16
+					}],
+					"dataProvider": JSON.parse(data),
+					"valueField": "visits",
+					"titleField": "country",
+					"startEffect": "elastic",
+					"startDuration": 2,
+					"labelRadius": 15,
+					"innerRadius": "50%",
+					"depth3D": 10,
+					"balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+					"angle": 15,
+					"export": {
+						"enabled": true
+					}
+				});
+			});
+
+		});
+		//End of Productwise Division Quotation
+
+		//Start Quotation Types
+		//Date range picker for Quotation Types
+			$('input[name="QuotationTypesDateRange"]').daterangepicker({
+			startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+			endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+		});
+
+		//On date change Quotation Types
+			$('input[name="QuotationTypesDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+
+			var sDate = picker.startDate.format('MM/DD/YYYY');
+			var eDate = picker.endDate.format('MM/DD/YYYY');
+			$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+			$("#QuotationTypes").load('@Url.Action("QuotationTypesChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+				if (JSON.parse('[' + JSON.parse(data) + ']').length != 0)
+				{
+					$("#lblMsgQuotationTypes").text("");
+				}
+				else {
+					$("#lblMsgQuotationTypes").text("Data is not available for last 30 days,kindly select Date range");
+				}
+				var gaugeChart = AmCharts.makeChart("QuotationTypes", {
+					"type": "gauge",
+					"responsive": {
+						"enabled": true
+					},
+					"theme": "light",
+					"axes": [{
+						"axisAlpha": 0,
+						"tickAlpha": 0,
+						"labelsEnabled": false,
+						"startValue": 0,
+						"endValue": 100,
+						"startAngle": 0,
+						"endAngle": 270,
+						"bands": JSON.parse('[' + JSON.parse(data) + ']')
+						}],
+					"allLabels": [{
+						"text": "Hot Quotation",
+						"x": "49%",
+						"y": "15%",
+						"size": 15,
+						"bold": true,
+						"color": "#fdd400",
+						"align": "right"
+					}, {
+						"text": "Warm Quotation",
+						"x": "49%",
+						"y": "24%",
+						"size": 15,
+						"bold": true,
+						"color": "#cc4748",
+						"align": "right"
+					}, {
+						"text": "Cold Quotation",
+						"x": "49%",
+						"y": "33%",
+						"size": 15,
+						"bold": true,
+						"color": "#67b7dc",
+						"align": "right"
+					}],
+					"export": {
+						"enabled": true
+					}
+				});
+
+			});
+
+		});
+		//End of Quotation types
+
+	});
+
+
+
+
+	$(function () {
+
+			//Start CitywiseQuotationAnalysis
+			//Date range picker for CitywiseQuotationAnalysis
+			$('input[name="CitywiseQuotationDateRange"]').daterangepicker({
+				startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+				endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+			});
+
+			//On date change CitywiseQuotationAnalysis
+			$('input[name="CitywiseQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+				var sDate = picker.startDate.format('MM/DD/YYYY');
+				var eDate = picker.endDate.format('MM/DD/YYYY');
+
+				$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+				$("#CitywiseQuotationAnalysis").load('@Url.Action("CitywiseQuotationChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+					if (JSON.parse(data).length != 0) {
+						$("#lblCitywiseQuotationAnalysis").text("");
+						$("#lblCitywiseQuotationAnalysis").hide();
+					}
+					else
+					{
+						$("#lblCitywiseQuotationAnalysis").show();
+						$("#lblCitywiseQuotationAnalysis").text("Data is not available for last 30 days,kindly select Date range");
+
+					}
+
+					//CitywiseQuotationAnalysis Pie chart
+					var chart = AmCharts.makeChart("CitywiseQuotationAnalysis", {
+					"type": "pie",
+					"startDuration": 0,
+					"theme": "light",
+					"responsive": {
+						"enabled": true
+					},
+					"addClassNames": true,
+					"legend": {
+						"position": "right",
+						"marginRight": 100,
+						"autoMargins": false
+					},
+					"innerRadius": "30%",
+					"defs": {
+						"filter": [{
+							"id": "shadow",
+							"width": "200%",
+							"height": "200%",
+							"feOffset": {
+								"result": "offOut",
+								"in": "SourceAlpha",
+								"dx": 0,
+								"dy": 0
+							},
+							"feGaussianBlur": {
+								"result": "blurOut",
+								"in": "offOut",
+								"stdDeviation": 5
+							},
+							"feBlend": {
+								"in": "SourceGraphic",
+								"in2": "blurOut",
+								"mode": "normal"
+							}
+						}]
+					},
+					"dataProvider": JSON.parse(data),
+					"valueField": "litres",
+					"titleField": "country",
+					"labelText": "[[country]]([[litres]], Amt:[[sum]])",
+					"balloonText": "[[country]](Count:[[litres]], Amt:[[sum]])",
+					"autoMargins": false,
+					"marginTop": 0,
+					"marginBottom": 0,
+					"marginLeft": 0,
+					"marginRight": 0,
+					"pullOutRadius": 10,
+					"export": {
+						"enabled": true
+					}
+					});
+
+					chart.addListener("init", handleInit);
+
+					chart.addListener("rollOverSlice", function (e) {
+						handleRollOver(e);
+					});
+
+					function handleInit() {
+						chart.legend.addListener("rollOverItem", handleRollOver);
+					}
+
+					function handleRollOver(e) {
+						var wedge = e.dataItem.wedge.node;
+						wedge.parentNode.appendChild(wedge);
+					}
+
+
+				});
+
+			});
+			//End of CitywiseQuotationAnalysis
+	});
+
+
+	$(function () {
+			//Start BranchwiseQuotationDateRange
+			//Date range picker for BranchwiseQuotationDateRange
+			$('input[name="BranchwiseQuotationDateRange"]').daterangepicker({
+				startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+				endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+			});
+
+			//On date change BranchwiseQuotationDateRange
+			$('input[name="BranchwiseQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+				var sDate = picker.startDate.format('MM/DD/YYYY');
+				var eDate = picker.endDate.format('MM/DD/YYYY');
+
+				$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+				$("#BranchwiseQuotation").load('@Url.Action("BranchwiseQuotationChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+					if (JSON.parse(data).length != 0) {
+						$("#lblBranchwiseQuotation").text("");
+						$("#lblBranchwiseQuotation").hide();
+					}
+					else
+					{
+						$("#lblBranchwiseQuotation").show();
+						$("#lblBranchwiseQuotation").text("Data is not available for last 30 days,kindly select Date range");
+
+					}
+
+				//BranchwiseQuotation
+				var chart = AmCharts.makeChart("BranchwiseQuotation", {
+				"theme": "light",
+				"type": "serial",
+				"startDuration": 2,
+				"dataProvider": JSON.parse(data),
+				"valueAxes": [{
+					"position": "left",
+					"title": "Count"
+				}],
+				"responsive": {
+					"enabled": true
+				},
+				"graphs": [{
+					"balloonText": "[[category]]: <b>[[value]]</b>",
+					"autoColor":true,
+					"fillColorsField": "color",
+					"fillAlphas": 1,
+					"lineAlpha": 0.1,
+					"type": "column",
+					"valueField": "visits"
+				}],
+				"depth3D": 20,
+				"angle": 30,
+				"chartCursor": {
+					"categoryBalloonEnabled": false,
+					"cursorAlpha": 0,
+					"zoomable": false
+				},
+				"categoryField": "country",
+				"categoryAxis": {
+					"gridPosition": "start",
+					"labelRotation": 90
+				},
+				"export": {
+					"enabled": true
+				}
+
+		});
+
+
+				});
+
+			});
+			//End of BranchwiseQuotation
+	});
+
+	$(function () {
+		//Start OverallTargetQuotation
+		//Date range picker for OverallTargetQuotation
+		$('input[name="OverallTargetQuotationDateRange"]').daterangepicker({
+			startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+			endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+		});
+
+		//On date change OverallTargetQuotation
+		$('input[name="OverallTargetQuotationDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+			var sDate = picker.startDate.format('MM/DD/YYYY');
+			var eDate = picker.endDate.format('MM/DD/YYYY');
+
+			$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+			$("#OverallTargetQuotation").load('@Url.Action("OverallTargetQuotationChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+
+				if (JSON.parse(data).length != 0) {
+					$("#lblMsgQuotationTargetCount").text("");
+					$("#lblMsgQuotationTargetCount").hide();
+				}
+				else {
+					$("#lblMsgQuotationTargetCount").show();
+					$("#lblMsgQuotationTargetCount").text("Data is not available for last 30 days,kindly select Date range");
+
+				}
+				var Obj = JSON.parse(data);
+
+				$("#ReqTCnt").text(Obj.RCnt);
+				$("#AchTarCnt").text(Obj.ACnt);
+
+				//OverallTargetQuotation Animated gauge
+				var chartGuage = AmCharts.makeChart("OverallTargetQuotation", {
+					"theme": "light",
+					"type": "gauge",
+					"responsive": {
+						"enabled": true
+					},
+					"axes": [{
+						"topTextFontSize": 20,
+						"topTextYOffset": 70,
+						"axisColor": "#31d6ea",
+						"axisThickness": 1,
+						"endValue": 100,
+						"gridInside": true,
+						"inside": true,
+						"radius": "50%",
+						"valueInterval": 20,
+						"tickColor": "#67b7dc",
+						"startAngle": -90,
+						"endAngle": 90,
+						"unit": "%",
+						"bandOutlineAlpha": 0,
+						"bands": [{
+							"color": "#0080ff",
+							"endValue": 100,
+							"innerRadius": "105%",
+							"radius": "170%",
+							"gradientRatio": [0.5, 0, -0.5],
+							"startValue": 0
+						}, {
+							"color": "#3cd3a3",
+							"endValue": Obj.Percent, //Change here
+							"innerRadius": "105%",
+							"radius": "170%",
+							"gradientRatio": [0.5, 0, -0.5],
+							"startValue": 0
+						}]
+					}],
+					"arrows": [{
+						"alpha": 1,
+						"innerRadius": "35%",
+						"nailRadius": 0,
+						"radius": "170%"
+					}],
+					"export": {
+						"enabled": true
+					}
+				});
+
+				setInterval(randomValueEnqd, 2000);
+
+
+				function randomValueEnqd() {
+					var value = Math.round(Obj.Percent); //and here
+					chartGuage.arrows[0].setValue(value);
+					chartGuage.axes[0].setTopText(value + " %");
+
+                                        chartGuage.axes[0].bands[1].endValue = value;
+                                        chartGuage.validateNow();
+				}
+
+
+			});
+
+		});
+
+		//End of OverallTargetQuotation
+	});
+
+	$(function () {
+		//Start OverallTargetQuotationAmt
+		//Date range picker for OverallTargetQuotationAmt
+		$('input[name="OverallTargetQuotationAmtDateRange"]').daterangepicker({
+			startDate: '@System.DateTime.Now.AddMonths(-1).ToString("MM/dd/yyyy")',
+			endDate: '@System.DateTime.Now.ToString("MM/dd/yyyy")'
+		});
+
+		//On date change OverallTargetQuotationAmt
+		$('input[name="OverallTargetQuotationAmtDateRange"]').on('apply.daterangepicker', function (ev, picker) {
+			var sDate = picker.startDate.format('MM/DD/YYYY');
+			var eDate = picker.endDate.format('MM/DD/YYYY');
+
+			$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+			$("#OverallTargetQuotationAmt").load('@Url.Action("OverallTargetQuotationAmtChart", "QuotationDashboard")?StartDate=' + picker.startDate.format('MM/DD/YYYY') + '&EndDate=' + picker.endDate.format('MM/DD/YYYY'), function (data) {
+
+
+				if (JSON.parse(data).length != 0) {
+					$("#lblMsgQuotationTargetAmt").text("");
+					$("#lblMsgQuotationTargetAmt").hide();
+				}
+				else {
+					$("#lblMsgQuotationTargetAmt").show();
+					$("#lblMsgQuotationTargetAmt").text("Data is not available for last 30 days,kindly select Date range");
+
+				}
+
+				var obj = JSON.parse(data);
+
+				$("#ReqTAmt").text(obj.RAmt);
+				$("#AchTarAmt").text(obj.AAmt);
+
+				//OverallTargetQuotationAmt Animated gauge
+				var chartAmt = AmCharts.makeChart("OverallTargetQuotationAmt", {
+					"theme": "light",
+					"type": "gauge",
+					"responsive": {
+						"enabled": true
+					},
+					"axes": [{
+						"topTextFontSize": 20,
+						"topTextYOffset": 70,
+						"axisColor": "#31d6ea",
+						"axisThickness": 1,
+						"endValue": 100,
+						"gridInside": true,
+						"inside": true,
+						"radius": "50%",
+						"valueInterval": 20,
+						"tickColor": "#67b7dc",
+						"startAngle": -90,
+						"endAngle": 90,
+						"unit": "%",
+						"bandOutlineAlpha": 0,
+						"bands": [{
+							"color": "#0080ff",
+							"endValue": 100,
+							"innerRadius": "105%",
+							"radius": "170%",
+							"gradientRatio": [0.5, 0, -0.5],
+							"startValue": 0
+						}, {
+							"color": "#3cd3a3",
+							"endValue": obj.Per, //Change here
+							"innerRadius": "105%",
+							"radius": "170%",
+							"gradientRatio": [0.5, 0, -0.5],
+							"startValue": 0
+						}]
+					}],
+					"arrows": [{
+						"alpha": 1,
+						"innerRadius": "35%",
+						"nailRadius": 0,
+						"radius": "170%"
+					}],
+					"export": {
+						"enabled": true
+					}
+				});
+
+				setInterval(randomValueEnqAmtd, 2000);
+
+
+				function randomValueEnqAmtd() {
+					//alert(data);
+					var value = Math.round(obj.Per); //and here
+					chartAmt.arrows[0].setValue(value);
+					chartAmt.axes[0].setTopText(value + " %");
+
+                                        chartAmt.axes[0].bands[1].endValue = value;
+                                        chartAmt.validateNow();
+				}
+
+
+			});
+
+		});
+
+		//End of OverallTargetQuotationAmt
+	});
+
+
+</script>
+<!-- HTML -->
+<body style='background:lightgrey;'>
+    @Html.HiddenFor(m => m.StartDate)
+    @Html.HiddenFor(m => m.EndDate)
+    <div>
+        <br />
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-6">
+                    <div class="well active" data-backdrop="true" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="QuotationStagesDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Quotation Stages</strong>
+                        <div id="QuotationStagesFunnel"></div>
+                        @if (Model.QuotationStages.Count() == 0)
+					{
+                        <label id="lblMsgQuotationStages">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="QuotationAnalysisDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Quotation Analysis</strong>
+                        <div id="QuotationAnalysisPyramid"></div>
+                        @if ((Model.TotalQuotationTypes == 0) && (Model.QuotationStatusOpen == 0) && (Model.QuotationStatusClosed == 0) && (Model.QuotationStatusPending == 0) && (Model.QuotationWon == 0) && (Model.QuotationLost == 0))
+					{
+                        <label id="lblMsgQuotationAnalysisPyramid">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="QuotationStatusDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Quotation Status</strong>
+                        <div id="QuotationStatus"></div>
+                        @if ((Model.QuotationStatusOpen == 0) && (Model.QuotationStatusClosed == 0) && (Model.QuotationStatusPending == 0))
+					{
+                        <label id="lblMsgQuotationStatus">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="MediawiseQuotationDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Mediawise Quotation</strong>
+                        <div id="MediawiseQuotation"></div>
+                        @if (Model.QuotationSource.Count() == 0)
+					{
+                        <label id="lblMsgQuotationSource">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="MonthlyWonLossAnalysisDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Monthly Quotation Won and Loss Analysis</strong>
+                        <div id="MonthlyWonLossAnalysis"></div>
+                        @if (Model.QuotationWonLost.Count() == 0)
+					{
+                        <label id="lblMsgQuotationWonLost">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="MostQuotationProductDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Most Quotation Products (Top 15)</strong>
+                        <div id="MostQuotProduct"></div>
+                        @if (Model.MostQuotationProduct.Count() == 0)
+					{
+                        <label id="lblMsgMostQuotationProduct">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="LeastQuotationProductDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Least Quotation Products (Top 15)</strong>
+                        <div id="LeastQuotationProduct"></div>
+                        @if (Model.LeastQuotationProduct.Count() == 0)
+					{
+                        <label id="lblMsgLeastQuotationProduct">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="QuotationTypesDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Quotation Types</strong>
+                        <div id="QuotationTypes"></div>
+                        @if ((Model.TotalQuotationTypes == 0) && (Model.HotQuotation == 0) && (Model.ColdQuotation == 0) && (Model.WarmQuotation == 0))
+					{
+                        <label id="lblMsgQuotationTypes">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="ProductwiseDivisionQuotationDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Productwise Division Quotation</strong>
+                        <div id="ProductwiseDivisionQuotation"></div>
+                        @if ((Model.ProductwiseDivisionQuotation.Count() == 0))
+					{
+                        <label id="lblMsgProductwiseDivisionQuotation">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                        <strong>Monthly Quotation Analysis</strong>
+                        <div id="MonthlyQuotationAnalysis"></div>
+                        @if (Model.QuotationAnalysisList.Count() == 0)
+					{
+                        <label id="lblMsgQuotationAnalysisList">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-12">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="CitywiseQuotationDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Citywise Quotation Analysis</strong>
+                        <div id="CitywiseQuotationAnalysis"></div>
+                        @if (Model.CitywiseQuotationList.Count() == 0)
+					{
+                        <label id="lblCitywiseQuotationAnalysis">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="OverallTargetQuotationDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Overall Company Target Achivement for Quotation</strong>
+                        <div id="OverallTargetQuotation"></div>	<div style='text-align:center;'>
+                            <label>(Target: <label id="ReqTCnt"></label>,  Achieved: <label id="AchTarCnt"></label></label>)
+                        </div>
+                        @if (Model.QuotationTargetCount <= 0)
+			{
+                        <label id="lblMsgQuotationTargetCount">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="OverallTargetQuotationAmtDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Overall Company's Target Achievement for Quotation (Amount)</strong>
+                        <div id="OverallTargetQuotationAmt"></div>
+                        <div style='text-align:center;'>
+                            <label>(Target: <label id="ReqTAmt"></label>,  Achieved: <label id="AchTarAmt"></label></label>)
+                        </div>
+                        @if (Model.QuotationTargetAmount <= 0)
+			{
+                        <label id="lblMsgQuotationTargetAmt">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days,kindly select Date range</strong>
+                        </label>
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="col-lg-6">
+                    <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Date range:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" name="BranchwiseQuotationDateRange">
+                            </div><!-- /.input group -->
+                        </div><!-- /.form group -->
+                        <!-- Date and time range -->
+                        <strong>Branchwise Quotation Analysis</strong>
+                        <div id="BranchwiseQuotation"></div>
+                        @if (Model.BranchwiseQuotationList.Count() == 0)
+					{
+                        <label id="lblBranchwiseQuotation">
+                            <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                            <strong style="color:cornflowerblue;">Data is not available for last 30 days</strong>
+                        </label>
+				}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

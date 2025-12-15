@@ -1,0 +1,178 @@
+﻿@model AdvanceCRM.Reports.AccountingReportModel
+
+@*<strong>All Outstanding Balance</strong>
+    <hr />
+
+    <div class="box-body no-padding">
+        <table class="table table-striped">
+            @{ int srno = 1; double ftot = 0;}
+            <tr><th style="text-align:center">Sr. No.</th><th style="text-align:left">Name</th><th style="text-align:right">Total</th></tr>
+            @foreach (var item in Model.Sales.Select(y => y.ContactsId).Distinct())
+            {
+                double t_tot = 0;
+
+                double debtorsopening = 0;
+                if (Model.Sales.Count > 0)
+                {
+                    if (Model.Sales.Where(x => x.ContactsId == item).FirstOrDefault().ContactsDebtorsOpening.HasValue)
+                    {
+                        debtorsopening = (double)Model.Sales.Where(x => x.ContactsId == item).FirstOrDefault().ContactsDebtorsOpening;
+                    }
+                }
+
+                t_tot = (double)Model.Sales.Where(y => y.ContactsId == item).Sum(x => x.GrandTotal) - (double)Model.Cash.Where(y => y.ContactsId == item).Sum(x => x.CashIn) + debtorsopening;
+
+                if (t_tot != 0)
+                {
+                    <tr>
+                        <td align="center">@srno</td>
+                        <td align="left">@Model.Sales.FirstOrDefault(y => y.ContactsId == item).ContactsName</td>
+                        <td align="right">@t_tot.ToString("#,##0.00")</td>
+                    </tr>
+                    srno++;
+                    ftot = ftot + t_tot;
+                }
+            }
+            <tr>
+                <td colspan="2" align="right"><strong> Total </strong></td>
+                <td align="right">@ftot.ToString("#,##0.00")</td>
+            </tr>
+        </table>
+        <hr />
+    </div>*@
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        /* text-align: center;*/
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        /*text-align: center;*/
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        /*text-align: center;*/
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    All Outstanding Balance
+</div>
+
+<table class="table table-striped">
+    @{ int srno = 1; double ftot = 0;}
+    <tr>
+        <th style="text-align:center">Sr. No.</th>
+        <th style="text-align:left">Name</th>
+        <th style="text-align:left">Address</th>
+        <th style="text-align:left">Phone</th>
+        <th style="text-align:left">Email</th>
+        <th style="text-align:left">Paid</th>
+        <th style="text-align:left">Balance</th>
+        <th style="text-align:right">Total</th>
+    </tr>
+    @foreach (var item in Model.Sales.Select(y => y.ContactsId).Distinct())
+    {
+        double t_tot = 0;
+        double paid = 0;
+        double bal = 0;
+        double t_paid = 0;
+
+        double debtorsopening = 0;
+        if (Model.Sales.Count > 0)
+        {
+            if (Model.Sales.Where(x => x.ContactsId == item).FirstOrDefault().ContactsDebtorsOpening.HasValue)
+            {
+                debtorsopening = (double)Model.Sales.Where(x => x.ContactsId == item).FirstOrDefault().ContactsDebtorsOpening;
+                //t_paid = (double)Model.Cash.Where(y => y.ContactsId == item).Sum(x=> x.CashIn) + (double)Model.Cash[Model.Sales.Count].CashIn;
+            }
+        }
+
+        t_tot = (double)Model.Sales.Where(y => y.ContactsId == item).Sum(x => x.GrandTotal) - (double)Model.Cash.Where(y => y.ContactsId == item).Sum(x => x.CashIn) + debtorsopening;
+        // Ensure CashIn is correctly summed up
+        t_paid = Model.Cash.Where(y => y.ContactsId == item).Sum(x => (double?)x.CashIn) ?? 0;
+        paid = t_paid;
+        bal = t_tot - paid;
+
+        if (t_tot != 0)
+        {
+            //var contact = Model.Sales.FirstOrDefault(y => y.ContactsId == item);
+            <tr>
+                <td align="center">@srno</td>
+                <td align="left">@Model.Sales.FirstOrDefault(y => y.ContactsId == item).ContactsName</td>
+                <td align="left">@Model.Sales.FirstOrDefault(y => y.ContactsId == item).ContactsAddress</td>
+                <td align="left">@Model.Sales.FirstOrDefault(y => y.ContactsId == item).ContactsPhone</td>
+                <td align="left">@Model.Sales.FirstOrDefault(y => y.ContactsId == item).ContactsEmail</td>
+                <td align="right">@paid.ToString("#,##0.00")</td>
+                <td align="right">@bal.ToString("#,##0.00")</td>
+                <td align="right">@t_tot.ToString("#,##0.00")</td>
+            </tr>
+            srno++;
+            ftot = ftot + t_tot;
+        }
+    }
+    <tr>
+        <td colspan="7" align="right"><strong> Total </strong></td>
+        <td align="right">@ftot.ToString("#,##0.00")</td>
+    </tr>
+</table>
+
+<div class="footer-note">
+    <em>Report generated automatically. Powered by Bizplus CRM.</em>
+</div>

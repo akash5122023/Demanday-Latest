@@ -1,0 +1,160 @@
+﻿
+@model AdvanceCRM.Modules.Reports.GST.GSTR2B2BPageModel
+@inject ITextLocalizer localizer
+
+
+<style>
+    table {
+        table-layout: fixed;
+    }
+
+        table th, table td {
+            overflow: hidden;
+        }
+</style>
+
+
+<table class="table table-bordered table-condensed table-striped table-hover table table-responsive">
+    <thead>
+        <tr style="height:40px; background-color:lightgrey;">
+            <th>GSTIN of Supplier</th>
+            <th>Invoice No</th>
+            <th>Invoice Date</th>
+            <th>Invoice Value</th>
+            <th>Place Of Supply</th>
+            <th>Reverse Charge</th>
+            <th>Invoice Type</th>
+            <th>Rate</th>
+            <th>Taxable Value</th>
+            <th>Integrated Tax Paid</th>
+            <th>Central Tax Paid</th>
+            <th>State/UT Tax Paid</th>
+            <th>Cess Paid</th>
+            <th>Eligibility For ITC</th>
+            <th>Availed ITC Integrated Tax</th>
+            <th>Availed ITC Central Tax</th>
+            <th>Availed ITC State/UT Tax</th>
+            <th>Availed ITC Cess</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var line in Model.PurchaseList)
+        {
+
+            foreach (var item in Model.PurchaseProductList.Where(x => x.PurchaseId == line.Id).GroupBy(y => y.Percentage1))
+            {
+
+        <tr>
+            <td>
+                @line.PurchaseFromGSTIN
+            </td>
+
+            <td>
+                @if (!line.InvoiceNo.IsEmptyOrNull())
+                {
+                    var val = line.InvoiceDate.Value.Year.ToString() + "/" + line.InvoiceNo.ToString();
+                @val
+                }
+                else
+                {
+                    var val = line.InvoiceDate.Value.Year.ToString() + "/" + line.Id.ToString();
+                @val
+                }
+            </td>
+            <td>
+                @line.InvoiceDate.Value.ToString("dd-MMM-yyyy")
+
+            </td>
+            <td>
+                @line.Total.Value.ToString("#,##0.00")
+            </td>
+            <td>
+                @if (line.PurchaseFromStateId.HasValue)
+                {
+                @Model.StateList.FirstOrDefault(x => x.Id == line.PurchaseFromStateId).State
+                }
+            </td>
+            <td>
+                @if (line.ReverseCharge.HasValue)
+                {
+                    if (line.ReverseCharge == true)
+                    {
+                <text>Y</text>
+                    }
+                    else
+                    {
+                <text>N</text>
+                    }
+                }
+            </td>
+            <td>
+                @if (line.InvoiceType.HasValue)
+                {
+                    var type = line.InvoiceType.Value.GetText(localizer);
+                <text> @type </text>
+                }
+            </td>
+            <td>
+                @if (item.FirstOrDefault(x => x.PurchaseId == line.Id).Percentage1 < 1)
+                {
+                @item.FirstOrDefault(x => x.PurchaseId == line.Id).Percentage1
+                }
+                else
+                {
+                    double t1 = ((double)@item.FirstOrDefault(x => x.PurchaseId == line.Id).Percentage1) + ((double)@item.FirstOrDefault(x => x.PurchaseId == line.Id).Percentage2);
+
+                @t1.ToString("#,##0.00");
+
+                }
+            </td>
+            <td>
+                @item.Sum(x => x.GrandTotal).Value.ToString("#,##0.00")
+            </td>
+            <td>
+                @{ var tax1 = @item.FirstOrDefault(x => x.PurchaseId == line.Id).Tax1Amount;
+                    var tax2 = @item.FirstOrDefault(x => x.PurchaseId == line.Id).Tax2Amount;
+                }
+
+                @{
+                    bool stateChanged = false;
+
+                    var Id = Model.CompanyList.FirstOrDefault().StateId;
+
+                    if (Id==line.PurchaseFromStateId)
+                    {
+                        stateChanged = true;
+                    }
+                    else
+                    {
+                        stateChanged = false;
+                    }
+                }
+                @if (stateChanged == true)
+                {
+                @(tax1+tax2);
+                }
+            </td>
+            <td>
+                @if (stateChanged == false)
+                {
+                @item.FirstOrDefault(x => x.PurchaseId == line.Id).Tax1Amount
+                }
+            </td>
+            <td>
+                @if (stateChanged == false)
+                {
+                @item.FirstOrDefault(x => x.PurchaseId == line.Id).Tax2Amount
+                }
+            </td>
+            <td></td>
+            <td>@line.ITCEligibility.Value.GetText(localizer)</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+
+            }
+        }
+    </tbody>
+</table>

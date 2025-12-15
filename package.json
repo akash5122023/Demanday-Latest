@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "bootstrap-colorpicker": "^3.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

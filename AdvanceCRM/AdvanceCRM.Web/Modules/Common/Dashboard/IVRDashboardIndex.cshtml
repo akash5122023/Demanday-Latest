@@ -1,0 +1,196 @@
+﻿@using System.Net;
+@using System.Net.Mail;
+@using System.Net;
+@using System.Net.Mail;
+
+@using Serenity;
+
+
+@model AdvanceCRM.Common.IVRDashboardPageModel
+@inject Serenity.ITextLocalizer Localizer
+@{ ViewData["Title"] = "IVRDashboard";
+    ViewData["PageId"] = "IVRDashboard"; }
+
+@section Head {
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css">
+    <link rel="stylesheet" href="~/Scripts/morris/morris.css">
+    <link rel="stylesheet" href="~/Scripts/datepicker/datepicker3.css">
+    <link rel="stylesheet" href="~/Scripts/daterangepicker/daterangepicker-bs3.css">
+    <link rel="stylesheet" href="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <script src="~/Scripts/raphael/raphael-min.js"></script>
+    <script src="~/Scripts/morris/morris.min.js"></script>
+    <script src="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js"></script>
+    <link rel="stylesheet" href="~/amcharts/plugins/export/export.css" type="text/css" media="all" />
+}
+
+@section ContentHeader {
+    <h1>@Localizer.Get("IVR Dashboard")<small>@Html.Raw(Texts.Site.Dashboard.ContentDescription)</small></h1>
+}
+
+<div class="row">
+    <div class="col-lg-3 col-xs-8">
+        <!-- Answered Calls -->
+        <div class="small-box" style="background-color:#4CAF50; color: white;">
+            <div class="inner">
+                <h3>@Model.AnswerCall</h3>
+                <p>Answered Calls</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-phone"></i>
+            </div>
+            <a href="~/ThirdParty/KnowlarityDetails?CallDurationState=1" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+
+    <div class="col-lg-3 col-xs-8">
+        <!-- Missed Calls -->
+        <div class="small-box" style="background-color: #DC3545; color: white;">
+            <div class="inner">
+                <h3>@Model.MissCall</h3>
+                <p>Missed Calls</p>
+            </div>
+            <div class="icon">
+                @*<i class="fa fa-phone-slash"></i>*@
+                <i class="fa fa-phone" style="transform: rotate(135deg);"></i>
+            </div>
+            <a href="~/ThirdParty/KnowlarityDetails?CallDurationState=0" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+
+    <div class="col-lg-3 col-xs-8">
+        <!-- Customer Missed -->
+        <div class="small-box" style="background-color: #FFA500; color: black; ">
+            <div class="inner">
+                <h3>@Model.CustomerMissed</h3>
+                <p>Customer Missed</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-user-times"></i>
+            </div>
+            <a href="/ThirdParty/KnowlarityDetails?CallDurationState=2" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+
+    <div class="col-lg-3 col-xs-8">
+        <!-- Agent Missed -->
+        <div class="small-box" style="background-color: #17A2B8; color: white;">
+            <div class="inner">
+                <h3>@Model.AgentMissed</h3>
+                <p>Agent Missed</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-user"></i>
+            </div>
+            <a href="/ThirdParty/KnowlarityDetails?CallDurationState=3" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+</div>
+
+<div class="row">
+    <div class="col-lg-3 col-xs-8">
+        <!-- Today's Calls -->
+        <div class="small-box" style="background-color: #E83E8C; color: white;">
+            <div class="inner">
+                <h3>@Model.TodaysCalls.Count</h3>
+                <p>Today's Calls</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-calendar"></i>
+            </div>
+            <a href="/ThirdParty/KnowlarityDetails?CallDurationState=4" class="small-box-footer">
+                More info <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+
+    <div class="col-lg-3 col-xs-8">
+        <!-- Total Monthly Calls -->
+        <div class="small-box" style="background-color:#9C27B0; color: white;">
+            <div class="inner">
+                <h3>@Model.TotalMonthlyCalls.Count</h3>
+                <p>Total Monthly Calls</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-pie-chart"></i>
+            </div>
+            <a href="#" class="small-box-footer">
+                &nbsp;<i class="fa fa-arrow-circle"></i>
+            </a>
+        </div>
+    </div>
+
+
+    <section class="col-lg-6 connectedSortable">
+
+        <div class="box box-solid bg-green-gradient">
+            <div class="box-header">
+                <i class="fa fa-th"></i>
+                <h3 class="box-title">Answered Calls (1 year)</h3>
+                <div class="box-tools pull-right">
+                    <button class="btn bg-green btn-sm" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    <button class="btn bg-green btn-sm" data-widget="remove"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <div class="box-body border-radius-none">
+                <div class="chart" id="line-chart-enq" style="height: 250px;"></div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+
+
+
+<script type="text/javascript">
+
+      $(function () {
+
+        $("#messageBody").wysihtml5();
+        //Enquiry chart
+        if ( @Model.AnsweredCalls.Count() > 0) {
+            var line = new Morris.Line({
+                element: 'line-chart-enq',
+                resize: true,
+                data: [
+                @{ int cnt = 1;}
+                @foreach (var item in Model.AnsweredCalls.Select(x => x.DateTime.Value.ToString("yyyy-MM-dd")).Distinct())
+                {
+                    <text> { y: '@item.ToString()', item1: @Model.AnsweredCalls.Where(yy => yy.DateTime.Value.ToString("yyyy-MM-dd") == Html.DisplayFor(x => item).ToString()).Count() }, </text>
+                    cnt = cnt + 1;
+                }
+                ],
+                xkey: 'y',
+                ykeys: ['item1'],
+                labels: ['Count'],
+                lineColors: ['#efefef'],
+                lineWidth: 2,
+                hideHover: 'auto',
+                gridTextColor: "#fff",
+                gridStrokeWidth: 0.4,
+                pointSize: 4,
+                pointStrokeColors: ["#efefef"],
+                gridLineColor: "#efefef",
+                gridTextFamily: "Open Sans",
+                gridTextSize: 10
+            });
+        }
+      });
+
+</script>
+
+
+</div><!-- /.row -->
+
+
+<div class="row">
+
+</div>

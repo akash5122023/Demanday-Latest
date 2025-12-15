@@ -1,0 +1,218 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
+    <AssemblyName>AdvanceCRM.Web</AssemblyName>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <SerenitySrc>..\..\Serenity\src\</SerenitySrc>
+    <DotNetSergenExe>$(SerenitySrc)Serenity.Net.CodeGenerator\bin\$(Configuration)\$(TargetFramework)\sergen.exe</DotNetSergenExe>
+    <DotNetSergen>dotnet sergen</DotNetSergen>
+    <DotNetSergen Condition="Exists('$(DotNetSergenExe)')">$(DotNetSergenExe)</DotNetSergen>
+    <CommonSrc>..\..\common-features\src\</CommonSrc>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\**\*.sql" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+    <!-- <Compile Remove="EF\**" /> -->
+    <Compile Remove="Modules\Payroll\Reports\**" />
+    <!-- <Content Remove="EF\**" /> -->
+    <Content Remove="Modules\Payroll\Reports\**" />
+    <Content Remove="Views/SharedMVC/**" />
+    <!-- <EmbeddedResource Remove="EF\**" /> -->
+    <EmbeddedResource Remove="Modules\Payroll\Reports\**" />
+    <!-- <None Remove="EF\**" /> -->
+    <None Remove="Modules\Payroll\Reports\**" />
+    <None Remove="Views/SharedMVC/**" />
+    <TypeScriptCompile Remove="EF\**" />
+    <TypeScriptCompile Remove="Modules\Payroll\Reports\**" />
+    <Compile Remove="Migrations\SerenityThemeContextModelSnapshot.cs" />
+    <Compile Remove="Modules\Administration\User\Authentication\AuthenticationService.cs" />
+    <Compile Remove="Modules\Administration\User\Authentication\AuthorizationService.cs" />
+    <Compile Remove="Modules\Common\LargeFileUpload\LargeFileUploadEditorAttribute.cs" />
+    <Content Remove="NLog.config" />
+    <Content Remove="wwwroot\Reporting\wkhtmltopdf.exe" />
+    <None Remove="C:\Users\DELL\.nuget\packages\nlog.config\4.7.15\contentFiles\any\any\NLog.config" />
+    <None Remove="Modules\Common\ExcelImporter\ExcelImportTemplate\ExcelImportFieldMappingEditor.ts" />
+    <None Remove="Modules\Common\ExcelImporter\ExcelImport\ExcelImportDataEditor\ExcelImportDataEditor.ts" />
+    <None Remove="Modules\DefaultEditors\AccountsEditor.ts" />
+    <None Remove="Modules\DefaultEditors\AddressIsEditor.ts" />
+    <None Remove="Modules\DefaultEditors\ApplicantStatusEditor.ts" />
+    <None Remove="Modules\DefaultEditors\BloodGroupEditor.ts" />
+    <None Remove="Modules\DefaultEditors\CheckinCheckOutEditor.ts" />
+    <None Remove="Modules\DefaultEditors\EducationLevelEditor.ts" />
+    <None Remove="Modules\DefaultEditors\EmployeeEditor.ts" />
+    <None Remove="Modules\DefaultEditors\EmployeeStatusEditor.ts" />
+    <None Remove="Modules\DefaultEditors\JobOpeningStatusEditor.ts" />
+    <None Remove="Modules\DefaultEditors\MaritalStatusEditor.ts" />
+    <None Remove="Modules\DefaultEditors\ModeTypeEditor.ts" />
+    <None Remove="Modules\DefaultEditors\NumberFormateEditor.ts" />
+    <None Remove="Modules\DefaultEditors\PaymenttermdiscounttypeEditor.ts" />
+    <None Remove="Modules\DefaultEditors\PaymenttermduedateEditor.ts" />
+    <None Remove="Modules\DefaultEditors\PayrollFrequencyEditor.ts" />
+    <None Remove="Modules\DefaultEditors\PreferedContactEmailEditor.ts" />
+    <None Remove="Modules\DefaultEditors\PriorityEditor.ts" />
+    <None Remove="Modules\DefaultEditors\SalaryModeEditor.ts" />
+    <None Remove="Modules\DefaultEditors\SolutionEditor.ts" />
+    <None Remove="Modules\DefaultEditors\StarRatingEditor.ts" />
+    <None Remove="Modules\DefaultEditors\UsersEditor.ts" />
+    <None Remove="Modules\DefaultEditors\WeeklyEditor.ts" />
+    <None Remove="Modules\DefaultEditors\WorkingHoursCalculationBasedOnEditor.ts" />
+    <None Remove="Modules\Payroll\TabDepartmentApprover\TabDepartmentApproverEditor.ts" />
+    <None Remove="Modules\Payroll\TabDesignationSkill\TabDesignationSkillEditor.ts" />
+    <None Remove="Modules\Payroll\TabDistributedCostCenter\TabDistributedCostCenterEditor.ts" />
+    <None Remove="Modules\Payroll\TabEmployeeExternalWorkHistory\TabEmployeeExternalWorkHistoryEditor.ts" />
+    <None Remove="Modules\Payroll\TabEmployeeInternalWorkHistory\TabEmployeeInternalWorkHistoryEditor.ts" />
+    <None Remove="Modules\Payroll\TabEmployee\SeriesEditor.ts" />
+    <None Remove="Modules\Payroll\TabHolidays\TabHolidaysEditor.ts" />
+    <None Remove="Modules\Payroll\TabIncomeTaxSlabOtherCharges\TabIncomeTaxSlabOtherChargesEditor.ts" />
+    <None Remove="Modules\Payroll\TabModeofPaymentAccount\TabModeofPaymentAccountEditor.ts" />
+    <None Remove="Modules\Payroll\TabPaymentTermTemplateDetail\TabPaymentTermTemplateDetailEditor.ts" />
+    <None Remove="Modules\Payroll\TabPayrollEmployeeDetail\TabPayrollEmployeeDetailEditor.ts" />
+    <None Remove="Modules\Payroll\TabSalaryComponentAccount\TabSalaryComponentAccountEditor.ts" />
+    <None Remove="Modules\Payroll\TabSalaryDetail\TabSalaryDetailEditor.ts" />
+    <None Remove="Modules\Payroll\TabTaxableSalarySlab\TabTaxableSalarySlabEditor.ts" />
+    <TypeScriptCompile Remove="Modules\Common\Helpers\J.initSkins.ts" />
+    <Content Include="wwwroot\Reporting\wkhtmltopdf.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="ExternalAppSetting.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\Content\skins\glass001\bg-animations.less" />
+    <None Include="wwwroot\Content\skins\glass001\theme-variables.less" />
+    <None Include="wwwroot\Content\skins\glass001\theme.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs-overwrite.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs-tool-button-color.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs-wrapper-content-no-space.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs001.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs002.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs003.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs004.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs005.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs006.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs007.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs008.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs009.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs010.less" />
+    <None Include="wwwroot\Content\skins\glass001\themeDefs011.less" />
+    <None Update="wwwroot\**\*">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+    <None Update="Modules\**\*.Template.html;Modules\**\*.ts.html;Views\Templates\*.html">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Templates\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="4.5.3.2" />
+    <PackageReference Include="FastMember" Version="1.5.0" />
+    <PackageReference Include="FluentMigrator.Runner" Version="3.2.9" />
+    <PackageReference Include="MailChimp.Net.V3" Version="5.7.0" />
+    <PackageReference Include="MailKit" Version="2.4.1" />
+    <PackageReference Include="Mapster" Version="4.1.1" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.3.0" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.19" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.OData.Client" Version="7.12.5" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.12.5" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.12.5" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Nito.AsyncEx.Context" Version="5.1.2" />
+    <PackageReference Include="NitoAsyncEx.Context.StrongName" Version="1.1.0" />
+    <PackageReference Include="NLog" Version="5.2.3" />
+    <PackageReference Include="PagedList" Version="1.17.0" />
+    <PackageReference Include="PagedList.Mvc" Version="4.5.0" />
+    <PackageReference Include="Quartz" Version="3.14.0" />
+    <PackageReference Include="RestSharp" Version="112.1.0" />
+    <PackageReference Include="Sentry" Version="3.36.0" />
+    <PackageReference Include="Sentry.AspNetCore" Version="3.36.0" />
+    <PackageReference Include="Sentry.NLog" Version="3.36.0" />
+
+    <PackageReference Include="Serilog" Version="4.2.0" />
+
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
+
+    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+
+    <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
+    <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.1.0" />
+    <PackageReference Include="Serenity.Net.Web" Version="6.0.8" />
+    <PackageReference Include="Serenity.Assets" Version="6.0.5" />
+    <PackageReference Include="Serenity.Scripts" Version="6.0.8" />
+    <PackageReference Include="System.Data.Odbc" Version="7.0.0" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="7.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Sap.Data.Hana.Core.v2.1">
+      <HintPath>Sap.Data.Hana.Core.v2.1.dll</HintPath>
+    </Reference>
+    <Reference Include="SAPBusinessOneSDK">
+      <HintPath>SAPBusinessOneSDK.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\Scripts\colorpicker\" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)Serenity\build\submodule.targets" Condition="Exists('$(SolutionDir)Serenity\build\submodule.targets')" />
+  <Target Name="CreateInputsOutputs" BeforeTargets="BeforeBuild">
+    <CreateItem Include="Modules\**\*.ts;Imports\**\*.ts;tsconfig.json">
+      <Output TaskParameter="Include" ItemName="CompileTSCInputs" />
+    </CreateItem>
+    <CreateItem Include="wwwroot\Content\site\**\*.less">
+      <Output TaskParameter="Include" ItemName="CompileSiteLessInputs" />
+    </CreateItem>
+  </Target>
+  <Target Name="NpmInstall" BeforeTargets="BeforeBuild" Condition="!Exists('node_modules\@types\jquery\index.d.ts')">
+    <Message Text="Installing NPM packages..." Importance="high"></Message>
+    <Exec Command="npm install" />
+  </Target>
+  <Target Name="TransformMvcClientTypes" BeforeTargets="BeforeBuild">
+    <Exec Command="dotnet tool restore" ContinueOnError="true" />
+    <Exec Command="$(DotNetSergen) restore" ContinueOnError="true" />
+    <Exec Command="$(DotNetSergen) mvct" ContinueOnError="true" />
+  </Target>
+  <Target Name="CompileSiteLess" AfterTargets="AfterBuild" Inputs="@(CompileSiteLessInputs)" Outputs="wwwroot\Content\site\site.css">
+    <Message Text="Compiling site.less..." Importance="high"></Message>
+    <Exec Command="node_modules/.bin/lessc ./wwwroot/Content/site/site.less ./wwwroot/Content/site/site.css" ContinueOnError="true" />
+  </Target>
+  <Target Name="TransformServerTypings" AfterTargets="AfterBuild">
+    <Exec Command="$(DotNetSergen) servertypings" ContinueOnError="true" />
+  </Target>
+  <Target Name="CompileTSC" AfterTargets="AfterBuild" Inputs="@(CompileTSCInputs)" Outputs="wwwroot\Scripts\site\AdvanceCRM.Web.js">
+    <Message Text="Executing TypeScript compiler..." Importance="high"></Message>
+    <Exec Command="node &quot;$(TSJavaScriptFile.Replace('build\..\tools\', 'tools\'))&quot; -p ./tsconfig.json" ContinueOnError="true" />
+  </Target>
+  <Target Name="RunSergenBundler" AfterTargets="AfterBuild">
+    <Message Text="Running sergen bundler..." Importance="high"></Message>
+    <Exec Command="$(DotNetSergen) bundler" ContinueOnError="true" />
+  </Target>
+</Project>

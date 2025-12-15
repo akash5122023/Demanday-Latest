@@ -1,0 +1,112 @@
+@model AdvanceCRM.Administration.Pages.TenantLicensePageModel
+
+@{
+    var isPrint = (ViewData["TenantLicenseTableIsPrint"] as bool?) ?? false;
+}
+
+@if (Model?.HasTenants == true)
+{
+    <div class="table-responsive tenant-license-table-container">
+        <table class="table table-bordered table-hover tenant-license-table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Client</th>
+                    <th scope="col">Client URL</th>
+                    <th scope="col">Plan</th>
+                    <th scope="col">License Start</th>
+                    <th scope="col">License End</th>
+                    <th scope="col">Remaining Days</th>
+                    <th scope="col">Users</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Tenants)
+                {
+                    var rowClass = item.IsExpired ? "expired" : string.Empty;
+                    <tr class="@rowClass">
+                        <td>
+                            @{
+                                var hasUser = item.PrimaryContactUserId.HasValue && item.PrimaryContactUserId.Value > 0;
+                                var displayName = !string.IsNullOrWhiteSpace(item.Name)
+                                    ? item.Name
+                                    : $"Client #{item.TenantId}";
+                            }
+
+                            @if (hasUser && !isPrint)
+                            {
+                                <a href="javascript:;" class="tenant-user-link" data-user-id="@item.PrimaryContactUserId">
+                                    <div class="tenant-name">@displayName</div>
+                                    @if (!string.IsNullOrWhiteSpace(item.Subdomain))
+                                    {
+                                        <div class="tenant-subdomain">@item.Subdomain</div>
+                                    }
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="tenant-name">@displayName</div>
+                                @if (!string.IsNullOrWhiteSpace(item.Subdomain))
+                                {
+                                    <div class="tenant-subdomain">@item.Subdomain</div>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(item.PortalUrl))
+                            {
+                                if (isPrint)
+                                {
+                                    <span class="tenant-url">@item.PortalUrl</span>
+                                }
+                                else
+                                {
+                                    <a href="@item.PortalUrl" target="_blank" rel="noopener">@item.PortalUrl</a>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not available</span>
+                            }
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(item.Plan) ? "-" : item.Plan)</td>
+                        <td>@(item.LicenseStartDate?.ToString("dd MMM yyyy") ?? "-")</td>
+                        <td>@(item.LicenseEndDate?.ToString("dd MMM yyyy") ?? "-")</td>
+                        <td>
+                            @if (item.IsExpired)
+                            {
+                                <span class="badge badge-danger">Expired</span>
+                            }
+                            else if (item.RemainingDays.HasValue)
+                            {
+                                <span class="badge badge-info">@item.RemainingDays.Value day@(item.RemainingDays.Value == 1 ? string.Empty : "s") left</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>@(item.PurchasedUsers.HasValue ? item.PurchasedUsers.Value.ToString() : "-")</td>
+                        <td>
+                            @if (item.PurchaseAmount.HasValue)
+                            {
+                                var currency = string.IsNullOrWhiteSpace(item.PurchaseCurrency) ? "" : item.PurchaseCurrency + " ";
+                                @($"{currency}{item.PurchaseAmount:0.##}")
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info" role="alert">
+        No clients found.
+    </div>
+}

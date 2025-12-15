@@ -1,0 +1,279 @@
+@inject Serenity.ITextLocalizer Localizer
+@inject AdvanceCRM.IDataMigrations DataMigrations
+@{
+    var welcomeMessage = ViewData["WelcomeMessage"] as string ?? Texts.Forms.Membership.Login.FormTitle;
+    ViewData["Title"] = welcomeMessage;
+    ViewData["PageId"] = "Login";
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+@section Head {
+    @Html.Script("~/Scripts/vegas/vegas.js")
+    @Html.Stylesheet("~/Scripts/vegas/vegas.css")
+
+    <style type="text/css">
+        body {
+          font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          font-size: 13px;
+          color: #000;
+          -ms-overflow-style: scrollbar;
+        }
+
+        #LoginPanel {
+            padding: 30px 20px;
+            width: 550px;
+            margin: 90px auto auto auto;
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            font-weight: 700;
+        }
+       
+        #LoginPanel .caption {
+            width: 180px;
+        }
+
+        #LoginPanel .login-header {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        #LoginPanel .logo {
+            width: 128px;
+            height: 128px;
+            background: transparent url(@Url.Content("~/Content/site/images/AdvanceCRM1.png")) no-repeat center center;
+            background-size: contain;
+        }
+
+        #LoginPanel .plan-badge {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #f5f27e;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            min-width: 110px;
+        }
+
+        #LoginPanel .plan-badge .value {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: normal;
+            text-transform: none;
+        }
+
+        #LoginPanel .plan-badge .meta {
+            display: block;
+            margin-top: 2px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: normal;
+            text-transform: none;
+            opacity: 0.85;
+        }
+
+            #LoginPanel h3 {
+                font-size: 18px;
+                font-weight: 500;
+                margin: 8px 0 24px;
+                color: #f5f27e;
+                text-align: center;
+                text-shadow: 0 1px 1px #333;
+            }
+
+        #LoginPanel .btn-plan {
+            margin-right: 12px;
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #1f1f1f;
+        }
+        #LoginPanel .btn-plan:hover {
+            background-color: #e0a800;
+            border-color: #e0a800;
+            color: #fff;
+        }
+       #LoginPanel .buttons {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            text-align: right;
+            padding: 8px 0 4px 0;
+            margin-right: 28px;
+        }
+
+
+        #LoginPanel .buttons .plan-badge {
+            margin-right: 12px;
+        }
+
+        html[dir="rtl"] #LoginPanel .buttons {
+
+            justify-content: flex-start;
+            text-align: left;
+            margin-left: 28px;
+            margin-right: 0;
+        }
+
+
+        html[dir="rtl"] #LoginPanel .btn-plan {
+            margin-right: 0;
+            margin-left: 12px;
+        }
+
+        html[dir="rtl"] #LoginPanel .buttons .plan-badge {
+            align-items: flex-end;
+            text-align: right;
+            margin-right: 0;
+            margin-left: 12px;
+
+        }
+        
+        #LoginPanel .btn {
+                padding: 8px 24px;
+                font-weight: 700;
+        }
+
+        #LoginPanel .caption {
+            color: #ececec;
+            font-weight: 700;
+            text-shadow: 0 1px 1px #333;
+        }
+
+        #LoginPanel .actions a.purchase-plan-link {
+            color: #ffe28a;
+        }
+        #LoginPanel .actions {
+            padding-right: 28px;
+        }
+
+        #LoginPanel .actions a {
+            color: #ececec;
+            padding: 2px 2px 2px 2px;
+            margin-top: 5px;
+            display: block;
+            float: right;
+            clear: both;
+            border-bottom: 1px dashed #999;
+            text-shadow: 0 1px 1px #333;
+        }
+
+        html[dir="rtl"] #LoginPanel .actions a {
+            margin-left: 35px;
+            float: left;
+        }
+
+        #LoginPanel .actions a i {
+            font-weight: 700;
+            margin-right: 4px;
+        }
+
+        #LoginPanel .s-Form label.error {
+            background-image: url(@Url.Content("~/Content/serenity/images/cross.png"));
+            padding: 26px 0 0 22px;
+        }
+
+        #LoginPanel .s-Form label.error.checked {
+            background-image: none;
+        }
+
+        #LoginPanel .s-Form .field {
+            padding: 8px;
+        }
+
+        #LoginPanel .s-Form input {
+            padding: 6px 10px;
+            border: none;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+        }
+
+        #LoginPanel .s-Form .caption {
+            padding: 6px 10px;
+            color: #fff;
+        }
+
+        html[dir="rtl"] #LoginPanel .s-Form .caption {
+            padding: 6px 60px;
+            color: #fff;
+        }
+
+        #LoginPanel a {
+            color: aqua;
+        }
+
+        #LoginPanel .s-PropertyGrid .categories {
+            height: auto;
+        }
+
+        #LoginPanel .flex-layout .s-PropertyGrid {
+            display: block;
+        }
+
+        @@media(max-width: 550px), (max-height: 500px) {
+            #LoginPanel {
+                padding: 16px 4px 16px 4px;
+                position: absolute;
+                margin: 0;
+                width: auto;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+            }
+        }
+
+        /* Hide SaaS-specific plan purchase visuals in single-tenant deployments */
+        #LoginPanel .plan-badge,
+        #LoginPanel .btn-plan,
+        #LoginPanel .actions a.purchase-plan-link {
+            display: none !important;
+        }
+
+        /* Hide public Sign Up link in single-tenant deployments */
+        #LoginPanel .actions a[href*="/Account/SignUp"] {
+            display: none !important;
+        }
+    </style>
+}
+
+@* @if (DataMigrations.SkippedMigrations)
+{
+    <div class="alert alert-error alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-warning"></i> Warning!</h4>
+        AdvanceCRM skipped running migrations to avoid modifying an arbitrary database.
+        If you'd like to run migrations on this database, remove the safety check
+        in DataMigrations.RunMigrations method.
+    </div>
+} *@
+
+<div class="page-content">
+    <div id="LoginPanel" data-default-welcome="@welcomeMessage">
+
+    </div>
+</div>
+
+<script type="text/javascript">
+
+jQuery(function () {
+    function initLoginPanel() {
+        if (window.AdvanceCRM && AdvanceCRM.Membership && AdvanceCRM.Membership.LoginPanel) {
+            var loginPanel = new AdvanceCRM.Membership.LoginPanel($('#LoginPanel')).init();
+@if (ViewData["Activated"] != null)
+{
+            <text>
+            loginPanel.byId('Username').val(@Html.Raw(Serenity.JSON.Stringify(ViewData["Activated"])));
+            loginPanel.byId('Password').focus();
+            </text>
+}
+        } else {
+            setTimeout(initLoginPanel, 50);
+        }
+    }
+    initLoginPanel();
+});
+</script>

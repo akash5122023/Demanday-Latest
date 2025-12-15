@@ -1,0 +1,506 @@
+﻿@model AdvanceCRM.Modules.Premium.RepresentativeDashboardPageModel
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="RepEnqStagesDateRange" id="RepEnqStagesDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representative Enquiry Stages</strong>
+                <div id="RepresentativeEnquiryStages"></div>
+                <label id="lblMsgEnquiryStages" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgEnquiryStages"></strong>
+                </label>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="RepQuotDateRange" id="RepQuotDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representative Quotation Stages</strong>
+                <div id="RepresentativeQuotationStages"></div>
+                <label id="lblMsgQuotationStages" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgQuotationStages"></strong>
+                </label>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="DatewiseEQSQuantityDateRange" id="DatewiseEQSQuantityDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Datewise Enquiry,Quotation and Sales with respect to Count</strong>
+                <div id="DatewiseEQSQuantityAnalysis"></div>
+                <label id="lblMsgDatewiseEQSQuantity" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgDatewiseEQSQuantity"></strong>
+                </label>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="DatewiseEQSAmountDateRange" id="DatewiseEQSAmountDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Datewise Enquiry,Quotation and Sales with respect to Amount</strong>
+                <div id="DatewiseEQSAmountAnalysis"></div>
+                <label id="lblMsgDatewiseEQSAmount" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="ConversionRatioEnquiry"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="OverallTargetEnquiryDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Enquiry Target Achievement (Count)</strong>
+                <div id="OverallTargetEnquiry"></div>
+                <div style='text-align:center;'>
+                    <label>(Target: <label id="ReqTCnt"></label>,  Achieved: <label id="AchTarCnt"></label></label>)
+                </div>
+                <label id="lblMsgTargetAchievementEnquiry" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgTargetAchievementEnquiry"></strong>
+                </label>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="OverallTargetEnquiryAmtDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Enquiry Target Achievement (Amount)</strong>
+                <div id="OverallTargetEnquiryAmt"></div>
+                <div style='text-align:center;'>
+                    <label>(Target: <label id="ReqTAmt"></label>,  Achieved: <label id="AchTarAmt"></label></label>)
+                </div>
+
+                <label id="lblMsgTargetAchievementEnquiryAmt" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgTargetAchievementEnquiryAmt"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="OverallTargetQuotationDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Quotation Target Achievement (Count)</strong>
+                <div id="OverallTargetQuotation"></div>	<div style='text-align:center;'>
+                    <label>(Target: <label id="ReqTQuotCnt"></label>,  Achieved: <label id="AchTarQuotCnt"></label></label>)
+                </div>
+                <label id="lblMsgTargetAchievementQuotation" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgTargetAchievementQuotation"></strong>
+                </label>
+
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="OverallTargetQuotationAmtDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Quotation Target Achievement (Amount)</strong>
+                <div id="OverallTargetQuotationAmt"></div>
+                <div style='text-align:center;'>
+                    <label>(Target: <label id="ReqTQuotAmt"></label>,  Achieved: <label id="AchTarQuotAmt"></label></label>)
+                </div>
+                <label id="lblMsgTargetAchievementQuotationAmt" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgTargetAchievementQuotationAmt"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="OverallTargetSalesDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Sales Target Achievement (Count)</strong>
+                <div id="OverallTargetSales"></div>
+                <div style='text-align:center;'>
+                    <label>(Target: <label id="ReqTSalCnt"></label>,  Achieved: <label id="AchTarSalCnt"></label></label>)
+                </div>
+                <label id="lblMsgTargetAchievementSales" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgTargetAchievementSales"></strong>
+                </label>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="OverallTargetSalesAmtDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Sales Target Achievement (Amount)</strong>
+                <div id="OverallTargetSalesAmt"></div>
+
+                <div style='text-align:center;'>
+                    <label>(Target: <label id="ReqTSalAmt"></label>,  Achieved: <label id="AchTarSalAmt"></label></label>)
+                </div>
+                <label id="lblMsgTargetAchievementSalesAmt" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgTargetAchievementSalesAmt"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="ProductwiseEnquiryDateRange" id="ProductwiseEnquiryDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Productwise Enquiry (Top 15 Product)</strong>
+                <div id="ProductwiseEnquiry"></div>
+                <label id="lblMostEnquiryProduct" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MostEnquiryProduct"></strong>
+                </label>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="ProductwiseSalesDateRange" id="ProductwiseSalesDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Productwise Sales (Top 15 Product)</strong>
+                <div id="ProductwiseSales"></div>
+                <label id="lblMsgMostSalesProduct" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgMostSalesProduct"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="ConversionRatioEnquiryDateRange" id="ConversionRatioEnquiryDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Conversion Ratio of Enquiry</strong>
+                <div id="ConversionRatioEnq"></div>
+                <label id="lblMsgConversionRatioEnquiry" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgConversionRatioEnquiry"></strong>
+                </label>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="ConversionRatioQuotationDateRange" id="ConversionRatioQuotationDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Conversion Ratio of Quotation</strong>
+                <div id="ConversionRatioQuotation"></div>
+                <label id="lblMsgConversionRatioQuotation" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgConversionRatioQuotation"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="RepEnquirystatusDateRange" id="RepEnquirystatusDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representative Enquiry Status</strong>
+                <div id="RepresentativeEnquirystatus"></div>
+                <label id="lblMsgRepresentativeEnquirystatus" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgRepresentativeEnquirystatus"></strong>
+                </label>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="RepQuotationstatusDateRange" id="RepQuotationstatusDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representative Quotation Status</strong>
+                <div id="RepresentativeQuotationstatus"></div>
+                <label id="lblMsgRepresentativeQuotationstatus" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgRepresentativeQuotationstatus"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-6">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="RepSalesstatusDateRange" id="RepSalesstatusDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representative Sales Status</strong>
+                <div id="RepresentativeSalesstatus"></div>
+                <label id="lblMsgRepresentativeSalesstatus" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgRepresentativeSalesstatus"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-12">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="CitywiseEnquiryDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representative Citywise Enquiry Analysis</strong>
+                <div id="CitywiseEnquiryAnalysis"></div>
+                <label id="lblMsgRepCitywiseEnquiryAnalysis" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgRepCitywiseEnquiryAnalysis"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-12">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="CitywiseQuotationDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representative Citywise Quotation Analysis</strong>
+                <div id="CitywiseQuotationAnalysis"></div>
+                <label id="lblMsgRepCitywiseQuotationAnalysis" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgRepCitywiseQuotationAnalysis"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="col-lg-12">
+            <div class="well active" style='background:white;box-shadow: 10px 10px 5px #888888;text-align:center;'>
+                <!-- Date range -->
+                <div class="form-group">
+                    <label>Date range:</label>
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" name="CitywiseSalesDateRange">
+                    </div><!-- /.input group -->
+                </div><!-- /.form group -->
+                <!-- Date and time range -->
+                <strong>Representative Citywise Sales Analysis</strong>
+                <div id="CitywiseSalesAnalysis"></div>
+                <label id="lblMsgRepCitywiseSalesAnalysis" hidden>
+                    <i style="color:cornflowerblue;" class="fa fa-info-circle fa-2x"></i><span>&nbsp;</span>
+                    <strong style="color:cornflowerblue;" id="MsgRepCitywiseSalesAnalysis"></strong>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

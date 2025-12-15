@@ -1,0 +1,13 @@
+@inject Serenity.ITextLocalizer Localizer
+@{
+     ViewData["Title"] = Localizer.Get("Db.Settings.ProductPlanModule.EntityPlural");
+}
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Settings.ProductPlanModuleGrid($('#GridDiv')).init();
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });
+</script>

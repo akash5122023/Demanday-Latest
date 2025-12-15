@@ -1,0 +1,301 @@
+﻿@model AdvanceCRM.Sales.OutwardReportData
+
+@if ((bool?)ViewData["Printing"] == true)
+{
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+}
+
+<style>
+    tr {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+
+    td {
+        page-break-inside: auto;
+        page-break-after: auto
+    }
+</style>
+
+<script type="text/javascript">
+
+    var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+    var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function toWords(num) {
+        if ((num = num.toString()).length > 9) return 'overflow';
+        n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return; var str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) + 'Only ' : '';
+        return str.trim();
+    }
+</script>
+
+<body style="align-self:stretch; align-items:center;">
+    <table style="width:100%" border="0">
+        @if (Model.Company.DcHeaderImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%">&nbsp; <img src="~/upload/@Model.Company.DcHeaderImage" height="@Model.Company.DcHeaderHeight.Value.ToString()" width="@Model.Company.DcHeaderWidth.Value.ToString()" />&nbsp;</td>
+            </tr>
+        }
+        <tr>
+            <td align="center" style="border:outset; width:100%"><h4> Delivery Outward / Packing Slip</h4></td>
+        </tr>
+    </table>
+    @if (Model.Company.DcHeaderContent != null)
+    {
+        @Html.Raw(Model.Company.DcHeaderContent)
+        ;
+    }
+    <table style="width:100%" border="1">
+        <tr>
+            <td>
+                <table style="width:100%; border-collapse:collapse" border="1" cellpadding="10" cellspacing="10">
+                    <tr>
+                        <td align="left" style="width:33.33%">
+                            <strong>&nbsp; Outward No </strong>: @Model.Company.ChallanPrefix@Model.Outward.Date.Value.Year.ToString()/@Model.Outward.ChallanNo@Model.Company.ChallanSuffix ,  <strong> Date </strong>: @Model.Outward.Date.Value.ToString("dd MMM yyyy")<br />
+                            <strong>&nbsp; Name </strong>
+                            : @Model.Outward.ContactsName<br />
+                            <strong>&nbsp; Phone </strong>: @Model.Outward.ContactsPhone
+                            @if (Model.Outward.ContactsGstin != null)
+                            {
+                                <br />
+                                <strong>&nbsp; GSTIN :</strong>
+ 
+                                @Model.Outward.ContactsGstin
+                            }
+                            @if (Model.Outward.ContactsPanNo != null)
+                            {
+                                <br />
+                                <strong>&nbsp; PAN No :</strong>
+ 
+                                @Model.Outward.ContactsPanNo
+                            }
+                        </td>
+
+                        <td style="vertical-align:top; text-align:left; width:33.33%; padding: 5px;">
+                            <strong>Billing Address: </strong>
+                            <span style="white-space: pre-line;">
+                                @Model.Outward.ContactsAddress
+                            </span>
+                        </td>
+
+                        <td style="vertical-align:top; text-align:left; width:33.33%; padding: 5px;">
+                            <strong>Shipping Address: </strong>
+                            <span style="white-space: pre-line;">
+                                @if (Model.Outward.ShippingAddress != null)
+                                {
+                                    @Model.Outward.ShippingAddress
+                                }
+                                else
+                                {
+                                    @Model.Outward.ContactsAddress
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        @* Products *@
+        <tr>
+            <td colspan="8" align="center" class="bg-gray-light">
+                &nbsp;
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table cellpadding="100" cellspacing="100" border="1" style="width:100%">
+                    <tr>
+                        <td align="center"><strong>&nbsp;Sr. No.&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;HSN&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Product&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Rate&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Qty&nbsp;</strong></td>
+                        <td align="center"><strong>&nbsp;Discount&nbsp;</strong></td>
+                        <td align="center"><strong>Total</strong></td>
+                    </tr>
+                    @{
+                        int srno = 1; decimal Total = 0;
+                    }
+                    @foreach (var qp in Model.OutwardProducts)
+                    {
+                        <tr>
+                            <td align="center">@srno</td>
+                            <td align="Left">&nbsp;@qp.ProductsHsn</td>
+                            <td align="left" style="padding:3px;">
+                                &nbsp;@qp.ProductsName<br />
+                                <span style="white-space: pre-line; font-size:smaller"><i>@qp.Description</i></span>
+                                @if (qp.Serial != null)
+                                {
+                                    <span style="white-space: pre-line; font-size:smaller">
+                                        <i>SN: @qp.Serial</i>
+                                    </span>
+                                }
+                            </td>
+                            <td align="right">&nbsp;@qp.Price.Value.ToString("#,##0.00")&nbsp;</td>
+                            <td align="center">@qp.Quantity.Value @qp.Unit&nbsp;</td>
+                            <td align="center">
+                                @qp.Discount.Value%&nbsp;@if (qp.DiscountAmount.Value > 0)
+                                {
+                                    <text>&amp; Amt:</text>
+                                    @qp.DiscountAmount.Value
+                                }
+                            </td>                          
+                        </tr>
+                    }
+
+                    @{
+                        int diff = 7 - srno;
+                    }
+
+                    @for (int i = diff; i > 0; i--)
+                    {
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <td colspan="7" align="center" class="bg-gray" style="text-decoration-color:antiquewhite">
+                            &nbsp;
+                        </td>
+                    </tr>
+
+
+                    @* Total *@
+                    <tr>
+                        <td colspan="4" align="left">
+                            @if (Model.Outward.DispatchDetails != null)
+                            {
+                                <text> &nbsp;<strong> Dispatch Details: </strong> @Model.Outward.DispatchDetails </text>
+                            }
+                        </td>
+                        <td colspan="2" align="right"><strong> Total:&nbsp;</strong></td>
+                        <td align="right"><strong>@Total.ToString("#,##0.00")&nbsp;</strong></td>
+                    </tr>
+                    @{
+                        double pack = 0; double frieght = 0; double adv = 0;
+                    }
+
+                    @* Packaging Charges *@
+                    @if (Model.Outward.PackagingCharges != null && Model.Outward.PackagingCharges != 0)
+                    {
+                        <tr>
+                            <td colspan="6" align="right"><strong> Packaging Charges:&nbsp;</strong></td>
+                            <td align="right"><strong>@Model.Outward.PackagingCharges.Value.ToString("#,##0.00")&nbsp;</strong></td>
+                            @{
+                                pack = Model.Outward.PackagingCharges.Value;
+                            }
+                        </tr>
+                    }
+
+                    @* Freight Charges *@
+                    @if (Model.Outward.FreightCharges != null && Model.Outward.FreightCharges != 0)
+                    {
+                        <tr>
+                            <td colspan="6" align="right"><strong> Freight Charges:&nbsp;</strong></td>
+                            <td align="right"><strong>@Model.Outward.FreightCharges.Value.ToString("#,##0.00")&nbsp;</strong></td>
+                            @{
+                                frieght = Model.Outward.FreightCharges.Value;
+                            }
+                        </tr>
+                    }
+
+                    @* Advance *@
+                    @if (Model.Outward.Advacne != null && Model.Outward.Advacne != 0)
+                    {
+                        <tr>
+                            <td colspan="6" align="right"><strong> Advance:&nbsp;</strong></td>
+                            <td align="right"><strong>@Model.Outward.Advacne.Value.ToString("#,##0.00")&nbsp;</strong></td>
+                            @{
+                                adv = Model.Outward.Advacne.Value;
+                            }
+                        </tr>
+                    }
+
+                    @* Grand Total *@
+                    <tr>
+                        <td colspan="4" align="left">
+                            @if (Model.Outward.DueDate != null)
+                            {
+                                <text> &nbsp;<strong> Due Date: </strong> @Model.Outward.DueDate.Value.ToShortDateString() </text>
+                            }
+                        </td>
+                        @{
+                            Total = Total + (decimal)pack + (decimal)frieght - (decimal)adv;
+                        }
+                        <td align="right" colspan="2"><strong> Grand Total:&nbsp;</strong></td>
+                        <td align="right"><strong>@(((Total)).ToString("#,##0.00"))&nbsp;</strong></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="10" bgcolor="wheat">
+                            <strong> &nbsp; Total in Words:</strong>
+                            <script>document.write(toWords(@Convert.ToInt32((Total))))</script>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    @* Terms *@
+    <br />
+    @if (Model.Template.TermsConditions != null)
+    {
+        <h5>Terms &amp; Condition's</h5>
+        <table cellpadding="100" cellspacing="100" border="1" style="width:100%">
+            <tr>
+                <td align="Left"><span style="white-space: pre-line">@Model.Template.TermsConditions</span></td>
+            </tr>
+        </table>
+    }
+    <style>
+        * {
+            margin: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        .wrapper {
+            min-height: 100%;
+            height: auto !important;
+            height: 100%;
+            margin: 0 auto -155px; /* the bottom margin is the negative value of the footer's height */
+        }
+
+        .footer, .push {
+            height: 155px; /* .push must be the same height as .footer */
+        }
+    </style>
+    @if (Model.Company.DcFooterContent != null)
+    {
+        @Html.Raw(Model.Company.DcFooterContent)
+        ;
+    }
+
+    <table style="width: 100% " border="0">
+        @if (Model.Company.DcFooterImage != null)
+        {
+            <tr style="border:none !important;">
+                <td align="center" style="border:none !important; width:100%"><img src="~/upload/@Model.Company.DcFooterImage" height="@Model.Company.DcFooterHeight.Value.ToString()" width="@Model.Company.DcFooterWidth.Value.ToString()" /></td>
+            </tr>
+        }
+    </table>
+
+</body>

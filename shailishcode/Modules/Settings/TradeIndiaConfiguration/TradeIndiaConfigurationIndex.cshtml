@@ -1,0 +1,13 @@
+﻿@inject Serenity.ITextLocalizer Localizer
+@{
+     ViewData["Title"] = Localizer.Get("Db.Settings.TradeIndiaConfiguration.EntityPlural");
+}
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Settings.TradeIndiaConfigurationDialog().loadByIdAndOpenDialog(1);
+        Q.initFullHeightGridPage($('#GridDiv'));
+    });
+</script>

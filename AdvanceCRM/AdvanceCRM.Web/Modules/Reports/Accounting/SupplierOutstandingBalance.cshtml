@@ -1,0 +1,245 @@
+﻿@model AdvanceCRM.Reports.AccountingReportModel
+
+
+@*<strong>Supplier Outstanding Balance</strong>
+    &nbsp;&nbsp; - &nbsp;&nbsp; <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat(), &nbsp;&nbsp;<strong>Name:</strong> @Model.Customer.Name
+    <hr />
+
+    @{ List<DateTime> dt = new List<DateTime>();
+
+        foreach (var item in Model.Cash)
+        {
+            dt.Add((DateTime)item.Date.Value);
+        }
+        foreach (var item in Model.Purchase)
+        {
+            dt.Add((DateTime)item.InvoiceDate.Value);
+        }
+
+        dt = dt.Distinct().ToList<DateTime>();
+        dt.Sort();
+    }
+
+    <div class="box-body no-padding">
+        <table class="table table-striped">
+            <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">Date</th><th style="text-align:center">Invoice/Voucher</th><th style="text-align:center">Credit</th><th style="text-align:center">Cash Out</th><th style="text-align:center">Total</th></tr>
+
+            @{
+                double opncash = 0; double opencst = 0;
+
+                opncash = (double)Model.OpeningBal.Sum(x => x.CashOut);
+                opencst = (double)Model.PurchaseOpeningBal.Sum(x => x.Total);
+
+                double creditorsopening = 0;
+                if (Model.Purchase.Count > 0)
+                {
+                    if (Model.Purchase.FirstOrDefault().PurchaseFromCreditorsOpening.HasValue)
+                    {
+                        creditorsopening = (double)Model.Purchase.FirstOrDefault().PurchaseFromCreditorsOpening;
+                    }
+                }
+            }
+            <tr>
+                <td colspan="5" align="right"><strong> Opening Balance </strong></td>
+                @{ double rtot = opencst - opncash + creditorsopening;}
+                <td align="right">@rtot.ToString("#,##0.00")</td>
+            </tr>
+            @{ int srno = 1;}
+
+            @foreach (var item in dt)
+            {
+                foreach (var itmcash in Model.Cash.Where(x => x.Date == item))
+                {
+                    <tr>
+                        <td align="center">@srno</td>
+                        <td align="center">@itmcash.Date.Value.ToShortDateString()</td>
+                        <td align="center">@itmcash.Id.Value</td>
+                        <td align="right">0</td>
+                        <td align="right">@itmcash.CashOut.Value.ToString("#,##0.00")</td>
+                        @{ rtot = rtot - itmcash.CashOut.Value;}
+                        <td align="right">@rtot.ToString("#,##0.00")</td>
+                    </tr>
+                    srno++;
+                }
+
+                foreach (var itmcst in Model.Purchase.Where(x => x.InvoiceDate == item))
+                {
+                    <tr>
+                        <td align="center">@srno</td>
+                        <td align="center">@itmcst.InvoiceDate.Value.ToShortDateString()</td>
+                        <td align="center">@itmcst.InvoiceNo</td>
+                        <td align="right">@itmcst.Total.Value.ToString("#,##0.00")</td>
+                        <td align="right">0</td>
+                        @{ rtot = rtot + itmcst.Total.Value;}
+                        <td align="right">@rtot.ToString("#,##0.00")</td>
+                    </tr>
+                    srno++;
+                }
+            }
+            <tr>
+                <td colspan="5" align="right"><strong> Closing Balance </strong></td>
+                <td align="right">@rtot.ToString("#,##0.00")</td>
+            </tr>
+        </table>
+        <hr />
+    </div>*@
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        /* text-align: center;*/
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        /*text-align: center;*/
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        /*text-align: center;*/
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    Supplier Outstanding Balance
+</div>
+<div>
+    <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() To: @Model.Request.DateTo.ToDateFormat()
+</div>
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    <strong>Name:</strong> @Model.Customer.Name
+</div>
+@{ List<DateTime> dt = new List<DateTime>();
+
+    foreach (var item in Model.Cash)
+    {
+        dt.Add((DateTime)item.Date.Value);
+    }
+    foreach (var item in Model.Purchase)
+    {
+        dt.Add((DateTime)item.InvoiceDate.Value);
+    }
+
+    dt = dt.Distinct().ToList<DateTime>();
+    dt.Sort();
+}
+
+<div class="box-body no-padding">
+    <table class="table table-striped">
+        <tr><th style="text-align:center">Sr. No.</th><th style="text-align:center">Date</th><th style="text-align:center">Invoice/Voucher</th><th style="text-align:center">Credit</th><th style="text-align:center">Cash Out</th><th style="text-align:center">Total</th></tr>
+
+        @{
+            double opncash = 0; double opencst = 0;
+
+            opncash = (double)Model.OpeningBal.Sum(x => x.CashOut);
+            opencst = (double)Model.PurchaseOpeningBal.Sum(x => x.Total);
+
+            double creditorsopening = 0;
+            if (Model.Purchase.Count > 0)
+            {
+                if (Model.Purchase.FirstOrDefault().PurchaseFromCreditorsOpening.HasValue)
+                {
+                    creditorsopening = (double)Model.Purchase.FirstOrDefault().PurchaseFromCreditorsOpening;
+                }
+            }
+        }
+        <tr>
+            <td colspan="5" align="right"><strong> Opening Balance </strong></td>
+            @{ double rtot = opencst - opncash + creditorsopening;}
+            <td align="right">@rtot.ToString("#,##0.00")</td>
+        </tr>
+        @{ int srno = 1;}
+
+        @foreach (var item in dt)
+        {
+            foreach (var itmcash in Model.Cash.Where(x => x.Date == item))
+            {
+                <tr>
+                    <td align="center">@srno</td>
+                    <td align="center">@itmcash.Date.Value.ToShortDateString()</td>
+                    <td align="center">@itmcash.Id.Value</td>
+                    <td align="right">0</td>
+                    <td align="right">@itmcash.CashOut.Value.ToString("#,##0.00")</td>
+                    @{ rtot = rtot - itmcash.CashOut.Value;}
+                    <td align="right">@rtot.ToString("#,##0.00")</td>
+                </tr>
+                srno++;
+            }
+
+            foreach (var itmcst in Model.Purchase.Where(x => x.InvoiceDate == item))
+            {
+                <tr>
+                    <td align="center">@srno</td>
+                    <td align="center">@itmcst.InvoiceDate.Value.ToShortDateString()</td>
+                    <td align="center">@itmcst.InvoiceNo</td>
+                    <td align="right">@itmcst.Total.Value.ToString("#,##0.00")</td>
+                    <td align="right">0</td>
+                    @{ rtot = rtot + itmcst.Total.Value;}
+                    <td align="right">@rtot.ToString("#,##0.00")</td>
+                </tr>
+                srno++;
+            }
+        }
+        <tr>
+            <td colspan="5" align="right"><strong> Closing Balance </strong></td>
+            <td align="right">@rtot.ToString("#,##0.00")</td>
+        </tr>
+    </table>
+</div>
+<div class="footer-note">
+    <em>Report generated automatically. Powered by Bizplus CRM.</em>
+</div>

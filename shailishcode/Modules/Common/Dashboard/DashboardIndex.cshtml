@@ -1,0 +1,2042 @@
+﻿@using System.Net;
+@using System.Net.Mail;
+@using System.Net;
+@using System.Net.Mail;
+
+@using Serenity;
+
+@{ string emailtovar = "";}
+
+@model AdvanceCRM.Common.DashboardPageModel
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageId"] = "Dashboard";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/Content/iCheck/flat/blue.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Scripts/morris/morris.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Scripts/datepicker/datepicker3.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Scripts/daterangepicker/daterangepicker-bs3.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" asp-append-version="true" />
+    <script src="~/Scripts/raphael/raphael-min.js" asp-append-version="true"></script>
+    <script src="~/Scripts/morris/morris.min.js" asp-append-version="true"></script>
+    <script src="~/Scripts/sparkline/jquery.sparkline.min.js" asp-append-version="true"></script>
+    <script src="~/Scripts/knob/jquery.knob.js" asp-append-version="true"></script>
+    <script src="~/Scripts/daterangepicker/moment.min.js" asp-append-version="true"></script>
+    <script src="~/Scripts/daterangepicker/daterangepicker.js" asp-append-version="true"></script>
+    @*<script src="~/Scripts/datepicker/bootstrap-datepicker.js"></script>*@ @*This was causing another calendar popup than regular one*@
+    <script src="~/Scripts/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.js"></script>
+    <script src="~/Scripts/adminlte/demo.js"></script>
+
+
+    <script src="~/amcharts/amcharts.js"></script>
+    <script src="~/amcharts/gauge.js"></script>
+    <script src="~/amcharts/plugins/export/export.min.js"></script>
+    <script src="~/amcharts/plugins/responsive/responsive.min.js"></script>
+    <link rel="stylesheet" href="~/amcharts/plugins/export/export.css" type="text/css" media="all" />
+    <script src="~/amcharts/themes/light.js"></script>
+}
+
+@section ContentHeader {
+    <h1>My @Localizer.Get("Navigation.Dashboard")<small>@Html.Raw(Texts.Site.Dashboard.ContentDescription)</small></h1>
+}
+
+@{
+    var FCount = Model.CountOfAniversaryWishes + Model.CountOfBirthDayWishes + Model.CountOfIncorporationWishes;
+
+    if (FCount > 0)
+    {
+        var str = "Todays wishes stats:<br/><br/>Birthday SMS: " + Convert.ToString(Model.CountOfBirthDayWishes) + ",<br/>Marriage Anniversary SMS: " + Convert.ToString(Model.CountOfAniversaryWishes) + ",<br/>Firm Anniversay SMS: " + Convert.ToString(Model.CountOfIncorporationWishes) + "";
+
+        <script type="text/javascript">
+            (function () {
+                toastr.info("<br/><button type='button' id='ConfirmYes' class='btn clear'>Ok</button>",'@Html.Raw(str)', 'Daily wishes statistics', {
+                    "closeButton": true,
+                    "allowHtml": true,
+                    "positionClass": "toast-top-center",
+                    "timeOut": 0,
+                    onShown: function (toast) {
+                        $('#ConfirmYes').click(function () {
+                            location.href = "#";
+                        });
+                    }
+                });.
+            })();
+        </script>
+    }
+}
+
+<style>
+    .example-modal .modal {
+        position: relative;
+        top: auto;
+        bottom: auto;
+        right: auto;
+        left: auto;
+        display: block;
+        z-index: 1;
+    }
+
+    .example-modal .modal {
+        background: transparent !important;
+    }
+</style>
+
+<!-- Small boxes (Stat box) -->
+
+
+
+
+<div class="row">
+    <div class="col-lg-2 col-xs-6">
+        <!-- small box -->
+        <div class="small-box" style="background-color: #007BFF; color: white;">
+            <div class="inner">
+                <h3>@Model.OpenEnq</h3>
+                <h4>@Model.EnqAmt</h4>
+                <p>Open Enquiries</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-envelope"></i>
+            </div>
+            <a href="/Enquiry?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div><!-- ./col -->
+
+    <div class="col-lg-2 col-xs-6">
+        <!-- small box -->
+        <div class="small-box" style="background-color: #28A745; color: white;">
+            <div class="inner">
+                <h3>@Model.OpenQuot</h3>
+                <h4>@Model.QuotAmt</h4>
+                <p>Open Quotations</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-file-text"></i>
+            </div>
+            <a href="/Quotation?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div><!-- ./col -->
+
+    <div class="col-lg-2 col-xs-6">
+        <!-- small box -->
+        <div class="small-box" style="background-color: #17A2B8; color: white;">
+            <div class="inner">
+                <h3>@Model.CustomerCount</h3>
+                <h4>All</h4>
+                <p>Contacts</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-address-book"></i>
+            </div>
+            <a href="/Contacts" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div><!-- ./col -->
+    <div class="col-lg-2 col-xs-6">
+
+        <!-- small box -->
+        <div class="small-box" style="background-color: #DC3545; color: white;">
+            <div class="inner">
+                <h3>@Model.OpenTasks</h3>
+                <h4>All</h4>
+                <p>Open Tasks</p>
+            </div>
+            <div class="icon">
+                <i class="fa fa-tasks"></i>
+            </div>
+            <a href="/Tasks?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div><!-- ./col -->
+
+    @if (@Model.OpenCMS > 0)
+    {
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box" style="background-color: #6610F2; color: white;">
+                <div class="inner">
+                    <h3>@Model.OpenCMS</h3>
+                    <h4>All</h4>
+                    <p>Open CMS</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-cogs"></i>
+                </div>
+                <a href="/Services/CMS?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div><!-- ./col -->
+    }
+
+    @if (Model.OpenAMC > 0)
+    {
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box" style="background-color: #FFC107; color: white;">
+                <div class="inner">
+                    <h3>@Model.OpenAMC</h3>
+                    <h4>All</h4>
+                    <p>AMC Visits</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-calendar"></i>
+                </div>
+                <a href="/Services/AMC?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div><!-- ./col -->
+    }
+
+    @if (@Model.OpenPi > 0)
+    {
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box" style="background-color: #6F42C1; color: white;">
+                <div class="inner">
+                    <h3>@Model.OpenPi</h3>
+                    <h4>@Model.PIAmt</h4>
+                    <p>Open PI</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-file"></i>
+                </div>
+                <a href="/Proforma?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div><!-- ./col -->
+    }
+
+    @if (Model.Opensale > 0)
+    {
+        <div class="col-lg-2 col-xs-6">
+            <!-- small box -->
+            <div class="small-box" style="background-color: #E83E8C; color: white;">
+                <div class="inner">
+                    <h3>@Model.Opensale</h3>
+                    <h4>@Model.SaleAmt</h4>
+                    <p>Open Sales</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-bar-chart"></i>
+                </div>
+                <a href="/Sales?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div><!-- ./col -->
+    }
+</div><!-- /.row -->
+<!-- Main row -->
+<div class="row">
+    <!-- Left col -->
+    <section class="col-lg-6 connectedSortable">
+
+        @if (Serenity.Authorization.HasPermission("Products:StockAlert") && (Model.StockData == true))
+        {
+            <div class="alert alert-info alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h4><i class="icon fa fa-info"></i>Reorder!</h4>
+                Some product(s) have reached reorder level, please click <a href="javascript:_Ext.ReportHelper.execute({ reportKey: 'Reports.InventoryReport', params: { Request: {Type:'5'} }, extension: 'pdf' });">here</a> to get the report.
+            </div>
+        }
+
+
+        @if (Model.EnqFollowups.Count > 0)
+        {
+            <!-- Enquiry Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Enquiry Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.EnqFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.EnquiryId</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Enquiry.EnquiryDialog().loadByIdAndOpenDialog('@item.EnquiryId', false)">@Model.Customer.FirstOrDefault(x => x.Id == item.EnquiryContactsId).Name</a></span> <text> - @Model.Customer.FirstOrDefault(x => x.Id == item.EnquiryContactsId).Phone</text>
+                                        </td>
+                                        <td width="35%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="35%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Enquiry Followups-->
+        }
+
+        @if (Model.QuotFollowups.Count > 0)
+        {
+            <!-- Quotation Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Quotation Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.QuotFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.QuotationId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.QuotationContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Quotation.QuotationDialog().loadByIdAndOpenDialog('@item.QuotationId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="35%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="35%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Quotation Followups-->
+        }
+
+        @if (Model.TCFollowups.Count > 0)
+        {
+            <!-- Telecalling Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Telecalling Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.TCFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.TeleCallingId</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.TeleCallingDialog().loadByIdAndOpenDialog('@item.TeleCallingId', false)">@Model.Customer.FirstOrDefault(x => x.Id == item.TeleCallingContactsId).Name</a></span> <text> - @Model.Customer.FirstOrDefault(x => x.Id == item.TeleCallingContactsId).Phone</text>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Telecalling Followups-->
+        }
+
+        @if (Model.EnqFollowupsCompleted.Count > 0)
+        {
+            <!-- Completed Enquiry Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Completed Enquiry Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.EnqFollowupsCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.EnquiryId</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Enquiry.EnquiryDialog().loadByIdAndOpenDialog('@item.EnquiryId', false)">@Model.Customer.FirstOrDefault(x => x.Id == item.EnquiryContactsId).Name</a></span> <text> - @Model.Customer.FirstOrDefault(x => x.Id == item.EnquiryContactsId).Phone</text>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Completed Enquiry Followups-->
+        }
+
+        @if (Model.QuotFollowupsCompleted.Count > 0)
+        {
+            <!-- Today's Completed Quotation Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Completed Quotation Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.QuotFollowupsCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.QuotationId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.QuotationContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Quotation.QuotationDialog().loadByIdAndOpenDialog('@item.QuotationId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's Completed Quotation Followups-->
+        }
+
+        @if (Model.TCCompleted.Count > 0)
+        {
+            <!-- Completed Telecalling Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Completed Telecalling Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.TCCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.TeleCallingId</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.TeleCallingDialog().loadByIdAndOpenDialog('@item.TeleCallingId', false)">@Model.Customer.FirstOrDefault(x => x.Id == item.TeleCallingContactsId).Name</a></span> <text> - @Model.Customer.FirstOrDefault(x => x.Id == item.TeleCallingContactsId).Phone</text>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Completed Telecalling Followups-->
+        }
+
+        @if (Model.ODEnqFollowups.Count > 0)
+        {
+            <!-- Overdue Enquiry Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Overdue Enquiry Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.ODEnqFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.EnquiryId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.EnquiryContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Enquiry.EnquiryDialog().loadByIdAndOpenDialog('@item.EnquiryId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Over Due Enquiry Followups-->
+        }
+
+        @if (Model.ODQuotFollowups.Count > 0)
+        {
+            <!-- Overdue Quotation Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Overdue Quotation Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.ODQuotFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.QuotationId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.QuotationContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Quotation.QuotationDialog().loadByIdAndOpenDialog('@item.QuotationId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Overdue Quotation Followups-->
+        }
+
+        @if (Model.ODTCFollowups.Count > 0)
+        {
+            <!-- Overdue Telecalling Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Overdue Telecalling Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.ODTCFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.TeleCallingId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.TeleCallingContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Services.TeleCallingDialog().loadByIdAndOpenDialog('@item.TeleCallingId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Over Due Telecalling Followups-->
+        }
+
+        @if (Model.Tasks.Count > 0)
+        {
+            <!-- Today's Tasks -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Tasks</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.Tasks)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Tasks.TasksDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Task</a></span>
+                                        </td>
+                                        <td width="35%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                        <td width="15%">
+                                            @foreach (var usrs in Model.Users)
+                                            {
+                                                if (item.AssignedBy == usrs.UserId)
+                                                {
+                                                    <span class="text">@usrs.Username</span>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="20%">
+                                            <span class="text">@item.CreationDate.Value.ToShortDateString()</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's Tasks-->
+        }
+
+        @if (Model.TasksOpen.Count > 0)
+        {
+            <!-- Today's Tasks -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Expected Completion Tasks</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.TasksOpen)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Tasks.TasksDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Task</a></span>
+                                        </td>
+                                        <td width="35%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                        <td width="15%">
+                                            @foreach (var usrs in Model.Users)
+                                            {
+                                                if (item.AssignedBy == usrs.UserId)
+                                                {
+                                                    <span class="text">@usrs.Username</span>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="20%">
+                                            <span class="text">@item.CreationDate.Value.ToShortDateString()</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's Tasks-->
+        }
+
+        @if (Model.TasksCompleted.Count > 0)
+        {
+            <!-- Today's Completed Tasks -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Completed Tasks</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.TasksCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Tasks.TasksDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Task</a></span>
+                                        </td>
+                                        <td width="35%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                        <td width="15%">
+                                            @foreach (var usrs in Model.Users)
+                                            {
+                                                if (item.AssignedBy == usrs.UserId)
+                                                {
+                                                    <span class="text">@usrs.Username</span>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="20%">
+                                            <span class="text">@item.CreationDate.Value.ToShortDateString()</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's Tasks-->
+        }
+
+        @if (Model.ODTasks.Count > 0)
+        {
+            <!-- Overdue Tasks -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Overdue Tasks</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.ODTasks)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Tasks.TasksDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.Task</a></span>
+                                        </td>
+                                        <td width="35%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                        <td width="15%">
+                                            @foreach (var usrs in Model.Users)
+                                            {
+                                                if (item.AssignedBy == usrs.UserId)
+                                                {
+                                                    <span class="text">@usrs.Username</span>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="20%">
+                                            <span class="text">@item.CreationDate.Value.ToShortDateString()</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Overdue Tasks-->
+        }
+
+        @if (Model.CMS.Count > 0 || Model.CMSFollowups.Count > 0)
+        {
+            <!-- Today's CMS -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Complaints</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.CMS)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.ContactsName</a></span> <text> - @item.ContactsPhone </text>
+                                        </td>
+                                        <td width="30%">
+                                            <span class="text">@item.ProductsName</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.ComplaintComplaintType</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.Instructions</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                        @foreach (var item in Model.CMSFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.CMSId', false)">@item.ContactName</a></span> <text> - @item.ContactPhone </text>
+                                        </td>
+                                        <td width="30%">
+                                            <span class="text">@item.ProductsName</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.ComplaintType</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's CMS-->
+        }
+
+        @if (Model.CMSCompleted.Count > 0 || Model.CMSFollowupsCompleted.Count > 0)
+        {
+            <!-- Today's Completed CMS -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Completed Complaints</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.CMSCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.ContactsName</a></span> <text> - @item.ContactsPhone </text>
+                                        </td>
+                                        <td width="30%">
+                                            <span class="text">@item.ProductsName</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.ComplaintComplaintType</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.Instructions</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                        @foreach (var item in Model.CMSFollowupsCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.CMSId', false)">@item.ContactName</a></span> <text> - @item.ContactPhone </text>
+                                        </td>
+                                        <td width="30%">
+                                            <span class="text">@item.ProductsName</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.ComplaintType</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's Completed CMS-->
+        }
+
+        @if (Model.ODCMS.Count > 0 || Model.ODCMSFollowups.Count > 0)
+        {
+            <!-- OD CMS -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Overdue Complaints</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.ODCMS)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.ContactsName</a></span> <text> - @item.ContactsPhone </text>
+                                        </td>
+                                        <td width="30%">
+                                            <span class="text">@item.ProductsName</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.ComplaintComplaintType</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.Instructions</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                        @foreach (var item in Model.ODCMSFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text"><a href="javascript:new AdvanceCRM.Services.CMSDialog().loadByIdAndOpenDialog('@item.CMSId', false)">@item.ContactName</a></span> <text> - @item.ContactPhone </text>
+                                        </td>
+                                        <td width="30%">
+                                            <span class="text">@item.ProductsName</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.ComplaintType</span>
+                                        </td>
+                                        <td width="25%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Overdue CMS-->
+        }
+
+        @*AMC*@
+        @if (Model.AMCED.Count > 0)
+        {
+            <!-- AMC Visits-->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's AMC's</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.AMCED)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.ContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.Id', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="70%">
+                                            <span class="text">@item.ContactsPhone</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End AMC Visits-->
+        }
+
+        @if (Model.AMCOD.Count > 0)
+        {
+            <!-- AMC Visits-->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">OverDue AMC's</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.AMCOD)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.Id</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.ContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.Id', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="70%">
+                                            <span class="text">@item.ContactsPhone</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End AMC Visits-->
+        }
+
+        @if (Model.AMC.Count > 0)
+        {
+            <!-- AMC Visits-->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's AMC Visits</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.AMC)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.AMCId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.AMCContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.AMCId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="70%">
+                                            <span class="text">@item.VisitDetails</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End AMC Visits-->
+        }
+
+        @if (Model.AMCCompleted.Count > 0)
+        {
+            <!-- Today's Completed AMC Visits-->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Completed AMC Visits</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.AMCCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.AMCId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.AMCContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.AMCId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="70%">
+                                            <span class="text">@item.VisitDetails</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's Completed AMC Visits-->
+        }
+
+        @if (Model.ODAMC.Count > 0)
+        {
+            <!-- AMC ODVisits-->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Overdue AMC Visits</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.ODAMC)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.AMCId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.AMCContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Services.AMCDialog().loadByIdAndOpenDialog('@item.AMCId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="70%">
+                                            <span class="text">@item.VisitDetails</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End ODAMC Visits-->
+        }
+
+        @*Overdue payment followups*@
+        @if (Model.SalesPaymentDue.Where(x => (int)DateTime.Now.Subtract((DateTime)x.Date).TotalDays > x.ContactsCreditDays).Count() > 0)
+        {
+            <!-- Over Due Payment Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Over Due Payment Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.SalesPaymentDue)
+                        {
+                            var dtdif = (int)DateTime.Now.Subtract((DateTime)item.Date).TotalDays;
+
+                            if (dtdif > item.ContactsCreditDays)
+                            {
+                                <li>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td width="5%">
+                                                <span class="text">@item.Id</span>
+                                            </td>
+                                            <td width="25%">
+                                                <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.Id', false)">@item.ContactsName</a></span> <text> - @item.ContactsPhone</text>
+                                            </td>
+                                            <td width="32.5%">
+                                                <span class="text">@item.Date.Value.ToShortDateString()</span>
+                                            </td>
+                                            <td width="32.5%">
+                                                <span class="text">@item.Total.Value.ToString("#,###.00")</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            }
+
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Over Due Payment Followups-->
+        }
+
+        @*Inovice*@
+        @if (Model.InvoiceFollowups.Count > 0)
+        {
+            <!-- Invoice Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Proforma Invoice Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.InvoiceFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.InvoiceId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.InvoiceContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Sales.InvoiceDialog().loadByIdAndOpenDialog('@item.InvoiceId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Invoice Followups-->
+        }
+
+        @if (Model.InvoiceFollowupsCompleted.Count > 0)
+        {
+            <!-- Today's Completed Invoice Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Completed Proforma Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.InvoiceFollowupsCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.InvoiceId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.InvoiceContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Sales.InvoiceDialog().loadByIdAndOpenDialog('@item.InvoiceId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's Completed Invoice Followups-->
+        }
+
+        @if (Model.ODInvoiceFollowups.Count > 0)
+        {
+            <!-- Overdue Invoice Followups -->
+            <div class="box box-primary collapsed-box">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Overdue Proforma Invoice Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-plus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.ODInvoiceFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.InvoiceId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.InvoiceContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Sales.InvoiceDialog().loadByIdAndOpenDialog('@item.InvoiceId', false)">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Over Due Invoice Followups-->
+        }
+
+        @*Sales*@
+        @if (Model.SalesFollowups.Count > 0)
+        {
+            <!-- Sales Followups -->
+            <div class="box box-primary">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Sales Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-minus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.SalesFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.SalesId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.SalesContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.SalesId')">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Sales Followups-->
+        }
+
+        @if (Model.SalesFollowupsCompleted.Count > 0)
+        {
+            <!-- Today's Completed Sales Followups -->
+            <div class="box box-primary">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Today's Completed Sales Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-minus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.SalesFollowupsCompleted)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.SalesId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.SalesContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.SalesId')">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Today's Completed Sales Followups-->
+        }
+
+        @if (Model.ODSalesFollowups.Count > 0)
+        {
+            <!-- Overdue Sales Followups -->
+            <div class="box box-primary">
+                <div class="box-header">
+                    <i class="ion ion-clipboard"></i>
+                    <h3 class="box-title">Overdue Sales Followups</h3>
+                    <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;"><i class="fa fa-minus"></i></button>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                    <ul class="todo-list">
+                        @foreach (var item in Model.ODSalesFollowups)
+                        {
+                            <li>
+                                <table style="width:100%">
+                                    <tr>
+                                        <td width="5%">
+                                            <span class="text">@item.SalesId</span>
+                                        </td>
+                                        <td width="25%">
+                                            @foreach (var cust in Model.Customer)
+                                            {
+                                                if (item.SalesContactsId == cust.Id)
+                                                {
+                                                    <span class="text"><a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.SalesId')">@cust.Name</a></span> <text> - @cust.Phone </text>
+                                                }
+                                            }
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.FollowupNote</span>
+                                        </td>
+                                        <td width="32.5%">
+                                            <span class="text">@item.Details</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                        }
+                    </ul>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+            <!--End Over Due Sales Followups-->
+        }
+
+
+
+
+
+
+        @*@if (Serenity.Authorization.HasPermission("Quotation:Can Approve")) 
+        {
+            if (Model.QuotApprovalList.Count > 0)
+            {
+                <div class="box box-primary collapsed-box">
+                    <div class="box-header">
+                        <i class="ion ion-clipboard"></i>
+                        <h3 class="box-title">Pending Quotation Approvals</h3>
+                        <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Expand" style="margin-right: 5px;">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="box-body" style="display: none;">
+                        <ul class="todo-list">
+                            @foreach (var item in Model.QuotApprovalList)
+                            {
+                                <li>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td width="20%">
+                                                <span class="text">@item.QuotationN</span>
+                                            </td>
+                                            <td width="40%">
+                                                @foreach (var cust in Model.Customer)
+                                                {
+                                                    if (item.ContactsId == cust.Id)
+                                                    {
+                                                        <span class="text">
+                                                            <a href="javascript:new AdvanceCRM.Quotation.QuotationDialog().loadByIdAndOpenDialog('@item.Id')">
+                                                                @cust.Name
+                                                            </a>
+                                                        </span>
+                                                        <text> - @cust.Phone </text>
+                                                    }
+                                                }
+                                            </td>
+                                            <td width="40%">
+                                                <span class="text">
+                                                    @item.QuotationN
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        }
+
+
+        @if (Serenity.Authorization.HasPermission("Invoice:Can Approve")) 
+        {
+
+            if (Model.InvoiceApprovalList.Count > 0)
+            {
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <i class="ion ion-clipboard"></i>
+                        <h3 class="box-title">Pending Proforma Approvals</h3>
+                        <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Collapse" style="margin-right: 5px;">
+                            <i class="fa fa-plus"></i>  
+                        </button>
+                    </div>
+                    <div class="box-body" style="display: none;">
+                        <ul class="todo-list">
+                            @foreach (var item in Model.InvoiceApprovalList)
+                            {
+                                <li>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td width="20%">
+                                                <span class="text">@item.InvoiceNo</span>
+                                            </td>
+                                            <td width="40%">
+                                                @foreach (var cust in Model.Customer)
+                                                {
+                                                    if (item.ContactsId == cust.Id)
+                                                    {
+                                                        <span class="text">
+                                                            <a href="javascript:new AdvanceCRM.Sales.InvoiceDialog().loadByIdAndOpenDialog('@item.InvoiceNo')">
+                                                                @cust.Name
+                                                            </a>
+                                                        </span>
+                                                        <text> - @cust.Phone </text>
+                                                    }
+                                                }
+                                            </td>
+                                            <td width="40%">
+                                                <span class="text">Amount: ₹@item.GrandTotal.GetValueOrDefault().ToString("N2")</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+        }
+
+
+        @if (Serenity.Authorization.HasPermission("Cashbook:Can Approve")) // Check permission first
+        {
+            if (Model.SalesApprovalList.Count > 0)
+            {
+                <div class="box box-primary collapsed-box">
+                    <div class="box-header">
+                        <i class="ion ion-clipboard"></i>
+                        <h3 class="box-title">Pending Sales Approvals</h3>
+                        <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Expand" style="margin-right: 5px;">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="box-body" style="display: none;">
+                        <ul class="todo-list">
+                            @foreach (var item in Model.SalesApprovalList)
+                            {
+                                <li>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td width="20%">
+                                                <span class="text">@item.Id</span>
+                                            </td>
+                                            <td width="40%">
+                                                @foreach (var cust in Model.Customer)
+                                                {
+                                                    if (item.ContactsId == cust.Id)
+                                                    {
+                                                        <span class="text">
+                                                            <a href="javascript:new AdvanceCRM.Sales.SalesDialog().loadByIdAndOpenDialog('@item.Id')">
+                                                                @cust.Name
+                                                            </a>
+                                                        </span>
+                                                        <text> - @cust.Phone</text>
+                                                    }
+                                                }
+                                            </td>
+                                            <td width="40%">
+                                                <span class="text">Amount: ₹@item.GrandTotal.GetValueOrDefault().ToString("N2")</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+        }
+
+        @if (Serenity.Authorization.HasPermission("Challan:Can Approve")) 
+        {
+
+            if (Model.ChallanApprovalList.Count > 0)
+            {
+                <div class="box box-primary collapsed-box">
+                    <div class="box-header">
+                        <i class="ion ion-clipboard"></i>
+                        <h3 class="box-title">Pending Challan Approvals</h3>
+                        <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Expand" style="margin-right: 5px;">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="box-body" style="display: none;">
+                        <ul class="todo-list">
+                            @foreach (var item in Model.ChallanApprovalList)
+                            {
+                                <li>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td width="20%">
+                                                <span class="text">@item.Id</span>
+                                            </td>
+                                            <td width="40%">
+                                                @foreach (var cust in Model.Customer)
+                                                {
+                                                    if (item.ContactsId == cust.Id)
+                                                    {
+                                                        <span class="text">
+                                                            <a href="javascript:new AdvanceCRM.Sales.ChallanDialog().loadByIdAndOpenDialog('@item.Id')">
+                                                                @cust.Name
+                                                            </a>
+                                                        </span>
+                                                        <text> - @cust.Phone </text>
+                                                    }
+                                                }
+                                            </td>
+                                            <td width="40%">
+                                                <span class="text">
+                                                    @(item.Date.HasValue ? item.Date.Value.ToString("dd-MMM-yyyy") : "N/A")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        }
+
+
+
+        @if (Serenity.Authorization.HasPermission("Purchase:Can Approve")) 
+        {
+            if (Model.PurchaseApprovalList.Count > 0)
+            {
+                <div class="box box-primary collapsed-box">
+                    <div class="box-header">
+                        <i class="ion ion-clipboard"></i>
+                        <h3 class="box-title">Pending Purchase Approvals</h3>
+                        <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Expand" style="margin-right: 5px;">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="box-body" style="display: none;">
+                        <ul class="todo-list">
+                            @foreach (var item in Model.PurchaseApprovalList)
+                            {
+                                <li>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td width="20%">
+                                                <span class="text">@item.InvoiceNo</span>
+                                            </td>
+                                            <td width="40%">
+                                                @foreach (var cust in Model.Customer)
+                                                {
+                                                    if (item.PurchaseFromId == cust.Id)
+                                                    {
+                                                        <span class="text">
+                                                            <a href="javascript:new AdvanceCRM.Purchase.PurchaseDialog().loadByIdAndOpenDialog('@item.Id')">
+                                                                @cust.Name
+                                                            </a>
+                                                        </span>
+                                                        <text> - @cust.Phone</text>
+                                                    }
+                                                }
+                                            </td>
+                                            <td width="40%">
+                                                <span class="text">Amount: ₹@item.Total.GetValueOrDefault().ToString("N2")</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+
+        }
+
+        @if (Serenity.Authorization.HasPermission("Cashbook:Can Approve")) // Check permission first
+        {
+
+            if (Model.CashbookApprovalList.Count > 0)
+            {
+                <div class="box box-primary collapsed-box">
+                    <div class="box-header">
+                        <i class="ion ion-clipboard"></i>
+                        <h3 class="box-title">Pending Cashbook Approvals</h3>
+                        <button class="btn btn-primary btn-sm pull-right" data-widget="collapse" data-toggle="tooltip" title="Expand" style="margin-right: 5px;">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="box-body" style="display: none;">
+                        <ul class="todo-list">
+                            @foreach (var item in Model.CashbookApprovalList)
+                            {
+                                <li>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td width="20%">
+                                                <span class="text">
+                                                    @item.Id
+                                                </span>
+                                            </td>
+                                            <td width="40%">
+                                                <span class="text">
+                                                    <a href="javascript:new AdvanceCRM.Accounting.CashbookDialog().loadByIdAndOpenDialog(@item.Id)">
+                                                        @item.Type
+                                                    </a>
+                                                </span>
+                                            </td>
+                                            <td width="40%">
+                                                <span class="text">
+                                                    @(item.Date.HasValue ? item.Date.Value.ToString("dd-MMM-yyyy") : "N/A")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+
+        }*@
+
+
+
+
+
+
+
+
+        </section><!-- /.Left col -->
+    <!-- **********Second Column********** -->
+    <!-- right col (We are only adding the ID to make the widgets sortable)-->
+    <section class="col-lg-6 connectedSortable">
+        <!-- Enquiry graph -->
+        <div class="box box-solid" style="background: linear-gradient(to right, #4caf50, #8bc34a); color: #fff;">
+            <div class="box-header">
+                <i class="fa fa-th"></i>
+                <h3 class="box-title">My Enquiry Chart (10 days)</h3>
+                <div class="box-tools pull-right">
+                    <button class="btn btn-sm" style="background-color: #8bc34a; color: #fff;" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button class="btn btn-sm" style="background-color: #8bc34a; color: #fff;" data-widget="remove">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="box-body border-radius-none">
+                <div class="chart" id="line-chart-enq" style="height: 250px;"></div>
+            </div>
+        </div>
+        <!-- Quotation graph -->
+        <div class="box box-solid" style="background: linear-gradient(to right, #2196f3, #9c27b0); color: #fff;">
+            <div class="box-header">
+                <i class="fa fa-th"></i>
+                <h3 class="box-title">My Quotation Chart (10 days)</h3>
+                <div class="box-tools pull-right">
+                    <button class="btn btn-sm" style="background-color: #9c27b0; color: #fff;" data-widget="collapse">
+                        <i class="fa fa-minus"></i>
+                    </button>
+                    <button class="btn btn-sm" style="background-color: #9c27b0; color: #fff;" data-widget="remove">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="box-body border-radius-none">
+                <div class="chart" id="line-chart-quot" style="height: 250px;"></div>
+            </div>
+        </div>
+
+        <!-- Quick email widget -->
+        <div class="box box-info" style="border-color: #2196f3;">
+            <div class="box-header" style="background: linear-gradient(to right, #2196f3, #42a5f5); color: #fff;">
+                <i class="fa fa-envelope"></i>
+                <h3 class="box-title">Quick Email</h3>
+                <div class="pull-right box-tools">
+                    <button class="btn btn-sm" style="background-color: #42a5f5; color: #fff;" data-widget="remove">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="form-group">
+                    <input type="email" class="form-control" name="emailto" placeholder="Email to:" id="emailto">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject">
+                </div>
+                <div>
+                    <textarea class="textarea" id="messageBody" name="messageBody" placeholder="Message"
+                              style="width: 100%; height: 125px; font-size: 14px; line-height: 18px; border: 1px solid #42a5f5; padding: 10px;"></textarea>
+                </div>
+                <div class="box-footer clearfix">
+                    <button class="pull-right btn" style="background-color: #42a5f5; color: #fff;" id="sendEmail" onclick="SendQuickMail();">
+                        Send <i class="fa fa-arrow-circle-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Quick SMS widget -->
+        <div class="box box-info" style="border-color: #ff1744;">
+            <div class="box-header" style="background: linear-gradient(to right, #ff1744, #ff5252); color: #fff;">
+                <i class="fa fa-envelope"></i>
+                <h3 class="box-title">Quick SMS</h3>
+                <div class="pull-right box-tools">
+                    <button class="btn btn-sm" style="background-color: #ff5252; color: #fff;" data-widget="remove">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="phone" placeholder="Add multiple numbers separated by commas" id="phone">
+                </div>
+                <div>
+                    <textarea class="textarea" id="smsBody" name="smsBody" placeholder="SMS content goes here"
+                              style="width: 100%; height: 125px; font-size: 14px; line-height: 18px; border: 1px solid #ff5252; padding: 10px;"></textarea>
+                </div>
+                <div class="box-footer clearfix">
+                    <button class="pull-right btn" style="background-color: #ff5252; color: #fff;" id="sendSMS" onclick="SendQuickSMS();">
+                        Send <i class="fa fa-arrow-circle-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</div><!-- /.row (main row) -->
+
+<script type="text/javascript">
+    function SendQuickMail() {
+
+        var subjectT, tomailT, tonameT, bodyT;
+
+        subjectT = $("#subject").val();
+        tomailT = $("#emailto").val();
+        bodyT = escape($("#messageBody").val());
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SendMail", "Dashboard")',
+            data: { subject: subjectT, tomail: tomailT, body: bodyT },
+            success: function (data) {
+                //alert(data);
+                if (data == "Mail sent successfully!!!") {
+                    toastr.success(data);
+                    $("#subject").val("");
+                    $("#emailto").val("");
+                    $("#emailto").val("");
+                    $("#messageBody").val("");
+                }
+                else {
+                    toastr.error(data);
+                }
+            }
+        });
+    }
+    function SendQuickSMS() {
+
+        var phone, sms;
+
+        phone = $("#phone").val();
+        sms = escape($("#smsBody").val());
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SendSMS", "Dashboard")',
+            data: { SMSType: sms, Phone: phone },
+            success: function (data) {
+                            Q.notifyInfo(response.Status);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(function () {
+
+  $("#messageBody").wysihtml5();
+        //Enquiry chart
+        if ( @Model.EnqListChart.Count() > 0) {
+            var line = new Morris.Line({
+                element: 'line-chart-enq',
+                resize: true,
+                data: [
+                @{ int cnt = 1;}
+                @foreach (var item in Model.EnqListChart.Select(x => x.Date.Value.ToString("yyyy-MM-dd")).Distinct())
+                {
+                    <text> { y: '@item.ToString()', item1: @Model.EnqListChart.Where(yy => yy.Date.Value.ToString("yyyy-MM-dd") == Html.DisplayFor(x => item).ToString()).Count() }, </text>
+                    cnt = cnt + 1;
+                }
+                ],
+                xkey: 'y',
+                ykeys: ['item1'],
+                labels: ['Count'],
+                lineColors: ['#efefef'],
+                lineWidth: 2,
+                hideHover: 'auto',
+                gridTextColor: "#fff",
+                gridStrokeWidth: 0.4,
+                pointSize: 4,
+                pointStrokeColors: ["#efefef"],
+                gridLineColor: "#efefef",
+                gridTextFamily: "Open Sans",
+                gridTextSize: 10
+            });
+        }
+
+        //Quotation chart
+        if ( @Model.QuotListChart.Count() > 0) {
+            var line = new Morris.Line({
+                element: 'line-chart-quot',
+                resize: true,
+                data: [
+                @{ int cnt1 = 1;}
+                @foreach (var item in Model.QuotListChart.Select(x => x.Date.Value.ToString("yyyy-MM-dd")).Distinct())
+                {
+                    <text> { y: '@item.ToString()', item1: @Model.QuotListChart.Where(yy => yy.Date.Value.ToString("yyyy-MM-dd") == Html.DisplayFor(x => item).ToString()).Count() }, </text>
+                    cnt1 = cnt1 + 1;
+                }
+                ],
+                xkey: 'y',
+                ykeys: ['item1'],
+                labels: ['Count'],
+                lineColors: ['#efefef'],
+                lineWidth: 2,
+                hideHover: 'auto',
+                gridTextColor: "#fff",
+                gridStrokeWidth: 0.4,
+                pointSize: 4,
+                pointStrokeColors: ["#efefef"],
+                gridLineColor: "#efefef",
+                gridTextFamily: "Open Sans",
+                gridTextSize: 10,
+            });
+        }
+    });
+
+</script>

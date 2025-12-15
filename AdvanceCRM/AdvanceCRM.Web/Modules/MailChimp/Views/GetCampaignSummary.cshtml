@@ -1,0 +1,181 @@
+﻿@model AdvanceCRM.Modules.MailChimp.Models.ModelReport
+@{
+    ViewBag.Title = "GetCampaignSummary";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.1.1.min.js"></script>*@
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>
+
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">@Model.CampaignTitle</div></div>
+    <br />
+    <br />
+
+    <h4><a href="/MailChimp/RecipientList?CampaignId=@Model.Id" data-toggle="tooltip" data-placement="top" title="Recipient List">@Model.MemberCount</a>  <strong>Receipents</strong></h4>
+    <div class="row">
+        <div class="col-lg-6">
+            <p>
+                <div><strong>List: </strong><span>@Model.ListName</span></div>
+            </p>
+            <p>
+                <strong>Subject: </strong><span>@Model.SubjectLine</span>
+            </p>
+        </div>
+        <div class="col-lg-6">
+            <p>
+                <strong>Delivered: </strong><span>@Convert.ToDateTime(Model.SendTime).ToString("D") @Convert.ToDateTime(Model.SendTime).ToString("t")</span>
+            </p>
+            <p>
+                <a href="@Model.ViewEmail" target="_viewCampaign">View email</a>
+            </p>
+        </div>
+    </div>
+    <br />
+
+    <div class="row">
+        <div class="col-lg-5">
+            <strong>Open Rate</strong>
+        </div>
+        <div class="col-lg-1">
+            <strong>@Model.ListStatsOpenRate.ToString("0.00")%</strong>
+        </div>
+        <div class="col-lg-5"> <strong>Click Rate</strong></div>
+        <div class="col-lg-1"><strong>@Model.ListStatsClickRate.ToString("0.00")%</strong></div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="progress">
+                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@Model.ListStatsOpenRate%" aria-valuemin="0" aria-valuemax="100" style="width: @Model.ListStatsOpenRate%">
+                    <span class="sr-only">@Model.ListStatsOpenRate%</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="progress">
+                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@Model.ListStatsClickRate%" aria-valuemin="0" aria-valuemax="100" style="width: @Model.ListStatsClickRate%">
+                    <span class="sr-only">@Model.ListStatsClickRate%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="container" style="width:100%;">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="well well-sm">
+                    <h4 class="text-center"><a href="/MailChimp/RecipientList?CampaignId=@Model.Id+&flag=Opens" data-toggle="tooltip" data-placement="top" title="Recipient opened List"><strong>@Model.UniqueOpens</strong></a></h4>
+                    <h5 class="text-center">Opened</h5>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="well well-sm">
+                    <h4 class="text-center"><strong>@Model.UniqueClicks</strong></h4>
+                    <h5 class="text-center">Clicked</h5>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="well well-sm">
+                    <h4 class="text-center"><strong>@Model.HardBounces</strong></h4>
+                    <h5 class="text-center">Bounced</h5>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="well well-sm">
+                    <h4 class="text-center"><strong>@Model.Unsubscribed</strong></h4>
+                    <h5 class="text-center">Unsubscribed</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="row" style="width:100%;">
+        <table class="table table-user-information" style="width:100%;">
+            <tbody>
+                <tr class="col-sm-12">
+                    <td class="col-sm-5"> Successfull deliveries </td>
+
+                    <td class="col-sm-2" align="right"><strong>@Model.EmailsSent</strong></td>
+                    <td class="col-sm-5">Clicks Per Unique Opens</td>
+                    <td class="col-sm-2" align="right"><strong>@Model.UniqueOpens</strong></td>
+
+                </tr>
+                <tr class="col-sm-12">
+                    <td class="col-sm-5">Total Opens</td>
+                    <td class="col-sm-2" align="right"><a href="/MailChimp/RecipientList?CampaignId=@Model.Id+&flag=Opens" data-toggle="tooltip" data-placement="left" title="Recipient opened List"><strong>@Model.OpensTotal</strong></a></td>
+                    <td class="col-sm-5">Total Clicks</td>
+                    <td class="col-sm-2" align="right"><strong>@Model.ClicksTotal</strong></td>
+                </tr>
+                <tr class="col-sm-12">
+                    <td class="col-sm-5">Last Opened</td>
+                    <td class="col-sm-2" align="right">
+                        @if (Model.LastOpen == null)
+                        {
+                        <strong>N/A</strong>
+                        }
+                        else
+                        {
+                        <strong>@Model.LastOpen</strong>
+                        }
+                    </td>
+                    <td class="col-sm-5">Last Clicked</td>
+                    <td class="col-sm-2" align="right">
+                        @if (Model.LastClick == null)
+                        {
+                        <strong>N/A</strong>
+
+                        }
+                        else
+                        {
+                        <strong>@Model.LastClick</strong>
+                        }
+                    </td>
+                </tr>
+                <tr class="col-sm-12">
+                    <td class="col-sm-5">Forwarded</td>
+                    <td class="col-sm-2" align="right"><strong>@Model.ForwardsCount</strong></td>
+                    <td class="col-sm-5">Abuse reports</td>
+                    <td class="col-sm-2" align="right"><strong>@Model.AbuseReports</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <br />
+
+    @if (ViewBag.SentToRecipients.Count > 0)
+    {
+    <h4><strong>Subscribers with most open</strong></h4>
+        foreach (var member in ViewBag.SentToRecipients)
+        {
+            if (member.OpenCount > 0)
+            {
+    <div class="row" style="width:100%;">
+        <table class="table table-user-information" style="width:100%;">
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <a href="/MailChimp/SubscriberActivity?CampaignId=@Model.Id+&EmailAddress=@member.EmailAddress" data-toggle="tooltip" data-placement="right" title="Subscriber activity">@member.EmailAddress</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="col-sm-6" align="right">@member.OpenCount</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+            }
+            else
+            {
+            }
+
+        }
+    }
+</div>

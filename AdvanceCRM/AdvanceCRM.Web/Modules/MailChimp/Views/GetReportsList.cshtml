@@ -1,0 +1,54 @@
+﻿@model IEnumerable<MailChimp.Net.Models.Report>
+@{
+    ViewBag.Title = "GetReportsList";
+}
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">Campaigns</div></div>
+    <br />
+    <br />
+    <br />
+
+    <table class="table table-user-information">
+        <tbody>
+            @foreach (var reports in Model)
+            {
+            <tr>
+                <td class="col-lg-7">
+                    <h5>
+                        <a href="/MailChimp/GetCampaignSummary?CampaignId=@reports.Id" title="Campaign"><span>@reports.CampaignTitle</span></a>
+                    </h5>
+                    <p>
+                        <span class="msg">
+                            <strong>Sent</strong>
+                            on @Convert.ToDateTime(reports.SendTime).ToString("D") @Convert.ToDateTime(reports.SendTime).ToString("t")
+
+                        </span>
+                    </p>
+                </td>
+                <td class="col-lg-1">
+                    <strong>@reports.Opens.OpenRate.ToString("P") </strong>
+                    <p><h5>Open Rate</h5></p>
+                </td>
+                <td class="col-lg-1">
+                    <strong>@reports.Clicks.ClickRate.ToString("P")  </strong>
+                    <p><h5>Click Rate</h5></p>
+                </td>
+                <td class="col-lg-1">
+                    <strong>@reports.Opens.OpensTotal</strong>
+                    <p><h5>Opens</h5></p>
+                </td>
+                <td class="col-lg-1">
+                    <strong>@reports.Clicks.ClicksTotal</strong>
+                    <p><h5>Clicks</h5></p>
+                </td>
+                <td class="col-lg-1">
+                    <h4>
+                        <a href="/MailChimp/GetCampaignSummary?CampaignId=@reports.Id" title="ViewReport"><span class="badge">View Report</span></a>
+                    </h4>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

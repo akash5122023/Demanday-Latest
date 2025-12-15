@@ -1,0 +1,166 @@
+﻿@model AdvanceCRM.Reports.AccountingReportModel
+
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    .report-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+    }
+
+    .report-title {
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .report-subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        /*text-align: center;*/
+    }
+
+    th {
+        background: #007bff;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background: #e3e3e3;
+    }
+
+    tr:hover {
+        background: #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .footer-note {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 15px;
+        color: #777;
+    }
+</style>
+
+<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+    Petty Cashbook
+</div>
+
+<div style="font-size: 14px; margin-bottom: 5px;">
+    <strong>From:</strong> @Model.Request.DateFrom.ToDateFormat() &nbsp;
+    <strong>To:</strong> @Model.Request.DateTo.ToDateFormat()
+</div>
+
+<table class="table table-striped">
+    <tr>
+        <th style="text-align:center">Sr. No.</th>
+        <th style="text-align:center">Date</th>
+        <th style="text-align:center">Type</th>
+        <th style="text-align:center">Name/Description</th>
+        <th style="text-align:center">Narration</th>
+        <th style="text-align:center">Bank</th>
+        <th style="text-align:center">Cash In</th>
+        <th style="text-align:center">Cash Out</th>
+        <th style="text-align:center">Total</th>
+    </tr>
+
+    @{ double cashin = 0; double cashout = 0; double totcash = 0;}
+    @{cashin = (double)Model.OpeningBal.Sum(x => x.CashIn); }
+    @{cashout = (double)Model.OpeningBal.Sum(x => x.CashOut); }
+    @{totcash = cashin - cashout; }
+    <tr>
+        <td colspan="8" style="text-align:right"><strong> Opening Balance: </strong>&nbsp;</td>
+        <td style="text-align:right">@totcash &nbsp;&nbsp;</td>
+    </tr>
+
+    @{ int cnt = 1; double tbal = 0;}
+    @{ tbal = totcash;}
+
+    @foreach (var item in Model.Cash)
+    {
+        <tr>
+            <td style="text-align:center;">
+                @cnt
+            </td>
+            <td style="text-align:center;">
+                &nbsp;&nbsp;@item.Date.Value.ToString("dd-MM-yyyy")
+            </td>
+            <td style="text-align:left;">
+                &nbsp;&nbsp;@item.Type
+            </td>
+            <td style="text-align:left;">
+                @if (item.Head1 == "Sundry debtors" || item.Head1 == "Sundry creditors")
+                {
+                    <text>&nbsp;&nbsp;@item.ContactsName</text>
+                }
+                else
+                {
+                    <text>&nbsp;&nbsp;@item.Head1</text>
+                }
+            </td>
+            <td style="text-align:left;">
+                &nbsp;&nbsp;@item.Narration
+            </td>
+            <td style="text-align:left;">
+                &nbsp;&nbsp;@item.BankBankName
+            </td>
+            <td style="text-align:right;color:green">
+                &nbsp;&nbsp;@item.CashIn &nbsp;&nbsp;
+            </td>
+            <td style="text-align:right;color:red;">
+                &nbsp;&nbsp;@item.CashOut &nbsp;&nbsp;
+            </td>
+            @{ double casinT = 0; double casoutT = 0;}
+            @if (item.CashIn != null)
+            {
+                casinT = (double)item.CashIn;
+            }
+            @if (item.CashOut != null)
+            {
+                casoutT = (double)item.CashOut;
+            }
+            <td style="text-align:right;">
+                &nbsp;&nbsp;@(tbal = tbal + (casinT - casoutT)) &nbsp;&nbsp;
+            </td>
+        </tr>
+        cnt = cnt + 1;
+    }
+    @{ double currbal = (double)(Model.Cash.Sum(x => x.CashIn) - Model.Cash.Sum(x => x.CashOut));}
+    <tr>
+        <td colspan="8" style="text-align:right"><strong>Closing Balance: </strong>&nbsp;</td>
+        <td style="text-align:right">@(totcash + currbal)&nbsp;&nbsp;</td>
+    </tr>
+</table>
+
+<div class="footer-note">
+    <em>Report generated automatically. Powered by Bizplus CRM.</em>
+</div>

@@ -1,0 +1,1034 @@
+@using System.Globalization
+@model AdvanceCRM.Membership.UserProfilePageModel
+@{
+    ViewData["Title"] = "My Profile";
+    ViewData["PageId"] = "UserProfile";
+
+    var daysRemaining = Model.DaysRemaining;
+    var licenseStatusClass = "label-default";
+    var licenseStatusText = "License information unavailable";
+
+    if (Model.LicenseEndDate.HasValue)
+    {
+        if (daysRemaining.HasValue)
+        {
+            if (daysRemaining.Value > 14)
+            {
+                licenseStatusClass = "label-success";
+                licenseStatusText = $"{daysRemaining.Value} days remaining";
+            }
+            else if (daysRemaining.Value > 0)
+            {
+                licenseStatusClass = "label-warning";
+                licenseStatusText = $"{daysRemaining.Value} days remaining";
+            }
+            else if (daysRemaining.Value == 0)
+            {
+                licenseStatusClass = "label-warning";
+                licenseStatusText = "Expires today";
+            }
+            else
+            {
+                licenseStatusClass = "label-danger";
+                licenseStatusText = $"Expired {Math.Abs(daysRemaining.Value)} days ago";
+            }
+        }
+        else
+        {
+            licenseStatusText = "Active";
+            licenseStatusClass = "label-success";
+        }
+    }
+
+    string FormatDate(DateTime? date) => date.HasValue
+        ? date.Value.ToString("dd MMM yyyy", CultureInfo.CurrentUICulture)
+        : "-";
+
+    string FormatAmount(decimal? amount, string? currency)
+    {
+        if (!amount.HasValue)
+            return "-";
+
+        var prefix = string.IsNullOrWhiteSpace(currency) ? string.Empty : currency.Trim() + " ";
+        return prefix + amount.Value.ToString("N2", CultureInfo.CurrentUICulture);
+    }
+
+    var defaultUsers = Math.Max(Model.PurchasedUsers ?? Model.ActiveUserCount, 1);
+    var canPurchaseModules = Model.CanPurchaseModules;
+
+    string FormatDays(int? days)
+    {
+        if (!days.HasValue)
+            return "-";
+
+        if (days.Value == 0)
+            return "Today";
+
+        var absolute = Math.Abs(days.Value);
+        var suffix = absolute == 1 ? "day" : "days";
+        return days.Value > 0
+            ? $"{days.Value} {suffix}"
+            : $"{absolute} {suffix} ago";
+    }
+}
+
+@section Head {
+    <style>
+        .profile-summary dl {
+            margin-bottom: 0;
+        }
+
+        .profile-summary dt {
+            width: 160px;
+        }
+
+        .profile-summary dd {
+            margin-left: 180px;
+        }
+
+        .module-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .module-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+
+        .module-list li:last-child {
+            border-bottom: none;
+        }
+
+        .module-list .module-icon {
+            color: #00a65a;
+        }
+
+        .plan-card {
+            border: 1px solid #d2d6de;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+            transition: box-shadow .2s ease;
+            background-color: #fff;
+        }
+
+        .plan-card:hover {
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .08);
+        }
+
+        .plan-card.current {
+            border-color: #00a65a;
+            box-shadow: 0 10px 24px rgba(0, 166, 90, .15);
+        }
+
+        .plan-card .plan-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .plan-card .plan-price {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #3c8dbc;
+        }
+
+        .plan-card .plan-meta {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .plan-card .plan-modules {
+            font-size: 12px;
+            color: #4b5563;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .plan-card .plan-modules .plan-modules-text {
+            flex: 1;
+        }
+
+        .plan-card .radio {
+            margin-top: 0;
+        }
+
+        .module-option {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .module-option.is-active {
+            border-color: rgba(0, 166, 90, .35);
+            box-shadow: 0 6px 18px rgba(0, 166, 90, .12);
+        }
+
+        .module-option.is-disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+        .module-option.is-disabled label {
+            cursor: not-allowed;
+        }
+
+        .module-option label {
+            display: block;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .module-option .module-option-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .module-option .module-option-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .module-option .module-option-price {
+            font-size: 12px;
+            color: #3c8dbc;
+            display: inline-block;
+            margin-top: 6px;
+            margin-left: 26px;
+        }
+
+        .module-option .label {
+            margin-left: 0;
+        }
+
+        .module-option input[disabled] + span {
+            opacity: .7;
+        }
+
+        .purchase-help {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .superadmin-profile .small-box {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+        }
+
+        .superadmin-profile .domain-table {
+            margin-bottom: 0;
+        }
+
+        .superadmin-profile .domain-table td,
+        .superadmin-profile .domain-table th {
+            vertical-align: middle;
+        }
+
+        .superadmin-profile .domain-status-label {
+            font-size: 11px;
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 9999px;
+        }
+
+        .superadmin-profile .domain-list-empty {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .superadmin-profile .domain-table-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .superadmin-profile .scrollable-domain-list {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        /* Hide SaaS plan and module purchase sections in single-tenant deployments */
+        #modulesPurchaseForm,
+        #planSelectionForm {
+            display: none;
+        }
+
+        .superadmin-profile .domain-pagination {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .superadmin-profile .domain-pagination .pagination {
+            margin: 0;
+        }
+    </style>
+}
+
+@section ContentHeader {
+    <h1>My Profile <small>Subscription overview</small></h1>
+}
+
+@if (Model.IsSuperAdmin)
+{
+    <div class="superadmin-profile">
+        <div class="row">
+            <div class="col-lg-3 col-sm-6">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3>@Model.TotalActiveUsers</h3>
+                        <p>Active Users</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-users"></i></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="small-box bg-red">
+                    <div class="inner">
+                        <h3>@Model.TotalInactiveUsers</h3>
+                        <p>Inactive Users</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-user-times"></i></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3>@Model.ExpiringDomainCount</h3>
+                        <p>Domains Expiring Soon</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-hourglass-half"></i></div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>@Model.ActiveDomainCount</h3>
+                        <p>Active Domains</p>
+                    </div>
+                    <div class="icon"><i class="fa fa-globe"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box box-warning">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Expiring within @Model.ExpiringSoonWindowDays days</h3>
+                        <span class="label label-warning" style="margin-left: 8px;">@Model.ExpiringDomainCount domains</span>
+                    </div>
+                    <div class="box-body">
+                        @if (Model.ExpiringDomains != null && Model.ExpiringDomains.Count > 0)
+                        {
+                            <div class="domain-table-container" data-page-size="10">
+                                <div class="table-responsive scrollable-domain-list">
+                                    <table class="table table-striped domain-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Company</th>
+                                                <th>Domain</th>
+                                                <th>Plan</th>
+                                                <th class="text-right">Expiry</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var domain in Model.ExpiringDomains)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <strong>@domain.TenantName</strong>
+                                                    </td>
+                                                    <td>
+                                                        @(string.IsNullOrWhiteSpace(domain.Subdomain) ? "-" : domain.Subdomain)
+                                                        <span class="domain-status-label label label-warning">@domain.Status</span>
+                                                    </td>
+                                                    <td>
+                                                        @(string.IsNullOrWhiteSpace(domain.PlanName) ? "Not Assigned" : domain.PlanName)
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <div>@FormatDate(domain.LicenseEndDate)</div>
+                                                        <small class="text-muted">@FormatDays(domain.DaysRemaining)</small>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <nav class="domain-pagination" aria-label="Expiring domains"></nav>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="domain-list-empty">Great news! No domains are close to expiry.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Healthy Domains</h3>
+                        <span class="label label-success" style="margin-left: 8px;">@Model.ActiveDomainCount domains</span>
+                    </div>
+                    <div class="box-body">
+                        @if (Model.ActiveDomains != null && Model.ActiveDomains.Count > 0)
+                        {
+                            <div class="domain-table-container" data-page-size="10">
+                                <div class="table-responsive scrollable-domain-list">
+                                    <table class="table table-striped domain-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Company</th>
+                                                <th>Domain</th>
+                                                <th>Plan</th>
+                                                <th class="text-right">Expiry</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var domain in Model.ActiveDomains)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <strong>@domain.TenantName</strong>
+                                                    </td>
+                                                    <td>
+                                                        @(string.IsNullOrWhiteSpace(domain.Subdomain) ? "-" : domain.Subdomain)
+                                                        <span class="domain-status-label label label-success">@domain.Status</span>
+                                                    </td>
+                                                    <td>
+                                                        @(string.IsNullOrWhiteSpace(domain.PlanName) ? "Not Assigned" : domain.PlanName)
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <div>@FormatDate(domain.LicenseEndDate)</div>
+                                                        <small class="text-muted">@FormatDays(domain.DaysRemaining)</small>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <nav class="domain-pagination" aria-label="Active domains"></nav>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="domain-list-empty">No active domains available.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-danger">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Expired Domains</h3>
+                        <span class="label label-danger" style="margin-left: 8px;">@Model.ExpiredDomainCount domains</span>
+                    </div>
+                    <div class="box-body">
+                        @if (Model.ExpiredDomains != null && Model.ExpiredDomains.Count > 0)
+                        {
+                            <div class="domain-table-container" data-page-size="10">
+                                <div class="table-responsive scrollable-domain-list">
+                                    <table class="table table-striped domain-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Company</th>
+                                                <th>Domain</th>
+                                                <th>Plan</th>
+                                                <th class="text-right">Expired On</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var domain in Model.ExpiredDomains)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <strong>@domain.TenantName</strong>
+                                                    </td>
+                                                    <td>
+                                                        @(string.IsNullOrWhiteSpace(domain.Subdomain) ? "-" : domain.Subdomain)
+                                                        <span class="domain-status-label label label-danger">@domain.Status</span>
+                                                    </td>
+                                                    <td>
+                                                        @(string.IsNullOrWhiteSpace(domain.PlanName) ? "Not Assigned" : domain.PlanName)
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <div>@FormatDate(domain.LicenseEndDate)</div>
+                                                        <small class="text-muted">@FormatDays(domain.DaysRemaining)</small>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <nav class="domain-pagination" aria-label="Expired domains"></nav>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="domain-list-empty">No domains have expired.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Account Summary</h3>
+                </div>
+                <div class="box-body profile-summary">
+                    <dl class="dl-horizontal">
+                        <dt>Account</dt>
+                        <dd>@(Model.TenantName ?? "-")</dd>
+                        <dt>User</dt>
+                        <dd>
+                            @(Model.DisplayName ?? Model.Username ?? "-")
+                            @if (!string.IsNullOrWhiteSpace(Model.Username) && !string.Equals(Model.DisplayName, Model.Username, StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="text-muted">(@Model.Username)</span>
+                            }
+                        </dd>
+                        <dt>Plan</dt>
+                        <dd>
+                            @(Model.CurrentPlanName ?? "Not Assigned")
+                            @if (!string.IsNullOrWhiteSpace(Model.CurrentPlanName))
+                            {
+                                <span class="label @licenseStatusClass" style="margin-left:8px;">@licenseStatusText</span>
+                            }
+                        </dd>
+                        <dt>License Start</dt>
+                        <dd>@FormatDate(Model.LicenseStartDate)</dd>
+                        <dt>License End</dt>
+                        <dd>@FormatDate(Model.LicenseEndDate)</dd>
+                        <dt>Purchased Users</dt>
+                        <dd>@(Model.PurchasedUsers?.ToString() ?? "-")</dd>
+                        <dt>Active Users</dt>
+                        <dd>@Model.ActiveUserCount</dd>
+                        @if (Model.PurchaseAmount.HasValue)
+                        {
+                            <dt>Last Purchase</dt>
+                            <dd>@FormatAmount(Model.PurchaseAmount, Model.PurchaseCurrency)</dd>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.PaymentOrderId))
+                        {
+                            <dt>Order Id</dt>
+                            <dd>@Model.PaymentOrderId</dd>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.PaymentId))
+                        {
+                            <dt>Payment Id</dt>
+                            <dd>@Model.PaymentId</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Usage Snapshot</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row text-center">
+                        <div class="col-xs-6">
+                            <h3>@Model.ActiveUserCount</h3>
+                            <p class="text-muted">Active Users</p>
+                        </div>
+                        <div class="col-xs-6">
+                            <h3>@(Model.PurchasedUsers?.ToString() ?? "-")</h3>
+                            <p class="text-muted">Users Purchased</p>
+                        </div>
+                    </div>
+                    <p class="text-muted text-center" style="margin-top: 12px;">
+                        Keep your plan aligned with your growing team by monitoring users and modules here.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form id="modulesPurchaseForm" class="box box-default" data-default-currency="@Model.PurchaseCurrency" data-can-purchase="@(canPurchaseModules ? "true" : "false")">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Purchase Extra Modules</h3>
+                </div>
+                <div class="box-body">
+                    <p class="purchase-help">
+                        @if (canPurchaseModules)
+                        {
+                            <text>Select the additional modules you want to activate. Existing active modules are shown for reference.</text>
+                        }
+                        else
+                        {
+                            <text>Purchase a subscription plan to unlock module purchases. Review available modules below.</text>
+                        }
+                    </p>
+                    @if (!canPurchaseModules)
+                    {
+                        <div class="alert alert-info" role="alert" style="margin-bottom: 16px;">
+                            Module purchases are locked until you purchase a subscription plan. Review the available options below and upgrade when ready.
+                        </div>
+                    }
+                    <div class="row">
+                        @foreach (var option in Model.AvailableModules)
+                        {
+                            var rawPrice = option.Price.HasValue
+                                ? FormatAmount(option.Price, option.Currency)
+                                : (!string.IsNullOrWhiteSpace(option.Currency) ? option.Currency.Trim() : string.Empty);
+                            var showPrice = !string.IsNullOrWhiteSpace(rawPrice) && !string.Equals(rawPrice, "-", StringComparison.Ordinal);
+                            var numericPrice = option.Price.HasValue ? option.Price.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : string.Empty;
+                            var currencyCode = !string.IsNullOrWhiteSpace(option.Currency) ? option.Currency.Trim() : string.Empty;
+                            var isActive = option.IsActive;
+                            var statusClass = isActive ? "label-success" : (canPurchaseModules ? "label-default" : "label-warning");
+                            var statusText = isActive ? "Active" : (canPurchaseModules ? "Available" : "Locked");
+                            var optionClasses = "checkbox module-option" + (isActive ? " is-active" : string.Empty) + (!canPurchaseModules && !isActive ? " is-disabled" : string.Empty);
+                            <div class="col-sm-6">
+                                <div class="@optionClasses">
+                                    <label>
+                                        <span class="module-option-header">
+                                            <span class="module-option-title">
+                                                <input type="checkbox" name="modules" value="@option.Key" data-price="@numericPrice" data-currency="@currencyCode" data-title="@option.Title" @(isActive ? "checked=\"checked\"" : string.Empty) @(isActive || !canPurchaseModules ? "disabled=\"disabled\"" : string.Empty) />
+                                                <span>@option.Title</span>
+                                            </span>
+                                            <span class="label @statusClass">
+                                                @statusText
+                                            </span>
+                                        </span>
+                                        @if (showPrice)
+                                        {
+                                            <span class="module-option-price">@rawPrice</span>
+                                        }
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <button type="button" class="btn btn-primary" id="purchaseModulesBtn" @(canPurchaseModules ? string.Empty : "disabled=\"disabled\"")>
+                        <i class="fa fa-shopping-cart"></i> Purchase Selected Modules
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <form id="planSelectionForm" class="box box-warning">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Upgrade or Renew Plan</h3>
+                </div>
+                <div class="box-body">
+                    @if (Model.AvailablePlans != null && Model.AvailablePlans.Count > 0)
+                    {
+                        foreach (var plan in Model.AvailablePlans)
+                        {
+                            var isCurrent = plan.IsCurrent;
+                            var pricePerUserAttr = plan.PricePerUser.HasValue
+                                ? plan.PricePerUser.Value.ToString(CultureInfo.InvariantCulture)
+                                : string.Empty;
+                            <div class="plan-card @(isCurrent ? "current" : string.Empty)"
+                                 data-plan-id="@plan.Id"
+                                 data-plan-name="@plan.Name"
+                                 data-plan-price="@pricePerUserAttr"
+                                 data-plan-currency="@plan.Currency">
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="planId" value="@plan.Id" @(isCurrent ? "checked=\"checked\"" : string.Empty) />
+                                        <span class="plan-name">@plan.Name</span>
+                                    </label>
+                                </div>
+                                <div class="plan-price">
+                                    @if (plan.PricePerUser.HasValue)
+                                    {
+                                        <span>@FormatAmount(plan.PricePerUser, plan.Currency)/user</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Contact sales for pricing</span>
+                                    }
+                                </div>
+                                <div class="plan-meta">
+                                    @if (plan.UserLimit.HasValue)
+                                    {
+                                        <span><i class="fa fa-users"></i> Up to @plan.UserLimit users</span>
+                                    }
+                                    else
+                                    {
+                                        <span><i class="fa fa-users"></i> Flexible user count</span>
+                                    }
+                                </div>
+                                @if (plan.TrialDays.HasValue && plan.TrialDays.Value > 0)
+                                {
+                                    <div class="plan-meta">
+                                        <i class="fa fa-gift"></i> Includes @plan.TrialDays day trial
+                                    </div>
+                                }
+                                @if (plan.Modules != null && plan.Modules.Count > 0)
+                                {
+                                    var moduleList = string.Join(", ", plan.Modules);
+                                    <div class="plan-modules" title="@moduleList">
+                                        <i class="fa fa-puzzle-piece"></i>
+                                        <span class="plan-modules-text">@moduleList</span>
+                                    </div>
+                                }
+                                @if (isCurrent)
+                                {
+                                    <span class="label label-success" style="position:absolute; top:12px; right:12px;">Current Plan</span>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">No public plans are available right now. Please contact support for assistance.</p>
+                    }
+                    <div class="form-group">
+                        <label for="planUserCount">Users to include</label>
+                        <input type="number" min="1" class="form-control" id="planUserCount" name="users" value="@defaultUsers" />
+                        <p class="purchase-help">Choose how many users you need for the selected plan.</p>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <button type="button" class="btn btn-warning" id="purchasePlanBtn">
+                        <i class="fa fa-credit-card"></i> Continue to Purchase Plan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        (function () {
+            function openPlanCheckout(query) {
+                var target = Q.resolveUrl('~/plans.html');
+                if (query) {
+                    target += (target.indexOf('?') >= 0 ? '&' : '?') + query;
+                }
+                window.open(target, '_blank');
+            }
+
+            var planDataMap = {};
+
+            function buildPlanDataMap() {
+                planDataMap = {};
+                $('#planSelectionForm .plan-card').each(function () {
+                    var $card = $(this);
+                    var rawId = $card.data('planId');
+                    var parsedId = parseInt(rawId, 10);
+                    if (!isFinite(parsedId) || parsedId <= 0) {
+                        return;
+                    }
+
+                    var rawPrice = $card.data('planPrice');
+                    var pricePerUser = parseFloat(rawPrice);
+                    planDataMap[parsedId] = {
+                        id: parsedId,
+                        name: ($card.data('planName') || '').toString(),
+                        pricePerUser: isFinite(pricePerUser) && pricePerUser >= 0 ? pricePerUser : null,
+                        currency: ($card.data('planCurrency') || '').toString()
+                    };
+                });
+            }
+
+            function getPlanInfo(planId) {
+                if (!planId) {
+                    return null;
+                }
+
+                if (!planDataMap || !Object.prototype.hasOwnProperty.call(planDataMap, planId)) {
+                    buildPlanDataMap();
+                }
+
+                return planDataMap[planId] || null;
+            }
+
+            function resolvePaymentGatewayUrl(queryString) {
+                var baseUrl = Q.resolveUrl('~/payment-gateway.html');
+                if (!queryString) {
+                    return baseUrl;
+                }
+
+                return baseUrl + (baseUrl.indexOf('?') >= 0 ? '&' : '?') + queryString;
+            }
+
+            function parseUsers(value) {
+                var parsed = parseInt(value, 10);
+                if (!isFinite(parsed) || parsed < 1) {
+                    return 1;
+                }
+
+                return parsed;
+            }
+
+            function initDomainPagination() {
+                $('.domain-table-container').each(function () {
+                    var $container = $(this);
+                    var pageSize = parseInt($container.data('pageSize'), 10);
+                    if (!pageSize || pageSize <= 0) {
+                        pageSize = 10;
+                    }
+
+                    var $rows = $container.find('tbody tr');
+                    var $pagination = $container.find('.domain-pagination');
+                    if ($rows.length <= pageSize) {
+                        $pagination.hide();
+                        return;
+                    }
+
+                    var totalPages = Math.ceil($rows.length / pageSize);
+                    var currentPage = 1;
+                    var $paginationList = $('<ul class="pagination pagination-sm"></ul>');
+                    var $prev = $('<li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>');
+                    var $next = $('<li class="disabled"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>');
+
+                    $paginationList.append($prev);
+
+                    for (var page = 1; page <= totalPages; page++) {
+                        var $pageItem = $('<li><a href="#"></a></li>');
+                        $pageItem.attr('data-page', page);
+                        $pageItem.find('a').text(page.toString());
+                        $paginationList.append($pageItem);
+                    }
+
+                    $paginationList.append($next);
+                    $pagination.empty().append($paginationList);
+
+                    function render(page) {
+                        if (page < 1 || page > totalPages) {
+                            return;
+                        }
+
+                        currentPage = page;
+                        var start = (currentPage - 1) * pageSize;
+                        var end = start + pageSize;
+
+                        $rows.each(function (index) {
+                            var show = index >= start && index < end;
+                            $(this).toggle(show);
+                        });
+
+                        $paginationList.find('li').removeClass('active');
+                        $paginationList.find('li[data-page="' + currentPage + '"]').addClass('active');
+
+                        if (currentPage === 1) {
+                            $prev.addClass('disabled');
+                        } else {
+                            $prev.removeClass('disabled');
+                        }
+
+                        if (currentPage === totalPages) {
+                            $next.addClass('disabled');
+                        } else {
+                            $next.removeClass('disabled');
+                        }
+                    }
+
+                    render(1);
+
+                    $pagination.on('click', 'li:not(.disabled) > a', function (event) {
+                        event.preventDefault();
+                        var $parent = $(this).parent();
+
+                        if ($parent.is($prev)) {
+                            render(currentPage - 1);
+                            return;
+                        }
+
+                        if ($parent.is($next)) {
+                            render(currentPage + 1);
+                            return;
+                        }
+
+                        var targetPage = parseInt($parent.data('page'), 10);
+                        if (!isNaN(targetPage)) {
+                            render(targetPage);
+                        }
+                    });
+                });
+            }
+
+            buildPlanDataMap();
+            initDomainPagination();
+
+            var $modulesForm = $('#modulesPurchaseForm');
+            var $purchaseModulesBtn = $('#purchaseModulesBtn');
+            var modulesCanBePurchased = false;
+
+            if ($modulesForm.length > 0) {
+                var rawCanPurchase = $modulesForm.data('canPurchase');
+                if (rawCanPurchase === true) {
+                    modulesCanBePurchased = true;
+                } else if (typeof rawCanPurchase === 'string') {
+                    modulesCanBePurchased = rawCanPurchase.toLowerCase() === 'true';
+                }
+            }
+
+            if (!modulesCanBePurchased && $purchaseModulesBtn.length) {
+                $purchaseModulesBtn.prop('disabled', true);
+            }
+
+            $purchaseModulesBtn.on('click', function () {
+                if (!modulesCanBePurchased) {
+                    Q.notifyWarning('Please purchase a subscription plan before buying additional modules.');
+                    return;
+                }
+
+                if ($modulesForm.length === 0) {
+                    Q.notifyWarning('Unable to locate the module purchase form. Please refresh the page and try again.');
+                    return;
+                }
+
+                var $form = $modulesForm;
+                var $selected = $form.find('input[name="modules"]:checked:not(:disabled)');
+
+                if ($selected.length === 0) {
+                    Q.notifyInfo('Select at least one additional module to continue.');
+                    return;
+                }
+
+                var moduleKeys = [];
+                var moduleTitles = [];
+                var total = 0;
+                var hasPositiveAmount = false;
+                var currency = null;
+                var currencyMismatch = false;
+
+                $selected.each(function () {
+                    var $input = $(this);
+                    var key = ($input.val() || '').toString();
+                    if (key.length > 0) {
+                        moduleKeys.push(key);
+                    }
+
+                    var title = $input.data('title');
+                    if (title) {
+                        moduleTitles.push(title.toString());
+                    }
+
+                    var priceAttr = $input.data('price');
+                    if (priceAttr !== undefined && priceAttr !== null && priceAttr !== '') {
+                        var parsed = parseFloat(priceAttr);
+                        if (!isNaN(parsed) && isFinite(parsed)) {
+                            total += parsed;
+                            if (parsed > 0) {
+                                hasPositiveAmount = true;
+                            }
+                        }
+                    }
+
+                    var moduleCurrency = $input.data('currency');
+                    if (moduleCurrency) {
+                        var normalized = moduleCurrency.toString().trim();
+                        if (normalized.length > 0) {
+                            if (!currency) {
+                                currency = normalized;
+                            } else if (currency.toUpperCase() !== normalized.toUpperCase()) {
+                                currencyMismatch = true;
+                            }
+                        }
+                    }
+                });
+
+                if (moduleKeys.length === 0) {
+                    Q.notifyWarning('Unable to determine the selected modules. Please try again.');
+                    return;
+                }
+
+                if (currencyMismatch) {
+                    Q.notifyWarning('Selected modules use different currencies. Please contact support to continue.');
+                    return;
+                }
+
+                if (!hasPositiveAmount || total <= 0) {
+                    Q.notifyWarning('Pricing is not configured for the selected modules yet. Please contact support.');
+                    return;
+                }
+
+                var normalizedTotal = Math.round(total * 100) / 100;
+                var payload = {
+                    mode: 'modules',
+                    modules: JSON.stringify(moduleKeys),
+                    moduleTitles: JSON.stringify(moduleTitles),
+                    total: normalizedTotal.toFixed(2)
+                };
+
+                if (!currency) {
+                    var defaultCurrency = ($form.data('defaultCurrency') || '').toString().trim();
+                    if (defaultCurrency.length > 0) {
+                        currency = defaultCurrency;
+                    }
+                }
+
+                if (currency) {
+                    payload.currency = currency;
+                }
+
+                var target = Q.resolveUrl('~/payment-gateway.html');
+                var separator = target.indexOf('?') >= 0 ? '&' : '?';
+                window.open(target + separator + $.param(payload), '_blank');
+            });
+
+            $('#purchasePlanBtn').on('click', function () {
+                var selectedPlan = $('#planSelectionForm input[name="planId"]:checked').val();
+                var parsedPlanId = parseInt(selectedPlan, 10);
+
+                if (!selectedPlan || !isFinite(parsedPlanId) || parsedPlanId <= 0) {
+                    Q.notifyWarning('Please select a plan before continuing.');
+                    return;
+                }
+
+                var planInfo = getPlanInfo(parsedPlanId);
+
+                if (!planInfo) {
+                    Q.notifyWarning('Unable to determine plan details. Please refresh the page and try again.');
+                    return;
+                }
+
+                if (planInfo.pricePerUser == null) {
+                    Q.notifyWarning('Online purchase is not available for this plan. Please contact sales for assistance.');
+                    return;
+                }
+
+                var users = parseUsers($('#planUserCount').val());
+                $('#planUserCount').val(users);
+
+                var total = Math.round(planInfo.pricePerUser * users * 100) / 100;
+                var params = {
+                    plan: planInfo.name || 'Selected Plan',
+                    planId: parsedPlanId,
+                    users: users,
+                    total: total.toFixed(2)
+                };
+
+                if (planInfo.currency) {
+                    params.currency = planInfo.currency;
+                }
+
+                var paymentUrl = resolvePaymentGatewayUrl($.param(params));
+                window.location.href = paymentUrl;
+            });
+        })();
+    </script>
+}

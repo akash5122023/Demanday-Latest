@@ -1,0 +1,166 @@
+@using System.Text.Json
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = Texts.Forms.Membership.SignUp.FormTitle.ToString(Localizer);
+    ViewData["PageId"] = "SignUp";
+    ViewData["BodyClass"] = "register-page";
+    Layout = MVC.Views.Shared._LayoutNoNavigation;
+    var razorpayConfig = ViewData["RazorpayConfig"] as AdvanceCRM.Membership.RazorpayClientConfig ?? new AdvanceCRM.Membership.RazorpayClientConfig();
+    var razorpayConfigJson = JsonSerializer.Serialize(razorpayConfig, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+}
+@section Head {
+    <link rel="stylesheet" href="~/Content/iCheck/square/blue.css" />
+    <script src="~/Scripts/jquery.icheck.min.js"></script>
+    <style>
+        .signup-payment {
+            margin: 16px 0;
+            padding: 16px 18px;
+            border-radius: 12px;
+            background: #f8faff;
+            border: 1px solid #d5dcf3;
+            display: none;
+        }
+
+        .signup-payment.is-visible {
+            display: block;
+        }
+
+        .signup-payment h4 {
+            margin-top: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2559;
+        }
+
+        .signup-payment .payment-summary {
+            margin: 8px 0 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2559;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .signup-payment .btn-pay {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .signup-payment .payment-status {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .signup-payment .payment-status--pending { color: #ff8a65; }
+        .signup-payment .payment-status--success { color: #1abc9c; }
+        .signup-payment .payment-status--error { color: #e74c3c; }
+
+        .signup-meta {
+            margin: 16px 0;
+        }
+
+        .trial-info {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #f0f4ff;
+            color: #1f2559;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .trial-info.is-visible {
+            display: flex;
+        }
+
+        .trial-info .label {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #2563eb;
+        }
+    </style>
+}
+<script id="Template_Membership_SignUpPanel" type="text/template">
+    <div class="s-Form">
+        <form id="~_Form" action="">
+            <div class="fieldset">
+                <div id="~_PropertyGrid"></div>
+                <div class="clear"></div>
+            </div>
+            <div class="signup-meta">
+                <div id="~_TrialInfo" class="trial-info" role="status" aria-live="polite">
+                    <span class="label">Trial period</span>
+                    <span id="~_TrialInfoText">Free trial</span>
+                </div>
+            </div>
+            <div id="~_PaymentSection" class="signup-payment">
+                <h4>Secure payment</h4>
+                <div class="payment-summary">
+                    <span id="~_PaymentPlanLabel">Plan: --</span>
+                    <span id="~_PaymentAmountLabel">Amount: --</span>
+                </div>
+                <button type="button" id="~_PaymentButton" class="btn btn-success btn-pay">Pay with Razorpay</button>
+                <div id="~_PaymentStatus" class="payment-status payment-status--pending">
+                    <i class="fa fa-clock-o"></i>
+                    <span>Payment pending</span>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-xs-7">
+                    <div class="checkbox icheck">
+                        <label>
+                            <input type="checkbox"> @Texts.Forms.Membership.SignUp.AcceptTerms.ToString(Localizer)
+                        </label>
+                    </div>
+                </div>
+                <div class="col-xs-5">
+                    <button id="~_SubmitButton" type="submit" class="btn btn-primary btn-block btn-flat">@Texts.Forms.Membership.SignUp.SubmitButton.ToString(Localizer)</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</script>
+
+<div class="register-box">
+    <div class="register-logo">
+        @Texts.Navigation.SiteTitle.ToString(Localizer)
+    </div>
+    <div class="register-box-body">
+        <h3 class="page-title">@Texts.Forms.Membership.SignUp.FormTitle.ToString(Localizer)</h3>
+        <p class="login-box-msg">@Texts.Forms.Membership.SignUp.FormInfo.ToString(Localizer)</p>
+        <div id="SignUpPanel">
+        </div>
+        <a href="~/Account/Login" class="text-center">@Texts.Forms.Membership.SignUp.BackToLogin.ToString(Localizer)</a>
+    </div>
+</div>
+
+@if (razorpayConfig.Enabled)
+{
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+}
+
+<script type="text/javascript">
+    window.SignUpRazorpay = @Html.Raw(razorpayConfigJson);
+</script>
+
+<script type="text/javascript">
+$(function() {
+    new AdvanceCRM.Membership.SignUpPanel($('#SignUpPanel')).init();
+    $('.field.DisplayName,.field.Email,.field.ConfirmEmail,.field.Password,.field.ConfirmPassword').addClass("has-icon");
+    $('.field.DisplayName input').after("<span class='glyphicon glyphicon-user form-control-feedback'></span>");
+    $('.emaildomain').after("<span class='glyphicon glyphicon-envelope form-control-feedback'></span>");
+    $('.field.Password input').after("<span class='glyphicon glyphicon-lock form-control-feedback'></span>");
+    $('.field.ConfirmPassword input').after("<span class='glyphicon glyphicon-log-in form-control-feedback'></span>");
+    $('input').iCheck({
+        checkboxClass: 'icheckbox_square-blue',
+        radioClass: 'iradio_square-blue',
+        increaseArea: '20%'
+    });
+});
+</script>

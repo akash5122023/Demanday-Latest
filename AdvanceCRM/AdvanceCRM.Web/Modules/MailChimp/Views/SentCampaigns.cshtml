@@ -1,0 +1,250 @@
+﻿
+@model IEnumerable<MailChimp.Net.Models.Campaign>
+@{
+    ViewBag.Title = "Campaigns";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/bootstrap-tour.min.css" rel="stylesheet" />
+<script src="~/Scripts/bootstrap-tour.min.js"></script>
+<script src="~/Scripts/MailChimpTour.js"></script>
+
+@*<script>
+        $(function () {
+            tour.restart();
+        });
+    </script>*@
+
+@*<script>
+        $(function () {
+            // Instance the tour
+            var tour = new Tour({
+                storage: false,
+                steps: [
+                    {
+                        element: "#dropdownMenu1",
+                        title: "Title of my step",
+                        content: "Content of my step"
+                    },
+                    {
+                        element: "#dropdownMenu2",
+                        title: "Title of my step",
+                        content: "Content of my step"
+                    }
+                ]
+            });
+
+            // Initialize the tour
+            tour.init();
+
+            // Start the tour
+            tour.start(true);
+        });
+    </script>*@
+
+<script type="text/javascript">
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+    function DeleteCampaign(Id) {
+        toastr.error("<br/><button type='button' id='ConfirmYes' class='btn clear'>Yes</button>", 'Do you want to delete this Campaign?',
+         {
+             "closeButton": true,
+             "debug": false,
+             "newestOnTop": true,
+             "progressBar": false,
+             "positionClass": "toast-top-center",
+             "preventDuplicates": true,
+             "onclick": null,
+             "showDuration": "300",
+             "hideDuration": "3000",
+             "timeOut": 0,
+             "extendedTimeOut": 0,
+             "tapToDismiss": false,
+             "allowHtml": true,
+             onShown: function (toast) {
+                 $("#ConfirmYes").click(function () {
+                     location.href = "/MailChimp/DeleteCampaign/" + Id;
+
+                 });
+             }
+         });
+    }
+    function openModal(CampaignId) {
+        $.ajax({
+            type: "Get",
+            url: '@Url.Action("CampaignDetails", "MailChimp")',
+            data: { id: CampaignId },
+            success: function (data) {
+                $('#Preview').html(data);
+                $('#CampaignModal').modal('show');
+            }
+        })
+    }
+</script>
+
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">Campaigns</div></div>
+
+    <div class="row" style="width:100%">
+        <div class="col-sm-10"></div>
+        <div class="col-sm-2">
+            <button type="button" id="CreateCampaign" name="CreateCampaign" class="btn btn-block navbar-btn" data-toggle="tooltip" data-placement="bottom" title="Create Campaign" onclick="location.href = '@Url.Action("CreateCampaigns", "MailChimp",new {TemplateId=0})';">Create Campaign</button>
+        </div>
+    </div>
+    <div class="row" style="width:100%">
+        <div class="col-sm-12" style="width:100%">
+            <div class="col-sm-1" style="width:10%">
+                <div class="dropdown" data-toggle="tooltip" data-placement="top" title="Sorts campaigns by Created date,Recent,A-Z and Z-A">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Sort By
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                        <li><a href="/MailChimp/SentCampaigns?sort=CreatedDate">Created Date</a></li>
+                        <li><a href="/MailChimp/SentCampaigns?sort=Recent">Recent</a></li>
+                        <li><a href="/MailChimp/SentCampaigns?sort=Asc">A-Z</a></li>
+                        <li><a href="/MailChimp/SentCampaigns?sort=Desc">Z-A</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-sm-1" style="width:10%">
+                <div class="dropdown" data-toggle="tooltip" data-placement="top" title="Filter campaigns by Sent,Draft and Scheduled">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Filter By
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                        <li><a href="/MailChimp/SentCampaigns?sort=Sent">Sent</a></li>
+                        <li><a href="/MailChimp/SentCampaigns?sort=Draft">Draft</a></li>
+                        <li><a href="/MailChimp/SentCampaigns?sort=Schedule">Scheduled</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-sm-10" style="width:80%">
+            </div>
+        </div>
+
+    </div>
+    <br />
+    <table class="table table-user-information" style="width:100%">
+        <tbody>
+            @foreach (var campaign in Model)
+            {
+            <tr>
+                <td style="width:2%">
+                    <i class="fa fa-envelope-open fa-2x" aria-hidden="true"></i>
+                </td>
+                <td style="width:50%">
+                    <h5>
+                        <a href="#" onclick="openModal('@campaign.Id.ToString()')" data-toggle="tooltip" data-placement="bottom" title="@campaign.Settings.Title">@campaign.Settings.Title</a>
+                    </h5>
+                    @if (campaign.Status == "sent")
+                        {
+                    <p>
+                        <span class="msg">
+                            @campaign.Status @campaign.SendTime.Value.ToLongDateString() @campaign.SendTime.Value.ToShortTimeString()
+                        </span>
+                    </p>
+                        }
+                        else if (campaign.Status == "save")
+                        {
+                    <p>
+                        <span class="msg">
+                            Created @campaign.CreateTime.ToLongDateString() @campaign.CreateTime.ToShortTimeString()
+                        </span>
+                    </p>
+                        }
+                        else if (campaign.Status == "schedule")
+                        {
+                    <p>
+                        <span class="msg">
+                            Sent @campaign.SendTime.Value.ToLongDateString() @campaign.SendTime.Value.ToShortTimeString()
+                        </span>
+                    </p>
+                        }
+                </td>
+                <td style="width:10%">
+                    @if (campaign.Status == "save")
+                        {
+                    <span class="badge col-lg-12">Draft</span>
+
+                        }
+                        else if (campaign.Status == "sent")
+                        {
+                    <span class="badge col-lg-12 alert-info">Sent</span>
+
+                        }
+                        else if (campaign.Status == "schedule")
+                        {
+                    <strong><span class="badge col-lg-12 alert-warning">Scheduled</span></strong>
+                        }
+                        else { }
+                </td>
+                @if (campaign.ReportSummary == null)
+                    { }
+                    else
+                    {
+                <td style="width:10%">
+                    <strong>@campaign.ReportSummary.OpenRate.ToString("P")</strong>
+                    <p><h5>Opens</h5></p>
+                </td>
+                    }
+                @if (@campaign.ReportSummary == null)
+                    { }
+                    else
+                    {
+                <td style="width:10%"> <strong>@campaign.ReportSummary.ClickRate.ToString("P")</strong> <p><h5>Clicks</h5></p></td>
+                    }
+                @if (campaign.Status == "save")
+                    {
+                <td style="width:5%"><span data-toggle="tooltip" data-placement="bottom" title="Edit Campaign" style="color:dodgerblue;font-size:20px;" class="glyphicon glyphicon-edit" aria-hidden="true" onclick="location.href = '@Url.Action("UpdateCampaigns", "MailChimp", new { id=@campaign.Id})';"></span></td>
+                <td style="width:5%"><span data-toggle="tooltip" data-placement="bottom" title="Delete" style="color:red;font-size:20px;" class="glyphicon glyphicon-trash" aria-hidden="true" onclick="DeleteCampaign('@campaign.Id');"></span></td>
+
+                    }
+                    else
+                    {
+                <td style="width:10%">
+                    <a href="@campaign.ArchiveUrl" target="_viewCampaign">View email &raquo;</a>
+                </td>
+                    }
+                @if (campaign.Status == "sent")
+                    {
+                <td style="width:8%">
+                    <h4>
+                        <a href="/MailChimp/GetCampaignSummary?CampaignId=@campaign.Id" title="ViewReport"><span class="badge">View Report</span></a>
+                    </h4>
+                </td>
+                    }
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="CampaignModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Campaign Details</h4>
+                </div>
+                <div class="modal-body" id="Preview">
+                    @ViewBag.CampaignObject
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/bootstrap-tour.min.js"></script>
+<script src="~/Scripts/MailChimpTour.js"></script>
+
+

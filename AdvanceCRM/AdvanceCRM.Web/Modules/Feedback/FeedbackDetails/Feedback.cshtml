@@ -1,0 +1,321 @@
+﻿@model  AdvanceCRM.Feedback.ModelFeedback
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Feedback";
+    ViewData["PageId"] = "Feedback";
+    Layout = "~/Views/Shared/_LayoutNoNavigation.cshtml";
+}
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/bootstrap-select.css" rel="stylesheet" />
+<style>
+    .kv-reqd {
+        color: red;
+        font-family: monospace;
+        font-weight: normal;
+    }
+</style>
+<!-- jQuery -->
+
+<script src="~/Scripts/bootstrap-select.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //$("#DivOTP").hide();
+        //$("#DivComplaint").hide();
+        jQuery.validator.addMethod("aFunction",
+            function (value, element) {
+                if (value == "none")
+                    return false;
+                else
+                    return true;
+            },
+            "Please select value");
+
+        $('#FeedbackFormId').validate({
+            errorClass: 'help-block animation-slideDown', // You can change the animation class for a different entrance animation - check animations page
+            errorElement: 'div',
+            errorPlacement: function (error, e) {
+                e.parents('.form-group > div').append(error);
+            },
+            highlight: function (e) {
+
+                $(e).closest('.form-group').removeClass('has-success has-error').addClass('has-error');
+                $(e).closest('.help-block').remove();
+            },
+            success: function (e) {
+                e.closest('.form-group').removeClass('has-success has-error');
+                e.closest('.help-block').remove();
+            },
+            rules: {
+                Service: {
+                    required: true
+                },
+                //Service: {
+                //    required: true
+                //},
+                Details: "required"
+            },
+            // Specify the validation error messages
+            messages: {
+                Service: "Please select List",
+                Details: "Please enter Feedback Message"
+              
+
+            }
+            //submitHandler: function (form) {
+            //    form.submit();
+            //}
+        });
+    });
+
+    function CancelInfo() {
+        toastr.info("<br/><button type='button' id='ConfirmYes' class='btn clear'>Yes</button>", 'Do you want to Cancel?.\n\nCancelling will clear your field information',
+            {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "3000",
+                "timeOut": 0,
+                "extendedTimeOut": 0,
+                "tapToDismiss": false,
+                "allowHtml": true,
+                onShown: function (toast) {
+                    $("#ConfirmYes").click(function () {
+                        location.href = '@Url.Action("Feedback", "FeedbackDetails")';
+                    });
+                }
+
+            });
+    }
+
+    function SendOTP() {
+        phone = $("#Phone").val();
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ValidateAndGenerateOTP", "FeedbackDetails")',
+            data: { Phone: phone},
+
+            success: function (data) {
+                if (data == "This phone number is not registered with us" || data == "Unable to send OTP via SMS") {
+                    toastr.error(data, 'Error',
+                        {
+                            "closeButton": true,
+                            "debug": false,
+                            "newestOnTop": true,
+                            "progressBar": false,
+                            "positionClass": "toast-top-center",
+                            "preventDuplicates": true,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "3000",
+                            "timeOut": 0,
+                            "extendedTimeOut": 0,
+                            "tapToDismiss": false,
+                            "allowHtml": true
+                        });
+                }
+                else
+                {
+                    toastr.success("OTP sent successfully!", 'Success',
+                        {
+                            "closeButton": true,
+                            "debug": false,
+                            "newestOnTop": true,
+                            "progressBar": false,
+                            "positionClass": "toast-top-center",
+                            "preventDuplicates": true,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "3000",
+                            "timeOut": 0,
+                            "extendedTimeOut": 0,
+                            "tapToDismiss": false,
+                            "allowHtml": true
+                        });
+                    $("#Name").val(data);
+                    $("#DivOTP").show();
+
+                }
+           }
+       })
+
+    }
+
+    function ValidateOTP() {
+        OTP = $("#OTPNumber").val();
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Validated", "FeedbackDetails")',
+            data: { Otp: OTP},
+
+            success: function (data) {
+                if (data == "Invalid OTP" || data == "OTP Expired") {
+                    toastr.error(data, 'Error',
+                        {
+                            "closeButton": true,
+                            "debug": false,
+                            "newestOnTop": true,
+                            "progressBar": false,
+                            "positionClass": "toast-top-center",
+                            "preventDuplicates": true,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "3000",
+                            "timeOut": 0,
+                            "extendedTimeOut": 0,
+                            "tapToDismiss": false,
+                            "allowHtml": true
+                        });
+
+                }
+                else
+                {
+                    //$("#DivOTP").show();
+                    toastr.success(data, 'Success',
+                        {
+                            "closeButton": true,
+                            "debug": false,
+                            "newestOnTop": true,
+                            "progressBar": false,
+                            "positionClass": "toast-top-center",
+                            "preventDuplicates": true,
+                            "onclick": null,
+                            "showDuration": "300",
+                            "hideDuration": "3000",
+                            "timeOut": 0,
+                            "extendedTimeOut": 0,
+                            "tapToDismiss": false,
+                            "allowHtml": true
+
+                        });
+                    $("#DivComplaint").show();
+                }
+           }
+       })
+
+    }
+</script>
+
+
+<div class="s-DataGrid require-layout route-handler responsive-height" style="height: auto;">
+    <div class="grid-title"><div class="title-text">Lodge Feedback</div></div>
+    <br />
+    <div class="text-danger">@TempData["Errormessage"]</div>
+    <div>@TempData["message"]</div>
+
+    @using (Html.BeginForm("Feedback", "FeedbackDetails", FormMethod.Post, new { @id = "FeedbackFormId", @class = "form-horizontal", role = "form" }))
+
+
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.Id, new { @class = "form-control" })
+
+
+        <div class="container">
+            <form>
+
+                <div class="col-lg-12">
+                    <div class="form-group row">
+                        <div class="col-lg-5">
+                            <label for="LabelforPhone" class="col-form-label">Phone <span class="kv-reqd">*</span> </label>
+                            @Html.TextBoxFor(model => model.Phone, new { @class = "form-control", placeholder = "Enter Phone" })
+                            @*@Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })*@
+                        </div>
+                        <div class="col-lg-2">
+                            <label for="LabelforPhone" class="col-form-label"> <span></span> </label>
+                            <button type="button" id="BtnOTP" onclick="SendOTP();" class="btn btn-primary form-control">Send OTP</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-lg-5">
+                            <label for="LabelforName" class="col-form-label">Name<span class="kv-reqd">*</span></label>
+                            @Html.TextBoxFor(model => model.Name, new { @class = "form-control", placeholder = "Enter Name", @readonly = "readonly" })
+                            @*@Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })*@
+                        </div>
+                    </div>
+
+
+                    <div id="DivOTP" class="form-group row" hidden>
+                        <div class="col-lg-5">
+                            <label for="LabelOtp" class="col-form-label">OTP<span class="kv-reqd">*</span></label>
+                            @*@Html.TextBoxFor(model => model.Otp, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.Otp, "", new { @class = "text-danger" })*@
+                            <input type="number" min="2" step="1" class="form-control input-group" id="OTPNumber" placeholder="Enter OTP" onkeypress="return isNumber(event)">
+                            <script type="text/javascript">
+                                function isNumber(evt) {
+                                    evt = (evt) ? evt : window.event;
+                                    var charCode = (evt.which) ? evt.which : evt.keyCode;
+                                    if ((charCode > 31 && charCode < 48) || charCode > 57) {
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                            </script>
+                        </div>
+
+                        <div class="col-lg-2">
+                            <label for="LabelforPhone" class="col-form-label"> <span></span> </label>
+                            <button type="button" class="btn btn-primary form-control" style="text-align:center" onclick="ValidateOTP();">Validate OTP</button>
+                        </div>
+                    </div>
+
+                    <div id="DivComplaint" hidden>
+
+                        <div class="form-group row">
+                            <div class="col-lg-5">
+                                <label for="LabelforDetails" class="col-form-label">Feedback Detail/Testimonial<span class="kv-reqd">*</span></label>
+                                @Html.TextAreaFor(model => model.Details, new { @class = "form-control", @placeholder = "Enter Feedback Details" })
+                                @Html.ValidationMessageFor(m => m.Details, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-5 id_200">
+                                <label for="LabelforService" class="col-form-label">Choose Service Rate <span class="kv-reqd">*</span></label>
+
+                                <select id="Service" name="Service" class="selectpicker show-tick form-control"
+                                        data-live-search="true" title="Select Rating">
+                                    <option value="1">Best</option>
+                                    <option value="2">Better</option>
+                                    <option value="3">Good</option>
+                                    <option value="4">Bad</option>
+                                    <option value="5">Verybad</option>
+                                </select>
+                                <input type="hidden" name="SearchButton" value="true">
+                                @Html.ValidationMessageFor(m => m.Service, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <script type="text/javascript">
+                            function SetPriorityVal() {
+                                $("div.id_200 select").val('@Model.Service');
+                        }
+                        SetPriorityVal();
+                        </script>
+                        <div class="form-group row">
+                            <div class="col-lg-3">
+                            </div>
+
+                            <div class="col-lg-1 ">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                            <div class="col-lg-1 ">
+                                <button type="button" class="btn btn-primary" title="Cancel" onclick="CancelInfo();">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </form>
+        </div>
+    }
+</div>
+
+
+
+
