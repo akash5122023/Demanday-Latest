@@ -74,10 +74,7 @@
     <None Remove="Modules\Payroll\TabSalaryDetail\TabSalaryDetailEditor.ts" />
     <None Remove="Modules\Payroll\TabTaxableSalarySlab\TabTaxableSalarySlabEditor.ts" />
     <TypeScriptCompile Remove="Modules\Common\Helpers\J.initSkins.ts" />
-    <Content Include="wwwroot\Reporting\wkhtmltopdf.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
+    
     <None Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
