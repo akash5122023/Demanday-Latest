@@ -64,6 +64,7 @@
         OwnerTenantId?: number;
         OwnerUrl?: string;
         OwnerPlan?: string;
+        EmailFormat?: string;
     }
 
     export namespace DemandayTeleMarketingEnquiryRow {
@@ -144,7 +145,8 @@
             OwnerTeamsId = "OwnerTeamsId",
             OwnerTenantId = "OwnerTenantId",
             OwnerUrl = "OwnerUrl",
-            OwnerPlan = "OwnerPlan"
+            OwnerPlan = "OwnerPlan",
+            EmailFormat = "EmailFormat"
         }
     }
 }

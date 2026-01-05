@@ -31,6 +31,12 @@ namespace AdvanceCRM.Demanday
             get => fields.TeleMarketingEnquiryId[this];
             set => fields.TeleMarketingEnquiryId[this] = value;
         }
+        [DisplayName("Email Format"), Size(100)]
+public String EmailFormat
+{
+    get => fields.EmailFormat[this];
+    set => fields.EmailFormat[this] = value;
+}
 
         [DisplayName("Company Name"), Size(200), QuickSearch, NameProperty]
         public String CompanyName
@@ -745,6 +751,7 @@ namespace AdvanceCRM.Demanday
             public Int32Field OwnerTenantId;
             public StringField OwnerUrl;
             public StringField OwnerPlan;
+            public StringField EmailFormat;
         }
     }
 }

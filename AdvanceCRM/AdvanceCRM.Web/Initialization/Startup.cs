@@ -87,6 +87,11 @@ namespace AdvanceCRM
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Fix for sync IO export error: allow synchronous IO for Kestrel and IIS
+            services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
+            });
             services.AddSingleton<ITypeSource>(new DefaultTypeSource(new[]
             {
                 typeof(LocalTextRegistry).Assembly,

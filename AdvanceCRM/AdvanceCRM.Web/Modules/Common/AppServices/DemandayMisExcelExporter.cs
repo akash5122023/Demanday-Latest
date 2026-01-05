@@ -8,6 +8,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
     {
         public static byte[] ExportToExcel(List<DemandayMisRow> demandaymisRows)
         {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using var package = new ExcelPackage();
             var ws = package.Workbook.Worksheets.Add("MIS");
             // Headers

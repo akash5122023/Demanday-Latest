@@ -17,7 +17,7 @@ namespace AdvanceCRM.Demanday {
             let buttons = super.getButtons();
 
             // Example: remove default add button
-            buttons.shift();
+            //buttons.shift();
             return buttons;
         }
     }

@@ -207,14 +207,14 @@ namespace AdvanceCRM.Demanday.Endpoints
             var fileName = "QualityList_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".xlsx";
             return Serenity.Web.ExcelContentResult.Create(bytes, fileName);
         }
-        public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
-            [FromServices] IDemandayQualityListHandler handler,
-            [FromServices] IExcelExporter exporter)
-        {
-            var data = List(connection, request, handler).Entities;
-            var bytes = exporter.Export(data, typeof(Columns.DemandayQualityColumns), request.ExportColumns);
-            return ExcelContentResult.Create(bytes, "DemandayQualityList_" +
-                DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
-        }
+       // public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
+        //    [FromServices] IDemandayQualityListHandler handler,
+        //    [FromServices] IExcelExporter exporter)
+        //{
+         //   var data = List(connection, request, handler).Entities;
+         //   var bytes = exporter.Export(data, typeof(Columns.DemandayQualityColumns), request.ExportColumns);
+          //  return ExcelContentResult.Create(bytes, "DemandayQualityList_" +
+          //      DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
+        //}
     }
 }

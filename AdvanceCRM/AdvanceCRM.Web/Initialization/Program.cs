@@ -3,12 +3,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Sentry;
 using Serilog;
+using OfficeOpenXml;
 namespace AdvanceCRM
 {
     public class Program
     {
         public static void Main(string[] args)
         {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .CreateBootstrapLogger();

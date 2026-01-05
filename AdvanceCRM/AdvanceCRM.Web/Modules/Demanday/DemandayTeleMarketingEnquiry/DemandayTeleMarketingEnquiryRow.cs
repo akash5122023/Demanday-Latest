@@ -186,7 +186,7 @@ namespace AdvanceCRM.Demanday
             set => fields.Md5[this] = value;
         }
 
-        [DisplayName("Owner"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jOwner"), TextualField("OwnerUsername")]
+        [DisplayName("Owner"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jOwner"), TextualField("OwnerUsername"),ReadOnly(true)]
         [LookupEditor(typeof(UserRow))]
         public Int32? OwnerId
         {
@@ -214,6 +214,12 @@ namespace AdvanceCRM.Demanday
             get => fields.OwnerEmail[this];
             set => fields.OwnerEmail[this] = value;
         }
+        [DisplayName("Email Format"), Size(100)]
+public String EmailFormat
+{
+    get => fields.EmailFormat[this];
+    set => fields.EmailFormat[this] = value;
+}
 
         [DisplayName("Owner Upper Level"), Expression("jOwner.[UpperLevel]")]
         public Int32? OwnerUpperLevel
@@ -544,6 +550,7 @@ namespace AdvanceCRM.Demanday
             public Int32Field OwnerTenantId;
             public StringField OwnerUrl;
             public StringField OwnerPlan;
+            public StringField EmailFormat;
         }
     }
 }

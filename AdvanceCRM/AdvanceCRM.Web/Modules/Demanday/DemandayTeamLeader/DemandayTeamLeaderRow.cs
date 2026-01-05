@@ -655,6 +655,12 @@ namespace AdvanceCRM.Demanday
             get => fields.OwnerPlan[this];
             set => fields.OwnerPlan[this] = value;
         }
+         [DisplayName("Email Format"), Size(100)]
+ public String EmailFormat
+ {
+     get => fields.EmailFormat[this];
+     set => fields.EmailFormat[this] = value;
+ }
 
         public DemandayTeamLeaderRow()
             : base()
@@ -668,6 +674,7 @@ namespace AdvanceCRM.Demanday
 
         public class RowFields : RowFieldsBase
         {
+            public StringField EmailFormat;
             public Int32Field Id;
             public Int32Field DemandayEnquiryId;
             public StringField CompanyName;

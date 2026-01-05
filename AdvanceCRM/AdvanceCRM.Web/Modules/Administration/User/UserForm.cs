@@ -10,11 +10,11 @@
     {
         [Tab("User Management")]
         public Int32 CompanyId { get; set; }
-        // Tenant / URL are SaaS-only concepts; hide them in single-tenant mode
-        //[ReadOnly(true)]
-        //public Int32 TenantId { get; set; }
-        //[ReadOnly(true)]
-        //public String Url { get; set; }
+    // Tenant / URL are SaaS-only concepts; hide them in single-tenant mode
+    [ReadOnly(true)]
+    public Int32 TenantId { get; set; }
+    [ReadOnly(true)]
+    public String Url { get; set; }
         public String Username { get; set; }
         public String DisplayName { get; set; }
         [EmailEditor]

@@ -83,6 +83,8 @@ namespace AdvanceCRM.Demanday.Forms
         public string RevenueLink { get; set; }
         [HalfWidth]
         public string AdressLink { get; set; }
+        [HalfWidth]
+public string EmailFormat { get; set; }
 
 
         [Category("Additional Details")]

@@ -100,9 +100,10 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var demandaymis = new DemandayMisRow
                             {
                                 Id = GetInt(ws.Cells[row, 1].Value),
-                                CompanyName = ws.Cells[row, 5].Text,
-                                FirstName = ws.Cells[row, 6].Text,
-                                LastName = ws.Cells[row, 7].Text,
+                                Slot = ws.Cells[row, 2].Text,
+                                CompanyName = ws.Cells[row, 3].Text,
+                                FirstName = ws.Cells[row, 4].Text,
+                                LastName = ws.Cells[row, 5].Text,
                                 Title = ws.Cells[row, 8].Text,
                                 Email = ws.Cells[row, 9].Text,
                                 WorkPhone = ws.Cells[row, 10].Text,

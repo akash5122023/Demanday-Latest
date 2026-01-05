@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayTeamLeaderRow {
+        EmailFormat?: string;
         Id?: number;
         DemandayEnquiryId?: number;
         CompanyName?: string;
@@ -108,6 +109,7 @@
         export const updatePermission = 'DemandayTeamLeader:Update';
 
         export declare const enum Fields {
+            EmailFormat = "EmailFormat",
             Id = "Id",
             DemandayEnquiryId = "DemandayEnquiryId",
             CompanyName = "CompanyName",

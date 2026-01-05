@@ -1,0 +1,44 @@
+# =========================
+# .NET / Serenity build artifacts
+# =========================
+bin/
+obj/
+publish/
+
+*.dll
+*.exe
+*.pdb
+*.so
+*.dylib
+
+# =========================
+# Visual Studio / IDE
+# =========================
+.vs/
+*.user
+*.suo
+*.cache
+*.log
+
+# Rider
+.idea/
+
+# =========================
+# Frontend
+# =========================
+node_modules/
+
+# =========================
+# OS
+# =========================
+Thumbs.db
+.DS_Store
+
+# =========================
+# Serenity specific
+# =========================
+# Machine-specific config
+appsettings.machine.json
+
+# Generated typings
+AdvanceCRM/AdvanceCRM.Web/Imports/ServerTypings/ThirdParty.*

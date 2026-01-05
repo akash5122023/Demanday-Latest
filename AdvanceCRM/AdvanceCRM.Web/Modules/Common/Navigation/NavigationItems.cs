@@ -47,22 +47,22 @@ using Serenity.Navigation;
 
 [assembly: NavigationMenu(1000, "Demanday EMail", icon: "fa-gift", Title = "Products")]
 [assembly: NavigationLink(1451, "Demanday/Demanday Enquiry", typeof(DemandayEnquiryController), icon: "fa-sms", Permission = "DemandayEnquiry:Read", Title = "Enquiry")]
-[assembly: NavigationLink(1452, "Demanday/TeamLeader", typeof(DemandayTeamLeaderController), icon: "fa-mail-bulk", Permission = "TeamLeader:Read", Title = "Team Leader")]
-[assembly: NavigationLink(1453, "Demanday/Quality", typeof(DemandayQualityController), icon: "fa-mail-bulk", Permission = "Quality:Read", Title = "Quality")]
-[assembly: NavigationLink(1454, "Demanday/MIS", typeof(DemandayMisController), icon: "fa-mail-bulk", Permission = "MIS:Read", Title = "MIS")]
+[assembly: NavigationLink(1452, "Demanday/TeamLeader", typeof(DemandayTeamLeaderController), icon: "fa-mail-bulk", Permission = "DemandayTeamLeader:Read", Title = "Team Leader")]
+[assembly: NavigationLink(1453, "Demanday/Quality", typeof(DemandayQualityController), icon: "fa-mail-bulk", Permission = "DemandayQuality:Read", Title = "Quality")]
+[assembly: NavigationLink(1454, "Demanday/MIS", typeof(DemandayMisController), icon: "fa-mail-bulk", Permission = "DemandayMIS:Read", Title = "MIS")]
 //[assembly: NavigationLink(1456, "Demanday/EMailTeam", typeof(EMailTeamController), icon: "fa-mail-bulk", Permission = "EMailTeam:Read", Title = "EMailTeam")]
 [assembly: NavigationLink(1457, "Demanday/Enquiry Contacts", typeof(EnquiryContactsController), icon: "fa-mail-bulk", Permission = "EnquiryContacts:Read", Title = "Enquiry Contacts")]
 
 
-[assembly: NavigationLink(1461, "Demanday/TM Enquiry", typeof(DemandayTeleMarketingEnquiryController), icon: "fa-phone", Permission = "TeleMarketingEnquiry:Read", Title = "TM Enquiry")]
-[assembly: NavigationLink(1462, "Demanday/TM TeamLeader", typeof(DemandayTeleMarketingTeamLeaderController), icon: "fa-phone", Permission = "TeleMarketingTeamLeader:Read", Title = "TM TeamLeader")]
-[assembly: NavigationLink(1463, "Demanday/TM Quality", typeof(DemandayTeleMarketingQualiltyController), icon: "fa-phone", Permission = "TeleMarketingQualilty:Read", Title = "TM Quality")]
-[assembly: NavigationLink(1464, "Demanday/TM MIS", typeof(DemandayTeleMarketingMISController), icon: "fa-phone", Permission = "TeleMarketingMis:Read", Title = "TM MIS")]
-[assembly: NavigationLink(1465, "Demanday/TM Contacts", typeof(DemandayTeleMarketingContactsController), icon: "fa-phone", Permission = "TeleMarketingContacts:Read", Title = "TM Contacts")]
+[assembly: NavigationLink(1461, "Demanday/TM Enquiry", typeof(DemandayTeleMarketingEnquiryController), icon: "fa-phone", Permission = "DemandayTeleMarketingEnquiry:Read", Title = "TM Enquiry")]
+[assembly: NavigationLink(1462, "Demanday/TM TeamLeader", typeof(DemandayTeleMarketingTeamLeaderController), icon: "fa-phone", Permission = "DemandayTeleMarketingTeamLeader:Read", Title = "TM TeamLeader")]
+[assembly: NavigationLink(1463, "Demanday/TM Quality", typeof(DemandayTeleMarketingQualiltyController), icon: "fa-phone", Permission = "DemandayTeleMarketingQualilty:Read", Title = "TM Quality")]
+[assembly: NavigationLink(1464, "Demanday/TM MIS", typeof(DemandayTeleMarketingMISController), icon: "fa-phone", Permission = "DemandayTeleMarketingMIS:Read", Title = "TM MIS")]
+[assembly: NavigationLink(1465, "Demanday/TM Contacts", typeof(DemandayTeleMarketingContactsController), icon: "fa-phone", Permission = "DemandayTeleMarketingContacts:Read", Title = "TM Contacts")]
 //[assembly: NavigationLink(1466, "Demanday/TM Team", typeof(TeleMarketingTeammController), icon: "fa-phone", Permission = "TeleMarketingTeam:Read", Title = "TM Team")]
 
-[assembly: NavigationLink(1455, "Demanday/EmailTeam Contacts", typeof(DemandayContactsController), icon: "fa-mail-bulk", Permission = "FLS:Read", Title = "ET Contacts")]
-[assembly: NavigationLink(1473, "Demanday/Verification", typeof(DemandayVerificationController), icon: "fa-mail-bulk", Permission = "Verification:Read", Title = "Verification")]
+[assembly: NavigationLink(1455, "Demanday/EmailTeam Contacts", typeof(DemandayContactsController), icon: "fa-mail-bulk", Permission = "DemandayContacts:Read", Title = "ET Contacts")]
+[assembly: NavigationLink(1473, "Demanday/Verification", typeof(DemandayVerificationController), icon: "fa-mail-bulk", Permission = "DemandayVerification:Read", Title = "Verification")]
 
 
 [assembly: NavigationLink(1200, "Enquiry", typeof(EnquiryController), icon: "fa-group", Permission = "Enquiry:Read", Title = "New Lead")]

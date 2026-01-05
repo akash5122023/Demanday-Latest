@@ -20,6 +20,7 @@
         CompanyLink: Serenity.StringEditor;
         RevenueLink: Serenity.StringEditor;
         AddressLink: Serenity.StringEditor;
+        EmailFormat: Serenity.StringEditor;
         Link: Serenity.StringEditor;
         QaStatus: Serenity.StringEditor;
         DeliveryStatus: Serenity.StringEditor;
@@ -81,6 +82,7 @@
                     'CompanyLink', w0,
                     'RevenueLink', w0,
                     'AddressLink', w0,
+                    'EmailFormat', w0,
                     'Link', w0,
                     'QaStatus', w0,
                     'DeliveryStatus', w0,
