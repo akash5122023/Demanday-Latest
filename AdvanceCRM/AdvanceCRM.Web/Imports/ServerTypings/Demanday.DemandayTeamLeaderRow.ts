@@ -16,8 +16,8 @@
         ZipCode?: string;
         Country?: string;
         Industry?: string;
-        Revenue?: number;
-        CompanyEmployeeSize?: number;
+        Revenue?: string;
+        CompanyEmployeeSize?: string;
         ProfileLink?: string;
         CompanyLink?: string;
         RevenueLink?: string;

@@ -74,9 +74,9 @@ namespace AdvanceCRM.Demanday.Columns
         public string ZipCode { get; set; }
         public string Country { get; set; }
         public string Industry { get; set; }
-        public decimal? Revenue { get; set; }
+        public string Revenue { get; set; }
 
-        public int? CompanyEmployeeSize { get; set; }
+        public string CompanyEmployeeSize { get; set; }
         public string ProfileLink { get; set; }
         public string CompanyLink { get; set; }
         public string RevenueLink { get; set; }

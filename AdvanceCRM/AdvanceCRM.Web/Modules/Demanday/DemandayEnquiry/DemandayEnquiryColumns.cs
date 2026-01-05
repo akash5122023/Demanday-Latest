@@ -28,8 +28,8 @@ namespace AdvanceCRM.Demanday.Columns
         public String ZipCode { get; set; }
         public String Country { get; set; }
         public String Industry { get; set; }
-        public Decimal Revenue { get; set; }
-        public int CompanyEmployeeSize { get; set; }
+        public string Revenue { get; set; }
+        public string CompanyEmployeeSize { get; set; }
         public String ProfileLink { get; set; }
         public String CompanyLink { get; set; }
         public String RevenueLink { get; set; }

@@ -8,8 +8,8 @@
         AlternativeNumber: Serenity.StringEditor;
         CompanyName: Serenity.StringEditor;
         Industry: Serenity.StringEditor;
-        Revenue: Serenity.DecimalEditor;
-        CompanyEmployeeSize: Serenity.IntegerEditor;
+        Revenue: Serenity.StringEditor;
+        CompanyEmployeeSize: Serenity.StringEditor;
         Street: Serenity.StringEditor;
         City: Serenity.StringEditor;
         State: Serenity.StringEditor;
@@ -38,9 +38,7 @@
 
                 var s = Serenity;
                 var w0 = s.StringEditor;
-                var w1 = s.DecimalEditor;
-                var w2 = s.IntegerEditor;
-                var w3 = s.LookupEditor;
+                var w1 = s.LookupEditor;
 
                 Q.initFormType(DemandayTeleMarketingEnquiryForm, [
                     'FirstName', w0,
@@ -51,8 +49,8 @@
                     'AlternativeNumber', w0,
                     'CompanyName', w0,
                     'Industry', w0,
-                    'Revenue', w1,
-                    'CompanyEmployeeSize', w2,
+                    'Revenue', w0,
+                    'CompanyEmployeeSize', w0,
                     'Street', w0,
                     'City', w0,
                     'State', w0,
@@ -66,7 +64,7 @@
                     'Tenurity', w0,
                     'Code', w0,
                     'Md5', w0,
-                    'OwnerId', w3
+                    'OwnerId', w1
                 ]);
             }
         }

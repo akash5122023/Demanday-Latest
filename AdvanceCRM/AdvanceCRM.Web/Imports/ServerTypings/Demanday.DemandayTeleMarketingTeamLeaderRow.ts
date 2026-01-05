@@ -14,9 +14,9 @@
         State?: string;
         ZipCode?: string;
         Country?: string;
-        CompanyEmployeeSize?: number;
+        CompanyEmployeeSize?: string;
         Industry?: string;
-        Revenue?: number;
+        Revenue?: string;
         ProfileLink?: string;
         CompanyLink?: string;
         RevenueLink?: string;

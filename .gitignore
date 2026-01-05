@@ -42,3 +42,7 @@ appsettings.machine.json
 
 # Generated typings
 AdvanceCRM/AdvanceCRM.Web/Imports/ServerTypings/ThirdParty.*
+/AdvanceCRM/AdvanceCRM.Web/wwwroot/Reporting/wkhtmltopdf/lib/wkhtmltox.lib
+/AdvanceCRM/AdvanceCRM.Web/appsettings.json
+/AdvanceCRM/AdvanceCRM.Web/ExternalAppSetting.config
+/AdvanceCRM/AdvanceCRM.Web/internal-nlog.txt

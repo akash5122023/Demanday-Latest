@@ -20,9 +20,9 @@
         ZipCode?: string;
         Country?: string;
         Continents?: string;
-        CompanyEmployeeSize?: number;
+        CompanyEmployeeSize?: string;
         Industry?: string;
-        Revenue?: number;
+        Revenue?: string;
         ProfileLink?: string;
         CompanyLink?: string;
         RevenueLink?: string;

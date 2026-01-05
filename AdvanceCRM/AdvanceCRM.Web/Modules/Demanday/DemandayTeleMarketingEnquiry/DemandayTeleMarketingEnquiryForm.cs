@@ -32,9 +32,9 @@ namespace AdvanceCRM.Demanday.Forms
         [HalfWidth]
         public string Industry { get; set; }
         [HalfWidth]
-        public decimal? Revenue { get; set; }
+        public string Revenue { get; set; }
         [HalfWidth, DisplayName("Employee Size")]
-        public Int32 CompanyEmployeeSize { get; set; }
+        public string CompanyEmployeeSize { get; set; }
 
         [Category("Address Information")]
         [FullWidth]
