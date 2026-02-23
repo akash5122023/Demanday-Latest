@@ -44,3 +44,4 @@ appsettings.machine.json
 AdvanceCRM/AdvanceCRM.Web/Imports/ServerTypings/ThirdParty.*
 /AdvanceCRM/AdvanceCRM.Web/wwwroot/Reporting/wkhtmltopdf/lib/wkhtmltox.lib
 /AdvanceCRM/AdvanceCRM.Web/internal-nlog.txt
+/AdvanceCRM/AdvanceCRM.Web/appsettings.json
