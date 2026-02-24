@@ -110,7 +110,7 @@ namespace AdvanceCRM.Membership.Pages
             {
                 if (systemMacAddress.Contains(permittedMacAddress[i]))
                 {
-                    //elig_status = true;
+                    elig_status = true;
                     break;
                 }
             }

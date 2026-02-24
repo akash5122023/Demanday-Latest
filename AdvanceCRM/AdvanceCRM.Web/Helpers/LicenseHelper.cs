@@ -46,6 +46,22 @@ namespace AdvanceCRM.Web.Helpers
             // normalize stored requestKey (uppercase, no spaces)
             var requestKey = Regex.Replace(requestKeyRaw, @"\s+", "").ToUpperInvariant();
 
+            // First check if activation key and date are valid (bypass MAC check for already activated systems)
+            if (!string.IsNullOrEmpty(activationKey) && !string.IsNullOrEmpty(endDate))
+            {
+                if (DateTime.TryParseExact(endDate, "MM/dd/yyyy",
+                                           System.Globalization.CultureInfo.InvariantCulture,
+                                           System.Globalization.DateTimeStyles.None,
+                                           out var parsedDate)
+                    && parsedDate.Date >= DateTime.UtcNow.Date)
+                {
+                    // If activation key exists and date is valid, consider it activated
+                    // This allows already activated systems to work without MAC address validation
+                    return true;
+                }
+            }
+
+            // Fallback: MAC address based validation for new activations
             var macs = NetworkInterface.GetAllNetworkInterfaces()
                         .Select(nic => nic.GetPhysicalAddress().ToString());
 
