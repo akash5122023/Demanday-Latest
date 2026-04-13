@@ -4,13 +4,14 @@ using Serenity.ComponentModel;
 using Serenity.Data;
 using Serenity.Data.Mapping;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
 namespace AdvanceCRM.Demanday
 {
     [ConnectionKey("Default"), Module("Demanday"), TableName("[dbo].[DemandayTeleMarketingQualilty]")]
-    [DisplayName("TM Qualilty"), InstanceName("Demanday Tele Marketing Qualilty")]
+    [DisplayName("TM Quality"), InstanceName("Demanday Tele Marketing Qualilty")]
     [ReadPermission("DemandayTeleMarketingQualilty:Read")]
     [InsertPermission("DemandayTeleMarketingQualilty:Insert")]
     [UpdatePermission("DemandayTeleMarketingQualilty:Update")]
@@ -598,12 +599,23 @@ public String EmailFormat
             get => fields.OwnerPlan[this];
             set => fields.OwnerPlan[this] = value;
         }
-
+        [DemandayTeleMarketingEnquiryQADetailsEditor, NotMapped]
+        [MasterDetailRelation(foreignKey: "EnquiryId", IncludeColumns = "QuestionText,AnswerText")]
+        public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails
+        {
+            get => fields.QADetails[this];
+            set => fields.QADetails[this] = value;
+        }
         public DemandayTeleMarketingQualiltyRow()
             : base()
         {
         }
-
+        [DisplayName("Attachments"), Size(500)]
+        public String Attachments
+        {
+            get => fields.Attachments[this];
+            set => fields.Attachments[this] = value;
+        }
         public DemandayTeleMarketingQualiltyRow(RowFields fields)
             : base(fields)
         {
@@ -611,6 +623,8 @@ public String EmailFormat
 
         public class RowFields : RowFieldsBase
         {
+            public StringField Attachments;
+            public RowListField<DemandayTeleMarketingEnquiryQADetailsRow> QADetails;
             public Int32Field Id;
             public StringField Slot;
             public StringField AgentsName;

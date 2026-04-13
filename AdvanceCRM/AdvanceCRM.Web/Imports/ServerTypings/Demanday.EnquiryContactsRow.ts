@@ -65,6 +65,7 @@
         OwnerTenantId?: number;
         OwnerUrl?: string;
         OwnerPlan?: string;
+        CampaignId?: string;
     }
 
     export namespace EnquiryContactsRow {
@@ -146,7 +147,8 @@
             OwnerTeamsId = "OwnerTeamsId",
             OwnerTenantId = "OwnerTenantId",
             OwnerUrl = "OwnerUrl",
-            OwnerPlan = "OwnerPlan"
+            OwnerPlan = "OwnerPlan",
+            CampaignId = "CampaignId"
         }
     }
 }

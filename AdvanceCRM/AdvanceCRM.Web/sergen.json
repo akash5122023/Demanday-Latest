@@ -20,9 +20,27 @@
           "PermissionKey": "Administration:General"
         },
         {
+          "Tablename": "dbo.ClientSupression",
+          "Identifier": "ClientSupression",
+          "Module": "Toolkit",
+          "PermissionKey": "Administration:General"
+        },
+        {
           "Tablename": "dbo.Country",
           "Identifier": "Country",
           "Module": "Administration",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.DemandayCampaignId",
+          "Identifier": "DemandayCampaignId",
+          "Module": "Masters",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.DemandayCompetitor",
+          "Identifier": "DemandayCompetitor",
+          "Module": "Toolkit",
           "PermissionKey": "Administration:General"
         },
         {
@@ -38,6 +56,24 @@
           "PermissionKey": "Administration:General"
         },
         {
+          "Tablename": "dbo.DemandayEnquiryCampaignQuestions",
+          "Identifier": "DemandayEnquiryCampaignQuestions",
+          "Module": "Masters",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.DemandayEnquiryQuestionAnswers",
+          "Identifier": "DemandayEnquiryQuestionAnswers",
+          "Module": "Masters",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.DemandayMasterAccount",
+          "Identifier": "DemandayMasterAccount",
+          "Module": "Masters",
+          "PermissionKey": "Administration:General"
+        },
+        {
           "Tablename": "dbo.DemandayMIS",
           "Identifier": "DemandayMis",
           "Module": "Demanday",
@@ -47,6 +83,12 @@
           "Tablename": "dbo.DemandayQuality",
           "Identifier": "DemandayQuality",
           "Module": "Demanday",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.DemandaySpecs",
+          "Identifier": "DemandaySpecs",
+          "Module": "Toolkit",
           "PermissionKey": "Administration:General"
         },
         {
@@ -66,6 +108,18 @@
           "Identifier": "DemandayTeleMarketingEnquiry",
           "Module": "Demanday",
           "PermissionKey": "DemandayTeleMarketingEnquiry:General"
+        },
+        {
+          "Tablename": "dbo.DemandayTeleMarketingEnquiryCampaignQuestions",
+          "Identifier": "DemandayTeleMarketingEnquiryCampaignQuestions",
+          "Module": "Masters",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.DemandayTeleMarketingEnquiryQuestionAnswers",
+          "Identifier": "DemandayTeleMarketingEnquiryQuestionAnswers",
+          "Module": "Masters",
+          "PermissionKey": "Administration:General"
         },
         {
           "Tablename": "dbo.DemandayTeleMarketingMIS",
@@ -119,6 +173,18 @@
           "Tablename": "dbo.LoyalityProgramDetail",
           "Identifier": "LoyalityProgramDetail",
           "Module": "Default",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.MasterSupression",
+          "Identifier": "MasterSupression",
+          "Module": "Toolkit",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.OpenCampaign",
+          "Identifier": "OpenCampaign",
+          "Module": "Toolkit",
           "PermissionKey": "Administration:General"
         },
         {
@@ -503,6 +569,12 @@
           "Tablename": "dbo.tabWarehouseType",
           "Identifier": "TabWarehouseType",
           "Module": "Payroll",
+          "PermissionKey": "Administration:General"
+        },
+        {
+          "Tablename": "dbo.TalCampaign",
+          "Identifier": "TalCampaign",
+          "Module": "Toolkit",
           "PermissionKey": "Administration:General"
         },
         {

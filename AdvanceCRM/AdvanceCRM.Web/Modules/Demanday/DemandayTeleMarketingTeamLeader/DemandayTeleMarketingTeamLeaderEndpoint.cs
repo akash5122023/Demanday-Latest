@@ -107,7 +107,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     State = demandaytelemarketingteamleader.State,
                     ZipCode = demandaytelemarketingteamleader.ZipCode,
                     Country = demandaytelemarketingteamleader.Country,
-                    //CompanyEmp = teamleader.CompanyName,      // Mapping CompanyName to CompanyEmp
+                    CampaignId = demandaytelemarketingteamleader.CampaignId,      // Mapping CompanyName to CompanyEmp
                     Industry = demandaytelemarketingteamleader.Industry,
                     Revenue = demandaytelemarketingteamleader.Revenue,
                     CompanyEmployeeSize = demandaytelemarketingteamleader.CompanyEmployeeSize,
@@ -118,12 +118,39 @@ namespace AdvanceCRM.Demanday.Endpoints
                     Tenurity = demandaytelemarketingteamleader.Tenurity,
                     Code = demandaytelemarketingteamleader.Code,
                     Md5 = demandaytelemarketingteamleader.Md5,
+                    Attachments = demandaytelemarketingteamleader.Attachments,
                     OwnerId = demandaytelemarketingteamleader.OwnerId
                 };
 
                 // 3️⃣ Insert into Quality table
 
                 demandaytelemarketingqualityConn.Insert(demandaytelemarketingqualilty);
+
+                // Retrieve the auto-generated Id via @@IDENTITY
+                using (var cmd = demandaytelemarketingqualityConn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT CAST(@@IDENTITY AS INT)";
+                    var newId = cmd.ExecuteScalar();
+                    if (newId != null && newId != DBNull.Value)
+                        demandaytelemarketingqualilty.Id = Convert.ToInt32(newId);
+                }
+
+                // 4️⃣ Move QADetails from TeamLeader to new Quality record
+                var qaFlds = DemandayTeleMarketingEnquiryQADetailsRow.Fields;
+                var qaDetails = demandaytelemarketingteamleaderConn.List<DemandayTeleMarketingEnquiryQADetailsRow>(q =>
+                    q.Select(qaFlds.Id, qaFlds.EnquiryId, qaFlds.QuestionId, qaFlds.AnswerId)
+                     .Where(qaFlds.EnquiryId == id));
+
+                foreach (var qa in qaDetails)
+                {
+                    demandaytelemarketingteamleaderConn.Insert(new DemandayTeleMarketingEnquiryQADetailsRow
+                    {
+                        EnquiryId = demandaytelemarketingqualilty.Id,
+                        QuestionId = qa.QuestionId,
+                        AnswerId = qa.AnswerId
+                    });
+                    demandaytelemarketingteamleaderConn.DeleteById<DemandayTeleMarketingEnquiryQADetailsRow>(qa.Id.Value);
+                }
 
                 demandaytelemarketingteamleaderConn.DeleteById<DemandayTeleMarketingTeamLeaderRow>(id);
 

@@ -85,6 +85,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     PrimaryReason = demandaytelemarketingquality.PrimaryReason,
                     Category = demandaytelemarketingquality.Category,
                     Comments = demandaytelemarketingquality.Comments,
+                    CampaignId = demandaytelemarketingquality.CampaignId,
                     QaStatus = demandaytelemarketingquality.QaStatus,
                     DeliveryStatus = demandaytelemarketingquality.DeliveryStatus,
                     AgentName = demandaytelemarketingquality.AgentName,
@@ -125,6 +126,32 @@ namespace AdvanceCRM.Demanday.Endpoints
                 };
                 demandaytelemarketingmisConn.Insert(demandayTeleMarketingMIS);
 
+                // Retrieve the auto-generated Id via @@IDENTITY
+                using (var cmd = demandaytelemarketingmisConn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT CAST(@@IDENTITY AS INT)";
+                    var newId = cmd.ExecuteScalar();
+                    if (newId != null && newId != DBNull.Value)
+                        demandayTeleMarketingMIS.Id = Convert.ToInt32(newId);
+                }
+
+                // Move QADetails from Quality to new MIS record
+                var qaFlds = DemandayTeleMarketingEnquiryQADetailsRow.Fields;
+                var qaDetails = demandaytelemarketingqualityConn.List<DemandayTeleMarketingEnquiryQADetailsRow>(q =>
+                    q.Select(qaFlds.Id, qaFlds.EnquiryId, qaFlds.QuestionId, qaFlds.AnswerId)
+                     .Where(qaFlds.EnquiryId == id));
+
+                foreach (var qa in qaDetails)
+                {
+                    demandaytelemarketingqualityConn.Insert(new DemandayTeleMarketingEnquiryQADetailsRow
+                    {
+                        EnquiryId = demandayTeleMarketingMIS.Id,
+                        QuestionId = qa.QuestionId,
+                        AnswerId = qa.AnswerId
+                    });
+                    demandaytelemarketingqualityConn.DeleteById<DemandayTeleMarketingEnquiryQADetailsRow>(qa.Id.Value);
+                }
+
                 var demandaytelemarketingcontacts = new DemandayTeleMarketingContactsRow
                 {
                     Slot = demandaytelemarketingquality.Slot,
@@ -138,6 +165,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     CallDate = demandaytelemarketingquality.CallDate,
                     DateAudited = demandaytelemarketingquality.DateAudited,
                     DeliveryDate = demandaytelemarketingquality.DeliveryDate,
+                    CampaignId = demandaytelemarketingquality.CampaignId,
                     Source = demandaytelemarketingquality.Source,
                     VerificationMode = demandaytelemarketingquality.VerificationMode,
                     Asset1 = demandaytelemarketingquality.Asset1,

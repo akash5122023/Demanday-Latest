@@ -12,6 +12,9 @@ namespace AdvanceCRM.Demanday.Forms
     [BasedOnRow(typeof(EnquiryContactsRow), CheckNames = true)]
     public class EnquiryContactsForm
     {
+        [Category("Campaign Information")]
+        [HalfWidth]
+        public string CampaignId { get; set; }
         [Category("Contact Information")]
         [HalfWidth]
         public string FirstName { get; set; }

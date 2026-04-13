@@ -1,0 +1,50 @@
+/* Audio Player Styles for Demanday Forms */
+
+.audio-player-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.audio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.audio-item audio {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.audio-item .btn {
+    flex-shrink: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* Grid Audio Player Styles */
+.slick-cell .audio-player-container {
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.slick-cell .audio-item audio {
+    max-width: 180px;
+    height: 25px;
+}
+
+/* File Upload Editor Hint */
+.s-ImageUploadEditor .upload-hint {
+    font-size: 11px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.s-ImageUploadEditor .upload-hint::before {
+    content: "💡 ";
+}

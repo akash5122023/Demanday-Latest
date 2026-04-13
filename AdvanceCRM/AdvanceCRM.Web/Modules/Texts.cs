@@ -199,13 +199,13 @@ namespace AdvanceCRM
                     {
                         WhiteLabel = settings["WhiteLabel"];
                         WhiteLabelURL = settings["WhiteLabelURL"];
-                        FooterInfo = "Powered By <a href='" + WhiteLabelURL + "' target='_blank'>" + WhiteLabel + "</a>";
+                        FooterInfo = "Powered By Demanday";
                     }
                 }
                 public static LocalText WhiteLabel = "Bizplus";
                 public static LocalText WhiteLabelURL = "https://www.bizpluscrm.com";
                 public static LocalText FooterCopyright = "Copyright (c) " + System.DateTime.Now.Year + ".";
-                public static LocalText FooterInfo = "Powered By <a href='https://www.bizpluscrm.com' target='_blank'>BizplusCRM</a>";
+                public static LocalText FooterInfo = "Powered By Demanday";
                 public static LocalText FooterRights = "All rights reserved.";
                 public static LocalText GeneralSettings = "General Settings";
                 public static LocalText Language = "Language";

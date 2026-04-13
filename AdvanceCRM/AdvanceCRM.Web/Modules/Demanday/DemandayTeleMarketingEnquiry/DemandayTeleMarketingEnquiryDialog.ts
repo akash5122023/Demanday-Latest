@@ -15,5 +15,18 @@ namespace AdvanceCRM.Demanday {
 
         protected form = new DemandayTeleMarketingEnquiryForm(this.idPrefix);
 
+        constructor() {
+            super();
+
+            this.form.CampaignId.changeSelect2(e => {
+                this.form.QADetails.setCampaignId(this.form.CampaignId.value || null);
+            });
+        }
+
+        protected afterLoadEntity(): void {
+            super.afterLoadEntity();
+            this.form.QADetails.setCampaignId(this.entity ? (this.entity as DemandayTeleMarketingEnquiryRow).CampaignId : null);
+        }
+
     }
 }

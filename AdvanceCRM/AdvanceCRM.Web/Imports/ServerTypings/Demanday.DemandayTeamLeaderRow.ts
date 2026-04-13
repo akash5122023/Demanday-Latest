@@ -92,6 +92,8 @@
         OwnerTenantId?: number;
         OwnerUrl?: string;
         OwnerPlan?: string;
+        Attachments?: string;
+        CampaignId?: string;
     }
 
     export namespace DemandayTeamLeaderRow {
@@ -200,7 +202,9 @@
             OwnerTeamsId = "OwnerTeamsId",
             OwnerTenantId = "OwnerTenantId",
             OwnerUrl = "OwnerUrl",
-            OwnerPlan = "OwnerPlan"
+            OwnerPlan = "OwnerPlan",
+            Attachments = "Attachments",
+            CampaignId = "CampaignId"
         }
     }
 }

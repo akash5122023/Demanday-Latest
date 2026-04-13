@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayTeleMarketingEnquiryRow {
+        Attachments?: string;
         Id?: number;
         CompanyName?: string;
         FirstName?: string;
@@ -65,6 +66,8 @@
         OwnerUrl?: string;
         OwnerPlan?: string;
         EmailFormat?: string;
+        CampaignId?: string;
+        QADetails?: DemandayTeleMarketingEnquiryQADetailsRow[];
     }
 
     export namespace DemandayTeleMarketingEnquiryRow {
@@ -82,6 +85,7 @@
         export const updatePermission = 'DemandayTeleMarketingEnquiry:Update';
 
         export declare const enum Fields {
+            Attachments = "Attachments",
             Id = "Id",
             CompanyName = "CompanyName",
             FirstName = "FirstName",
@@ -146,7 +150,9 @@
             OwnerTenantId = "OwnerTenantId",
             OwnerUrl = "OwnerUrl",
             OwnerPlan = "OwnerPlan",
-            EmailFormat = "EmailFormat"
+            EmailFormat = "EmailFormat",
+            CampaignId = "CampaignId",
+            QADetails = "QADetails"
         }
     }
 }

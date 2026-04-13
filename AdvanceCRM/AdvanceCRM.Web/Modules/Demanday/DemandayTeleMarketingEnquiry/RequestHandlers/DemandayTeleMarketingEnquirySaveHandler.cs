@@ -44,6 +44,7 @@ namespace AdvanceCRM.Demanday
                     Title = Row.Title,
                     Email = Row.Email,
                     WorkPhone = Row.WorkPhone,
+                    CampaignId = Row.CampaignId,
                     AlternativeNumber = Row.AlternativeNumber,
                     Street = Row.Street,
                     City = Row.City,
@@ -61,11 +62,40 @@ namespace AdvanceCRM.Demanday
                     Code = Row.Code,
                     Link = Row.Link,
                     Md5 = Row.Md5,
+                    Attachments = Row.Attachments,
                     OwnerId = Row.OwnerId
                 };
 
-                var demandaytelemarketingteamleaderConn = sqlConnections.NewFor<DemandayTeleMarketingTeamLeaderRow>();
-                demandaytelemarketingteamleaderConn.Insert(demandaytelemarketingteamleader);
+                // Insert TeamLeader on a separate connection and retrieve the auto-generated Id
+                using var teamLeaderConn = sqlConnections.NewFor<DemandayTeleMarketingTeamLeaderRow>();
+                teamLeaderConn.Insert(demandaytelemarketingteamleader);
+
+                // Serenity Insert does not populate identity; retrieve via @@IDENTITY
+                // @@IDENTITY is connection-scoped (safe on this dedicated connection)
+                using (var cmd = teamLeaderConn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT CAST(@@IDENTITY AS INT)";
+                    var newId = cmd.ExecuteScalar();
+                    if (newId != null && newId != DBNull.Value)
+                        demandaytelemarketingteamleader.Id = Convert.ToInt32(newId);
+                }
+
+                // Copy QADetails using the current Connection (same transaction) to avoid deadlock
+                var qaFlds = DemandayTeleMarketingEnquiryQADetailsRow.Fields;
+                var qaDetails = Connection.List<DemandayTeleMarketingEnquiryQADetailsRow>(q =>
+                    q.Select(qaFlds.Id, qaFlds.EnquiryId, qaFlds.QuestionId, qaFlds.AnswerId)
+                     .Where(qaFlds.EnquiryId == Row.Id.Value));
+
+                foreach (var qa in qaDetails)
+                {
+                    Connection.Insert(new DemandayTeleMarketingEnquiryQADetailsRow
+                    {
+                        EnquiryId = demandaytelemarketingteamleader.Id,
+                        QuestionId = qa.QuestionId,
+                        AnswerId = qa.AnswerId
+                    });
+                    Connection.DeleteById<DemandayTeleMarketingEnquiryQADetailsRow>(qa.Id.Value);
+                }
 
                 Task.Run(() =>
                 {

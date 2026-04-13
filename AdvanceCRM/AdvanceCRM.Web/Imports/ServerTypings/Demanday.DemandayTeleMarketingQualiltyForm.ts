@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayTeleMarketingQualiltyForm {
+        CampaignId: Serenity.LookupEditor;
         Slot: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
@@ -40,6 +41,8 @@
         Tenurity: Serenity.StringEditor;
         Code: Serenity.StringEditor;
         Md5: Serenity.StringEditor;
+        Attachments: Serenity.ImageUploadEditor;
+        QADetails: DemandayTeleMarketingEnquiryQADetailsEditor;
         OwnerId: Serenity.LookupEditor;
     }
 
@@ -54,53 +57,58 @@
                 DemandayTeleMarketingQualiltyForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.StringEditor;
-                var w1 = s.DateTimeEditor;
-                var w2 = s.TextAreaEditor;
-                var w3 = s.LookupEditor;
+                var w0 = s.LookupEditor;
+                var w1 = s.StringEditor;
+                var w2 = s.DateTimeEditor;
+                var w3 = s.TextAreaEditor;
+                var w4 = s.ImageUploadEditor;
+                var w5 = DemandayTeleMarketingEnquiryQADetailsEditor;
 
                 Q.initFormType(DemandayTeleMarketingQualiltyForm, [
-                    'Slot', w0,
-                    'FirstName', w0,
-                    'LastName', w0,
-                    'Title', w0,
-                    'Email', w0,
-                    'WorkPhone', w0,
-                    'AlternativeNumber', w0,
-                    'CompanyName', w0,
-                    'Industry', w0,
-                    'Revenue', w0,
-                    'CompanyEmployeeSize', w0,
-                    'Street', w0,
-                    'City', w0,
-                    'State', w0,
-                    'ZipCode', w0,
-                    'Country', w0,
-                    'ProfileLink', w0,
-                    'CompanyLink', w0,
-                    'RevenueLink', w0,
-                    'AddressLink', w0,
-                    'EmailFormat', w0,
-                    'Link', w0,
-                    'QaStatus', w0,
-                    'DeliveryStatus', w0,
-                    'Category', w0,
-                    'CallDate', w1,
-                    'DateAudited', w1,
-                    'DeliveryDate', w1,
-                    'AgentName', w0,
-                    'QaName', w0,
-                    'TlName', w0,
-                    'PrimaryReason', w0,
-                    'Comments', w2,
-                    'Source', w0,
-                    'VerificationMode', w0,
-                    'Asset1', w0,
-                    'Asset2', w0,
-                    'Tenurity', w0,
-                    'Code', w0,
-                    'Md5', w0,
-                    'OwnerId', w3
+                    'CampaignId', w0,
+                    'Slot', w1,
+                    'FirstName', w1,
+                    'LastName', w1,
+                    'Title', w1,
+                    'Email', w1,
+                    'WorkPhone', w1,
+                    'AlternativeNumber', w1,
+                    'CompanyName', w1,
+                    'Industry', w1,
+                    'Revenue', w1,
+                    'CompanyEmployeeSize', w1,
+                    'Street', w1,
+                    'City', w1,
+                    'State', w1,
+                    'ZipCode', w1,
+                    'Country', w1,
+                    'ProfileLink', w1,
+                    'CompanyLink', w1,
+                    'RevenueLink', w1,
+                    'AddressLink', w1,
+                    'EmailFormat', w1,
+                    'Link', w1,
+                    'QaStatus', w1,
+                    'DeliveryStatus', w1,
+                    'Category', w1,
+                    'CallDate', w2,
+                    'DateAudited', w2,
+                    'DeliveryDate', w2,
+                    'AgentName', w1,
+                    'QaName', w1,
+                    'TlName', w1,
+                    'PrimaryReason', w1,
+                    'Comments', w3,
+                    'Source', w1,
+                    'VerificationMode', w1,
+                    'Asset1', w1,
+                    'Asset2', w1,
+                    'Tenurity', w1,
+                    'Code', w1,
+                    'Md5', w1,
+                    'Attachments', w4,
+                    'QADetails', w5,
+                    'OwnerId', w0
                 ]);
             }
         }

@@ -79,6 +79,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     LastName = demandayteamleader.LastName,
                     Title = demandayteamleader.Title,
                     Email = demandayteamleader.Email,
+                    CampaignId = demandayteamleader.CampaignId,
                     WorkPhone = demandayteamleader.WorkPhone,
                     AlternativeNumber = demandayteamleader.AlternativeNumber,
                     Street = demandayteamleader.Street,

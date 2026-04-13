@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayTeleMarketingEnquiryForm {
+        CampaignId: Serenity.LookupEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
         Title: Serenity.StringEditor;
@@ -23,6 +24,8 @@
         Tenurity: Serenity.StringEditor;
         Code: Serenity.StringEditor;
         Md5: Serenity.StringEditor;
+        Attachments: Serenity.ImageUploadEditor;
+        QADetails: DemandayTeleMarketingEnquiryQADetailsEditor;
         OwnerId: Serenity.LookupEditor;
     }
 
@@ -37,34 +40,39 @@
                 DemandayTeleMarketingEnquiryForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.StringEditor;
-                var w1 = s.LookupEditor;
+                var w0 = s.LookupEditor;
+                var w1 = s.StringEditor;
+                var w2 = s.ImageUploadEditor;
+                var w3 = DemandayTeleMarketingEnquiryQADetailsEditor;
 
                 Q.initFormType(DemandayTeleMarketingEnquiryForm, [
-                    'FirstName', w0,
-                    'LastName', w0,
-                    'Title', w0,
-                    'Email', w0,
-                    'WorkPhone', w0,
-                    'AlternativeNumber', w0,
-                    'CompanyName', w0,
-                    'Industry', w0,
-                    'Revenue', w0,
-                    'CompanyEmployeeSize', w0,
-                    'Street', w0,
-                    'City', w0,
-                    'State', w0,
-                    'ZipCode', w0,
-                    'Country', w0,
-                    'ProfileLink', w0,
-                    'CompanyLink', w0,
-                    'RevenueLink', w0,
-                    'AddressLink', w0,
-                    'EmailFormat', w0,
-                    'Tenurity', w0,
-                    'Code', w0,
-                    'Md5', w0,
-                    'OwnerId', w1
+                    'CampaignId', w0,
+                    'FirstName', w1,
+                    'LastName', w1,
+                    'Title', w1,
+                    'Email', w1,
+                    'WorkPhone', w1,
+                    'AlternativeNumber', w1,
+                    'CompanyName', w1,
+                    'Industry', w1,
+                    'Revenue', w1,
+                    'CompanyEmployeeSize', w1,
+                    'Street', w1,
+                    'City', w1,
+                    'State', w1,
+                    'ZipCode', w1,
+                    'Country', w1,
+                    'ProfileLink', w1,
+                    'CompanyLink', w1,
+                    'RevenueLink', w1,
+                    'AddressLink', w1,
+                    'EmailFormat', w1,
+                    'Tenurity', w1,
+                    'Code', w1,
+                    'Md5', w1,
+                    'Attachments', w2,
+                    'QADetails', w3,
+                    'OwnerId', w0
                 ]);
             }
         }

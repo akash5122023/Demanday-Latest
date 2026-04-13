@@ -31,6 +31,7 @@
     <Compile Remove="Modules\Administration\User\Authentication\AuthenticationService.cs" />
     <Compile Remove="Modules\Administration\User\Authentication\AuthorizationService.cs" />
     <Compile Remove="Modules\Common\LargeFileUpload\LargeFileUploadEditorAttribute.cs" />
+    <Compile Remove="Templates\GenerateDemandaySpecsTemplate.cs" />
     <Content Remove="NLog.config" />
     <Content Remove="wwwroot\Reporting\wkhtmltopdf.exe" />
     <None Remove="C:\Users\DELL\.nuget\packages\nlog.config\4.7.15\contentFiles\any\any\NLog.config" />

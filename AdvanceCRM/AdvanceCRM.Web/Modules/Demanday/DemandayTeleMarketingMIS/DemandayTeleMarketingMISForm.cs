@@ -12,13 +12,16 @@ namespace AdvanceCRM.Demanday.Forms
     [BasedOnRow(typeof(DemandayTeleMarketingMISRow), CheckNames = true)]
     public class DemandayTeleMarketingMISForm
     {
-        [Category("Account Information")]
+
+        [Category("Campaign Details")]
+        [HalfWidth]
+        [LookupEditor("Masters.DemandayCampaignIdByText")]
+        public string CampaignId { get; set; }
         //[HalfWidth]
         //public string AccountID { get; set; }
         [HalfWidth]
         public string Slot { get; set; }
-        //[HalfWidth]
-        //public string CampaignID { get; set; }
+        
 
         [Category("Contact Information")]
         [HalfWidth]
@@ -112,6 +115,9 @@ namespace AdvanceCRM.Demanday.Forms
         public string Code { get; set; }
         [HalfWidth]
         public string Md5 { get; set; }
+        [Category("Questions and Answers")]
+        [DemandayTeleMarketingEnquiryQADetailsEditor]
+        public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails { get; set; }
 
         [Category("Representatives")]
         [HalfWidth]

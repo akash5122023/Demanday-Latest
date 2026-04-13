@@ -12,13 +12,15 @@ namespace AdvanceCRM.Demanday.Forms
     [BasedOnRow(typeof(DemandayTeleMarketingContactsRow), CheckNames = true)]
     public class DemandayTeleMarketingContactsForm
     {
-        [Category("Account Information")]
+        [Category("Campaign Information")]
+        [HalfWidth]
+        [LookupEditor("Masters.DemandayCampaignIdByText")]
+        public string CampaignId { get; set; }
+        //[Category("Account Information")]
         //[HalfWidth]
         //public string AccountID { get; set; }
         [HalfWidth]
         public string Slot { get; set; }
-        //[HalfWidth]
-        //public string CampaignID { get; set; }
 
         [Category("Contact Information")]
         [HalfWidth]
