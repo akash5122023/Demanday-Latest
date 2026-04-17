@@ -12,6 +12,10 @@ namespace AdvanceCRM.Demanday.Forms
     [BasedOnRow(typeof(DemandayTeleMarketingQualiltyRow), CheckNames = true)]
     public class DemandayTeleMarketingQualiltyForm
     {
+        [Category("Campaign Information")]
+        [HalfWidth]
+        [LookupEditor("Masters.DemandayCampaignIdByText")]
+        public string CampaignId { get; set; }
         [Category("Account Information")]
         //[HalfWidth]
         //public string AccountID { get; set; }
@@ -110,6 +114,12 @@ namespace AdvanceCRM.Demanday.Forms
         public string Code { get; set; }
         [HalfWidth]
         public string Md5 { get; set; }
+        [HalfWidth, DisplayName("Audio Attachments")]
+        [ImageUploadEditor(FilenameFormat = "TeleMarketingAttachment/~", CopyToHistory = true)]
+        public string Attachments { get; set; }
+        [Category("Questions and Answers")]
+        [DemandayTeleMarketingEnquiryQADetailsEditor]
+        public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails { get; set; }
         [Category("Representative")]
         [HalfWidth]
         public Int32 OwnerId { get; set; }

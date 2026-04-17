@@ -17,7 +17,7 @@ namespace AdvanceCRM.Demanday.Columns
         //[EditLink]
         //public String AgentsName { get; set; }
         //public String TlName { get; set; }
-        //public String CampaignId { get; set; }
+        //
         //public String CompanyName { get; set; }
         //public String FirstName { get; set; }
         //public String LastName { get; set; }
@@ -63,16 +63,18 @@ namespace AdvanceCRM.Demanday.Columns
         //public String Continents { get; set; }
         //public String ProspectUrl { get; set; }
         //public String OwnerUsername { get; set; }
-        [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
+        [DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
-        [EditLink]
+        public String CampaignId { get; set; }
         //public String AgentsName { get; set; }
         //public String TlName { get; set; }
         //public String CampaignId { get; set; }
+        [QuickFilter]
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }
         public String Title { get; set; }
+        [QuickFilter]
         public String Email { get; set; }
         public String WorkPhone { get; set; }
         public String AlternativeNumber { get; set; }
@@ -80,6 +82,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String City { get; set; }
         public String State { get; set; }
         public String ZipCode { get; set; }
+        [QuickFilter]
         public String Country { get; set; }
         public string CompanyEmployeeSize { get; set; }
         public String Industry { get; set; }
@@ -113,6 +116,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String JobFunctionRole { get; set; }
         public String Continents { get; set; }
         public String ProspectUrl { get; set; }
+        [QuickFilter]
         public String OwnerUsername { get; set; }
     }
 }

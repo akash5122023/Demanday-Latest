@@ -37,6 +37,9 @@ namespace AdvanceCRM.Demanday.Forms
         //public String Link { get; set; }
         //public String Md5 { get; set; }
         //public Int32 OwnerId { get; set; }
+        [Category("Campaign Information")]
+        [HalfWidth]
+        public string CampaignId { get; set; }
         [Category("Contact Information")]
         [HalfWidth]
         public string FirstName { get; set; }
@@ -92,6 +95,10 @@ public string EmailFormat { get; set; }
         public string Code { get; set; }
         [HalfWidth]
         public string Md5 { get; set; }
+        [HalfWidth, DisplayName("Audio Attachments")]
+        [ImageUploadEditor(FilenameFormat = "TeamLeaderAttachment/~", CopyToHistory = true)]
+        public string Attachments { get; set; }
+        
         [Category("Representative")]
         [HalfWidth]
         public Int32 OwnerId { get; set; }

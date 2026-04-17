@@ -4,6 +4,7 @@ using Serenity.ComponentModel;
 using Serenity.Data;
 using Serenity.Data.Mapping;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -197,6 +198,20 @@ public String EmailFormat
         {
             get => fields.Md5[this];
             set => fields.Md5[this] = value;
+        }
+
+        [DisplayName("Attachments"), Size(500)]
+        public String Attachments
+        {
+            get => fields.Attachments[this];
+            set => fields.Attachments[this] = value;
+        }
+
+        [DisplayName("Campaign Id"), Size(50)]
+        public String CampaignId
+        {
+            get => fields.CampaignId[this];
+            set => fields.CampaignId[this] = value;
         }
 
         [DisplayName("Created By"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jOwner"), TextualField("OwnerUsername"), ReadOnly(true)]
@@ -647,6 +662,13 @@ public String EmailFormat
             get => fields.OwnerPlan[this];
             set => fields.OwnerPlan[this] = value;
         }
+        [DemandayTeleMarketingEnquiryQADetailsEditor, NotMapped]
+        [MasterDetailRelation(foreignKey: "EnquiryId", IncludeColumns = "QuestionText,AnswerText")]
+        public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails
+        {
+            get => fields.QADetails[this];
+            set => fields.QADetails[this] = value;
+        }
 
         public DemandayTeleMarketingTeamLeaderRow()
             : base()
@@ -660,6 +682,7 @@ public String EmailFormat
 
         public class RowFields : RowFieldsBase
         {
+            public RowListField<DemandayTeleMarketingEnquiryQADetailsRow> QADetails;
             public Int32Field Id;
             public Int32Field TeleMarketingEnquiryId;
             public StringField CompanyName;
@@ -752,6 +775,8 @@ public String EmailFormat
             public StringField OwnerUrl;
             public StringField OwnerPlan;
             public StringField EmailFormat;
+            public StringField Attachments;
+            public StringField CampaignId;
         }
     }
 }

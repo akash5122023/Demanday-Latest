@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayTeleMarketingTeamLeaderForm {
+        CampaignId: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
         Title: Serenity.StringEditor;
@@ -23,6 +24,8 @@
         Tenurity: Serenity.StringEditor;
         Code: Serenity.StringEditor;
         Md5: Serenity.StringEditor;
+        Attachments: Serenity.ImageUploadEditor;
+        QADetails: DemandayTeleMarketingEnquiryQADetailsEditor;
         OwnerId: Serenity.LookupEditor;
     }
 
@@ -38,9 +41,12 @@
 
                 var s = Serenity;
                 var w0 = s.StringEditor;
-                var w1 = s.LookupEditor;
+                var w1 = s.ImageUploadEditor;
+                var w2 = DemandayTeleMarketingEnquiryQADetailsEditor;
+                var w3 = s.LookupEditor;
 
                 Q.initFormType(DemandayTeleMarketingTeamLeaderForm, [
+                    'CampaignId', w0,
                     'FirstName', w0,
                     'LastName', w0,
                     'Title', w0,
@@ -64,7 +70,9 @@
                     'Tenurity', w0,
                     'Code', w0,
                     'Md5', w0,
-                    'OwnerId', w1
+                    'Attachments', w1,
+                    'QADetails', w2,
+                    'OwnerId', w3
                 ]);
             }
         }

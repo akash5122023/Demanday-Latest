@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface EnquiryContactsForm {
+        CampaignId: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
         Title: Serenity.StringEditor;
@@ -40,6 +41,7 @@
                 var w1 = Administration.UserEditor;
 
                 Q.initFormType(EnquiryContactsForm, [
+                    'CampaignId', w0,
                     'FirstName', w0,
                     'LastName', w0,
                     'Title', w0,

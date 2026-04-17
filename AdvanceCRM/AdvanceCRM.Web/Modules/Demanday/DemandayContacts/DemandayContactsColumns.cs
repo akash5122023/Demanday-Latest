@@ -66,13 +66,16 @@ namespace AdvanceCRM.Demanday.Columns
         [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
         public string Slot { get; set; }
+        [QuickFilter]
         public string CompanyName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Domain { get; set; }
         public string Title { get; set; }
+        public string CampaignId { get; set; }
         public string JobLevel { get; set; }
         public string JobFunctionRole { get; set; }
+        [QuickFilter]
         public string Email { get; set; }
         public string WorkPhone { get; set; }
         public string AlternativeNumber { get; set; }
@@ -80,6 +83,7 @@ namespace AdvanceCRM.Demanday.Columns
         public string City { get; set; }
         public string State { get; set; }
         public string ZipCode { get; set; }
+        [QuickFilter]
         public string Country { get; set; }
         public string Continents { get; set; }
         public string Industry { get; set; }

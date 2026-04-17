@@ -193,6 +193,20 @@ namespace AdvanceCRM.Demanday
             set => fields.Md5[this] = value;
         }
 
+        [DisplayName("Attachments"), Size(500)]
+        public String Attachments
+        {
+            get => fields.Attachments[this];
+            set => fields.Attachments[this] = value;
+        }
+
+        [DisplayName("Campaign Id"), Size(15)]
+        public String CampaignId
+        {
+            get => fields.CampaignId[this];
+            set => fields.CampaignId[this] = value;
+        }
+
         [DisplayName("Created By"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jOwner"), TextualField("OwnerUsername"), ReadOnly(true)]
        [LookupEditor(typeof(UserRow))]
         public Int32? OwnerId
@@ -768,6 +782,8 @@ namespace AdvanceCRM.Demanday
             public Int32Field OwnerTenantId;
             public StringField OwnerUrl;
             public StringField OwnerPlan;
+            public StringField Attachments;
+            public StringField CampaignId;
         }
     }
 }

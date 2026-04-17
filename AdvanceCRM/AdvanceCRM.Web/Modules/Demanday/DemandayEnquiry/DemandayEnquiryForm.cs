@@ -38,9 +38,14 @@ namespace AdvanceCRM.Demanday.Forms
         //    public String Link { get; set; }
         //    public String Md5 { get; set; }
         //    public Int32 OwnerId { get; set; }
+        [Category("Campaign Information")]
+        [HalfWidth]
+        [LookupEditor("Masters.DemandayCampaignIdByText")]
+        public string CampaignId { get; set; }
         [Category("Contact Information")]
         [HalfWidth]
         public string FirstName { get; set; }
+
         [HalfWidth]
         public string LastName { get; set; }
         [HalfWidth]
@@ -92,7 +97,7 @@ public string EmailFormat { get; set; }
         [HalfWidth]
         public string Code { get; set; }
         [HalfWidth]
-        public string Md5 { get; set; }
+        public string Md5 { get; set; }        
         [Category("Representatives")]
         [HalfWidth]
         public Int32 OwnerId { get; set; }

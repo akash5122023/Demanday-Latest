@@ -12,6 +12,9 @@ namespace AdvanceCRM.Demanday.Forms
     [BasedOnRow(typeof(DemandayTeleMarketingTeamLeaderRow), CheckNames = true)]
     public class DemandayTeleMarketingTeamLeaderForm
     {
+        [Category("Campaign Information")]
+        [HalfWidth]
+        public string CampaignId { get; set; }
         [Category("Contact Information")]
         [HalfWidth]
         public string FirstName { get; set; }
@@ -67,6 +70,13 @@ public string EmailFormat { get; set; }
         public string Code { get; set; }
         [HalfWidth]
         public string Md5 { get; set; }
+        [HalfWidth, DisplayName("Audio Attachments")]
+        [ImageUploadEditor(FilenameFormat = "TeleMarketingAttachment/~", CopyToHistory = true)]
+        public string Attachments { get; set; }
+        [Category("Questions and Answers")]
+        [DemandayTeleMarketingEnquiryQADetailsEditor]
+        public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails { get; set; }
+
         [Category("Representative")]
         [HalfWidth]
         public Int32 OwnerId { get; set; }

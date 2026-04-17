@@ -60,6 +60,10 @@ namespace AdvanceCRM.Demanday.Forms
         //public String Asset1 { get; set; }
         //public String Asset2 { get; set; }
         //public Int32 OwnerId { get; set; }
+        [Category("Campaign Information")]
+        [HalfWidth]
+        [LookupEditor("Masters.DemandayCampaignIdByText")]
+        public string CampaignId { get; set; }
         [Category("Account Information")]
         //[HalfWidth]
         //public string AccountID { get; set; }

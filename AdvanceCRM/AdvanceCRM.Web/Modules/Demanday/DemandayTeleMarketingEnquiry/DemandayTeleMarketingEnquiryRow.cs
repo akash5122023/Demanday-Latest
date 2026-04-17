@@ -4,6 +4,7 @@ using Serenity.ComponentModel;
 using Serenity.Data;
 using Serenity.Data.Mapping;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -220,6 +221,13 @@ public String EmailFormat
     get => fields.EmailFormat[this];
     set => fields.EmailFormat[this] = value;
 }
+
+        [DisplayName("Campaign Id"), Size(50)]
+        public String CampaignId
+        {
+            get => fields.CampaignId[this];
+            set => fields.CampaignId[this] = value;
+        }
 
         [DisplayName("Owner Upper Level"), Expression("jOwner.[UpperLevel]")]
         public Int32? OwnerUpperLevel
@@ -473,6 +481,19 @@ public String EmailFormat
             set => fields.OwnerPlan[this] = value;
         }
 
+        [DemandayTeleMarketingEnquiryQADetailsEditor, NotMapped]
+        [MasterDetailRelation(foreignKey: "EnquiryId", IncludeColumns = "QuestionText,AnswerText")]
+        public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails
+        {
+            get => fields.QADetails[this];
+            set => fields.QADetails[this] = value;
+        }
+        [DisplayName("Attachments"), Size(500)]
+        public String Attachments
+        {
+            get => fields.Attachments[this];
+            set => fields.Attachments[this] = value;
+        }
         public DemandayTeleMarketingEnquiryRow()
             : base()
         {
@@ -485,6 +506,7 @@ public String EmailFormat
 
         public class RowFields : RowFieldsBase
         {
+            public StringField Attachments;
             public Int32Field Id;
             public StringField CompanyName;
             public StringField FirstName;
@@ -551,6 +573,8 @@ public String EmailFormat
             public StringField OwnerUrl;
             public StringField OwnerPlan;
             public StringField EmailFormat;
+            public StringField CampaignId;
+            public RowListField<DemandayTeleMarketingEnquiryQADetailsRow> QADetails;
         }
     }
 }

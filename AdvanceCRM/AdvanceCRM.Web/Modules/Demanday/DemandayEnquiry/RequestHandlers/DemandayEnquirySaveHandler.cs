@@ -44,6 +44,7 @@ namespace AdvanceCRM.Demanday
                     Title = Row.Title,
                     Email = Row.Email,
                     WorkPhone = Row.WorkPhone,
+                    CampaignId = Row.CampaignId,
                     AlternativeNumber = Row.AlternativeNumber,
                     Street = Row.Street,
                     City = Row.City,

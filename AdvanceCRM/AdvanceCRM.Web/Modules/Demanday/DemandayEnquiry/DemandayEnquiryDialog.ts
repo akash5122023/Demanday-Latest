@@ -15,5 +15,9 @@ namespace AdvanceCRM.Demanday {
 
         protected form = new DemandayEnquiryForm(this.idPrefix);
 
+        protected afterLoadEntity(): void {
+            super.afterLoadEntity();
+        }
+
     }
 }

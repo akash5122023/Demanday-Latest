@@ -22,6 +22,8 @@ using AdvanceCRM.Settings.Pages;
 using AdvanceCRM.Tasks.Pages;
 using AdvanceCRM.Template.Pages;
 using AdvanceCRM.ThirdParty.Pages;
+using AdvanceCRM.Toolkit.Pages;
+
 //using MyPages = AdvanceCRM.Pages;
 using Serenity.Navigation;
 
@@ -79,14 +81,14 @@ using Serenity.Navigation;
 //[assembly: NavigationLink(1205, "DMS", typeof(DMSController), icon: "fa-folder-o", Permission = "DMS:Read", Title = "DMS")]
 //[assembly: NavigationLink(1206, "Employee", typeof(EmployeeController), icon: "fa-address-book", Permission = "Employee:Read", Title = "Employee")]
 
-//[assembly: NavigationMenu(1400, "Sales", icon: "fa-exchange", Title = "Sales")]
-//[assembly: NavigationLink(1401, "Sales/Proforma Invoice", typeof(InvoiceController), icon: "icon-book-open", Permission = "Proforma:Read", Title = "Proforma")]
-//[assembly: NavigationLink(1404, "Sales/Delivery Challan", typeof(ChallanController), icon: "fa-file-text-o", Permission = "Challan:Read", Title = "Challan")]
-//[assembly: NavigationLink(1406, "Sales/Indent", typeof(IndentController), icon: "fa-list-alt", Permission = "Indent:Read", Title = "Indent")]
-//[assembly: NavigationLink(1407, "Sales/Inward", typeof(InwardController), icon: "fa-file-text-o", Permission = "Inward:Read", Title = "Inward")]
-//[assembly: NavigationLink(1408, "Sales/Outward", typeof(OutwardController), icon: "fa-file-text-o", Permission = "Outward:Read", Title = "Outward")]
-//[assembly: NavigationLink(1402, "Sales/Sales", typeof(SalesController), icon: "icon-docs", Permission = "Sales:Read", Title = "Invoice")]
-//[assembly: NavigationLink(1405, "Sales/Sales Return", typeof(SalesReturnController), icon: "fa-reply-all", Permission = "SalesReturn:Read", Title = "Sales Return")]
+[assembly: NavigationMenu(1500, "Toolkit", icon: "fa-exchange", Title = "Toolkit")]
+[assembly: NavigationLink(1501, "Toolkit/Master Supression", typeof(MasterSupressionController), icon: "icon-book-open", Permission = "MasterSupression:Read", Title = "Master Supression")]
+[assembly: NavigationLink(1504, "Toolkit/Client Supression", typeof(ClientSupressionController), icon: "fa-file-text-o", Permission = "ClientSupression:Read", Title = "Client Supression")]
+[assembly: NavigationLink(1506, "Toolkit/Open Campaign", typeof(OpenCampaignController), icon: "fa-list-alt", Permission = "OpenCampaign:Read", Title = "Open Campaign")]
+[assembly: NavigationLink(1507, "Toolkit/Tal Campaign", typeof(TalCampaignController), icon: "fa-file-text-o", Permission = "TalCampaign:Read", Title = "Tal Campaign")]
+[assembly: NavigationLink(1508, "Toolkit/Demanday Competitor", typeof(DemandayCompetitorController), icon: "fa-file-text-o", Permission = "DemandayCompetitor:Read", Title = "Demanday Competitor")]
+[assembly: NavigationLink(1509, "Toolkit/Demanday Specs", typeof(DemandaySpecsController), icon: "icon-docs", Permission = "DemandaySpecs:Read", Title = "Demanday Specs")]
+[assembly: NavigationLink(1505, "Toolkit/Sales Return", typeof(SalesReturnController), icon: "fa-reply-all", Permission = "SalesReturn:Read", Title = "Sales Return")]
 
 //[assembly: NavigationMenu(1450, "Purchase", icon: "fa-cart-plus", Title = "Purchase")]
 //[assembly: NavigationLink(1451, "Purchase/Purchase Order", typeof(PurchaseOrderController), icon: "fa-cart-arrow-down", Permission = "PurchaseOrder:Read", Title = "Purchase Order")]
@@ -240,37 +242,37 @@ using Serenity.Navigation;
 
 //Masters
 [assembly: NavigationMenu(7000, "Masters", icon: "fa-anchor", Title = "Masters", Permission = "Masters:Read")]
-[assembly: NavigationLink(7001, "Masters/Area", typeof(AreaController), icon: "fa-map-signs")]
-[assembly: NavigationLink(7001, "Masters/Purpose", typeof(PurposeController), icon: "fa-medium")]
-[assembly: NavigationLink(7003, "Masters/Category", typeof(CategoryController), icon: "fa-houzz")]
-[assembly: NavigationLink(7004, "Masters/State", typeof(StateController), icon: "fa-map")]
-[assembly: NavigationLink(7005, "Masters/City", typeof(CityController), icon: "fa-building")]
-[assembly: NavigationLink(7006, "Masters/Tehsil", typeof(TehsilController), icon: "icon-direction")]
-[assembly: NavigationLink(7006, "Masters/Village", typeof(VillageController), icon: "fa-home")]
-[assembly: NavigationLink(7007, "Masters/Product Division", typeof(ProductsDivisionController), icon: "fa-arrows-alt")]
-[assembly: NavigationLink(7007, "Masters/Product Unit", typeof(ProductsUnitController), icon: "fa-balance-scale")]
-[assembly: NavigationLink(7007, "Masters/Product Group", typeof(ProductsGroupController), icon: "fa-object-group")]
-[assembly: NavigationLink(7008, "Masters/Tax", typeof(TaxController), icon: "fa-cut")]
-[assembly: NavigationLink(7009, "Masters/Source", typeof(SourceController), icon: "fa-medium")]
-[assembly: NavigationLink(7010, "Masters/Stage", typeof(StageController), icon: "fa-align-right")]
-[assembly: NavigationLink(7011, "Masters/Terms", typeof(QuotationTermsMasterController), icon: "fa-gg")]
-[assembly: NavigationLink(7011, "Masters/Message", typeof(MessageMasterController), icon: "fa-comment")]
-[assembly: NavigationLink(7011, "Masters/Additional Charges", typeof(AdditionalChargesController), icon: "fa-plus-circle")]
-[assembly: NavigationLink(7011, "Masters/Additional Concession", typeof(AdditionalConcessionController), icon: "fa-minus-circle")]
-[assembly: NavigationLink(7012, "Masters/Task Status", typeof(TaskStatusController), icon: "fa-file-text")]
-[assembly: NavigationLink(7012, "Masters/Task Types", typeof(TaskTypeController), icon: "fa-sliders")]
-[assembly: NavigationLink(7013, "Masters/Complaint Types", typeof(ComplaintTypeController), icon: "fa-support", Title = "Complaint Types")]
-[assembly: NavigationLink(7014, "Masters/Banks", typeof(BankMasterController), icon: "fa-bank", Title = "Bank Master")]
-[assembly: NavigationLink(7015, "Masters/Accounting Heads", typeof(AccountingHeadsController), icon: "fa-money", Title = "Accounting Heads")]
-[assembly: NavigationLink(7015, "Masters/Trasportation", typeof(TransportationController), icon: "fa-truck", Title = "Trasportation")]
-[assembly: NavigationLink(7024, "Masters/Grade", typeof(GradeController), icon: "fa-star")]
-[assembly: NavigationLink(7025, "Masters/Department", typeof(DepartmentController), icon: "fa-th-large")]
+//[assembly: NavigationLink(7001, "Masters/Area", typeof(AreaController), icon: "fa-map-signs")]
+//[assembly: NavigationLink(7001, "Masters/Purpose", typeof(PurposeController), icon: "fa-medium")]
+//[assembly: NavigationLink(7003, "Masters/Category", typeof(CategoryController), icon: "fa-houzz")]
+//[assembly: NavigationLink(7004, "Masters/State", typeof(StateController), icon: "fa-map")]
+//[assembly: NavigationLink(7005, "Masters/City", typeof(CityController), icon: "fa-building")]
+//[assembly: NavigationLink(7006, "Masters/Tehsil", typeof(TehsilController), icon: "icon-direction")]
+//[assembly: NavigationLink(7006, "Masters/Village", typeof(VillageController), icon: "fa-home")]
+//[assembly: NavigationLink(7007, "Masters/Product Division", typeof(ProductsDivisionController), icon: "fa-arrows-alt")]
+//[assembly: NavigationLink(7007, "Masters/Product Unit", typeof(ProductsUnitController), icon: "fa-balance-scale")]
+//[assembly: NavigationLink(7007, "Masters/Product Group", typeof(ProductsGroupController), icon: "fa-object-group")]
+//[assembly: NavigationLink(7008, "Masters/Tax", typeof(TaxController), icon: "fa-cut")]
+//[assembly: NavigationLink(7009, "Masters/Source", typeof(SourceController), icon: "fa-medium")]
+//[assembly: NavigationLink(7010, "Masters/Stage", typeof(StageController), icon: "fa-align-right")]
+//[assembly: NavigationLink(7011, "Masters/Terms", typeof(QuotationTermsMasterController), icon: "fa-gg")]
+//[assembly: NavigationLink(7011, "Masters/Message", typeof(MessageMasterController), icon: "fa-comment")]
+//[assembly: NavigationLink(7011, "Masters/Additional Charges", typeof(AdditionalChargesController), icon: "fa-plus-circle")]
+//[assembly: NavigationLink(7011, "Masters/Additional Concession", typeof(AdditionalConcessionController), icon: "fa-minus-circle")]
+//[assembly: NavigationLink(7012, "Masters/Task Status", typeof(TaskStatusController), icon: "fa-file-text")]
+//[assembly: NavigationLink(7012, "Masters/Task Types", typeof(TaskTypeController), icon: "fa-sliders")]
+//[assembly: NavigationLink(7013, "Masters/Complaint Types", typeof(ComplaintTypeController), icon: "fa-support", Title = "Complaint Types")]
+//[assembly: NavigationLink(7014, "Masters/Banks", typeof(BankMasterController), icon: "fa-bank", Title = "Bank Master")]
+//[assembly: NavigationLink(7015, "Masters/Accounting Heads", typeof(AccountingHeadsController), icon: "fa-money", Title = "Accounting Heads")]
+//[assembly: NavigationLink(7015, "Masters/Trasportation", typeof(TransportationController), icon: "fa-truck", Title = "Trasportation")]
+//[assembly: NavigationLink(7024, "Masters/Grade", typeof(GradeController), icon: "fa-star")]
+//[assembly: NavigationLink(7025, "Masters/Department", typeof(DepartmentController), icon: "fa-th-large")]
 
-[assembly: NavigationLink(7026, "Masters/Dealer", typeof(DealerController), icon: "fa-briefcase")]
-[assembly: NavigationLink(7026, "Masters/Teams", typeof(TeamsController), icon: "fa-sitemap")]
+//[assembly: NavigationLink(7026, "Masters/Dealer", typeof(DealerController), icon: "fa-briefcase")]
+//[assembly: NavigationLink(7026, "Masters/Teams", typeof(TeamsController), icon: "fa-sitemap")]
 
-[assembly: NavigationLink(7027, "Masters/Task", typeof(TaskController), icon: "fa fa-tasks")]
-[assembly: NavigationLink(7028, "Masters/Days", typeof(DaysController), icon: "fa fa-Days")]
+[assembly: NavigationLink(7001, "Masters/Account", typeof(DemandayMasterAccountController), icon: "fa fa-tasks")]
+[assembly: NavigationLink(7002, "Masters/CampaignId", typeof(DemandayCampaignIdController), icon: "fa fa-Days")]
 
 
 

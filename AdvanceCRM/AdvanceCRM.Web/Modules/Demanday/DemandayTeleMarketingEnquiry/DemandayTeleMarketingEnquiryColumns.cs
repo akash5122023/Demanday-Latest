@@ -41,18 +41,21 @@ namespace AdvanceCRM.Demanday.Columns
         //public String OwnerUsername { get; set; }
         [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
-        [EditLink]
+        [EditLink, QuickFilter]
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }
         public String Title { get; set; }
+        [QuickFilter]
         public String Email { get; set; }
         public String WorkPhone { get; set; }
         public String AlternativeNumber { get; set; }
+        public String CampaignId { get; set; }
         public String Street { get; set; }
         public String City { get; set; }
         public String State { get; set; }
         public String ZipCode { get; set; }
+        [QuickFilter]
         public String Country { get; set; }
         public String CompanyEmployeeSize { get; set; }
         public String Industry { get; set; }

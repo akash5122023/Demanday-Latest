@@ -1,5 +1,7 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayTeleMarketingQualiltyRow {
+        Attachments?: string;
+        QADetails?: DemandayTeleMarketingEnquiryQADetailsRow[];
         Id?: number;
         Slot?: string;
         AgentsName?: string;
@@ -100,6 +102,8 @@
         export const updatePermission = 'DemandayTeleMarketingQualilty:Update';
 
         export declare const enum Fields {
+            Attachments = "Attachments",
+            QADetails = "QADetails",
             Id = "Id",
             Slot = "Slot",
             AgentsName = "AgentsName",

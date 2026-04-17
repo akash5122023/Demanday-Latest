@@ -67,6 +67,7 @@
         OwnerUrl?: string;
         OwnerPlan?: string;
         EmailFormat?: string;
+        CampaignId?: string;
     }
 
     export namespace DemandayEnquiryRow {
@@ -150,7 +151,8 @@
             OwnerTenantId = "OwnerTenantId",
             OwnerUrl = "OwnerUrl",
             OwnerPlan = "OwnerPlan",
-            EmailFormat = "EmailFormat"
+            EmailFormat = "EmailFormat",
+            CampaignId = "CampaignId"
         }
     }
 }

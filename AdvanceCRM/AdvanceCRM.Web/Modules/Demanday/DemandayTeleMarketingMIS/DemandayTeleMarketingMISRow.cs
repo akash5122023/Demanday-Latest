@@ -4,6 +4,7 @@ using Serenity.ComponentModel;
 using Serenity.Data;
 using Serenity.Data.Mapping;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -599,6 +600,13 @@ namespace AdvanceCRM.Demanday
             get => fields.OwnerPlan[this];
             set => fields.OwnerPlan[this] = value;
         }
+        [DemandayTeleMarketingEnquiryQADetailsEditor, NotMapped]
+        [MasterDetailRelation(foreignKey: "EnquiryId", IncludeColumns = "QuestionText,AnswerText")]
+        public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails
+        {
+            get => fields.QADetails[this];
+            set => fields.QADetails[this] = value;
+        }
 
         public DemandayTeleMarketingMISRow()
             : base()
@@ -612,6 +620,7 @@ namespace AdvanceCRM.Demanday
 
         public class RowFields : RowFieldsBase
         {
+            public RowListField<DemandayTeleMarketingEnquiryQADetailsRow> QADetails;
             public Int32Field Id;
             public StringField AgentsName;
             public StringField TlName;

@@ -8243,6 +8243,42 @@ section.content > .s-DataGrid {
 .s-Masters-MessageMasterDialog .caption {
   width: 150px;
 }
+.s-Masters-DemandayMasterAccountDialog > .size {
+  width: 650px;
+}
+.s-Masters-DemandayMasterAccountDialog .caption {
+  width: 150px;
+}
+.s-Masters-DemandayCampaignIdDialog > .size {
+  width: 650px;
+}
+.s-Masters-DemandayCampaignIdDialog .caption {
+  width: 150px;
+}
+.s-Masters-DemandayEnquiryCampaignQuestionsDialog > .size {
+  width: 650px;
+}
+.s-Masters-DemandayEnquiryCampaignQuestionsDialog .caption {
+  width: 150px;
+}
+.s-Masters-DemandayEnquiryQuestionAnswersDialog > .size {
+  width: 650px;
+}
+.s-Masters-DemandayEnquiryQuestionAnswersDialog .caption {
+  width: 150px;
+}
+.s-Masters-DemandayTeleMarketingEnquiryCampaignQuestionsDialog > .size {
+  width: 650px;
+}
+.s-Masters-DemandayTeleMarketingEnquiryCampaignQuestionsDialog .caption {
+  width: 150px;
+}
+.s-Masters-DemandayTeleMarketingEnquiryQuestionAnswersDialog > .size {
+  width: 650px;
+}
+.s-Masters-DemandayTeleMarketingEnquiryQuestionAnswersDialog .caption {
+  width: 150px;
+}
 .s-Products-ProductsDialog > .size {
   width: 650px;
 }
@@ -9784,6 +9820,42 @@ section.content > .s-DataGrid {
   width: 650px;
 }
 .s-Demanday-DemandayVerificationDialog .caption {
+  width: 150px;
+}
+.s-Toolkit-MasterSupressionDialog > .size {
+  width: 650px;
+}
+.s-Toolkit-MasterSupressionDialog .caption {
+  width: 150px;
+}
+.s-Toolkit-ClientSupressionDialog > .size {
+  width: 650px;
+}
+.s-Toolkit-ClientSupressionDialog .caption {
+  width: 150px;
+}
+.s-Toolkit-OpenCampaignDialog > .size {
+  width: 650px;
+}
+.s-Toolkit-OpenCampaignDialog .caption {
+  width: 150px;
+}
+.s-Toolkit-TalCampaignDialog > .size {
+  width: 650px;
+}
+.s-Toolkit-TalCampaignDialog .caption {
+  width: 150px;
+}
+.s-Toolkit-DemandayCompetitorDialog > .size {
+  width: 650px;
+}
+.s-Toolkit-DemandayCompetitorDialog .caption {
+  width: 150px;
+}
+.s-Toolkit-DemandaySpecsDialog > .size {
+  width: 650px;
+}
+.s-Toolkit-DemandaySpecsDialog .caption {
   width: 150px;
 }
 .main-header .logo {

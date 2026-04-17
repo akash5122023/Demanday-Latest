@@ -192,6 +192,13 @@ namespace AdvanceCRM.Demanday
             set => fields.Md5[this] = value;
         }
 
+        [DisplayName("Campaign Id"), Size(15)]
+        public String CampaignId
+        {
+            get => fields.CampaignId[this];
+            set => fields.CampaignId[this] = value;
+        }
+
         [DisplayName("Created By"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jOwner"), TextualField("OwnerUsername"), ReadOnly(true)]
         [Administration.UserEditor]
         public Int32? OwnerId
@@ -550,6 +557,7 @@ namespace AdvanceCRM.Demanday
             public Int32Field OwnerTenantId;
             public StringField OwnerUrl;
             public StringField OwnerPlan;
+            public StringField CampaignId;
         }
     }
 }

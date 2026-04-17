@@ -1,0 +1,184 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Serenity;
+using Serenity.Data;
+using Serenity.Reporting;
+using Serenity.Services;
+using Serenity.Web;
+using AdvanceCRM.Web.Helpers;
+using AdvanceCRM.Toolkit;
+using OfficeOpenXml;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using MyRow = AdvanceCRM.Toolkit.DemandaySpecsRow;
+
+namespace AdvanceCRM.Toolkit.Endpoints
+{
+    [Route("Services/Toolkit/DemandaySpecs/[action]")]
+    [ConnectionKey(typeof(MyRow)), ServiceAuthorize(typeof(MyRow))]
+    public class DemandaySpecsController : ServiceEndpoint
+    {
+        private readonly ISqlConnections _connections;
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
+
+        public DemandaySpecsController(
+            ISqlConnections connections,
+            IConfiguration configuration,
+            IWebHostEnvironment env)
+        {
+            _connections = connections;
+            _configuration = configuration;
+            _env = env;
+            UploadHelper.Configure(configuration, env);
+
+            // Ensure template file exists and is valid
+            string templatePath = Path.Combine(env.ContentRootPath, "Templates", "DemandaySpecs_Template.xlsx");
+            DemandaySpecsTemplateInitializer.EnsureTemplateExists(templatePath);
+        }
+
+        [HttpPost, AuthorizeCreate(typeof(MyRow))]
+        public SaveResponse Create(IUnitOfWork uow, SaveRequest<MyRow> request,
+            [FromServices] IDemandaySpecsSaveHandler handler)
+        {
+            return handler.Create(uow, request);
+        }
+
+        [HttpPost, AuthorizeUpdate(typeof(MyRow))]
+        public SaveResponse Update(IUnitOfWork uow, SaveRequest<MyRow> request,
+            [FromServices] IDemandaySpecsSaveHandler handler)
+        {
+            return handler.Update(uow, request);
+        }
+ 
+        [HttpPost, AuthorizeDelete(typeof(MyRow))]
+        public DeleteResponse Delete(IUnitOfWork uow, DeleteRequest request,
+            [FromServices] IDemandaySpecsDeleteHandler handler)
+        {
+            return handler.Delete(uow, request);
+        }
+
+        [HttpPost]
+        public RetrieveResponse<MyRow> Retrieve(IDbConnection connection, RetrieveRequest request,
+            [FromServices] IDemandaySpecsRetrieveHandler handler)
+        {
+            return handler.Retrieve(connection, request);
+        }
+
+        [HttpPost]
+        public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
+            [FromServices] IDemandaySpecsListHandler handler)
+        {
+            return handler.List(connection, request);
+        }
+
+        public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
+            [FromServices] IDemandaySpecsListHandler handler,
+            [FromServices] IExcelExporter exporter)
+        {
+            var data = List(connection, request, handler).Entities;
+            var bytes = exporter.Export(data, typeof(Columns.DemandaySpecsColumns), request.ExportColumns);
+            return ExcelContentResult.Create(bytes, "DemandaySpecsList_" +
+                DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
+        }
+
+        [HttpPost, ServiceAuthorize("Administration:General")]
+        public ActionResult DownloadTemplate(IDbConnection connection, RetrieveRequest request)
+        {
+            string templateFile = Path.Combine(_env.ContentRootPath, "Templates", "DemandaySpecs_Template.xlsx");
+            byte[] bytes = System.IO.File.ReadAllBytes(templateFile);
+
+            var Output = File(bytes, System.Net.Mime.MediaTypeNames.Application.Octet, "DemandaySpecs_Template.xlsx");
+            return Output;
+        }
+
+        [HttpPost, ServiceAuthorize("Administration:General")]
+        public ExcelImportResponse ExcelImport(IUnitOfWork uow, ExcelImportRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+            if (string.IsNullOrWhiteSpace(request.FileName))
+                throw new ArgumentNullException(nameof(request.FileName));
+
+            UploadHelper.CheckFileNameSecurity(request.FileName);
+
+            if (!request.FileName.StartsWith("temporary/", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentOutOfRangeException("filename");
+
+            string physicalPath = UploadHelper.DbFilePath(request.FileName);
+
+            ExcelPackage ep = new ExcelPackage();
+            using (var fs = new FileStream(physicalPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                ep.Load(fs);
+            }
+
+            var response = new ExcelImportResponse();
+            response.Inserted = 0;
+            response.Updated = 0;
+            response.ErrorList = new List<string>();
+
+            var worksheet = ep.Workbook.Worksheets.FirstOrDefault();
+            if (worksheet == null)
+                throw new ValidationError("Uploaded excel file does not contain any worksheet");
+
+            for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
+            {
+                try
+                {
+                    // Read all ExcelImportable fields from the Excel worksheet
+                    var orderId = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
+                    var jobTitle = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
+                    var jobLevel = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
+                    var jobFunction = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
+                    var industry = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
+                    var companyEmployeeSize = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
+                    var annualRevenue = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
+                    var address = Convert.ToString(worksheet.Cells[row, 8].Value ?? "").Trim();
+                    var city = Convert.ToString(worksheet.Cells[row, 9].Value ?? "").Trim();
+                    var state = Convert.ToString(worksheet.Cells[row, 10].Value ?? "").Trim();
+                    var zipCode = Convert.ToString(worksheet.Cells[row, 11].Value ?? "").Trim();
+                    var country = Convert.ToString(worksheet.Cells[row, 12].Value ?? "").Trim();
+                    var comments = Convert.ToString(worksheet.Cells[row, 13].Value ?? "").Trim();
+                    var additionalNotes = Convert.ToString(worksheet.Cells[row, 14].Value ?? "").Trim();
+
+                    // Skip empty rows (at least JobTitle or OrderId should have a value)
+                    if (string.IsNullOrEmpty(jobTitle) && string.IsNullOrEmpty(orderId))
+                        continue;
+
+                    var newRow = new MyRow
+                    {
+                        OrderId = string.IsNullOrEmpty(orderId) ? (long?)null : Convert.ToInt64(orderId),
+                        JobTitle = jobTitle,
+                        JobLevel = jobLevel,
+                        JobFunction = jobFunction,
+                        Industry = industry,
+                        CompanyEmployeeSize = companyEmployeeSize,
+                        AnnualRevenue = annualRevenue,
+                        Address = address,
+                        City = city,
+                        State = state,
+                        ZipCode = zipCode,
+                        Country = country,
+                        Comments = comments,
+                        AdditionalNotes = additionalNotes
+                    };
+
+                    uow.Connection.Insert(newRow);
+                    response.Inserted++;
+                }
+                catch (Exception ex)
+                {
+                    response.ErrorList.Add($"Row {row}: {ex.Message}");
+                }
+            }
+
+            return response;
+        }
+    }
+}

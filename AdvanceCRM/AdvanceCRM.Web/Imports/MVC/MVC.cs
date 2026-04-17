@@ -522,6 +522,26 @@ namespace MVC
                 public const string DealerIndex = "~/Modules/Masters/Dealer/DealerIndex.cshtml";
             }
 
+            public static class DemandayCampaignId
+            {
+                public const string DemandayCampaignIdIndex = "~/Modules/Masters/DemandayCampaignId/DemandayCampaignIdIndex.cshtml";
+            }
+
+            public static class DemandayMasterAccount
+            {
+                public const string DemandayMasterAccountIndex = "~/Modules/Masters/DemandayMasterAccount/DemandayMasterAccountIndex.cshtml";
+            }
+
+            public static class DemandayTeleMarketingEnquiryCampaignQuestions
+            {
+                public const string DemandayTeleMarketingEnquiryCampaignQuestionsIndex = "~/Modules/Masters/DemandayTeleMarketingEnquiryCampaignQuestions/DemandayTeleMarketingEnquiryCampaignQuestionsIndex.cshtml";
+            }
+
+            public static class DemandayTeleMarketingEnquiryQuestionAnswers
+            {
+                public const string DemandayTeleMarketingEnquiryQuestionAnswersIndex = "~/Modules/Masters/DemandayTeleMarketingEnquiryQuestionAnswers/DemandayTeleMarketingEnquiryQuestionAnswersIndex.cshtml";
+            }
+
             public static class Department
             {
                 public const string DepartmentIndex = "~/Modules/Masters/Department/DepartmentIndex.cshtml";
@@ -1371,6 +1391,40 @@ namespace MVC
             public static class WoocommerceDetails
             {
                 public const string WoocommerceDetailsIndex = "~/Modules/ThirdParty/WoocommerceDetails/WoocommerceDetailsIndex.cshtml";
+            }
+
+        }
+
+        public static class Toolkit
+        {
+            public static class ClientSupression
+            {
+                public const string ClientSupressionIndex = "~/Modules/Toolkit/ClientSupression/ClientSupressionIndex.cshtml";
+            }
+
+            public static class DemandayCompetitor
+            {
+                public const string DemandayCompetitorIndex = "~/Modules/Toolkit/DemandayCompetitor/DemandayCompetitorIndex.cshtml";
+            }
+
+            public static class DemandaySpecs
+            {
+                public const string DemandaySpecsIndex = "~/Modules/Toolkit/DemandaySpecs/DemandaySpecsIndex.cshtml";
+            }
+
+            public static class MasterSupression
+            {
+                public const string MasterSupressionIndex = "~/Modules/Toolkit/MasterSupression/MasterSupressionIndex.cshtml";
+            }
+
+            public static class OpenCampaign
+            {
+                public const string OpenCampaignIndex = "~/Modules/Toolkit/OpenCampaign/OpenCampaignIndex.cshtml";
+            }
+
+            public static class TalCampaign
+            {
+                public const string TalCampaignIndex = "~/Modules/Toolkit/TalCampaign/TalCampaignIndex.cshtml";
             }
 
         }
