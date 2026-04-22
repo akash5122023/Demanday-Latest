@@ -20,9 +20,9 @@ namespace AdvanceCRM.Toolkit.Forms
         public String CampaignId { get; set; }
         [HalfWidth]
         public String Domain { get; set; }
-        [HalfWidth]
-        public Int32 DemandayUserId { get; set; }
-        [HalfWidth, DateTimeEditor]
+        //[HalfWidth]
+        //public Int32 DemandayUserId { get; set; }
+        [HalfWidth, DateTimeEditor, ReadOnly(true)]
         public DateTime TimeStamp { get; set; }
         //[HalfWidth]
         //public Int32 ClientAccountId { get; set; }

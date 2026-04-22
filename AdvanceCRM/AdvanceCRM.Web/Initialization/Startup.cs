@@ -88,9 +88,23 @@ namespace AdvanceCRM
         public void ConfigureServices(IServiceCollection services)
         {
             // Fix for sync IO export error: allow synchronous IO for Kestrel and IIS
+            // Also raise request body size to 1 GB so Excel imports (Demanday + Toolkit modules)
+            // can accept large .xlsx files.
+            const long maxUploadBytes = 1073741824L; // 1 GB
             services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
             {
                 options.AllowSynchronousIO = true;
+                options.Limits.MaxRequestBodySize = maxUploadBytes;
+            });
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = maxUploadBytes;
+            });
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = maxUploadBytes;
+                options.ValueLengthLimit = int.MaxValue;
+                options.MultipartHeadersLengthLimit = int.MaxValue;
             });
             services.AddSingleton<ITypeSource>(new DefaultTypeSource(new[]
             {

@@ -36,12 +36,15 @@
             if (uid != 1) {
                 this.form.CompanyId.readOnly = true;
             }
-           // this.form.TenantId.set_readOnly(true);
-            this.form.TenantId.readOnly=true;
-            this.form.TenantId.element.closest('.field').hide();
-           // this.form.Url.set_readOnly(true);
-            this.form.Url.readOnly = true;
-            this.form.Url.element.closest('.field').hide();
+            // Tenant / URL are SaaS-only; hide them if the widgets are present.
+            try {
+                this.form.TenantId.readOnly = true;
+                this.form.TenantId.element.closest('.field').hide();
+            } catch { /* TenantId not in form (single-tenant mode) */ }
+            try {
+                this.form.Url.readOnly = true;
+                this.form.Url.element.closest('.field').hide();
+            } catch { /* Url not in form (single-tenant mode) */ }
         }
 
         protected getToolbarButtons() {
