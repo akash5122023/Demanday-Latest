@@ -58,3 +58,4 @@ publish-noactivation/
 # =========================
 GenerateActivationKey.cs
 test_activation.cs
+/AdvanceCRM/AdvanceCRM.Web/appsettings.json

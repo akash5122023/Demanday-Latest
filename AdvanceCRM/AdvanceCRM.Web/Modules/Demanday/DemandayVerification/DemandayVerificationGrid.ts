@@ -34,6 +34,14 @@ namespace AdvanceCRM.Demanday {
                     take.name = 'Take';
                     take.value = '0';
                     form.appendChild(take);
+                    const selectedKeys = this.rowSelection.getSelectedKeys().map(x => Number(x));
+                    if (selectedKeys && selectedKeys.length) {
+                        var idsInput = document.createElement('input');
+                        idsInput.type = 'hidden';
+                        idsInput.name = 'Ids';
+                        idsInput.value = selectedKeys.join(',');
+                        form.appendChild(idsInput);
+                    }
                     document.body.appendChild(form);
                     form.submit();
                     document.body.removeChild(form);

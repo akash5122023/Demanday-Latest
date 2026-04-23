@@ -59,8 +59,8 @@ namespace AdvanceCRM.Demanday.Endpoints
         [HttpPost, AuthorizeUpdate(typeof(DemandayTeamLeaderRow))]
         public StandardResponse MoveToQuality(IUnitOfWork uow, MoveToDemandayQualityRequest request)
         {
-            if (request?.Ids == null)
-                throw new ArgumentNullException(nameof(request.Ids));
+            if (request?.Ids == null || request.Ids.Count == 0)
+                throw new ValidationError("Please select at least one record.");
 
             var response = new StandardResponse();
             var demandayteamleaderConn = sqlConnections.NewFor<DemandayTeamLeaderRow>();

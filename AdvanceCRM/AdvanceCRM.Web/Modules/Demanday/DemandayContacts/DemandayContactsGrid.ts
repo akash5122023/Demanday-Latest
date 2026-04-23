@@ -33,6 +33,29 @@ namespace AdvanceCRM.Demanday {
 					take.name = 'Take';
 					take.value = '0';
 					form.appendChild(take);
+					const selectedKeys = this.rowSelection.getSelectedKeys().map(x => Number(x));
+					if (selectedKeys && selectedKeys.length) {
+						var idsInput = document.createElement('input');
+						idsInput.type = 'hidden';
+						idsInput.name = 'Ids';
+						idsInput.value = selectedKeys.join(',');
+						form.appendChild(idsInput);
+					}
+					document.body.appendChild(form);
+					form.submit();
+					document.body.removeChild(form);
+				}
+			});
+			buttons.push({
+				title: 'Download Import Template',
+				cssClass: 'download-template-button',
+				icon: 'fa-download',
+				onClick: () => {
+					const url = '/Services/Demanday/DemandayContacts/DownloadTemplate';
+					var form = document.createElement('form');
+					form.method = 'POST';
+					form.action = url;
+					form.style.display = 'none';
 					document.body.appendChild(form);
 					form.submit();
 					document.body.removeChild(form);

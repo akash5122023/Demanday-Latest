@@ -10,12 +10,14 @@ namespace AdvanceCRM.Demanday {
         protected getLocalTextPrefix() { return DemandayTeamLeaderRow.localTextPrefix; }
         protected getService() { return DemandayTeamLeaderService.baseUrl; }
 
+        
         constructor(container: JQuery) {
             super(container);
         }
 
         protected getColumns() {
             let columns = super.getColumns();
+            columns.unshift(Serenity.GridRowSelectionMixin.createSelectColumn(() => this.rowSelection));
 
             // Add audio player formatter for Attachments column
             let attachmentsCol = columns.find(x => x.field === 'Attachments');
@@ -50,6 +52,7 @@ namespace AdvanceCRM.Demanday {
 
             return columns;
         }
+        
         protected getButtons(): Serenity.ToolButton[] {
             let buttons = super.getButtons();
             buttons.shift();

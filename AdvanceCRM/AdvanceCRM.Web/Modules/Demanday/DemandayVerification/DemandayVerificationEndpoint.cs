@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AdvanceCRM.Web.Modules.Common.AppServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using Serenity;
@@ -88,27 +89,28 @@ namespace AdvanceCRM.Demanday.Endpoints
                 {
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
+                    var map = ExcelImportHelper.BuildHeaderMap(ws);
                     for (int row = 2; row <= rowCount; row++)
                     {
                         try
                         {
                             var demandayverification = new DemandayVerificationRow
                             {
-                                Id = GetInt(ws.Cells[row, 1].Value),
-                                SrNo = GetInt(ws.Cells[row, 2].Value),
-                                AgentName = ws.Cells[row, 3].Text,
-                                CdqaComments = ws.Cells[row, 4].Text,
-                                CampaignId = GetInt(ws.Cells[row, 5].Value),
-                                CompanyName = ws.Cells[row, 6].Text,
-                                FirstName = ws.Cells[row, 7].Text,
-                                LastName = ws.Cells[row, 8].Text,
-                                Title = ws.Cells[row, 9].Text,
-                                Email = ws.Cells[row, 10].Text,
-                                WorkPhone = ws.Cells[row, 11].Text,
-                                Alternate01 = ws.Cells[row, 12].Text,
-                                Alternate02 = ws.Cells[row, 13].Text,
-                                ProfileLink = ws.Cells[row, 14].Text,
-                                OwnerId = GetInt(ws.Cells[row, 15].Value),
+                                Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
+                                SrNo = ExcelImportHelper.GetInt(ws, row, map, "SrNo", "Sr No"),
+                                AgentName = ExcelImportHelper.GetText(ws, row, map, "AgentName", "Agent Name"),
+                                CdqaComments = ExcelImportHelper.GetText(ws, row, map, "CdqaComments", "Cdqa Comments", "CDQA Comments"),
+                                CampaignId = ExcelImportHelper.GetInt(ws, row, map, "CampaignId", "Campaign Id"),
+                                CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
+                                FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
+                                LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),
+                                Title = ExcelImportHelper.GetText(ws, row, map, "Title"),
+                                Email = ExcelImportHelper.GetText(ws, row, map, "Email"),
+                                WorkPhone = ExcelImportHelper.GetText(ws, row, map, "WorkPhone", "Work Phone"),
+                                Alternate01 = ExcelImportHelper.GetText(ws, row, map, "Alternate01", "Alternate 01", "Alternate1"),
+                                Alternate02 = ExcelImportHelper.GetText(ws, row, map, "Alternate02", "Alternate 02", "Alternate2"),
+                                ProfileLink = ExcelImportHelper.GetText(ws, row, map, "ProfileLink", "Profile Link"),
+                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy"),
                             };
                             if (demandayverification.Id.HasValue && demandayverification.Id.Value > 0)
                             {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AdvanceCRM.Web.Modules.Common.AppServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using Serenity;
@@ -88,59 +89,63 @@ namespace AdvanceCRM.Demanday.Endpoints
                 {
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
+                    var map = ExcelImportHelper.BuildHeaderMap(ws);
                     for (int row = 2; row <= rowCount; row++)
                     {
                         try
                         {
                             var demandaycontacts = new DemandayContactsRow
                             {
-                                Id = GetInt(ws.Cells[row, 1].Value),
-                                Slot = ws.Cells[row, 2].Text,
-                                CompanyName = ws.Cells[row, 3].Text,
-                                FirstName = ws.Cells[row, 4].Text,
-                                LastName = ws.Cells[row, 5].Text,
-                                Domain = ws.Cells[row, 6].Text,
-                                Title = ws.Cells[row, 7].Text,
-                                JobLevel = ws.Cells[row, 8].Text,
-                                JobFunctionRole = ws.Cells[row, 9].Text,
-                                Email = ws.Cells[row, 10].Text,
-                                WorkPhone = ws.Cells[row, 11].Text,
-                                AlternativeNumber = ws.Cells[row, 12].Text,
-                                Street = ws.Cells[row, 13].Text,
-                                City = ws.Cells[row, 14].Text,
-                                State = ws.Cells[row, 15].Text,
-                                ZipCode = ws.Cells[row, 16].Text,
-                                Country = ws.Cells[row, 17].Text,
-                                Continents = ws.Cells[row, 18].Text,
-                                Industry = ws.Cells[row, 19].Text,
-                                Revenue = ws.Cells[row, 20].Text,
-                                CompanyEmployeeSize = ws.Cells[row, 21].Text,
-                                ProfileLink = ws.Cells[row, 22].Text,
-                                CompanyLink = ws.Cells[row, 23].Text,
-                                RevenueLink = ws.Cells[row, 24].Text,
-                                EmailFormat = ws.Cells[row, 25].Text,
-                                AdressLink = ws.Cells[row, 26].Text,
-                                ProspectUrl = ws.Cells[row, 27].Text,
-                                PrimaryReason = ws.Cells[row, 28].Text,
-                                Category = ws.Cells[row, 29].Text,
-                                Comments = ws.Cells[row, 30].Text,
-                                QaStatus = ws.Cells[row, 31].Text,
-                                DeliveryStatus = ws.Cells[row, 32].Text,
-                                AgentName = ws.Cells[row, 33].Text,
-                                QaName = ws.Cells[row, 34].Text,
-                                CallDate = GetDate(ws.Cells[row, 35].Value),
-                                DateAudited = GetDate(ws.Cells[row, 36].Value),
-                                DeliveryDate = GetDate(ws.Cells[row, 37].Value),
-                                Source = ws.Cells[row, 38].Text,
-                                VerificationMode = ws.Cells[row, 39].Text,
-                                Asset1 = ws.Cells[row, 40].Text,
-                                Asset2 = ws.Cells[row, 41].Text,
-                                TlName = ws.Cells[row, 42].Text,
-                                Tenurity = ws.Cells[row, 43].Text,
-                                Code = ws.Cells[row, 44].Text,
-                                Link = ws.Cells[row, 45].Text,
-                                Md5 = ws.Cells[row, 46].Text,
-                                OwnerUsername = ws.Cells[row, 47].Text
+                                Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
+                                Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
+                                CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
+                                CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
+                                FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
+                                LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),
+                                Domain = ExcelImportHelper.GetText(ws, row, map, "Domain"),
+                                Title = ExcelImportHelper.GetText(ws, row, map, "Title"),
+                                JobLevel = ExcelImportHelper.GetText(ws, row, map, "JobLevel", "Job Level", "Job_Level"),
+                                JobFunctionRole = ExcelImportHelper.GetText(ws, row, map, "JobFunctionRole", "Job Function Role"),
+                                Email = ExcelImportHelper.GetText(ws, row, map, "Email"),
+                                WorkPhone = ExcelImportHelper.GetText(ws, row, map, "WorkPhone", "Work Phone"),
+                                AlternativeNumber = ExcelImportHelper.GetText(ws, row, map, "AlternativeNumber", "Alternative Number"),
+                                Street = ExcelImportHelper.GetText(ws, row, map, "Street"),
+                                City = ExcelImportHelper.GetText(ws, row, map, "City"),
+                                State = ExcelImportHelper.GetText(ws, row, map, "State"),
+                                ZipCode = ExcelImportHelper.GetText(ws, row, map, "ZipCode", "Zip Code"),
+                                Country = ExcelImportHelper.GetText(ws, row, map, "Country"),
+                                Continents = ExcelImportHelper.GetText(ws, row, map, "Continents"),
+                                Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
+                                Revenue = ExcelImportHelper.GetText(ws, row, map, "Revenue"),
+                                CompanyEmployeeSize = ExcelImportHelper.GetText(ws, row, map, "CompanyEmployeeSize", "Company Employee Size"),
+                                ProfileLink = ExcelImportHelper.GetText(ws, row, map, "ProfileLink", "Profile Link"),
+                                CompanyLink = ExcelImportHelper.GetText(ws, row, map, "CompanyLink", "Company Link"),
+                                RevenueLink = ExcelImportHelper.GetText(ws, row, map, "RevenueLink", "Revenue Link"),
+                                EmailFormat = ExcelImportHelper.GetText(ws, row, map, "EmailFormat", "Email Format"),
+                                AdressLink = ExcelImportHelper.GetText(ws, row, map, "AdressLink", "Adress Link", "AddressLink", "Address Link"),
+                                ProspectUrl = ExcelImportHelper.GetText(ws, row, map, "ProspectUrl", "Prospect Url", "Prospect URL", "ProspectURL"),
+                                PrimaryReason = ExcelImportHelper.GetText(ws, row, map, "PrimaryReason", "Primary Reason"),
+                                Category = ExcelImportHelper.GetText(ws, row, map, "Category"),
+                                Comments = ExcelImportHelper.GetText(ws, row, map, "Comments"),
+                                QaStatus = ExcelImportHelper.GetText(ws, row, map, "QaStatus", "QA Status"),
+                                DeliveryStatus = ExcelImportHelper.GetText(ws, row, map, "DeliveryStatus", "Delivery Status"),
+                                AgentName = ExcelImportHelper.GetText(ws, row, map, "AgentName", "Agent Name"),
+                                AgentsName = ExcelImportHelper.GetText(ws, row, map, "AgentsName", "Agents Name"),
+                                QaName = ExcelImportHelper.GetText(ws, row, map, "QaName", "QA Name"),
+                                CallDate = ExcelImportHelper.GetDate(ws, row, map, "CallDate", "Call Date"),
+                                DateAudited = ExcelImportHelper.GetDate(ws, row, map, "DateAudited", "Date Audited"),
+                                DeliveryDate = ExcelImportHelper.GetDate(ws, row, map, "DeliveryDate", "Delivery Date"),
+                                Source = ExcelImportHelper.GetText(ws, row, map, "Source"),
+                                VerificationMode = ExcelImportHelper.GetText(ws, row, map, "VerificationMode", "Verification Mode"),
+                                Asset1 = ExcelImportHelper.GetText(ws, row, map, "Asset1", "Asset 1"),
+                                Asset2 = ExcelImportHelper.GetText(ws, row, map, "Asset2", "Asset 2"),
+                                TlName = ExcelImportHelper.GetText(ws, row, map, "TlName", "TL Name"),
+                                Tenurity = ExcelImportHelper.GetText(ws, row, map, "Tenurity"),
+                                Code = ExcelImportHelper.GetText(ws, row, map, "Code"),
+                                Link = ExcelImportHelper.GetText(ws, row, map, "Link"),
+                                Md5 = ExcelImportHelper.GetText(ws, row, map, "Md5", "MD5"),
+                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy"),
+                                OwnerUsername = ExcelImportHelper.GetText(ws, row, map, "OwnerUsername", "Owner Username", "Created By", "CreatedBy")
                             };
                             if (demandaycontacts.Id.HasValue && demandaycontacts.Id.Value > 0)
                             {
@@ -169,5 +174,71 @@ namespace AdvanceCRM.Demanday.Endpoints
         private static decimal? GetDecimal(object val) { if (val == null) return null; decimal d; return decimal.TryParse(val.ToString(), out d) ? d : null; }
         private static DateTime? GetDate(object val) { if (val == null) return null; DateTime dt; return DateTime.TryParse(val.ToString(), out dt) ? dt : null; }
 
+        [HttpGet, HttpPost, IgnoreAntiforgeryToken, AuthorizeList(typeof(DemandayContactsRow))]
+        public FileContentResult DownloadTemplate()
+        {
+            string[] headers = new[]
+            {
+                "Id",
+                "SLOT",
+                "Company Name",
+                "First Name",
+                "Last Name",
+                "Domain",
+                "Title",
+                "Job Level",
+                "Job Function Role",
+                "Email",
+                "Work Phone",
+                "Alternative Number",
+                "Street",
+                "City",
+                "State",
+                "Zip Code",
+                "Country",
+                "Continents",
+                "Industry",
+                "Revenue",
+                "Company Employee Size",
+                "Profile Link",
+                "Company Link",
+                "Revenue Link",
+                "Email Format",
+                "Adress Link",
+                "Prospect URL",
+                "Primary Reason",
+                "Category",
+                "Comments",
+                "QA Status",
+                "Delivery Status",
+                "Agent Name",
+                "QA Name",
+                "Call Date",
+                "Date Audited",
+                "Delivery Date",
+                "Source",
+                "Verification Mode",
+                "Asset 1",
+                "Asset 2",
+                "TL Name",
+                "Tenurity",
+                "Code",
+                "Link",
+                "MD5",
+                "Created By"
+            };
+            using var package = new ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("DemandayContacts");
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cells[1, i + 1];
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+            }
+            ws.Cells.AutoFitColumns();
+            var bytes = package.GetAsByteArray();
+            var fileName = "DemandayContacts_ImportTemplate.xlsx";
+            return Serenity.Web.ExcelContentResult.Create(bytes, fileName);
+        }
     }
 }

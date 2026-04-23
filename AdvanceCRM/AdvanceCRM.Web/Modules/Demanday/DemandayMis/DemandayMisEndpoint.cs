@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AdvanceCRM.Web.Modules.Common.AppServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using Serenity;
@@ -93,54 +94,57 @@ namespace AdvanceCRM.Demanday.Endpoints
                 {
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
+                    var map = ExcelImportHelper.BuildHeaderMap(ws);
                     for (int row = 2; row <= rowCount; row++)
                     {
                         try
                         {
                             var demandaymis = new DemandayMisRow
                             {
-                                Id = GetInt(ws.Cells[row, 1].Value),
-                                Slot = ws.Cells[row, 2].Text,
-                                CompanyName = ws.Cells[row, 3].Text,
-                                FirstName = ws.Cells[row, 4].Text,
-                                LastName = ws.Cells[row, 5].Text,
-                                Title = ws.Cells[row, 8].Text,
-                                Email = ws.Cells[row, 9].Text,
-                                WorkPhone = ws.Cells[row, 10].Text,
-                                AlternativeNumber = ws.Cells[row, 11].Text,
-                                Street = ws.Cells[row, 12].Text,
-                                City = ws.Cells[row, 13].Text,
-                                State = ws.Cells[row, 14].Text,
-                                ZipCode = ws.Cells[row, 15].Text,
-                                Country = ws.Cells[row, 16].Text,
-                                CompanyEmployeeSize = ws.Cells[row, 17].Text,
-                                Industry = ws.Cells[row, 18].Text,
-                                Revenue = ws.Cells[row, 19].Text,
-                                ProfileLink = ws.Cells[row, 20].Text,
-                                CompanyLink = ws.Cells[row, 21].Text,
-                                RevenueLink = ws.Cells[row, 22].Text,
-                                EmailFormat = ws.Cells[row, 23].Text,
-                                AdressLink = ws.Cells[row, 24].Text,
-                                PrimaryReason = ws.Cells[row, 25].Text,
-                                Category = ws.Cells[row, 26].Text,
-                                Comments = ws.Cells[row, 27].Text,
-                                QaStatus = ws.Cells[row, 28].Text,
-                                DeliveryStatus = ws.Cells[row, 29].Text,
-                                AgentName = ws.Cells[row, 30].Text,
-                                QaName = ws.Cells[row, 31].Text,
-                                CallDate = GetDate(ws.Cells[row, 32].Value),
-                                DateAudited = GetDate(ws.Cells[row, 33].Value),
-                                DeliveryDate = GetDate(ws.Cells[row, 34].Value),
-                                Source = ws.Cells[row, 35].Text,
-                                VerificationMode = ws.Cells[row, 36].Text,
-                                Asset1 = ws.Cells[row, 37].Text,
-                                Asset2 = ws.Cells[row, 38].Text,
-                                TlName = ws.Cells[row, 39].Text,
-                                Tenurity = ws.Cells[row, 40].Text,
-                                Code = ws.Cells[row, 41].Text,
-                                Link = ws.Cells[row, 42].Text,
-                                Md5 = ws.Cells[row, 43].Text,
-                                OwnerId = GetInt(ws.Cells[row, 43].Value),
+                                Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
+                                Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
+                                CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
+                                CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
+                                FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
+                                LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),
+                                Title = ExcelImportHelper.GetText(ws, row, map, "Title"),
+                                Email = ExcelImportHelper.GetText(ws, row, map, "Email"),
+                                WorkPhone = ExcelImportHelper.GetText(ws, row, map, "WorkPhone", "Work Phone"),
+                                AlternativeNumber = ExcelImportHelper.GetText(ws, row, map, "AlternativeNumber", "Alternative Number"),
+                                Street = ExcelImportHelper.GetText(ws, row, map, "Street"),
+                                City = ExcelImportHelper.GetText(ws, row, map, "City"),
+                                State = ExcelImportHelper.GetText(ws, row, map, "State"),
+                                ZipCode = ExcelImportHelper.GetText(ws, row, map, "ZipCode", "Zip Code"),
+                                Country = ExcelImportHelper.GetText(ws, row, map, "Country"),
+                                CompanyEmployeeSize = ExcelImportHelper.GetText(ws, row, map, "CompanyEmployeeSize", "Company Employee Size"),
+                                Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
+                                Revenue = ExcelImportHelper.GetText(ws, row, map, "Revenue"),
+                                ProfileLink = ExcelImportHelper.GetText(ws, row, map, "ProfileLink", "Profile Link"),
+                                CompanyLink = ExcelImportHelper.GetText(ws, row, map, "CompanyLink", "Company Link"),
+                                RevenueLink = ExcelImportHelper.GetText(ws, row, map, "RevenueLink", "Revenue Link"),
+                                EmailFormat = ExcelImportHelper.GetText(ws, row, map, "EmailFormat", "Email Format"),
+                                AdressLink = ExcelImportHelper.GetText(ws, row, map, "AdressLink", "Adress Link", "AddressLink", "Address Link"),
+                                PrimaryReason = ExcelImportHelper.GetText(ws, row, map, "PrimaryReason", "Primary Reason"),
+                                Category = ExcelImportHelper.GetText(ws, row, map, "Category"),
+                                Comments = ExcelImportHelper.GetText(ws, row, map, "Comments"),
+                                QaStatus = ExcelImportHelper.GetText(ws, row, map, "QaStatus", "QA Status"),
+                                DeliveryStatus = ExcelImportHelper.GetText(ws, row, map, "DeliveryStatus", "Delivery Status"),
+                                AgentName = ExcelImportHelper.GetText(ws, row, map, "AgentName", "Agent Name"),
+                                AgentsName = ExcelImportHelper.GetText(ws, row, map, "AgentsName", "Agents Name"),
+                                QaName = ExcelImportHelper.GetText(ws, row, map, "QaName", "QA Name"),
+                                CallDate = ExcelImportHelper.GetDate(ws, row, map, "CallDate", "Call Date"),
+                                DateAudited = ExcelImportHelper.GetDate(ws, row, map, "DateAudited", "Date Audited"),
+                                DeliveryDate = ExcelImportHelper.GetDate(ws, row, map, "DeliveryDate", "Delivery Date"),
+                                Source = ExcelImportHelper.GetText(ws, row, map, "Source"),
+                                VerificationMode = ExcelImportHelper.GetText(ws, row, map, "VerificationMode", "Verification Mode"),
+                                Asset1 = ExcelImportHelper.GetText(ws, row, map, "Asset1", "Asset 1"),
+                                Asset2 = ExcelImportHelper.GetText(ws, row, map, "Asset2", "Asset 2"),
+                                TlName = ExcelImportHelper.GetText(ws, row, map, "TlName", "TL Name"),
+                                Tenurity = ExcelImportHelper.GetText(ws, row, map, "Tenurity"),
+                                Code = ExcelImportHelper.GetText(ws, row, map, "Code"),
+                                Link = ExcelImportHelper.GetText(ws, row, map, "Link"),
+                                Md5 = ExcelImportHelper.GetText(ws, row, map, "Md5", "MD5"),
+                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy"),
                             };
                             if (demandaymis.Id.HasValue && demandaymis.Id.Value > 0)
                             {
