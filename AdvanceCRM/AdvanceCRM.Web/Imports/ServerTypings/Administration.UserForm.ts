@@ -1,8 +1,6 @@
 ﻿namespace AdvanceCRM.Administration {
     export interface UserForm {
         CompanyId: Serenity.LookupEditor;
-        TenantId: Serenity.LookupEditor;
-        Url: Serenity.StringEditor;
         Username: Serenity.StringEditor;
         DisplayName: Serenity.StringEditor;
         Email: Serenity.EmailEditor;
@@ -67,8 +65,6 @@
 
                 Q.initFormType(UserForm, [
                     'CompanyId', w0,
-                    'TenantId', w0,
-                    'Url', w1,
                     'Username', w1,
                     'DisplayName', w1,
                     'Email', w2,

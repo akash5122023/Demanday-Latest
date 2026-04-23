@@ -71,6 +71,18 @@ namespace AdvanceCRM.Web.Helpers
                 }
             }
 
+            // Fallback: if config has a valid activation key and end date is in the future,
+            // accept the license regardless of MAC (covers server migrations/new deployments).
+            if (!string.IsNullOrWhiteSpace(activationKey)
+                && DateTime.TryParseExact(endDate, "MM/dd/yyyy",
+                                           System.Globalization.CultureInfo.InvariantCulture,
+                                           System.Globalization.DateTimeStyles.None,
+                                           out var fallbackParsed)
+                && fallbackParsed.Date >= DateTime.UtcNow.Date)
+            {
+                return true;
+            }
+
             return false;
         }
 
