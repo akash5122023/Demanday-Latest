@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Data;
 using Serenity.Services;
 using System;
@@ -16,6 +16,14 @@ namespace AdvanceCRM.Toolkit
         public OpenCampaignSaveHandler(IRequestContext context)
              : base(context)
         {
+        }
+
+        protected override void SetInternalFields()
+        {
+            base.SetInternalFields();
+
+            if (IsCreate)
+                Row.OwnerId = Convert.ToInt32(User.GetIdentifier());
         }
     }
 }

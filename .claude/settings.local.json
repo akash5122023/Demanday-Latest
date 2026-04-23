@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -ao \"PrefixedContext[^}]\\\\{0,400\\\\}\" c:/Users/dudhe/source/repos/Demanday-Latest/AdvanceCRM/AdvanceCRM.Web/wwwroot/Scripts/serenity/Serenity.CoreLib.min.js)",
+      "Bash(awk 'NR>=21040 && NR<=21060' c:/Users/dudhe/source/repos/Demanday-Latest/AdvanceCRM/AdvanceCRM.Web/wwwroot/Scripts/site/AdvanceCRM.Web.js)",
+      "Bash(xargs grep *)"
+    ]
+  }
+}
