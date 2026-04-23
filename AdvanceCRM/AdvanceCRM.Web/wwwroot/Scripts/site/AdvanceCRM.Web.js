@@ -26060,12 +26060,15 @@ var AdvanceCRM;
                 if (uid != 1) {
                     _this.form.CompanyId.readOnly = true;
                 }
-                // this.form.TenantId.set_readOnly(true);
-                _this.form.TenantId.readOnly = true;
-                _this.form.TenantId.element.closest('.field').hide();
-                // this.form.Url.set_readOnly(true);
-                _this.form.Url.readOnly = true;
-                _this.form.Url.element.closest('.field').hide();
+                // Tenant / URL are SaaS-only; hide them if the widgets are present.
+                try {
+                    _this.form.TenantId.readOnly = true;
+                    _this.form.TenantId.element.closest('.field').hide();
+                } catch (_a) { /* TenantId not in form (single-tenant mode) */ }
+                try {
+                    _this.form.Url.readOnly = true;
+                    _this.form.Url.element.closest('.field').hide();
+                } catch (_b) { /* Url not in form (single-tenant mode) */ }
                 return _this;
             }
             UserDialog.prototype.getFormKey = function () { return Administration.UserForm.formKey; };
