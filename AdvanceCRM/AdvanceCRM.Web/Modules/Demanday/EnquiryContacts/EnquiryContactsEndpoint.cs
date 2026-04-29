@@ -64,6 +64,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                 DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
         }
         [HttpPost, IgnoreAntiforgeryToken]
+        [RequestSizeLimit(52428800)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 52428800)]
         public IActionResult ImportExcel([FromServices] IUnitOfWork uow, IFormFile file, [FromServices] IEnquiryContactsSaveHandler saveHandler)
         {
             try

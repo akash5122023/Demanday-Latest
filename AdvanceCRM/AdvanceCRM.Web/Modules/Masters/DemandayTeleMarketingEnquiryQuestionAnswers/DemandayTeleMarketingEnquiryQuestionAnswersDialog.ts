@@ -14,5 +14,10 @@ namespace AdvanceCRM.Masters {
 
         protected form = new DemandayTeleMarketingEnquiryQuestionAnswersForm(this.idPrefix);
 
+        protected afterLoadEntity(): void {
+            super.afterLoadEntity();
+            // Trigger cascade so QuestionId lookup filters by selected CampaignId on edit
+            this.form.CampaignId.element.triggerHandler('change');
+        }
     }
 }

@@ -25,7 +25,10 @@ namespace AdvanceCRM.Demanday {
 
         protected afterLoadEntity(): void {
             super.afterLoadEntity();
-            this.form.QADetails.setCampaignId(this.entity ? (this.entity as DemandayTeleMarketingEnquiryRow).CampaignId : null);
+            var row = this.entity as DemandayTeleMarketingEnquiryRow;
+            this.form.QADetails.setCampaignId(row ? row.CampaignId : null);
+            DemandayAudioAttachment.render(this.element, this.idPrefix, "Attachments",
+                row ? row.Attachments : null);
         }
 
     }

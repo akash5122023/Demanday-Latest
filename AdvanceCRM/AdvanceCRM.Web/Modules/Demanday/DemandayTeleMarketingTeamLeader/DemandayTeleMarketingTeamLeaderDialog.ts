@@ -15,5 +15,11 @@ namespace AdvanceCRM.Demanday {
 
         protected form = new DemandayTeleMarketingTeamLeaderForm(this.idPrefix);
 
+        protected afterLoadEntity(): void {
+            super.afterLoadEntity();
+            var row = this.entity as DemandayTeleMarketingTeamLeaderRow;
+            DemandayAudioAttachment.render(this.element, this.idPrefix, "Attachments",
+                row ? row.Attachments : null);
+        }
     }
 }

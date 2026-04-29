@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Masters {
     export interface DemandayTeleMarketingEnquiryQuestionAnswersForm {
+        CampaignId: Serenity.LookupEditor;
         QuestionId: Serenity.LookupEditor;
         AnswerText: Serenity.StringEditor;
         OwnerId: Administration.UserEditor;
@@ -21,6 +22,7 @@
                 var w2 = Administration.UserEditor;
 
                 Q.initFormType(DemandayTeleMarketingEnquiryQuestionAnswersForm, [
+                    'CampaignId', w0,
                     'QuestionId', w0,
                     'AnswerText', w1,
                     'OwnerId', w2

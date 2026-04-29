@@ -29,7 +29,7 @@ namespace AdvanceCRM.Masters
             set => fields.QuestionText[this] = value;
         }
 
-        [DisplayName("Campaign"), ForeignKey("[dbo].[DemandayCampaignId]", "Id"), LeftJoin("jCampaign"), TextualField("CampaignCampaignId")]
+        [DisplayName("Campaign"), ForeignKey("[dbo].[DemandayCampaignId]", "Id"), LeftJoin("jCampaign"), TextualField("CampaignCampaignId"), LookupInclude]
         public Int32? CampaignId
         {
             get => fields.CampaignId[this];

@@ -12,7 +12,10 @@ namespace AdvanceCRM.Masters.Forms
     [BasedOnRow(typeof(DemandayTeleMarketingEnquiryQuestionAnswersRow), CheckNames = true)]
     public class DemandayTeleMarketingEnquiryQuestionAnswersForm
     {
-        [LookupEditor(typeof(DemandayTeleMarketingEnquiryCampaignQuestionsRow))]
+        [LookupEditor(typeof(DemandayCampaignIdRow))]
+        public Int32 CampaignId { get; set; }
+
+        [LookupEditor(typeof(DemandayTeleMarketingEnquiryCampaignQuestionsRow), CascadeFrom = "CampaignId", CascadeField = "CampaignId")]
         public Int32 QuestionId { get; set; }
         public String AnswerText { get; set; }
         public Int32 OwnerId { get; set; }

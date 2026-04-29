@@ -1,6 +1,8 @@
 ﻿namespace AdvanceCRM.Masters {
     export interface DemandayTeleMarketingEnquiryQuestionAnswersRow {
         Id?: number;
+        CampaignId?: number;
+        CampaignCampaignId?: string;
         QuestionId?: number;
         AnswerText?: string;
         OwnerId?: number;
@@ -64,6 +66,8 @@
 
         export declare const enum Fields {
             Id = "Id",
+            CampaignId = "CampaignId",
+            CampaignCampaignId = "CampaignCampaignId",
             QuestionId = "QuestionId",
             AnswerText = "AnswerText",
             OwnerId = "OwnerId",

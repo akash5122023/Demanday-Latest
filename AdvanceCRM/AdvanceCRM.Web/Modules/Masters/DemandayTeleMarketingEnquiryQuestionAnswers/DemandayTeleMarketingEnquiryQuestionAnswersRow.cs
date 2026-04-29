@@ -22,6 +22,20 @@ namespace AdvanceCRM.Masters
             set => fields.Id[this] = value;
         }
 
+        [DisplayName("Campaign"), ForeignKey("[dbo].[DemandayCampaignId]", "Id"), LeftJoin("jCampaign"), TextualField("CampaignCampaignId"), LookupInclude]
+        public Int32? CampaignId
+        {
+            get => fields.CampaignId[this];
+            set => fields.CampaignId[this] = value;
+        }
+
+        [DisplayName("Campaign Id"), Expression("jCampaign.[CampaignId]"), LookupInclude]
+        public String CampaignCampaignId
+        {
+            get => fields.CampaignCampaignId[this];
+            set => fields.CampaignCampaignId[this] = value;
+        }
+
         [DisplayName("Question"), ForeignKey("[dbo].[DemandayTeleMarketingEnquiryCampaignQuestions]", "Id"), LeftJoin("jQuestion"), TextualField("QuestionQuestionText"), LookupInclude]
         public Int32? QuestionId
         {
@@ -351,6 +365,8 @@ namespace AdvanceCRM.Masters
         public class RowFields : RowFieldsBase
         {
             public Int32Field Id;
+            public Int32Field CampaignId;
+            public StringField CampaignCampaignId;
             public Int32Field QuestionId;
             public StringField AnswerText;
             public Int32Field OwnerId;

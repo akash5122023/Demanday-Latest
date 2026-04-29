@@ -78,6 +78,8 @@ namespace AdvanceCRM.Demanday.Endpoints
             return Serenity.Web.ExcelContentResult.Create(bytes, fileName);
         }
         [HttpPost, IgnoreAntiforgeryToken]
+        [RequestSizeLimit(52428800)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 52428800)]
         public IActionResult ImportExcel([FromServices] IUnitOfWork uow, IFormFile file, [FromServices] IDemandayTeleMarketingMISSaveHandler saveHandler)
         {
             try
