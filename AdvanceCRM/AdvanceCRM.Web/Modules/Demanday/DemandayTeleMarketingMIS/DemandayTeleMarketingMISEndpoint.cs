@@ -142,8 +142,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Code = ExcelImportHelper.GetText(ws, row, map, "Code"),
                                 Link = ExcelImportHelper.GetText(ws, row, map, "Link"),
                                 Md5 = ExcelImportHelper.GetText(ws, row, map, "Md5", "MD5"),
-                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy"),
-                                OwnerUsername = ExcelImportHelper.GetText(ws, row, map, "OwnerUsername", "Owner Username", "Created By", "CreatedBy")
+                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy")
                             };
                             if (demandaytelemarketingmis.Id.HasValue && demandaytelemarketingmis.Id.Value > 0)
                             {
@@ -171,6 +170,86 @@ namespace AdvanceCRM.Demanday.Endpoints
         private static int? GetInt(object val) { if (val == null) return null; int i; return int.TryParse(val.ToString(), out i) ? i : null; }
         private static decimal? GetDecimal(object val) { if (val == null) return null; decimal d; return decimal.TryParse(val.ToString(), out d) ? d : null; }
         private static DateTime? GetDate(object val) { if (val == null) return null; DateTime dt; return DateTime.TryParse(val.ToString(), out dt) ? dt : null; }
+
+        [HttpPost, AuthorizeUpdate(typeof(DemandayTeleMarketingMISRow))]
+        public StandardResponse MoveToTeleMarketingContacts(IUnitOfWork uow,
+            MoveToTeleMarketingContactsRequest request,
+            [FromServices] ISqlConnections sqlConnections)
+        {
+            if (request?.Ids == null)
+                throw new ArgumentNullException(nameof(request.Ids));
+
+            var response = new StandardResponse();
+            var demandaytelemarketingmisConn = sqlConnections.NewFor<DemandayTeleMarketingMISRow>();
+            var demandaytelemarketingcontactsConn = sqlConnections.NewFor<DemandayTeleMarketingContactsRow>();
+
+            foreach (var id in request.Ids)
+            {
+                var demandaytelemarketingmis = demandaytelemarketingmisConn.TryById<DemandayTeleMarketingMISRow>(id);
+
+                if (demandaytelemarketingmis == null)
+                    throw new ValidationError("MIS record not found!");
+
+                var demandaytelemarketingcontacts = new DemandayTeleMarketingContactsRow
+                {
+                    Slot = demandaytelemarketingmis.Slot,
+                    PrimaryReason = demandaytelemarketingmis.PrimaryReason,
+                    Category = demandaytelemarketingmis.Category,
+                    Comments = demandaytelemarketingmis.Comments,
+                    QaStatus = demandaytelemarketingmis.QaStatus,
+                    DeliveryStatus = demandaytelemarketingmis.DeliveryStatus,
+                    AgentName = demandaytelemarketingmis.AgentName,
+                    QaName = demandaytelemarketingmis.QaName,
+                    CallDate = demandaytelemarketingmis.CallDate,
+                    DateAudited = demandaytelemarketingmis.DateAudited,
+                    DeliveryDate = demandaytelemarketingmis.DeliveryDate,
+                    CampaignId = demandaytelemarketingmis.CampaignId,
+                    Source = demandaytelemarketingmis.Source,
+                    VerificationMode = demandaytelemarketingmis.VerificationMode,
+                    Asset1 = demandaytelemarketingmis.Asset1,
+                    Asset2 = demandaytelemarketingmis.Asset2,
+                    AgentsName = demandaytelemarketingmis.AgentsName,
+                    TlName = demandaytelemarketingmis.TlName,
+                    CompanyName = demandaytelemarketingmis.CompanyName,
+                    FirstName = demandaytelemarketingmis.FirstName,
+                    LastName = demandaytelemarketingmis.LastName,
+                    Title = demandaytelemarketingmis.Title,
+                    Email = demandaytelemarketingmis.Email,
+                    WorkPhone = demandaytelemarketingmis.WorkPhone,
+                    AlternativeNumber = demandaytelemarketingmis.AlternativeNumber,
+                    Street = demandaytelemarketingmis.Street,
+                    City = demandaytelemarketingmis.City,
+                    State = demandaytelemarketingmis.State,
+                    ZipCode = demandaytelemarketingmis.ZipCode,
+                    Country = demandaytelemarketingmis.Country,
+                    CompanyEmployeeSize = demandaytelemarketingmis.CompanyEmployeeSize,
+                    Industry = demandaytelemarketingmis.Industry,
+                    Revenue = demandaytelemarketingmis.Revenue,
+                    ProfileLink = demandaytelemarketingmis.ProfileLink,
+                    CompanyLink = demandaytelemarketingmis.CompanyLink,
+                    RevenueLink = demandaytelemarketingmis.RevenueLink,
+                    AdressLink = demandaytelemarketingmis.AdressLink,
+                    Tenurity = demandaytelemarketingmis.Tenurity,
+                    Code = demandaytelemarketingmis.Code,
+                    Link = demandaytelemarketingmis.Link,
+                    Md5 = demandaytelemarketingmis.Md5,
+                    OwnerId = demandaytelemarketingmis.OwnerId
+                };
+
+                demandaytelemarketingcontactsConn.Insert(demandaytelemarketingcontacts);
+
+                // MIS record is intentionally retained (not deleted) after moving to Contacts.
+                response.Id = demandaytelemarketingcontacts.Id ?? 0;
+            }
+            response.Status = "MIS successfully moved to TeleMarketing Contacts module!";
+
+            return response;
+        }
+
+        public class MoveToTeleMarketingContactsRequest : ServiceRequest
+        {
+            public List<int> Ids { get; set; }
+        }
 
     }
 }

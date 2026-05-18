@@ -63,7 +63,7 @@ namespace AdvanceCRM.Demanday.Columns
         //public String Continents { get; set; }
         //public String ProspectUrl { get; set; }
         //public String OwnerUsername { get; set; }
-        [DisplayName("Db.Shared.RecordId"), AlignRight]
+        [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
         public String CampaignId { get; set; }
         //public String AgentsName { get; set; }

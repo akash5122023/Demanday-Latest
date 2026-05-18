@@ -148,8 +148,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Code = ExcelImportHelper.GetText(ws, row, map, "Code"),
                                 Link = ExcelImportHelper.GetText(ws, row, map, "Link"),
                                 Md5 = ExcelImportHelper.GetText(ws, row, map, "Md5", "MD5"),
-                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy"),
-                                OwnerUsername = ExcelImportHelper.GetText(ws, row, map, "OwnerUsername", "Owner Username", "Created By", "CreatedBy")
+                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy")
                             };
                             if (demandaytelemarketingcontacts.Id.HasValue && demandaytelemarketingcontacts.Id.Value > 0)
                             {

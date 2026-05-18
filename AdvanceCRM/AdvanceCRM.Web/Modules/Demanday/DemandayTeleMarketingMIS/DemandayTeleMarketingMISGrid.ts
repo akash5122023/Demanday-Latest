@@ -19,6 +19,28 @@ namespace AdvanceCRM.Demanday {
             // Example: remove default add button
             buttons.shift();
 			buttons.push({
+				title: "Move to TeleMarketing Contacts",
+				cssClass: "move-to-telemarketing-contacts-button",
+				onClick: () => {
+					const selectedKeys = this.rowSelection.getSelectedKeys().map(x => Number(x));
+
+					if (!selectedKeys.length) {
+						Q.notifyWarning("Please select at least one record!");
+						return;
+					}
+					Q.confirm("Are you sure you want to move selected record to TeleMarketing Contacts?", () => {
+						Q.serviceRequest(
+							"Demanday/DemandayTeleMarketingMIS/MoveToTeleMarketingContacts",
+							{ Ids: selectedKeys },
+							(response: { Status: string }) => {
+								Q.notifySuccess(response.Status);
+								this.refresh();
+							}
+						);
+					});
+				}
+			});
+			buttons.push({
 				title: 'Export To Excel',
 				cssClass: 'export-excel-button',
 				icon: 'fa-file-excel',

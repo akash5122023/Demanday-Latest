@@ -1,8 +1,9 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Abstractions;
 using Serenity.Data;
 using AdvanceCRM.Administration.Entities;
 using AdvanceCRM.Administration.Repositories;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,14 +16,17 @@ namespace AdvanceCRM.Administration
         protected ISqlConnections SqlConnections { get; }
         public ITypeSource TypeSource { get; }
         protected IUserAccessor UserAccessor { get; }
+        protected IHttpContextAccessor HttpContextAccessor { get; }
 
         public PermissionService(ITwoLevelCache cache, ISqlConnections sqlConnections,
-            ITypeSource typeSource, IUserAccessor userAccessor)
+            ITypeSource typeSource, IUserAccessor userAccessor,
+            IHttpContextAccessor httpContextAccessor)
         {
             Cache = cache ?? throw new ArgumentNullException(nameof(cache));
             SqlConnections = sqlConnections ?? throw new ArgumentNullException(nameof(sqlConnections));
             TypeSource = typeSource ?? throw new ArgumentNullException(nameof(typeSource));
             UserAccessor = userAccessor ?? throw new ArgumentNullException(nameof(userAccessor));
+            HttpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
         }
 
         public bool HasPermission(string permission)
@@ -64,12 +68,30 @@ namespace AdvanceCRM.Administration
             return false;
         }
 
+        // Permissions are read fresh from the DB and memoized only for the
+        // lifetime of the current HTTP request. This keeps permission changes
+        // real-time across ALL app instances/pods (no process-local cache that
+        // can go stale on other replicas when there is no distributed cache),
+        // while still avoiding repeated DB hits while a single page/menu renders.
+        private T GetRequestScoped<T>(string key, Func<T> factory)
+        {
+            var ctx = HttpContextAccessor.HttpContext;
+            if (ctx == null)
+                return factory(); // background/no-request: always fresh
+
+            if (ctx.Items.TryGetValue(key, out var existing) && existing is T cached)
+                return cached;
+
+            var value = factory();
+            ctx.Items[key] = value;
+            return value;
+        }
+
         private Dictionary<string, bool> GetUserPermissions(int userId)
         {
-            var fld = UserPermissionRow.Fields;
-
-            return Cache.GetLocalStoreOnly("UserPermissions:" + userId, TimeSpan.Zero, fld.GenerationKey, () =>
+            return GetRequestScoped("PermSvc:UserPermissions:" + userId, () =>
             {
+                var fld = UserPermissionRow.Fields;
                 using (var connection = SqlConnections.NewByKey("Default"))
                 {
                     var result = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
@@ -96,10 +118,9 @@ namespace AdvanceCRM.Administration
 
         private HashSet<string> GetRolePermissions(int roleId)
         {
-            var fld = RolePermissionRow.Fields;
-
-            return Cache.GetLocalStoreOnly("RolePermissions:" + roleId, TimeSpan.Zero, fld.GenerationKey, () =>
+            return GetRequestScoped("PermSvc:RolePermissions:" + roleId, () =>
             {
+                var fld = RolePermissionRow.Fields;
                 using (var connection = SqlConnections.NewByKey("Default"))
                 {
                     var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -125,10 +146,9 @@ namespace AdvanceCRM.Administration
 
         private HashSet<int> GetUserRoles(int userId)
         {
-            var fld = UserRoleRow.Fields;
-
-            return Cache.GetLocalStoreOnly("UserRoles:" + userId, TimeSpan.Zero, fld.GenerationKey, () =>
+            return GetRequestScoped("PermSvc:UserRoles:" + userId, () =>
             {
+                var fld = UserRoleRow.Fields;
                 using (var connection = SqlConnections.NewByKey("Default"))
                 {
                     var result = new HashSet<int>();

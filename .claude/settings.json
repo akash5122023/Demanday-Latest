@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs cat)",
+      "Bash(grep -c \"DemandayConatcts\" wwwroot/Scripts/site/AdvanceCRM.Web.js)",
+      "Bash(grep -c \"Demanday/DemandayContacts/ImportExcel\" wwwroot/Scripts/site/AdvanceCRM.Web.js)"
+    ]
+  }
+}

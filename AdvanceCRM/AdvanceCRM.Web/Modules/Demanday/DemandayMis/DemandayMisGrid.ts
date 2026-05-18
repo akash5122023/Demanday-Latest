@@ -18,6 +18,28 @@ namespace AdvanceCRM.Demanday {
 			buttons.shift();
 
 			buttons.push({
+				title: "Move to ETContacts",
+				cssClass: "move-to-etcontacts-button",
+				onClick: () => {
+					const selectedKeys = this.rowSelection.getSelectedKeys().map(x => Number(x));
+
+					if (!selectedKeys.length) {
+						Q.notifyWarning("Please select at least one record!");
+						return;
+					}
+					Q.confirm("Are you sure you want to move selected record to ETContacts?", () => {
+						Q.serviceRequest(
+							"Demanday/DemandayMis/MoveToETContacts",
+							{ Ids: selectedKeys },
+							(response: { Status: string }) => {
+								Q.notifySuccess(response.Status);
+								this.refresh();
+							}
+						);
+					});
+				}
+			});
+			buttons.push({
 				title: 'Export All MIS rows to Excel',
 				cssClass: 'export-excel-button',
 				icon: 'fa-file-excel',

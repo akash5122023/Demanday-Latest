@@ -23,7 +23,7 @@ namespace AdvanceCRM.Demanday {
 				cssClass: 'export-excel-button',
 				icon: 'fa-file-excel',
 				onClick: () => {
-					const url = '/Services/Demanday/DemandayConatcts/ListExcel';
+					const url = '/Services/Demanday/DemandayContacts/ListExcel';
 					var form = document.createElement('form');
 					form.method = 'POST';
 					form.action = url;
@@ -79,7 +79,7 @@ namespace AdvanceCRM.Demanday {
 						if (fileInput.files && fileInput.files.length > 0) {
 							const formData = new FormData();
 							formData.append('file', fileInput.files[0]);
-							fetch('/Services/Demanday/DemandayConatcts/ImportExcel', {
+							fetch('/Services/Demanday/DemandayContacts/ImportExcel', {
 								method: 'POST',
 								body: formData
 							}).then(r => r.text().then(msg => {

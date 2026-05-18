@@ -58,7 +58,7 @@ namespace AdvanceCRM.Demanday.Columns
         //public String Asset1 { get; set; }
         //public String Asset2 { get; set; }
         //public String OwnerUsername { get; set; }
-        [DisplayName("Db.Shared.RecordId"), AlignRight]
+        [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
         public string Slot { get; set; }
         [QuickFilter]

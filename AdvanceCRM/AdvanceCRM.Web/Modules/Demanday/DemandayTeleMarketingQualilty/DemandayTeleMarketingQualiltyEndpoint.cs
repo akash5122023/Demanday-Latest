@@ -69,7 +69,6 @@ namespace AdvanceCRM.Demanday.Endpoints
             var response = new StandardResponse();
             var demandaytelemarketingqualityConn = sqlConnections.NewFor<DemandayTeleMarketingQualiltyRow>();
             var demandaytelemarketingmisConn = sqlConnections.NewFor<DemandayTeleMarketingMISRow>();
-            var demandaytelemarketingcontactsConn = sqlConnections.NewFor<DemandayTeleMarketingContactsRow>();
 
             foreach (var id in request.Ids)
             {
@@ -155,54 +154,6 @@ namespace AdvanceCRM.Demanday.Endpoints
                     demandaytelemarketingqualityConn.DeleteById<DemandayTeleMarketingEnquiryQADetailsRow>(qa.Id.Value);
                 }
 
-                var demandaytelemarketingcontacts = new DemandayTeleMarketingContactsRow
-                {
-                    Slot = demandaytelemarketingquality.Slot,
-                    PrimaryReason = demandaytelemarketingquality.PrimaryReason,
-                    Category = demandaytelemarketingquality.Category,
-                    Comments = demandaytelemarketingquality.Comments,
-                    QaStatus = demandaytelemarketingquality.QaStatus,
-                    DeliveryStatus = demandaytelemarketingquality.DeliveryStatus,
-                    AgentName = demandaytelemarketingquality.AgentName,
-                    QaName = demandaytelemarketingquality.QaName,
-                    CallDate = demandaytelemarketingquality.CallDate,
-                    DateAudited = demandaytelemarketingquality.DateAudited,
-                    DeliveryDate = demandaytelemarketingquality.DeliveryDate,
-                    CampaignId = demandaytelemarketingquality.CampaignId,
-                    Source = demandaytelemarketingquality.Source,
-                    VerificationMode = demandaytelemarketingquality.VerificationMode,
-                    Asset1 = demandaytelemarketingquality.Asset1,
-                    Asset2 = demandaytelemarketingquality.Asset2,
-                    AgentsName = demandaytelemarketingquality.AgentsName,
-                    TlName = demandaytelemarketingquality.TlName,
-                    CompanyName = demandaytelemarketingquality.CompanyName,
-                    FirstName = demandaytelemarketingquality.FirstName,
-                    LastName = demandaytelemarketingquality.LastName,
-                    Title = demandaytelemarketingquality.Title,
-                    Email = demandaytelemarketingquality.Email,
-                    WorkPhone = demandaytelemarketingquality.WorkPhone,
-                    AlternativeNumber = demandaytelemarketingquality.AlternativeNumber,
-                    Street = demandaytelemarketingquality.Street,
-                    City = demandaytelemarketingquality.City,
-                    State = demandaytelemarketingquality.State,
-                    ZipCode = demandaytelemarketingquality.ZipCode,
-                    Country = demandaytelemarketingquality.Country,
-                    CompanyEmployeeSize = demandaytelemarketingquality.CompanyEmployeeSize,      // Mapping CompanyName to CompanyEmp
-                    Industry = demandaytelemarketingquality.Industry,
-                    Revenue = demandaytelemarketingquality.Revenue,
-                    ProfileLink = demandaytelemarketingquality.ProfileLink,
-                    CompanyLink = demandaytelemarketingquality.CompanyLink,
-                    RevenueLink = demandaytelemarketingquality.RevenueLink,
-                    AdressLink = demandaytelemarketingquality.AddressLink,     // Note: mapped AddressLink
-                    Tenurity = demandaytelemarketingquality.Tenurity,
-                    Code = demandaytelemarketingquality.Code,
-                    Link = demandaytelemarketingquality.Link,
-                    Md5 = demandaytelemarketingquality.Md5,
-                    OwnerId = demandaytelemarketingquality.OwnerId
-                };
-
-                demandaytelemarketingcontactsConn.Insert(demandaytelemarketingcontacts);
-
                 demandaytelemarketingqualityConn.DeleteById<DemandayTeleMarketingQualiltyRow>(id);
                 response.Id = demandayTeleMarketingMIS.Id ?? 0;
             }
@@ -242,6 +193,34 @@ namespace AdvanceCRM.Demanday.Endpoints
                 if (idList.Count > 0)
                     data = data.Where(x => x.Id.HasValue && idList.Contains(x.Id.Value)).ToList();
             }
+
+            // Ensure the "Created By" (OwnerUsername) column is populated. The join
+            // expression is not reliably selected by the bare export ListRequest, so
+            // resolve usernames directly from Users for any rows missing it.
+            var ownerIds = data.Where(x => x.OwnerId.HasValue &&
+                                           string.IsNullOrEmpty(x.OwnerUsername))
+                                .Select(x => x.OwnerId.Value)
+                                .Distinct()
+                                .ToList();
+            if (ownerIds.Count > 0)
+            {
+                var uFlds = AdvanceCRM.Administration.UserRow.Fields;
+                var userMap = connection.List<AdvanceCRM.Administration.UserRow>(q => q
+                        .Select(uFlds.UserId)
+                        .Select(uFlds.Username)
+                        .Where(uFlds.UserId.In(ownerIds)))
+                    .Where(u => u.UserId.HasValue)
+                    .GroupBy(u => u.UserId.Value)
+                    .ToDictionary(g => g.Key, g => g.First().Username);
+
+                foreach (var rowItem in data)
+                {
+                    if (string.IsNullOrEmpty(rowItem.OwnerUsername) && rowItem.OwnerId.HasValue &&
+                        userMap.TryGetValue(rowItem.OwnerId.Value, out var uname))
+                        rowItem.OwnerUsername = uname;
+                }
+            }
+
             var bytes = AdvanceCRM.Web.Modules.Common.AppServices.DemandayTeleMarketingQualityExcelExporter.ExportToExcel(data);
             var fileName = "TeleMarketingQualityList_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".xlsx";
             return Serenity.Web.ExcelContentResult.Create(bytes, fileName);
@@ -262,6 +241,19 @@ namespace AdvanceCRM.Demanday.Endpoints
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
+
+                    // Build a username -> UserId lookup so the exported "Created By"
+                    // (which is a username string) can be resolved back to OwnerId
+                    // on import instead of erroring / losing the owner.
+                    var uFlds = AdvanceCRM.Administration.UserRow.Fields;
+                    var userByName = uow.Connection.List<AdvanceCRM.Administration.UserRow>(q => q
+                            .Select(uFlds.UserId)
+                            .Select(uFlds.Username))
+                        .Where(u => u.UserId.HasValue && !string.IsNullOrEmpty(u.Username))
+                        .GroupBy(u => u.Username.Trim(), StringComparer.OrdinalIgnoreCase)
+                        .ToDictionary(g => g.Key, g => g.First().UserId.Value,
+                            StringComparer.OrdinalIgnoreCase);
+
                     for (int row = 2; row <= rowCount; row++)
                     {
                         try
@@ -311,7 +303,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Code = ExcelImportHelper.GetText(ws, row, map, "Code"),
                                 Link = ExcelImportHelper.GetText(ws, row, map, "Link"),
                                 Md5 = ExcelImportHelper.GetText(ws, row, map, "Md5", "MD5"),
-                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy"),
+                                OwnerId = ResolveOwnerId(ws, row, map, userByName),
                             };
                             if (demandaytmquality.Id.HasValue && demandaytmquality.Id.Value > 0)
                             {
@@ -336,6 +328,25 @@ namespace AdvanceCRM.Demanday.Endpoints
                 return Content("Import failed: " + ex.Message + "\n" + ex.StackTrace, "text/plain");
             }
         }
+        // Resolve OwnerId from the "Created By" column: accept a raw UserId int,
+        // otherwise treat the cell as a username and map it back via userByName.
+        private static int? ResolveOwnerId(ExcelWorksheet ws, int row,
+            System.Collections.Generic.Dictionary<string, int> map,
+            System.Collections.Generic.Dictionary<string, int> userByName)
+        {
+            var byId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy");
+            if (byId.HasValue)
+                return byId;
+
+            var name = ExcelImportHelper.GetText(ws, row, map,
+                "OwnerUsername", "Owner Username", "Created By", "CreatedBy", "OwnerId");
+            if (!string.IsNullOrWhiteSpace(name) && userByName != null &&
+                userByName.TryGetValue(name.Trim(), out var uid))
+                return uid;
+
+            return null;
+        }
+
         private static int? GetInt(object val) { if (val == null) return null; int i; return int.TryParse(val.ToString(), out i) ? i : null; }
         private static decimal? GetDecimal(object val) { if (val == null) return null; decimal d; return decimal.TryParse(val.ToString(), out d) ? d : null; }
         private static DateTime? GetDate(object val) { if (val == null) return null; DateTime dt; return DateTime.TryParse(val.ToString(), out dt) ? dt : null; }

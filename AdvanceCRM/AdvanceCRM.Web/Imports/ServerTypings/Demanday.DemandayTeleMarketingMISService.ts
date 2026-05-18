@@ -8,6 +8,7 @@
         export declare function Retrieve(request: Serenity.RetrieveRequest, onSuccess?: (response: Serenity.RetrieveResponse<DemandayTeleMarketingMISRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function List(request: Serenity.ListRequest, onSuccess?: (response: Serenity.ListResponse<DemandayTeleMarketingMISRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function ImportExcel(request: Serenity.ServiceRequest, onSuccess?: (response: Microsoft.AspNetCore.Mvc.IActionResult) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
+        export declare function MoveToTeleMarketingContacts(request: MoveToTeleMarketingContactsRequest, onSuccess?: (response: StandardResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
 
         export declare const enum Methods {
             Create = "Demanday/DemandayTeleMarketingMIS/Create",
@@ -15,7 +16,8 @@
             Delete = "Demanday/DemandayTeleMarketingMIS/Delete",
             Retrieve = "Demanday/DemandayTeleMarketingMIS/Retrieve",
             List = "Demanday/DemandayTeleMarketingMIS/List",
-            ImportExcel = "Demanday/DemandayTeleMarketingMIS/ImportExcel"
+            ImportExcel = "Demanday/DemandayTeleMarketingMIS/ImportExcel",
+            MoveToTeleMarketingContacts = "Demanday/DemandayTeleMarketingMIS/MoveToTeleMarketingContacts"
         }
 
         [
@@ -24,7 +26,8 @@
             'Delete', 
             'Retrieve', 
             'List', 
-            'ImportExcel'
+            'ImportExcel', 
+            'MoveToTeleMarketingContacts'
         ].forEach(x => {
             (<any>DemandayTeleMarketingMISService)[x] = function (r, s, o) {
                 return Q.serviceRequest(baseUrl + '/' + x, r, s, o);

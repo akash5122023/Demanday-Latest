@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using MyRow = AdvanceCRM.Demanday.EnquiryContactsRow;
 
 namespace AdvanceCRM.Demanday.Endpoints
@@ -54,11 +55,25 @@ namespace AdvanceCRM.Demanday.Endpoints
             return handler.List(connection, request);
         }
 
-        public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
+        [HttpPost, IgnoreAntiforgeryToken, AuthorizeList(typeof(EnquiryContactsRow))]
+        public FileContentResult ListExcel(
+            IDbConnection connection,
+            [FromForm] ListRequest request,
+            [FromForm] string Ids,
             [FromServices] IEnquiryContactsListHandler handler,
             [FromServices] IExcelExporter exporter)
         {
-            var data = List(connection, request, handler).Entities;
+            request ??= new ListRequest { Take = 0 }; // Defensive: always have a request
+            var data = List(connection, request, handler).Entities.ToList();
+            if (!string.IsNullOrWhiteSpace(Ids))
+            {
+                var idList = Ids.Split(',').Select(x =>
+                {
+                    int v; return int.TryParse(x.Trim(), out v) ? (int?)v : null;
+                }).Where(x => x.HasValue).Select(x => x!.Value).ToHashSet();
+                if (idList.Count > 0)
+                    data = data.Where(x => x.Id.HasValue && idList.Contains(x.Id.Value)).ToList();
+            }
             var bytes = exporter.Export(data, typeof(Columns.EnquiryContactsColumns), request.ExportColumns);
             return ExcelContentResult.Create(bytes, "EnquiryContactsList_" +
                 DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
@@ -111,8 +126,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Code = ExcelImportHelper.GetText(ws, row, map, "Code"),
                                 Link = ExcelImportHelper.GetText(ws, row, map, "Link"),
                                 Md5 = ExcelImportHelper.GetText(ws, row, map, "Md5", "MD5"),
-                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy"),
-                                OwnerUsername = ExcelImportHelper.GetText(ws, row, map, "OwnerUsername", "Owner Username", "Created By", "CreatedBy")
+                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy")
                             };
                             if (enquirycontacts.Id.HasValue && enquirycontacts.Id.Value > 0)
                             {

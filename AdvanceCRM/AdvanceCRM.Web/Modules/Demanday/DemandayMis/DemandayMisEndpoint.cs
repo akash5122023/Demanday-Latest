@@ -175,5 +175,84 @@ namespace AdvanceCRM.Demanday.Endpoints
         private static decimal? GetDecimal(object val) { if (val == null) return null; decimal d; return decimal.TryParse(val.ToString(), out d) ? d : null; }
         private static DateTime? GetDate(object val) { if (val == null) return null; DateTime dt; return DateTime.TryParse(val.ToString(), out dt) ? dt : null; }
 
+        [HttpPost, AuthorizeUpdate(typeof(DemandayMisRow))]
+        public StandardResponse MoveToETContacts(IUnitOfWork uow, MoveToETContactsRequest request)
+        {
+            if (request?.Ids == null)
+                throw new ArgumentNullException(nameof(request.Ids));
+
+            var response = new StandardResponse();
+            var demandaymisConn = sqlConnections.NewFor<DemandayMisRow>();
+            var demandaycontactsConn = sqlConnections.NewFor<DemandayContactsRow>();
+
+            foreach (var id in request.Ids)
+            {
+                var demandaymis = demandaymisConn.TryById<DemandayMisRow>(id);
+
+                if (demandaymis == null)
+                    throw new ValidationError("MIS record not found!");
+
+                var demandaycontacts = new DemandayContactsRow
+                {
+                    Slot = demandaymis.Slot,
+                    PrimaryReason = demandaymis.PrimaryReason,
+                    Category = demandaymis.Category,
+                    Comments = demandaymis.Comments,
+                    QaStatus = demandaymis.QaStatus,
+                    CampaignId = demandaymis.CampaignId,
+                    DeliveryStatus = demandaymis.DeliveryStatus,
+                    AgentName = demandaymis.AgentName,
+                    QaName = demandaymis.QaName,
+                    CallDate = demandaymis.CallDate,
+                    DateAudited = demandaymis.DateAudited,
+                    DeliveryDate = demandaymis.DeliveryDate,
+                    Source = demandaymis.Source,
+                    VerificationMode = demandaymis.VerificationMode,
+                    Asset1 = demandaymis.Asset1,
+                    Asset2 = demandaymis.Asset2,
+                    AgentsName = demandaymis.AgentsName,
+                    TlName = demandaymis.TlName,
+                    CompanyName = demandaymis.CompanyName,
+                    FirstName = demandaymis.FirstName,
+                    LastName = demandaymis.LastName,
+                    Title = demandaymis.Title,
+                    Email = demandaymis.Email,
+                    WorkPhone = demandaymis.WorkPhone,
+                    AlternativeNumber = demandaymis.AlternativeNumber,
+                    Street = demandaymis.Street,
+                    City = demandaymis.City,
+                    State = demandaymis.State,
+                    ZipCode = demandaymis.ZipCode,
+                    Country = demandaymis.Country,
+                    CompanyEmployeeSize = demandaymis.CompanyEmployeeSize,
+                    Industry = demandaymis.Industry,
+                    Revenue = demandaymis.Revenue,
+                    ProfileLink = demandaymis.ProfileLink,
+                    CompanyLink = demandaymis.CompanyLink,
+                    RevenueLink = demandaymis.RevenueLink,
+                    EmailFormat = demandaymis.EmailFormat,
+                    AdressLink = demandaymis.AdressLink,
+                    Tenurity = demandaymis.Tenurity,
+                    Code = demandaymis.Code,
+                    Link = demandaymis.Link,
+                    Md5 = demandaymis.Md5,
+                    OwnerId = demandaymis.OwnerId
+                };
+
+                demandaycontactsConn.Insert(demandaycontacts);
+
+                // MIS record is intentionally retained (not deleted) after moving to ETContacts.
+                response.Id = demandaycontacts.Id ?? 0;
+            }
+            response.Status = "MIS successfully moved to ETContacts module!";
+
+            return response;
+        }
+
+        public class MoveToETContactsRequest : ServiceRequest
+        {
+            public List<int> Ids { get; set; }
+        }
+
     }
 }

@@ -17,5 +17,20 @@ namespace AdvanceCRM.Demanday
              : base(context)
         {
         }
+
+        protected override void BeforeSave()
+        {
+            base.BeforeSave();
+
+            // Stamp the creating user so OwnerUsername (jOwner.[Username]) resolves
+            // and shows up when exporting Quality data. Only set when not already
+            // provided (e.g. carried over by Move-to-Quality or supplied in import).
+            if (IsCreate && Row.OwnerId == null)
+            {
+                var identifier = User?.GetIdentifier();
+                if (!string.IsNullOrEmpty(identifier) && int.TryParse(identifier, out var userId))
+                    Row.OwnerId = userId;
+            }
+        }
     }
 }
