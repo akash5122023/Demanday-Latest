@@ -11,6 +11,12 @@
         Industry: Serenity.StringEditor;
         Revenue: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
+        ZoomInfoIndustry: Serenity.StringEditor;
+        ZoomInfoEmployeeSize: Serenity.StringEditor;
+        Date: Serenity.DateTimeEditor;
+        Asset: Serenity.StringEditor;
+        CallStatus: Serenity.StringEditor;
+        AdditionalNotes: Serenity.StringEditor;
         Street: Serenity.StringEditor;
         City: Serenity.StringEditor;
         State: Serenity.StringEditor;
@@ -42,8 +48,9 @@
                 var s = Serenity;
                 var w0 = s.LookupEditor;
                 var w1 = s.StringEditor;
-                var w2 = s.ImageUploadEditor;
-                var w3 = DemandayTeleMarketingEnquiryQADetailsEditor;
+                var w2 = s.DateTimeEditor;
+                var w3 = s.ImageUploadEditor;
+                var w4 = DemandayTeleMarketingEnquiryQADetailsEditor;
 
                 Q.initFormType(DemandayTeleMarketingEnquiryForm, [
                     'CampaignId', w0,
@@ -57,6 +64,12 @@
                     'Industry', w1,
                     'Revenue', w1,
                     'CompanyEmployeeSize', w1,
+                    'ZoomInfoIndustry', w1,
+                    'ZoomInfoEmployeeSize', w1,
+                    'Date', w2,
+                    'Asset', w1,
+                    'CallStatus', w1,
+                    'AdditionalNotes', w1,
                     'Street', w1,
                     'City', w1,
                     'State', w1,
@@ -70,8 +83,8 @@
                     'Tenurity', w1,
                     'Code', w1,
                     'Md5', w1,
-                    'Attachments', w2,
-                    'QADetails', w3,
+                    'Attachments', w3,
+                    'QADetails', w4,
                     'OwnerId', w0
                 ]);
             }

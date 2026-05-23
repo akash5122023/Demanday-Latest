@@ -15,6 +15,12 @@
         Industry: Serenity.StringEditor;
         Revenue: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
+        ZoomInfoIndustry: Serenity.StringEditor;
+        ZoomInfoEmployeeSize: Serenity.StringEditor;
+        Date: Serenity.DateTimeEditor;
+        Asset: Serenity.StringEditor;
+        CallStatus: Serenity.StringEditor;
+        AdditionalNotes: Serenity.StringEditor;
         Street: Serenity.StringEditor;
         City: Serenity.StringEditor;
         State: Serenity.StringEditor;
@@ -81,6 +87,12 @@
                     'Industry', w1,
                     'Revenue', w1,
                     'CompanyEmployeeSize', w1,
+                    'ZoomInfoIndustry', w1,
+                    'ZoomInfoEmployeeSize', w1,
+                    'Date', w2,
+                    'Asset', w1,
+                    'CallStatus', w1,
+                    'AdditionalNotes', w1,
                     'Street', w1,
                     'City', w1,
                     'State', w1,

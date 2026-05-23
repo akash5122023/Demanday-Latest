@@ -114,6 +114,9 @@ namespace AdvanceCRM.Demanday.Endpoints
                     Country = demandayquality.Country,
                     CompanyEmployeeSize = demandayquality.CompanyEmployeeSize,      // Mapping CompanyName to CompanyEmp
                     Industry = demandayquality.Industry,
+                    ZoomInfoIndustry = demandayquality.ZoomInfoIndustry,
+                    Date = demandayquality.Date,
+                    ZoomInfoEmployeeSize = demandayquality.ZoomInfoEmployeeSize,
                     Revenue = demandayquality.Revenue,
                     ProfileLink = demandayquality.ProfileLink,
                     CompanyLink = demandayquality.CompanyLink,

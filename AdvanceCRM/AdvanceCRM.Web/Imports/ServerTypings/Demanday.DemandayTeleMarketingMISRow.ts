@@ -45,6 +45,12 @@
         Asset1?: string;
         Asset2?: string;
         OwnerId?: number;
+        Asset?: string;
+        CallStatus?: string;
+        AdditionalNotes?: string;
+        ZoomInfoIndustry?: string;
+        ZoomInfoEmployeeSize?: string;
+        Date?: string;
         OwnerUsername?: string;
         OwnerDisplayName?: string;
         OwnerEmail?: string;
@@ -146,6 +152,12 @@
             Asset1 = "Asset1",
             Asset2 = "Asset2",
             OwnerId = "OwnerId",
+            Asset = "Asset",
+            CallStatus = "CallStatus",
+            AdditionalNotes = "AdditionalNotes",
+            ZoomInfoIndustry = "ZoomInfoIndustry",
+            ZoomInfoEmployeeSize = "ZoomInfoEmployeeSize",
+            Date = "Date",
             OwnerUsername = "OwnerUsername",
             OwnerDisplayName = "OwnerDisplayName",
             OwnerEmail = "OwnerEmail",

@@ -11,6 +11,12 @@
         Industry: Serenity.StringEditor;
         Revenue: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
+        ZoomInfoIndustry: Serenity.StringEditor;
+        ZoomInfoEmployeeSize: Serenity.StringEditor;
+        Date: Serenity.DateTimeEditor;
+        Asset: Serenity.StringEditor;
+        CallStatus: Serenity.StringEditor;
+        AdditionalNotes: Serenity.StringEditor;
         Street: Serenity.StringEditor;
         City: Serenity.StringEditor;
         State: Serenity.StringEditor;
@@ -41,9 +47,10 @@
 
                 var s = Serenity;
                 var w0 = s.StringEditor;
-                var w1 = s.ImageUploadEditor;
-                var w2 = DemandayTeleMarketingEnquiryQADetailsEditor;
-                var w3 = s.LookupEditor;
+                var w1 = s.DateTimeEditor;
+                var w2 = s.ImageUploadEditor;
+                var w3 = DemandayTeleMarketingEnquiryQADetailsEditor;
+                var w4 = s.LookupEditor;
 
                 Q.initFormType(DemandayTeleMarketingTeamLeaderForm, [
                     'CampaignId', w0,
@@ -57,6 +64,12 @@
                     'Industry', w0,
                     'Revenue', w0,
                     'CompanyEmployeeSize', w0,
+                    'ZoomInfoIndustry', w0,
+                    'ZoomInfoEmployeeSize', w0,
+                    'Date', w1,
+                    'Asset', w0,
+                    'CallStatus', w0,
+                    'AdditionalNotes', w0,
                     'Street', w0,
                     'City', w0,
                     'State', w0,
@@ -70,9 +83,9 @@
                     'Tenurity', w0,
                     'Code', w0,
                     'Md5', w0,
-                    'Attachments', w1,
-                    'QADetails', w2,
-                    'OwnerId', w3
+                    'Attachments', w2,
+                    'QADetails', w3,
+                    'OwnerId', w4
                 ]);
             }
         }

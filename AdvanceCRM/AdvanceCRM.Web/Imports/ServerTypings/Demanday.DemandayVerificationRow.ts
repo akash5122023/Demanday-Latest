@@ -54,6 +54,7 @@
         OwnerTenantId?: number;
         OwnerUrl?: string;
         OwnerPlan?: string;
+        Date?: string;
     }
 
     export namespace DemandayVerificationRow {
@@ -124,7 +125,8 @@
             OwnerTeamsId = "OwnerTeamsId",
             OwnerTenantId = "OwnerTenantId",
             OwnerUrl = "OwnerUrl",
-            OwnerPlan = "OwnerPlan"
+            OwnerPlan = "OwnerPlan",
+            Date = "Date"
         }
     }
 }

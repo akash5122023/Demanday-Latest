@@ -11,6 +11,9 @@
         Industry: Serenity.StringEditor;
         Revenue: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
+        ZoomInfoIndustry: Serenity.StringEditor;
+        ZoomInfoEmployeeSize: Serenity.StringEditor;
+        Date: Serenity.DateTimeEditor;
         Street: Serenity.StringEditor;
         City: Serenity.StringEditor;
         State: Serenity.StringEditor;
@@ -40,7 +43,8 @@
                 var s = Serenity;
                 var w0 = s.LookupEditor;
                 var w1 = s.StringEditor;
-                var w2 = Administration.UserEditor;
+                var w2 = s.DateTimeEditor;
+                var w3 = Administration.UserEditor;
 
                 Q.initFormType(DemandayEnquiryForm, [
                     'CampaignId', w0,
@@ -54,6 +58,9 @@
                     'Industry', w1,
                     'Revenue', w1,
                     'CompanyEmployeeSize', w1,
+                    'ZoomInfoIndustry', w1,
+                    'ZoomInfoEmployeeSize', w1,
+                    'Date', w2,
                     'Street', w1,
                     'City', w1,
                     'State', w1,
@@ -67,7 +74,7 @@
                     'Tenurity', w1,
                     'Code', w1,
                     'Md5', w1,
-                    'OwnerId', w2
+                    'OwnerId', w3
                 ]);
             }
         }

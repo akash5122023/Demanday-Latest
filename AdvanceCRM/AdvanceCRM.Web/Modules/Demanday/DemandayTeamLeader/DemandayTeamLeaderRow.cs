@@ -52,7 +52,25 @@ namespace AdvanceCRM.Demanday
             get => fields.LastName[this];
             set => fields.LastName[this] = value;
         }
+        [DisplayName("ZoomInfo Employee Size")]
+        public String ZoomInfoEmployeeSize
+        {
+            get => fields.ZoomInfoEmployeeSize[this];
+            set => fields.ZoomInfoEmployeeSize[this] = value;
+        }
 
+        [DisplayName("ZoomInfo Industry"), Size(100)]
+        public String ZoomInfoIndustry
+        {
+            get => fields.ZoomInfoIndustry[this];
+            set => fields.ZoomInfoIndustry[this] = value;
+        }
+        [DisplayName("Date")]
+        public DateTime? Date
+        {
+            get => fields.Date[this];
+            set => fields.Date[this] = value;
+        }
         [DisplayName("Title"), Size(150)]
         public String Title
         {
@@ -742,6 +760,9 @@ namespace AdvanceCRM.Demanday
             public StringField DemandayEnquiryLink;
             public StringField DemandayEnquiryMd5;
             public Int32Field DemandayEnquiryOwnerId;
+            public StringField ZoomInfoEmployeeSize;
+            public StringField ZoomInfoIndustry;
+            public DateTimeField Date;
 
             public StringField OwnerUsername;
             public StringField OwnerDisplayName;

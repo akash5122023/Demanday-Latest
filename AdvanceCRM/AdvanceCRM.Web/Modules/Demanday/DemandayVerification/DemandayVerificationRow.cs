@@ -65,8 +65,13 @@ namespace AdvanceCRM.Demanday
         {
             get => fields.FirstName[this];
             set => fields.FirstName[this] = value;
+        }        
+        [DisplayName("Date")]
+        public DateTime? Date
+        {
+            get => fields.Date[this];
+            set => fields.Date[this] = value;
         }
-
         [DisplayName("Last Name"), Size(100)]
         public String LastName
         {
@@ -464,6 +469,7 @@ namespace AdvanceCRM.Demanday
             public Int32Field OwnerTenantId;
             public StringField OwnerUrl;
             public StringField OwnerPlan;
+            public DateTimeField Date;
         }
     }
 }

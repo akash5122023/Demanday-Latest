@@ -74,7 +74,43 @@ namespace AdvanceCRM.Demanday
             get => fields.Title[this];
             set => fields.Title[this] = value;
         }
+        [DisplayName("ZoomInfo Employee Size")]
+        public String ZoomInfoEmployeeSize
+        {
+            get => fields.ZoomInfoEmployeeSize[this];
+            set => fields.ZoomInfoEmployeeSize[this] = value;
+        }
 
+        [DisplayName("ZoomInfo Industry"), Size(100)]
+        public String ZoomInfoIndustry
+        {
+            get => fields.ZoomInfoIndustry[this];
+            set => fields.ZoomInfoIndustry[this] = value;
+        }
+        [DisplayName("Date")]
+        public DateTime? Date
+        {
+            get => fields.Date[this];
+            set => fields.Date[this] = value;
+        }
+        [DisplayName("Asset"), Size(100)]
+        public String Asset
+        {
+            get => fields.Asset[this];
+            set => fields.Asset[this] = value;
+        }
+        [DisplayName("Call Status"), Size(100)]
+        public String CallStatus
+        {
+            get => fields.CallStatus[this];
+            set => fields.CallStatus[this] = value;
+        }
+        [DisplayName("Additional Notes"), Size(2000)]
+        public String AdditionalNotes
+        {
+            get => fields.AdditionalNotes[this];
+            set => fields.AdditionalNotes[this] = value;
+        }
         [DisplayName("Email"), Size(200)]
         public String Email
         {
@@ -665,6 +701,13 @@ namespace AdvanceCRM.Demanday
             public StringField Asset1;
             public StringField Asset2;
             public Int32Field OwnerId;
+
+            public StringField Asset;
+            public StringField CallStatus;
+            public StringField AdditionalNotes;
+            public StringField ZoomInfoIndustry;
+            public StringField ZoomInfoEmployeeSize;
+            public DateTimeField Date;
 
             public StringField OwnerUsername;
             public StringField OwnerDisplayName;

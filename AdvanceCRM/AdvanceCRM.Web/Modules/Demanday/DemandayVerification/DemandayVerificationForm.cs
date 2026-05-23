@@ -37,6 +37,9 @@ namespace AdvanceCRM.Demanday.Forms
 
         [HalfWidth, EmailEditor]
         public String Email { get; set; }
+        
+        [HalfWidth, DateTimeEditor]
+        public DateTime Date { get; set; }
 
         [Category("📞 Contact Numbers")]
         [HalfWidth]

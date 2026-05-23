@@ -56,16 +56,24 @@ namespace AdvanceCRM.Demanday.Forms
         public string WorkPhone { get; set; }
         [HalfWidth]
         public string AlternativeNumber { get; set; }
+       
 
         [Category("Company Information")]
         [HalfWidth]
         public string CompanyName { get; set; }
         [HalfWidth]
         public string Industry { get; set; }
+        
         [HalfWidth]
         public string Revenue { get; set; }
         [HalfWidth, DisplayName("Employee Size")]
         public string CompanyEmployeeSize { get; set; }
+        [HalfWidth]
+        public string ZoomInfoIndustry { get; set; }
+        [HalfWidth, DisplayName("ZoomInfo EmployeeSize")]
+        public string ZoomInfoEmployeeSize { get; set; }
+        [HalfWidth, DateTimeEditor]
+        public DateTime Date { get; set; }
 
         [Category("Address Information")]
         [FullWidth]

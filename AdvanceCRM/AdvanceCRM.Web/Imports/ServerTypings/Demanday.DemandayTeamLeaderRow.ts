@@ -53,6 +53,9 @@
         DemandayEnquiryLink?: string;
         DemandayEnquiryMd5?: string;
         DemandayEnquiryOwnerId?: number;
+        ZoomInfoEmployeeSize?: string;
+        ZoomInfoIndustry?: string;
+        Date?: string;
         OwnerUsername?: string;
         OwnerDisplayName?: string;
         OwnerEmail?: string;
@@ -164,6 +167,9 @@
             DemandayEnquiryLink = "DemandayEnquiryLink",
             DemandayEnquiryMd5 = "DemandayEnquiryMd5",
             DemandayEnquiryOwnerId = "DemandayEnquiryOwnerId",
+            ZoomInfoEmployeeSize = "ZoomInfoEmployeeSize",
+            ZoomInfoIndustry = "ZoomInfoIndustry",
+            Date = "Date",
             OwnerUsername = "OwnerUsername",
             OwnerDisplayName = "OwnerDisplayName",
             OwnerEmail = "OwnerEmail",
