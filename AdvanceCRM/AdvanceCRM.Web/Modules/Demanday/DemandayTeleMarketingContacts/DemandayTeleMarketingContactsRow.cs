@@ -4,6 +4,7 @@ using Serenity.ComponentModel;
 using Serenity.Data;
 using Serenity.Data.Mapping;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 
@@ -38,7 +39,13 @@ namespace AdvanceCRM.Demanday
             get => fields.TlName[this];
             set => fields.TlName[this] = value;
         }
-
+        [DemandayTeleMarketingEnquiryQADetailsEditor, NotMapped]
+        [MasterDetailRelation(foreignKey: "EnquiryId", IncludeColumns = "QuestionText,AnswerText")]
+        public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails
+        {
+            get => fields.QADetails[this];
+            set => fields.QADetails[this] = value;
+        }
         [DisplayName("Campaign Id"), Size(100)]
         public String CampaignId
         {
@@ -739,7 +746,7 @@ namespace AdvanceCRM.Demanday
             public StringField ZoomInfoIndustry;
             public StringField ZoomInfoEmployeeSize;
             public DateTimeField Date;
-
+            public RowListField<DemandayTeleMarketingEnquiryQADetailsRow> QADetails;
             public StringField OwnerUsername;
             public StringField OwnerDisplayName;
             public StringField OwnerEmail;

@@ -43,6 +43,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String PrimaryReason { get; set; }
         public String Category { get; set; }
         public String Comments { get; set; }
+        public System.DateTime? Date { get; set; }
         public String QaStatus { get; set; }
         public String DeliveryStatus { get; set; }
         public String AgentName { get; set; }

@@ -55,6 +55,7 @@
         ZoomInfoIndustry?: string;
         ZoomInfoEmployeeSize?: string;
         Date?: string;
+        QADetails?: DemandayTeleMarketingEnquiryQADetailsRow[];
         OwnerUsername?: string;
         OwnerDisplayName?: string;
         OwnerEmail?: string;
@@ -166,6 +167,7 @@
             ZoomInfoIndustry = "ZoomInfoIndustry",
             ZoomInfoEmployeeSize = "ZoomInfoEmployeeSize",
             Date = "Date",
+            QADetails = "QADetails",
             OwnerUsername = "OwnerUsername",
             OwnerDisplayName = "OwnerDisplayName",
             OwnerEmail = "OwnerEmail",

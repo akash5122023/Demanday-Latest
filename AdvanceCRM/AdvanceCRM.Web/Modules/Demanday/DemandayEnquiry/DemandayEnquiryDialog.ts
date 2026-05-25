@@ -17,6 +17,7 @@ namespace AdvanceCRM.Demanday {
 
         protected afterLoadEntity(): void {
             super.afterLoadEntity();
+            
         }
 
     }

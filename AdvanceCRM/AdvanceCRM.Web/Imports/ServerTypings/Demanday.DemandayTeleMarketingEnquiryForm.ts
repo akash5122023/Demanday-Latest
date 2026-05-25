@@ -13,10 +13,8 @@
         CompanyEmployeeSize: Serenity.StringEditor;
         ZoomInfoIndustry: Serenity.StringEditor;
         ZoomInfoEmployeeSize: Serenity.StringEditor;
-        Date: Serenity.DateTimeEditor;
         Asset: Serenity.StringEditor;
         CallStatus: Serenity.StringEditor;
-        AdditionalNotes: Serenity.StringEditor;
         Street: Serenity.StringEditor;
         City: Serenity.StringEditor;
         State: Serenity.StringEditor;
@@ -30,6 +28,8 @@
         Tenurity: Serenity.StringEditor;
         Code: Serenity.StringEditor;
         Md5: Serenity.StringEditor;
+        Date: Serenity.DateTimeEditor;
+        AdditionalNotes: Serenity.StringEditor;
         Attachments: Serenity.ImageUploadEditor;
         QADetails: DemandayTeleMarketingEnquiryQADetailsEditor;
         OwnerId: Serenity.LookupEditor;
@@ -66,10 +66,8 @@
                     'CompanyEmployeeSize', w1,
                     'ZoomInfoIndustry', w1,
                     'ZoomInfoEmployeeSize', w1,
-                    'Date', w2,
                     'Asset', w1,
                     'CallStatus', w1,
-                    'AdditionalNotes', w1,
                     'Street', w1,
                     'City', w1,
                     'State', w1,
@@ -83,6 +81,8 @@
                     'Tenurity', w1,
                     'Code', w1,
                     'Md5', w1,
+                    'Date', w2,
+                    'AdditionalNotes', w1,
                     'Attachments', w3,
                     'QADetails', w4,
                     'OwnerId', w0

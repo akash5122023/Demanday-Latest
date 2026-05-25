@@ -13,7 +13,6 @@
         CompanyEmployeeSize: Serenity.StringEditor;
         ZoomInfoIndustry: Serenity.StringEditor;
         ZoomInfoEmployeeSize: Serenity.StringEditor;
-        Date: Serenity.DateTimeEditor;
         Street: Serenity.StringEditor;
         City: Serenity.StringEditor;
         State: Serenity.StringEditor;
@@ -27,6 +26,7 @@
         Tenurity: Serenity.StringEditor;
         Code: Serenity.StringEditor;
         Md5: Serenity.StringEditor;
+        Date: Serenity.DateTimeEditor;
         Attachments: Serenity.ImageUploadEditor;
         OwnerId: Serenity.LookupEditor;
     }
@@ -61,7 +61,6 @@
                     'CompanyEmployeeSize', w0,
                     'ZoomInfoIndustry', w0,
                     'ZoomInfoEmployeeSize', w0,
-                    'Date', w1,
                     'Street', w0,
                     'City', w0,
                     'State', w0,
@@ -75,6 +74,7 @@
                     'Tenurity', w0,
                     'Code', w0,
                     'Md5', w0,
+                    'Date', w1,
                     'Attachments', w2,
                     'OwnerId', w3
                 ]);

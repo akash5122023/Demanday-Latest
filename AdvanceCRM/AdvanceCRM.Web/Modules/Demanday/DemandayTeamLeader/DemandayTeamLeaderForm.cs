@@ -67,8 +67,7 @@ namespace AdvanceCRM.Demanday.Forms
         public string ZoomInfoIndustry { get; set; }
         [HalfWidth, DisplayName("ZoomInfo EmployeeSize")]
         public string ZoomInfoEmployeeSize { get; set; }
-        [HalfWidth, DateTimeEditor]
-        public DateTime Date { get; set; }
+        
 
         [Category("Address Information")]
         [FullWidth]
@@ -101,6 +100,8 @@ public string EmailFormat { get; set; }
         public string Code { get; set; }
         [HalfWidth]
         public string Md5 { get; set; }
+        [HalfWidth, DateTimeEditor]
+        public DateTime Date { get; set; }
         [HalfWidth, DisplayName("Audio Attachments")]
         [ImageUploadEditor(FilenameFormat = "TeamLeaderAttachment/~", CopyToHistory = true)]
         public string Attachments { get; set; }

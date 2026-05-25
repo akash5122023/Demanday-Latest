@@ -23,6 +23,7 @@ namespace AdvanceCRM.Demanday.Columns
         [QuickFilter]
         public String Email { get; set; }
         public String WorkPhone { get; set; }
+        public System.DateTime? Date { get; set; }
         public String AlternativeNumber { get; set; }
         public String CampaignId { get; set; }
         public String Street { get; set; }

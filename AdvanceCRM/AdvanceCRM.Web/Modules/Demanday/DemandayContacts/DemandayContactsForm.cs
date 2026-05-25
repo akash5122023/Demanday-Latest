@@ -106,8 +106,7 @@ namespace AdvanceCRM.Demanday.Forms
         public string ZoomInfoIndustry { get; set; }
         [HalfWidth, DisplayName("ZoomInfo EmployeeSize")]
         public string ZoomInfoEmployeeSize { get; set; }
-        [HalfWidth, DateTimeEditor]
-        public DateTime Date { get; set; }
+        
 
         [Category("Address Information")]
         [FullWidth]
@@ -180,6 +179,8 @@ namespace AdvanceCRM.Demanday.Forms
         public string Code { get; set; }
         [HalfWidth]
         public string Md5 { get; set; }
+        [HalfWidth, DateTimeEditor]
+        public DateTime Date { get; set; }
 
         [Category("Representatives")]
         [HalfWidth]

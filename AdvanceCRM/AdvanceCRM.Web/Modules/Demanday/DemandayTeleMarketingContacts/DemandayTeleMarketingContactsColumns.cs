@@ -89,6 +89,7 @@ namespace AdvanceCRM.Demanday.Columns
         public string Revenue { get; set; }
         public String ProfileLink { get; set; }
         public String CompanyLink { get; set; }
+        public System.DateTime? Date { get; set; }
         public String RevenueLink { get; set; }
         public String EmailFormat { get; set; }
         public String AdressLink { get; set; }

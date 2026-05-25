@@ -40,6 +40,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String AddressLink { get; set; }
         public String Tenurity { get; set; }
         public String Code { get; set; }
+        public System.DateTime? Date { get; set; }
         public String Link { get; set; }
         public String Md5 { get; set; }
         [Width(150), DisplayName("Audio")]
