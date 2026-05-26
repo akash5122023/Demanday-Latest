@@ -240,6 +240,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 AlternativeNumber = ExcelImportHelper.GetText(ws, row, map, "AlternativeNumber", "Alternative Number"),
                                 Street = ExcelImportHelper.GetText(ws, row, map, "Street"),
                                 City = ExcelImportHelper.GetText(ws, row, map, "City"),
+                                Date = ExcelImportHelper.GetDate(ws, row, map, "Date"),
                                 State = ExcelImportHelper.GetText(ws, row, map, "State"),
                                 ZipCode = ExcelImportHelper.GetText(ws, row, map, "ZipCode", "Zip Code"),
                                 Country = ExcelImportHelper.GetText(ws, row, map, "Country"),

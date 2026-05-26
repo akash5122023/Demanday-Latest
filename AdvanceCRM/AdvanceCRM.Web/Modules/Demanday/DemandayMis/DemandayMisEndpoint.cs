@@ -121,6 +121,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 CompanyEmployeeSize = ExcelImportHelper.GetText(ws, row, map, "CompanyEmployeeSize", "Company Employee Size"),
                                 Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
                                 Revenue = ExcelImportHelper.GetText(ws, row, map, "Revenue"),
+                                Date = ExcelImportHelper.GetDate(ws, row, map, "Date"),
                                 ProfileLink = ExcelImportHelper.GetText(ws, row, map, "ProfileLink", "Profile Link"),
                                 CompanyLink = ExcelImportHelper.GetText(ws, row, map, "CompanyLink", "Company Link"),
                                 RevenueLink = ExcelImportHelper.GetText(ws, row, map, "RevenueLink", "Revenue Link"),
