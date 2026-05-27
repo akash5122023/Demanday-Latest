@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Demanday;
+using AdvanceCRM.Demanday;
 using OfficeOpenXml;
 using System.Collections.Generic;
 
@@ -28,7 +28,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.FirstName;
                 ws.Cells[row, col++].Value = en.LastName;
                 ws.Cells[row, col++].Value = en.Title;
-                ws.Cells[row, col++].Value = en.Date;
+                ws.Cells[row, col++].Value = en.Date?.ToString("MM-dd-yyyy");
                 ws.Cells[row, col++].Value = en.AdditionalNotes;
                 ws.Cells[row, col++].Value = en.Email;
                 ws.Cells[row, col++].Value = en.WorkPhone;
@@ -53,9 +53,9 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.DeliveryStatus;
                 ws.Cells[row, col++].Value = en.AgentName;
                 ws.Cells[row, col++].Value = en.QaName;
-                ws.Cells[row, col++].Value = en.CallDate?.ToString("yyyy-MM-dd");
-                ws.Cells[row, col++].Value = en.DateAudited?.ToString("yyyy-MM-dd");
-                ws.Cells[row, col++].Value = en.DeliveryDate?.ToString("yyyy-MM-dd");
+                ws.Cells[row, col++].Value = en.CallDate?.ToString("MM-dd-yyyy");
+                ws.Cells[row, col++].Value = en.DateAudited?.ToString("MM-dd-yyyy");
+                ws.Cells[row, col++].Value = en.DeliveryDate?.ToString("MM-dd-yyyy");
                 ws.Cells[row, col++].Value = en.Source;
                 ws.Cells[row, col++].Value = en.VerificationMode;
                 ws.Cells[row, col++].Value = en.Asset1;

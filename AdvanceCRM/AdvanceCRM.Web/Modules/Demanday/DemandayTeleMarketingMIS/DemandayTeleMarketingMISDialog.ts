@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.Demanday {
 
     @Serenity.Decorators.registerClass()
@@ -14,6 +14,23 @@ namespace AdvanceCRM.Demanday {
         protected getUpdatePermission() { return DemandayTeleMarketingMISRow.updatePermission; }
 
         protected form = new DemandayTeleMarketingMISForm(this.idPrefix);
+
+        constructor() {
+            super();
+
+            this.form.CampaignId.changeSelect2(e => {
+                this.form.QADetails.setCampaignId(this.form.CampaignId.value || null);
+            });
+        }
+
+        protected afterLoadEntity(): void {
+            super.afterLoadEntity();
+            var row = this.entity as DemandayTeleMarketingMISRow;
+            this.form.QADetails.setCampaignId(row ? row.CampaignId : null);
+            if (!this.form.Date.value) {
+                this.form.Date.value = Q.formatDate(new Date(), "yyyy-MM-dd HH:mm");
+            }
+        }
 
     }
 }

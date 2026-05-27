@@ -86,8 +86,13 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             {
                 try { return DateTime.FromOADate(d); } catch { }
             }
-            var s = v.ToString();
+            var s = v.ToString()?.Trim();
             if (string.IsNullOrWhiteSpace(s)) return null;
+
+            string[] formats = new string[] { "MM-dd-yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "yyyy/MM/dd", "dd-MM-yyyy", "dd/MM/yyyy" };
+            if (DateTime.TryParseExact(s, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime rex))
+                return rex;
+
             return DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime r) ? r : (DateTime?)null;
         }
     }

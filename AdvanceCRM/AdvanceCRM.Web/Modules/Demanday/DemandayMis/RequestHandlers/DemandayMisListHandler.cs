@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Data;
 using Serenity.Services;
 using System;
@@ -16,6 +16,22 @@ namespace AdvanceCRM.Demanday
         public DemandayMisListHandler(IRequestContext context)
              : base(context)
         {
+        }
+
+        protected override void ApplyFilters(SqlQuery query)
+        {
+            base.ApplyFilters(query);
+
+            if (Context.Permissions.HasPermission(AdvanceCRM.Administration.PermissionKeys.Security))
+            {
+                return;
+            }
+
+            var userIdStr = Context.User.GetIdentifier();
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+            {
+                query.Where(MyRow.Fields.OwnerId == userId);
+            }
         }
     }
 }

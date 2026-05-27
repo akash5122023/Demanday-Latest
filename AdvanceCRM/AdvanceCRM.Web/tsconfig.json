@@ -1,8 +1,9 @@
-﻿{
+{
   "compileOnSave": true,
   "compilerOptions": {
     "preserveConstEnums": true,
     "experimentalDecorators": true,
+    "noEmitOnError": false,
     "declaration": false,
     "emitBOM": true,
     "jsx": "react",

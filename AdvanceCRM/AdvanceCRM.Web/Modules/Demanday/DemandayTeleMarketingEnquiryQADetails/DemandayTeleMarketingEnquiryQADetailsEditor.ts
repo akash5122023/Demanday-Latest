@@ -15,6 +15,27 @@ namespace AdvanceCRM.Demanday {
             super(container);
         }
 
+        protected editItem(entityOrId: any): void {
+            var id = entityOrId;
+            var item = this.view.getItemById(id);
+            if (item && !item.CampaignId && this.campaignId) {
+                item.CampaignId = this.campaignId;
+            }
+            super.editItem(entityOrId);
+        }
+
+        protected enableDeleteColumn() {
+            return true;
+        }
+
+        public setReadOnly(value: boolean) {
+            // Keep QADetails always editable as requested
+        }
+
+        public set_readOnly(value: boolean) {
+            // Keep QADetails always editable as requested
+        }
+
         public setCampaignId(value: string): void {
             this.campaignId = value || null;
         }

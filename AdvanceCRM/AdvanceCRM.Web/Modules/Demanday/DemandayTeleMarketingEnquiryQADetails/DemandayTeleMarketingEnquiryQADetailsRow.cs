@@ -22,7 +22,7 @@ namespace AdvanceCRM.Demanday
             set => fields.Id[this] = value;
         }
 
-        [DisplayName("Enquiry"), NotNull, ForeignKey("[dbo].[DemandayTeleMarketingEnquiry]", "Id"), LeftJoin("jEnquiry")]
+        [DisplayName("Enquiry"), NotNull]
         public Int32? EnquiryId
         {
             get => fields.EnquiryId[this];

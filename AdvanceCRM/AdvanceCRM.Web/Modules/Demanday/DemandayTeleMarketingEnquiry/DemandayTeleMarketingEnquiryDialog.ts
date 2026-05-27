@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.Demanday {
 
     @Serenity.Decorators.registerClass()
@@ -29,6 +29,9 @@ namespace AdvanceCRM.Demanday {
             this.form.QADetails.setCampaignId(row ? row.CampaignId : null);
             DemandayAudioAttachment.render(this.element, this.idPrefix, "Attachments",
                 row ? row.Attachments : null);
+            if (!this.form.Date.value) {
+                this.form.Date.value = Q.formatDate(new Date(), "yyyy-MM-dd HH:mm");
+            }
         }
 
     }

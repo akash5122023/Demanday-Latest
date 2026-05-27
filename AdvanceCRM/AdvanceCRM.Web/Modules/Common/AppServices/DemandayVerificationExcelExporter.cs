@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Demanday;
+using AdvanceCRM.Demanday;
 using OfficeOpenXml;
 using System.Collections.Generic;
 
@@ -26,7 +26,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.AgentName;
                 ws.Cells[row, col++].Value = en.CdqaComments;
                 ws.Cells[row, col++].Value = en.CampaignId;
-                ws.Cells[row, col++].Value = en.Date;
+                ws.Cells[row, col++].Value = en.Date?.ToString("MM-dd-yyyy");
                 ws.Cells[row, col++].Value = en.CompanyName;
                 ws.Cells[row, col++].Value = en.FirstName;
                 ws.Cells[row, col++].Value = en.LastName;
