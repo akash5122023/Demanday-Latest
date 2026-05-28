@@ -88,6 +88,7 @@ namespace AdvanceCRM.Demanday.Columns
         public string Country { get; set; }
         public string Continents { get; set; }
         public string Industry { get; set; }
+        public string SubIndustry { get; set; }
         public string Revenue { get; set; }
         public string ProfileLink { get; set; }
         public string CompanyLink { get; set; }

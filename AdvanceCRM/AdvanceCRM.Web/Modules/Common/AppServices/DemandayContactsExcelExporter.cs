@@ -13,7 +13,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             // Headers
             string[] headers = new[]
             {
-            "CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "DOMAIN","DATE","TITLE","JOB_LEVEL","Job_Function_Role", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","CONTINENTS", "INDUSTRY", "REVENUE","COMPANY EMPLOYEE SIZE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","ProspectURL","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
+            "CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "DOMAIN","DATE","TITLE","JOB_LEVEL","Job_Function_Role", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","CONTINENTS", "INDUSTRY", "SUB INDUSTRY", "REVENUE","COMPANY EMPLOYEE SIZE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","ProspectURL","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
         };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
@@ -42,6 +42,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.Country;
                 ws.Cells[row, col++].Value = en.Continents;
                 ws.Cells[row, col++].Value = en.Industry;
+                ws.Cells[row, col++].Value = en.SubIndustry;
                 ws.Cells[row, col++].Value = en.Revenue;
                 ws.Cells[row, col++].Value = en.CompanyEmployeeSize;
                 ws.Cells[row, col++].Value = en.ProfileLink;

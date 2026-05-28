@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using static MVC.Views.Demanday;
 using MyRow = AdvanceCRM.Demanday.DemandayTeleMarketingTeamLeaderRow;
 
 namespace AdvanceCRM.Demanday.Endpoints
@@ -109,6 +110,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     Country = demandaytelemarketingteamleader.Country,
                     CampaignId = demandaytelemarketingteamleader.CampaignId,      // Mapping CompanyName to CompanyEmp
                     Industry = demandaytelemarketingteamleader.Industry,
+                    SubIndustry = demandaytelemarketingteamleader.SubIndustry,
                     Revenue = demandaytelemarketingteamleader.Revenue,
                     CompanyEmployeeSize = demandaytelemarketingteamleader.CompanyEmployeeSize,
                     ZoomInfoIndustry = demandaytelemarketingteamleader.ZoomInfoIndustry,

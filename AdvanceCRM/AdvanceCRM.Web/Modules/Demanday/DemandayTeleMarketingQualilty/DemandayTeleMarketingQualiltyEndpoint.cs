@@ -115,6 +115,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     Country = demandaytelemarketingquality.Country,
                     CompanyEmployeeSize = demandaytelemarketingquality.CompanyEmployeeSize,      // Mapping CompanyName to CompanyEmp
                     Industry = demandaytelemarketingquality.Industry,
+                    SubIndustry = demandaytelemarketingquality.SubIndustry,
                     ZoomInfoIndustry = demandaytelemarketingquality.ZoomInfoIndustry,
                     Date = demandaytelemarketingquality.Date,
                     ZoomInfoEmployeeSize = demandaytelemarketingquality.ZoomInfoEmployeeSize,
@@ -285,6 +286,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 AdditionalNotes = ExcelImportHelper.GetText(ws, row, map, "AdditionalNotes", "Additional Notes"),
                                 CompanyEmployeeSize = ExcelImportHelper.GetText(ws, row, map, "CompanyEmployeeSize", "Company Employee Size"),
                                 Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
+                                SubIndustry = ExcelImportHelper.GetText(ws, row, map, "SubIndustry", "Sub Industry"),
                                 Revenue = ExcelImportHelper.GetText(ws, row, map, "Revenue"),
                                 ProfileLink = ExcelImportHelper.GetText(ws, row, map, "ProfileLink", "Profile Link"),
                                 CompanyLink = ExcelImportHelper.GetText(ws, row, map, "CompanyLink", "Company Link"),

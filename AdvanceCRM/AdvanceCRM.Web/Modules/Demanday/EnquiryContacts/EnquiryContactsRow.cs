@@ -115,14 +115,21 @@ namespace AdvanceCRM.Demanday
             set => fields.Industry[this] = value;
         }
 
-        [DisplayName("Revenue")]
+        [DisplayName("Sub Industry"), Size(100)]
+        public String SubIndustry
+        {
+            get => fields.SubIndustry[this];
+            set => fields.SubIndustry[this] = value;
+        }
+
+        [DisplayName("Revenue"), Size(50)]
         public String Revenue
         {
             get => fields.Revenue[this];
             set => fields.Revenue[this] = value;
         }
 
-        [DisplayName("Company Employee Size")]
+        [DisplayName("Company Employee Size"), Size(100)]
         public String CompanyEmployeeSize
         {
             get => fields.CompanyEmployeeSize[this];
@@ -505,6 +512,7 @@ namespace AdvanceCRM.Demanday
             public StringField ZipCode;
             public StringField Country;
             public StringField Industry;
+            public StringField SubIndustry;
             public StringField Revenue;
             public StringField CompanyEmployeeSize;
             public StringField ProfileLink;

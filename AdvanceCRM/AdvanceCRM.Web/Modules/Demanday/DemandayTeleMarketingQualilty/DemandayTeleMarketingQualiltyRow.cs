@@ -59,7 +59,7 @@ public String EmailFormat
             get => fields.CompanyName[this];
             set => fields.CompanyName[this] = value;
         }
-        [DisplayName("ZoomInfo Employee Size")]
+        [DisplayName("ZoomInfo Employee Size"), Size(100)]
         public String ZoomInfoEmployeeSize
         {
             get => fields.ZoomInfoEmployeeSize[this];
@@ -71,6 +71,13 @@ public String EmailFormat
         {
             get => fields.ZoomInfoIndustry[this];
             set => fields.ZoomInfoIndustry[this] = value;
+        }
+
+        [DisplayName("Sub Industry"), Size(100)]
+        public String SubIndustry
+        {
+            get => fields.SubIndustry[this];
+            set => fields.SubIndustry[this] = value;
         }
         [DisplayName("Date")]
         public DateTime? Date
@@ -173,7 +180,7 @@ public String EmailFormat
             set => fields.Country[this] = value;
         }
 
-        [DisplayName("Company Employee Size")]
+        [DisplayName("Company Employee Size"), Size(100)]
         public String CompanyEmployeeSize
         {
             get => fields.CompanyEmployeeSize[this];
@@ -187,7 +194,7 @@ public String EmailFormat
             set => fields.Industry[this] = value;
         }
 
-        [DisplayName("Revenue")]
+        [DisplayName("Revenue"), Size(50)]
         public String Revenue
         {
             get => fields.Revenue[this];
@@ -709,6 +716,7 @@ public String EmailFormat
             public StringField CallStatus;
             public StringField AdditionalNotes;
             public StringField ZoomInfoIndustry;
+            public StringField SubIndustry;
             public StringField ZoomInfoEmployeeSize;
             public DateTimeField Date;
 

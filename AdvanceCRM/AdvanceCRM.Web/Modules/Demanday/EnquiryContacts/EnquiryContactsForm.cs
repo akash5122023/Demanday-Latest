@@ -35,6 +35,8 @@ namespace AdvanceCRM.Demanday.Forms
         [HalfWidth]
         public string Industry { get; set; }
         [HalfWidth]
+        public string SubIndustry { get; set; }
+        [HalfWidth]
         public string Revenue { get; set; }
         [HalfWidth, DisplayName("Employee Size")]
         public string CompanyEmployeeSize { get; set; }

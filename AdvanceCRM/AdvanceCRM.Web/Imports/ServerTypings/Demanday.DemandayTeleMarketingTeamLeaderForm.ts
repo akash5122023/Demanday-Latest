@@ -12,6 +12,7 @@
         Revenue: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
         ZoomInfoIndustry: Serenity.StringEditor;
+        SubIndustry: Serenity.StringEditor;
         ZoomInfoEmployeeSize: Serenity.StringEditor;
         Asset: Serenity.StringEditor;
         CallStatus: Serenity.StringEditor;
@@ -65,6 +66,7 @@
                     'Revenue', w0,
                     'CompanyEmployeeSize', w0,
                     'ZoomInfoIndustry', w0,
+                    'SubIndustry', w0,
                     'ZoomInfoEmployeeSize', w0,
                     'Asset', w0,
                     'CallStatus', w0,

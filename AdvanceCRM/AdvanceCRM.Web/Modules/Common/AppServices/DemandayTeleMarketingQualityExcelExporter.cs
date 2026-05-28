@@ -13,7 +13,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             // Headers
             string[] headers = new[]
             {
-            "CAMPAIGN ID","Id","Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "Email","Date","Additional Notes", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
+            "CAMPAIGN ID","Id","Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "Email","Date","Additional Notes", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
         };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
@@ -40,6 +40,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.Country;
                 ws.Cells[row, col++].Value = en.CompanyEmployeeSize;
                 ws.Cells[row, col++].Value = en.Industry;
+                ws.Cells[row, col++].Value = en.SubIndustry;
                 ws.Cells[row, col++].Value = en.Revenue;
                 ws.Cells[row, col++].Value = en.ProfileLink;
                 ws.Cells[row, col++].Value = en.CompanyLink;

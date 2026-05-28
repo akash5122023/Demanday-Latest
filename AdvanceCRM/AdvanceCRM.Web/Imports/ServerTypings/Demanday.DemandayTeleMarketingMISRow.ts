@@ -49,6 +49,7 @@
         CallStatus?: string;
         AdditionalNotes?: string;
         ZoomInfoIndustry?: string;
+        SubIndustry?: string;
         ZoomInfoEmployeeSize?: string;
         Date?: string;
         OwnerUsername?: string;
@@ -156,6 +157,7 @@
             CallStatus = "CallStatus",
             AdditionalNotes = "AdditionalNotes",
             ZoomInfoIndustry = "ZoomInfoIndustry",
+            SubIndustry = "SubIndustry",
             ZoomInfoEmployeeSize = "ZoomInfoEmployeeSize",
             Date = "Date",
             OwnerUsername = "OwnerUsername",

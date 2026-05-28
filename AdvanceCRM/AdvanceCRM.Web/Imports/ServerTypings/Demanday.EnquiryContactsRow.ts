@@ -14,6 +14,7 @@
         ZipCode?: string;
         Country?: string;
         Industry?: string;
+        SubIndustry?: string;
         Revenue?: string;
         CompanyEmployeeSize?: string;
         ProfileLink?: string;
@@ -97,6 +98,7 @@
             ZipCode = "ZipCode",
             Country = "Country",
             Industry = "Industry",
+            SubIndustry = "SubIndustry",
             Revenue = "Revenue",
             CompanyEmployeeSize = "CompanyEmployeeSize",
             ProfileLink = "ProfileLink",

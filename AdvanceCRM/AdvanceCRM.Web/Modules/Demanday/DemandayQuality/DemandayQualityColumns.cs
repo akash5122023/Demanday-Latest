@@ -80,6 +80,7 @@ namespace AdvanceCRM.Demanday.Columns
         [QuickFilter]
         public string Country { get; set; }
         public string Industry { get; set; }
+        public string SubIndustry { get; set; }
         public string Revenue { get; set; }
 
         public string CompanyEmployeeSize { get; set; }

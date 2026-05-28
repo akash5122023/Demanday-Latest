@@ -53,6 +53,7 @@
         CallStatus?: string;
         AdditionalNotes?: string;
         ZoomInfoIndustry?: string;
+        SubIndustry?: string;
         ZoomInfoEmployeeSize?: string;
         Date?: string;
         QADetails?: DemandayTeleMarketingEnquiryQADetailsRow[];
@@ -165,6 +166,7 @@
             CallStatus = "CallStatus",
             AdditionalNotes = "AdditionalNotes",
             ZoomInfoIndustry = "ZoomInfoIndustry",
+            SubIndustry = "SubIndustry",
             ZoomInfoEmployeeSize = "ZoomInfoEmployeeSize",
             Date = "Date",
             QADetails = "QADetails",

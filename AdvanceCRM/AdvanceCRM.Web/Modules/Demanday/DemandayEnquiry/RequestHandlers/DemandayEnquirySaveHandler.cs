@@ -52,6 +52,7 @@ namespace AdvanceCRM.Demanday
                     ZipCode = Row.ZipCode,
                     Country = Row.Country,
                     Industry = Row.Industry,
+                    SubIndustry = Row.SubIndustry,
                     Revenue = Row.Revenue,
                     CompanyEmployeeSize = Row.CompanyEmployeeSize,
                     ZoomInfoIndustry = Row.ZoomInfoIndustry,

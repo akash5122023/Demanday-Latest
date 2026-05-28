@@ -52,6 +52,7 @@ namespace AdvanceCRM.Demanday
                     ZipCode = Row.ZipCode,
                     Country = Row.Country,
                     Industry = Row.Industry,
+                    SubIndustry = Row.SubIndustry,
                     Revenue = Row.Revenue,
                     CompanyEmployeeSize = Row.CompanyEmployeeSize,
                     ZoomInfoIndustry = Row.ZoomInfoIndustry,
@@ -103,19 +104,7 @@ namespace AdvanceCRM.Demanday
                     Connection.DeleteById<DemandayTeleMarketingEnquiryQADetailsRow>(qa.Id.Value);
                 }
 
-                Task.Run(() =>
-                {
-                    using var newConn = sqlConnections.NewFor<DemandayTeleMarketingEnquiryRow>();
-                    try
-                    {
-                        newConn.DeleteById<DemandayTeleMarketingEnquiryRow>(Row.Id.Value);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log error if deletion fails
-                        Console.WriteLine("Error deleting Enquiry: " + ex.Message);
-                    }
-                });
+                Connection.DeleteById<DemandayTeleMarketingEnquiryRow>(Row.Id.Value);
             }
         }
     }

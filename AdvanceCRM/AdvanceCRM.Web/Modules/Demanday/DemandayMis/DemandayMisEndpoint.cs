@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using static MVC.Views.Demanday;
 using MyRow = AdvanceCRM.Demanday.DemandayMisRow;
 
 namespace AdvanceCRM.Demanday.Endpoints
@@ -120,6 +121,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Country = ExcelImportHelper.GetText(ws, row, map, "Country"),
                                 CompanyEmployeeSize = ExcelImportHelper.GetText(ws, row, map, "CompanyEmployeeSize", "Company Employee Size"),
                                 Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
+                                SubIndustry = ExcelImportHelper.GetText(ws, row, map, "SubIndustry", "Sub Industry"),
                                 Revenue = ExcelImportHelper.GetText(ws, row, map, "Revenue"),
                                 Date = ExcelImportHelper.GetDate(ws, row, map, "Date"),
                                 ProfileLink = ExcelImportHelper.GetText(ws, row, map, "ProfileLink", "Profile Link"),
@@ -227,6 +229,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     Country = demandaymis.Country,
                     CompanyEmployeeSize = demandaymis.CompanyEmployeeSize,
                     Industry = demandaymis.Industry,
+                    SubIndustry = demandaymis.SubIndustry,
                     ZoomInfoIndustry = demandaymis.ZoomInfoIndustry,
                     Date = demandaymis.Date,
                     ZoomInfoEmployeeSize = demandaymis.ZoomInfoEmployeeSize,

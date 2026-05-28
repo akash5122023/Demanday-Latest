@@ -59,6 +59,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String Country { get; set; }
         public String CompanyEmployeeSize { get; set; }
         public String Industry { get; set; }
+        public String SubIndustry { get; set; }
         public String Revenue { get; set; }
         public String ProfileLink { get; set; }
         public String CompanyLink { get; set; }
@@ -69,6 +70,8 @@ namespace AdvanceCRM.Demanday.Columns
         public String Link { get; set; }
         public System.DateTime? Date { get; set; }
         public String Md5 { get; set; }
+        [Width(150), DisplayName("Audio")]
+        public String Attachments { get; set; }
         [QuickFilter]
         public String OwnerUsername { get; set; }
     }

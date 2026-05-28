@@ -74,7 +74,7 @@ namespace AdvanceCRM.Demanday
             get => fields.Title[this];
             set => fields.Title[this] = value;
         }
-        [DisplayName("ZoomInfo Employee Size")]
+        [DisplayName("ZoomInfo Employee Size"), Size(100)]
         public String ZoomInfoEmployeeSize
         {
             get => fields.ZoomInfoEmployeeSize[this];
@@ -86,6 +86,13 @@ namespace AdvanceCRM.Demanday
         {
             get => fields.ZoomInfoIndustry[this];
             set => fields.ZoomInfoIndustry[this] = value;
+        }
+
+        [DisplayName("Sub Industry"), Size(100)]
+        public String SubIndustry
+        {
+            get => fields.SubIndustry[this];
+            set => fields.SubIndustry[this] = value;
         }
         [DisplayName("Date")]
         public DateTime? Date
@@ -167,7 +174,7 @@ namespace AdvanceCRM.Demanday
             set => fields.Country[this] = value;
         }
 
-        [DisplayName("Company Employee Size")]
+        [DisplayName("Company Employee Size"), Size(100)]
         public String CompanyEmployeeSize
         {
             get => fields.CompanyEmployeeSize[this];
@@ -181,7 +188,7 @@ namespace AdvanceCRM.Demanday
             set => fields.Industry[this] = value;
         }
 
-        [DisplayName("Revenue")]
+        [DisplayName("Revenue"), Size(50)]
         public String Revenue
         {
             get => fields.Revenue[this];
@@ -706,6 +713,7 @@ namespace AdvanceCRM.Demanday
             public StringField CallStatus;
             public StringField AdditionalNotes;
             public StringField ZoomInfoIndustry;
+            public StringField SubIndustry;
             public StringField ZoomInfoEmployeeSize;
             public DateTimeField Date;
 

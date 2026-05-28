@@ -120,6 +120,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Country = ExcelImportHelper.GetText(ws, row, map, "Country"),
                                 Continents = ExcelImportHelper.GetText(ws, row, map, "Continents"),
                                 Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
+                                SubIndustry = ExcelImportHelper.GetText(ws, row, map, "SubIndustry", "Sub Industry"),
                                 Date = ExcelImportHelper.GetDate(ws, row, map, "Date"),
                                 AdditionalNotes = ExcelImportHelper.GetText(ws, row, map, "AdditionalNotes", "Additional Notes"),
                                 Revenue = ExcelImportHelper.GetText(ws, row, map, "Revenue"),

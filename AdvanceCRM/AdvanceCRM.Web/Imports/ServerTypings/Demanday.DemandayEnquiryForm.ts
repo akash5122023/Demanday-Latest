@@ -12,6 +12,7 @@
         Revenue: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
         ZoomInfoIndustry: Serenity.StringEditor;
+        SubIndustry: Serenity.StringEditor;
         ZoomInfoEmployeeSize: Serenity.StringEditor;
         Street: Serenity.StringEditor;
         City: Serenity.StringEditor;
@@ -59,6 +60,7 @@
                     'Revenue', w1,
                     'CompanyEmployeeSize', w1,
                     'ZoomInfoIndustry', w1,
+                    'SubIndustry', w1,
                     'ZoomInfoEmployeeSize', w1,
                     'Street', w1,
                     'City', w1,

@@ -70,6 +70,8 @@ namespace AdvanceCRM.Demanday.Forms
         public string CompanyEmployeeSize { get; set; }
         [HalfWidth]
         public string ZoomInfoIndustry { get; set; }
+        [HalfWidth]
+        public string SubIndustry { get; set; }
         [HalfWidth, DisplayName("ZoomInfo EmployeeSize")]
         public string ZoomInfoEmployeeSize { get; set; }
         

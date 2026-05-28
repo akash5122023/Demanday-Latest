@@ -129,7 +129,7 @@ public String EmailFormat
             set => fields.Country[this] = value;
         }
 
-        [DisplayName("Company Employee Size")]
+        [DisplayName("Company Employee Size"), Size(100)]
         public String CompanyEmployeeSize
         {
             get => fields.CompanyEmployeeSize[this];
@@ -142,7 +142,7 @@ public String EmailFormat
             get => fields.Industry[this];
             set => fields.Industry[this] = value;
         }
-        [DisplayName("ZoomInfo Employee Size")]
+        [DisplayName("ZoomInfo Employee Size"), Size(100)]
         public String ZoomInfoEmployeeSize
         {
             get => fields.ZoomInfoEmployeeSize[this];
@@ -155,13 +155,20 @@ public String EmailFormat
             get => fields.ZoomInfoIndustry[this];
             set => fields.ZoomInfoIndustry[this] = value;
         }
+
+        [DisplayName("Sub Industry"), Size(100)]
+        public String SubIndustry
+        {
+            get => fields.SubIndustry[this];
+            set => fields.SubIndustry[this] = value;
+        }
         [DisplayName("Date")]
         public DateTime? Date
         {
             get => fields.Date[this];
             set => fields.Date[this] = value;
         }
-        [DisplayName("Revenue")]
+        [DisplayName("Revenue"), Size(50)]
         public String Revenue
         {
             get => fields.Revenue[this];
@@ -553,6 +560,7 @@ public String EmailFormat
             public Int32Field OwnerId;
             public StringField ZoomInfoEmployeeSize;
             public StringField ZoomInfoIndustry;
+            public StringField SubIndustry;
             public DateTimeField Date;
 
             public StringField OwnerUsername;

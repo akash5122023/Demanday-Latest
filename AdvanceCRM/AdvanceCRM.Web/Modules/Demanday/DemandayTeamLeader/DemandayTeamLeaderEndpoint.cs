@@ -88,6 +88,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     ZipCode = demandayteamleader.ZipCode,
                     Country = demandayteamleader.Country,
                     Industry = demandayteamleader.Industry,
+                    SubIndustry = demandayteamleader.SubIndustry,
                     Revenue = demandayteamleader.Revenue,
                     CompanyEmployeeSize = demandayteamleader.CompanyEmployeeSize,
                     ZoomInfoIndustry = demandayteamleader.ZoomInfoIndustry,

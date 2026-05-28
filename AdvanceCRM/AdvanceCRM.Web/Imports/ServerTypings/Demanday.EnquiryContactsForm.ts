@@ -9,6 +9,7 @@
         AlternativeNumber: Serenity.StringEditor;
         CompanyName: Serenity.StringEditor;
         Industry: Serenity.StringEditor;
+        SubIndustry: Serenity.StringEditor;
         Revenue: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
         Street: Serenity.StringEditor;
@@ -50,6 +51,7 @@
                     'AlternativeNumber', w0,
                     'CompanyName', w0,
                     'Industry', w0,
+                    'SubIndustry', w0,
                     'Revenue', w0,
                     'CompanyEmployeeSize', w0,
                     'Street', w0,

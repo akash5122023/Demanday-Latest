@@ -31,6 +31,7 @@
         CallStatus?: string;
         AdditionalNotes?: string;
         ZoomInfoIndustry?: string;
+        SubIndustry?: string;
         ZoomInfoEmployeeSize?: string;
         Date?: string;
         TeleMarketingEnquiryCompanyName?: string;
@@ -147,6 +148,7 @@
             CallStatus = "CallStatus",
             AdditionalNotes = "AdditionalNotes",
             ZoomInfoIndustry = "ZoomInfoIndustry",
+            SubIndustry = "SubIndustry",
             ZoomInfoEmployeeSize = "ZoomInfoEmployeeSize",
             Date = "Date",
             TeleMarketingEnquiryCompanyName = "TeleMarketingEnquiryCompanyName",

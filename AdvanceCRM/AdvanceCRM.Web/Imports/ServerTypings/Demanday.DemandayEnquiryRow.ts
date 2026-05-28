@@ -29,6 +29,7 @@
         OwnerId?: number;
         ZoomInfoEmployeeSize?: string;
         ZoomInfoIndustry?: string;
+        SubIndustry?: string;
         Date?: string;
         OwnerUsername?: string;
         OwnerDisplayName?: string;
@@ -117,6 +118,7 @@
             OwnerId = "OwnerId",
             ZoomInfoEmployeeSize = "ZoomInfoEmployeeSize",
             ZoomInfoIndustry = "ZoomInfoIndustry",
+            SubIndustry = "SubIndustry",
             Date = "Date",
             OwnerUsername = "OwnerUsername",
             OwnerDisplayName = "OwnerDisplayName",
