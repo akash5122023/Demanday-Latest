@@ -17,7 +17,9 @@ namespace AdvanceCRM.Demanday {
 
         protected afterLoadEntity(): void {
             super.afterLoadEntity();
-            
+            if (!this.form.Date.value) {
+                this.form.Date.value = Q.formatDate(new Date(), "yyyy-MM-dd HH:mm");
+            }
         }
 
     }
