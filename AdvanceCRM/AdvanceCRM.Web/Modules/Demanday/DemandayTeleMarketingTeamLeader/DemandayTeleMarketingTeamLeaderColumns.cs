@@ -34,6 +34,8 @@ namespace AdvanceCRM.Demanday.Columns
         public String CompanyEmployeeSize { get; set; }
         public String Industry { get; set; }
         public String SubIndustry { get; set; }
+        public string ZoomInfoIndustry { get; set; }
+        public string ZoomInfoEmployeeSize { get; set; }
         public String Revenue { get; set; }
         public String ProfileLink { get; set; }
         public String CompanyLink { get; set; }
