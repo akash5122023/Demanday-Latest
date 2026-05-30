@@ -13,7 +13,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             // Headers
             string[] headers = new[]
             {
-            "CAMPAIGN ID","Id","Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "Email","Date","Additional Notes", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
+            "CAMPAIGN ID","Id","Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "Email","Date","Additional Notes", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","ASSET","CALL STATUS","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
         };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
@@ -62,6 +62,8 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.VerificationMode;
                 ws.Cells[row, col++].Value = en.Asset1;
                 ws.Cells[row, col++].Value = en.Asset2;
+                ws.Cells[row, col++].Value = en.Asset;
+                ws.Cells[row, col++].Value = en.CallStatus;
                 ws.Cells[row, col++].Value = en.TlName;
                 ws.Cells[row, col++].Value = en.Tenurity;
                 ws.Cells[row, col++].Value = en.Code;

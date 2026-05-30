@@ -142,6 +142,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 VerificationMode = ExcelImportHelper.GetText(ws, row, map, "VerificationMode", "Verification Mode"),
                                 Asset1 = ExcelImportHelper.GetText(ws, row, map, "Asset1", "Asset 1"),
                                 Asset2 = ExcelImportHelper.GetText(ws, row, map, "Asset2", "Asset 2"),
+                                Asset = ExcelImportHelper.GetText(ws, row, map, "Asset"),
+                                CallStatus = ExcelImportHelper.GetText(ws, row, map, "CallStatus", "Call Status"),
                                 TlName = ExcelImportHelper.GetText(ws, row, map, "TlName", "TL Name"),
                                 Tenurity = ExcelImportHelper.GetText(ws, row, map, "Tenurity"),
                                 Code = ExcelImportHelper.GetText(ws, row, map, "Code"),

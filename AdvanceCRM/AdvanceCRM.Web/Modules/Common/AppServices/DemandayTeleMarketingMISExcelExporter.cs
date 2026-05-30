@@ -13,7 +13,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             // Headers
             string[] headers = new[]
             {
-            "CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE","Date","Additional Notes", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE","COMPANY EMPLOYEE SIZE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
+            "CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE","Date","Additional Notes", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","ASSET","CALL STATUS","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
         };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
@@ -63,6 +63,8 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.VerificationMode;
                 ws.Cells[row, col++].Value = en.Asset1;
                 ws.Cells[row, col++].Value = en.Asset2;
+                ws.Cells[row, col++].Value = en.Asset;
+                ws.Cells[row, col++].Value = en.CallStatus;
                 ws.Cells[row, col++].Value = en.TlName;
                 ws.Cells[row, col++].Value = en.Tenurity;
                 ws.Cells[row, col++].Value = en.Code;
