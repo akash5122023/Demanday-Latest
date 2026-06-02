@@ -134,6 +134,7 @@ namespace AdvanceCRM.Demanday.Forms
         [ImageUploadEditor(FilenameFormat = "TeleMarketingAttachment/~", CopyToHistory = true)]
         public string Attachments { get; set; }
         [Category("Questions and Answers")]
+        [DisplayName("QA Details")]
         [DemandayTeleMarketingEnquiryQADetailsEditor]
         public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails { get; set; }
         [Category("Representative")]

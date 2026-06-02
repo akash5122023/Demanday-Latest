@@ -3,7 +3,9 @@
     "allow": [
       "Bash(xargs cat)",
       "Bash(grep -c \"DemandayConatcts\" wwwroot/Scripts/site/AdvanceCRM.Web.js)",
-      "Bash(grep -c \"Demanday/DemandayContacts/ImportExcel\" wwwroot/Scripts/site/AdvanceCRM.Web.js)"
+      "Bash(grep -c \"Demanday/DemandayContacts/ImportExcel\" wwwroot/Scripts/site/AdvanceCRM.Web.js)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\dudhe\\\\source\\\\repos\\\\Demanday-Latest\" -Force)",
+      "Bash(Select-Object Name, Mode)"
     ]
   }
 }

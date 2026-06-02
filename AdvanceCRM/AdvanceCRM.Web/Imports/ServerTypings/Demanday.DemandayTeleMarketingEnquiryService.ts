@@ -7,13 +7,17 @@
         export declare function Delete(request: Serenity.DeleteRequest, onSuccess?: (response: Serenity.DeleteResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function Retrieve(request: Serenity.RetrieveRequest, onSuccess?: (response: Serenity.RetrieveResponse<DemandayTeleMarketingEnquiryRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function List(request: Serenity.ListRequest, onSuccess?: (response: Serenity.ListResponse<DemandayTeleMarketingEnquiryRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
+        export declare function MoveToTeamLeader(request: MoveToTeamLeaderRequest, onSuccess?: (response: StandardResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
+        export declare function ImportExcel(request: Serenity.ServiceRequest, onSuccess?: (response: Microsoft.AspNetCore.Mvc.IActionResult) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
 
         export declare const enum Methods {
             Create = "Demanday/DemandayTeleMarketingEnquiry/Create",
             Update = "Demanday/DemandayTeleMarketingEnquiry/Update",
             Delete = "Demanday/DemandayTeleMarketingEnquiry/Delete",
             Retrieve = "Demanday/DemandayTeleMarketingEnquiry/Retrieve",
-            List = "Demanday/DemandayTeleMarketingEnquiry/List"
+            List = "Demanday/DemandayTeleMarketingEnquiry/List",
+            MoveToTeamLeader = "Demanday/DemandayTeleMarketingEnquiry/MoveToTeamLeader",
+            ImportExcel = "Demanday/DemandayTeleMarketingEnquiry/ImportExcel"
         }
 
         [
@@ -21,7 +25,9 @@
             'Update', 
             'Delete', 
             'Retrieve', 
-            'List'
+            'List', 
+            'MoveToTeamLeader', 
+            'ImportExcel'
         ].forEach(x => {
             (<any>DemandayTeleMarketingEnquiryService)[x] = function (r, s, o) {
                 return Q.serviceRequest(baseUrl + '/' + x, r, s, o);

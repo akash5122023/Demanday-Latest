@@ -92,6 +92,7 @@ public string EmailFormat { get; set; }
         public string Attachments { get; set; }
 
         [Category("Questions and Answers")]
+        [DisplayName("QA Details")]
         [DemandayTeleMarketingEnquiryQADetailsEditor]
         public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails { get; set; }
 

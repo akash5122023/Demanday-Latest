@@ -132,6 +132,7 @@ namespace AdvanceCRM.Demanday.Forms
         [FullWidth]
         public string AdditionalNotes { get; set; }
         [Category("Questions and Answers")]
+        [DisplayName("QA Details")]
         [DemandayTeleMarketingEnquiryQADetailsEditor]
         public List<DemandayTeleMarketingEnquiryQADetailsRow> QADetails { get; set; }
 
