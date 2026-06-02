@@ -241,6 +241,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                             {
                                 skipped++; continue;
                             }
+                            ExcelImportHelper.ClampStringFields(demandayenquiry);
                             var creReq = new SaveRequest<DemandayEnquiryRow> { Entity = demandayenquiry };
                             saveHandler.Create(uow, creReq);
                             imported++;

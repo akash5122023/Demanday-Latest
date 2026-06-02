@@ -69,6 +69,8 @@ namespace AdvanceCRM.Demanday.Columns
         public String CompanyLink { get; set; }
         public String RevenueLink { get; set; }
         public String AddressLink { get; set; }
+
+        public String EmailFormat { get; set; }
         public String Tenurity { get; set; }
         public String Code { get; set; }
         public String Link { get; set; }

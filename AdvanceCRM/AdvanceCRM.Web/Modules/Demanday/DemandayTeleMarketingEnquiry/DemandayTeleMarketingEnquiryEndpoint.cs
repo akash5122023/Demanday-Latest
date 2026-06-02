@@ -276,6 +276,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                             {
                                 skipped++; continue;
                             }
+                            ExcelImportHelper.ClampStringFields(tmenquiry);
                             var creReq = new SaveRequest<DemandayTeleMarketingEnquiryRow> { Entity = tmenquiry };
                             saveHandler.Create(uow, creReq);
                             imported++;

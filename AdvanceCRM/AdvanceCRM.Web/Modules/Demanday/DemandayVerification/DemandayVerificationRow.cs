@@ -114,7 +114,7 @@ namespace AdvanceCRM.Demanday
             set => fields.Alternate02[this] = value;
         }
 
-        [DisplayName("Profile Link"), Size(300)]
+        [DisplayName("Profile Link"), Size(2000)]
         public String ProfileLink
         {
             get => fields.ProfileLink[this];

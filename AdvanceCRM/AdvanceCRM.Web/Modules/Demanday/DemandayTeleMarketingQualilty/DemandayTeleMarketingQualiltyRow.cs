@@ -201,28 +201,28 @@ public String EmailFormat
             set => fields.Revenue[this] = value;
         }
 
-        [DisplayName("Profile Link"), Size(300)]
+        [DisplayName("Profile Link"), Size(2000)]
         public String ProfileLink
         {
             get => fields.ProfileLink[this];
             set => fields.ProfileLink[this] = value;
         }
 
-        [DisplayName("Company Link"), Size(300)]
+        [DisplayName("Company Link"), Size(2000)]
         public String CompanyLink
         {
             get => fields.CompanyLink[this];
             set => fields.CompanyLink[this] = value;
         }
 
-        [DisplayName("Revenue Link"), Size(300)]
+        [DisplayName("Revenue Link"), Size(2000)]
         public String RevenueLink
         {
             get => fields.RevenueLink[this];
             set => fields.RevenueLink[this] = value;
         }
 
-        [DisplayName("Address Link"), Size(300)]
+        [DisplayName("Address Link"), Size(2000)]
         public String AddressLink
         {
             get => fields.AddressLink[this];
@@ -348,7 +348,7 @@ public String EmailFormat
             set => fields.Code[this] = value;
         }
 
-        [DisplayName("Link"), Size(300)]
+        [DisplayName("Link"), Size(2000)]
         public String Link
         {
             get => fields.Link[this];

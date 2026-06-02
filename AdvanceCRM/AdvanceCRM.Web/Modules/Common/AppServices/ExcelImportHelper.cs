@@ -1,4 +1,5 @@
 using OfficeOpenXml;
+using Serenity.Data;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,6 +9,25 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
 {
     public static class ExcelImportHelper
     {
+        // Defensive backstop for Excel imports: clamp every string field to its
+        // declared column size so an over-length cell (e.g. a long URL pasted into
+        // a short column) is trimmed to fit instead of failing the whole row with
+        // "String or binary data would be truncated".
+        public static void ClampStringFields(IRow row)
+        {
+            if (row == null)
+                return;
+            foreach (var field in row.GetFields())
+            {
+                if (field is StringField sf && sf.Size > 0)
+                {
+                    var val = sf[row];
+                    if (val != null && val.Length > sf.Size)
+                        sf[row] = val.Substring(0, sf.Size);
+                }
+            }
+        }
+
         public static Dictionary<string, int> BuildHeaderMap(ExcelWorksheet ws)
         {
             var map = new Dictionary<string, int>();

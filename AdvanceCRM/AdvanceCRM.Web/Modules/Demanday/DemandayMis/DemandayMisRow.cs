@@ -176,21 +176,21 @@ namespace AdvanceCRM.Demanday
             set => fields.Revenue[this] = value;
         }
 
-        [DisplayName("Profile Link"), Size(300)]
+        [DisplayName("Profile Link"), Size(2000)]
         public String ProfileLink
         {
             get => fields.ProfileLink[this];
             set => fields.ProfileLink[this] = value;
         }
 
-        [DisplayName("Company Link"), Size(300)]
+        [DisplayName("Company Link"), Size(2000)]
         public String CompanyLink
         {
             get => fields.CompanyLink[this];
             set => fields.CompanyLink[this] = value;
         }
 
-        [DisplayName("Revenue Link"), Size(300)]
+        [DisplayName("Revenue Link"), Size(2000)]
         public String RevenueLink
         {
             get => fields.RevenueLink[this];
@@ -204,7 +204,7 @@ namespace AdvanceCRM.Demanday
             set => fields.EmailFormat[this] = value;
         }
 
-        [DisplayName("Adress Link"), Size(300)]
+        [DisplayName("Adress Link"), Size(2000)]
         public String AdressLink
         {
             get => fields.AdressLink[this];
@@ -225,7 +225,7 @@ namespace AdvanceCRM.Demanday
             set => fields.Code[this] = value;
         }
 
-        [DisplayName("Link"), Size(300)]
+        [DisplayName("Link"), Size(2000)]
         public String Link
         {
             get => fields.Link[this];

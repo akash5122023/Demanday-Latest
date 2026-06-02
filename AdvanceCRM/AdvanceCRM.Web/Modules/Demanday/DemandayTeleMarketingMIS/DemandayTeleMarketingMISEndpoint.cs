@@ -155,6 +155,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                             {
                                 skipped++; continue;
                             }
+                            ExcelImportHelper.ClampStringFields(demandaytelemarketingmis);
                             var creReq = new Serenity.Services.SaveRequest<DemandayTeleMarketingMISRow> { Entity = demandaytelemarketingmis };
                             saveHandler.Create(uow, creReq);
                             imported++;

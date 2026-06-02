@@ -133,6 +133,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                             {
                                 skipped++; continue;
                             }
+                            ExcelImportHelper.ClampStringFields(enquirycontacts);
                             var creReq = new Serenity.Services.SaveRequest<EnquiryContactsRow> { Entity = enquirycontacts };
                             saveHandler.Create(uow, creReq);
                             imported++;
