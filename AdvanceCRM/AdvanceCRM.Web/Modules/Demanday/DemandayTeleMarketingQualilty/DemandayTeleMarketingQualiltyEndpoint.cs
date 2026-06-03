@@ -126,7 +126,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                     ProfileLink = demandaytelemarketingquality.ProfileLink,
                     CompanyLink = demandaytelemarketingquality.CompanyLink,
                     RevenueLink = demandaytelemarketingquality.RevenueLink,
-                    AdressLink = demandaytelemarketingquality.AddressLink,     // Note: mapped AddressLink
+                    AdressLink = demandaytelemarketingquality.AddressLink,
+                    EmailFormat = demandaytelemarketingquality.EmailFormat, // Note: mapped AddressLink
                     Tenurity = demandaytelemarketingquality.Tenurity,
                     Code = demandaytelemarketingquality.Code,
                     Link = demandaytelemarketingquality.Link,

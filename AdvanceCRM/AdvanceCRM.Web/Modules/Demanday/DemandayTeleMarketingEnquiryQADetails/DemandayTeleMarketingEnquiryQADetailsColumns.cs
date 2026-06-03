@@ -10,6 +10,8 @@ namespace AdvanceCRM.Demanday.Columns
     [BasedOnRow(typeof(DemandayTeleMarketingEnquiryQADetailsRow), CheckNames = true)]
     public class DemandayTeleMarketingEnquiryQADetailsColumns
     {
+        public String CampaignId { get; set; }
+
         [EditLink, Width(300)]
         public String QuestionText { get; set; }
 

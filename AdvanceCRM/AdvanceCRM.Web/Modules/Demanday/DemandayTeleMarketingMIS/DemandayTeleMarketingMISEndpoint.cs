@@ -244,6 +244,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     CompanyLink = demandaytelemarketingmis.CompanyLink,
                     RevenueLink = demandaytelemarketingmis.RevenueLink,
                     AdressLink = demandaytelemarketingmis.AdressLink,
+                    EmailFormat = demandaytelemarketingmis.EmailFormat,
                     Tenurity = demandaytelemarketingmis.Tenurity,
                     Code = demandaytelemarketingmis.Code,
                     Link = demandaytelemarketingmis.Link,

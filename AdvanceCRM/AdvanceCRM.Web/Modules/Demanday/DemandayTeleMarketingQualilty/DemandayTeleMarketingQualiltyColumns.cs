@@ -45,6 +45,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String CompanyLink { get; set; }
         public String RevenueLink { get; set; }
         public String AddressLink { get; set; }
+        public String EmailFormat { get; set; }
         public String PrimaryReason { get; set; }
         public String Category { get; set; }
         public String Comments { get; set; }

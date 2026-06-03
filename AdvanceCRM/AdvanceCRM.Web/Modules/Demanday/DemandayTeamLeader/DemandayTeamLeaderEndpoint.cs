@@ -96,6 +96,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     ZoomInfoEmployeeSize = demandayteamleader.ZoomInfoEmployeeSize,
                     ProfileLink = demandayteamleader.ProfileLink,
                     CompanyLink = demandayteamleader.CompanyLink,
+                    EmailFormat = demandayteamleader.EmailFormat,
                     RevenueLink = demandayteamleader.RevenueLink,
                     AdressLink = demandayteamleader.AddressLink,
                     Tenurity = demandayteamleader.Tenurity,
