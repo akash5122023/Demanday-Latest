@@ -1,7 +1,9 @@
+using AdvanceCRM.Administration;
 using OfficeOpenXml;
 using Serenity.Data;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Text;
 
@@ -84,6 +86,34 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             var s = v.ToString();
             if (string.IsNullOrWhiteSpace(s)) return null;
             return int.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out int r) ? r : (int?)null;
+        }
+
+        // Resolves an owner column to a Users.UserId. The cell may contain either a
+        // numeric user id (legacy/export round-trip) OR an owner name typed by the user.
+        // When it's text, we look the user up by Username or Display Name (case-insensitive
+        // per the DB collation) so the owner actually resolves and shows in the grid —
+        // GetInt alone returns null for a name, leaving the owner blank after import.
+        public static int? GetUserId(ExcelWorksheet ws, int row, Dictionary<string, int> map, IDbConnection connection, params string[] names)
+        {
+            if (!TryGetCol(map, names, out int col)) return null;
+            var v = ws.Cells[row, col].Value;
+            if (v == null) return null;
+            var s = v.ToString()?.Trim();
+            if (string.IsNullOrWhiteSpace(s)) return null;
+
+            // A plain integer is taken as the UserId directly.
+            if (int.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out int id))
+                return id;
+
+            if (connection == null)
+                return null;
+
+            // Otherwise resolve the typed name against Username or Display Name.
+            var u = UserRow.Fields;
+            var user = connection.TryFirst<UserRow>(q => q
+                .Select(u.UserId)
+                .Where((u.Username == s) | (u.DisplayName == s)));
+            return user?.UserId;
         }
 
         public static decimal? GetDecimal(ExcelWorksheet ws, int row, Dictionary<string, int> map, params string[] names)

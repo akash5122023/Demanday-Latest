@@ -112,7 +112,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Alternate01 = ExcelImportHelper.GetText(ws, row, map, "Alternate01", "Alternate 01", "Alternate1"),
                                 Alternate02 = ExcelImportHelper.GetText(ws, row, map, "Alternate02", "Alternate 02", "Alternate2"),
                                 ProfileLink = ExcelImportHelper.GetText(ws, row, map, "ProfileLink", "Profile Link"),
-                                OwnerId = ExcelImportHelper.GetInt(ws, row, map, "OwnerId", "Created By", "CreatedBy"),
+                                OwnerId = ExcelImportHelper.GetUserId(ws, row, map, uow.Connection, "OwnerId", "Owner", "Owner Name", "OwnerName", "Created By", "CreatedBy"),
                             };
                             if (demandayverification.Id.HasValue && demandayverification.Id.Value > 0)
                             {
