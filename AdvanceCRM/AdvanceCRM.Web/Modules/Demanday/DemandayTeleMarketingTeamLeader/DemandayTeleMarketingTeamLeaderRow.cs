@@ -243,6 +243,13 @@ public String EmailFormat
             set => fields.Md5[this] = value;
         }
 
+        [DisplayName("Slot"), Column("SLOT"), Size(100)]
+        public String Slot
+        {
+            get => fields.Slot[this];
+            set => fields.Slot[this] = value;
+        }
+
         [DisplayName("Attachments"), Size(500)]
         public String Attachments
         {
@@ -751,6 +758,7 @@ public String EmailFormat
             public StringField Code;
             public StringField Link;
             public StringField Md5;
+            public StringField Slot;
             public Int32Field OwnerId;
 
             public StringField Asset;

@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Administration;
+using AdvanceCRM.Administration;
 using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
@@ -625,6 +625,27 @@ namespace AdvanceCRM.Demanday
             set => fields.OwnerPlan[this] = value;
         }
 
+        [DisplayName("Domain"), Size(100)]
+        public String Domain
+        {
+            get => fields.Domain[this];
+            set => fields.Domain[this] = value;
+        }
+
+        [DisplayName("Job Level"), Column("Job_Level"), Size(100)]
+        public String JobLevel
+        {
+            get => fields.JobLevel[this];
+            set => fields.JobLevel[this] = value;
+        }
+
+        [DisplayName("Job Function Role"), Column("Job_Function_Role"), Size(200)]
+        public String JobFunctionRole
+        {
+            get => fields.JobFunctionRole[this];
+            set => fields.JobFunctionRole[this] = value;
+        }
+
         public DemandayMisRow()
             : base()
         {
@@ -725,6 +746,10 @@ namespace AdvanceCRM.Demanday
             public Int32Field OwnerTenantId;
             public StringField OwnerUrl;
             public StringField OwnerPlan;
+
+            public StringField Domain;
+            public StringField JobLevel;
+            public StringField JobFunctionRole;
         }
     }
 }

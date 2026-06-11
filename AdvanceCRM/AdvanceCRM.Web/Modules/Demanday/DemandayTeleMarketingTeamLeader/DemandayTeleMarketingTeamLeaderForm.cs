@@ -15,6 +15,8 @@ namespace AdvanceCRM.Demanday.Forms
         [Category("Campaign Information")]
         [HalfWidth]
         public string CampaignId { get; set; }
+        [HalfWidth]
+        public string Slot { get; set; }
         [Category("Contact Information")]
         [HalfWidth]
         public string FirstName { get; set; }

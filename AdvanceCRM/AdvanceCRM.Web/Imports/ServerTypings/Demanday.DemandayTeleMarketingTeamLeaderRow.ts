@@ -26,6 +26,7 @@
         Code?: string;
         Link?: string;
         Md5?: string;
+        Slot?: string;
         OwnerId?: number;
         Asset?: string;
         CallStatus?: string;
@@ -143,6 +144,7 @@
             Code = "Code",
             Link = "Link",
             Md5 = "Md5",
+            Slot = "Slot",
             OwnerId = "OwnerId",
             Asset = "Asset",
             CallStatus = "CallStatus",

@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Web.Modules.Common.AppServices;
+using AdvanceCRM.Web.Modules.Common.AppServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
@@ -109,6 +109,9 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Email = ExcelImportHelper.GetText(ws, row, map, "Email"),
                                 WorkPhone = ExcelImportHelper.GetText(ws, row, map, "WorkPhone", "Work Phone"),
                                 AlternativeNumber = ExcelImportHelper.GetText(ws, row, map, "AlternativeNumber", "Alternative Number"),
+                                Domain = ExcelImportHelper.GetText(ws, row, map, "Domain"),
+                                JobLevel = ExcelImportHelper.GetText(ws, row, map, "JobLevel", "Job Level", "Job_Level"),
+                                JobFunctionRole = ExcelImportHelper.GetText(ws, row, map, "JobFunctionRole", "Job Function Role", "Job_Function_Role", "JobFunction", "Job Function"),
                                 Street = ExcelImportHelper.GetText(ws, row, map, "Street"),
                                 City = ExcelImportHelper.GetText(ws, row, map, "City"),
                                 State = ExcelImportHelper.GetText(ws, row, map, "State"),
@@ -225,6 +228,9 @@ namespace AdvanceCRM.Demanday.Endpoints
                     Email = demandaytelemarketingmis.Email,
                     WorkPhone = demandaytelemarketingmis.WorkPhone,
                     AlternativeNumber = demandaytelemarketingmis.AlternativeNumber,
+                    Domain = demandaytelemarketingmis.Domain,
+                    JobLevel = demandaytelemarketingmis.JobLevel,
+                    JobFunctionRole = demandaytelemarketingmis.JobFunctionRole,
                     Street = demandaytelemarketingmis.Street,
                     City = demandaytelemarketingmis.City,
                     State = demandaytelemarketingmis.State,

@@ -87,6 +87,9 @@
         OwnerTenantId?: number;
         OwnerUrl?: string;
         OwnerPlan?: string;
+        Domain?: string;
+        JobLevel?: string;
+        JobFunctionRole?: string;
     }
 
     export namespace DemandayMisRow {
@@ -190,7 +193,10 @@
             OwnerTeamsId = "OwnerTeamsId",
             OwnerTenantId = "OwnerTenantId",
             OwnerUrl = "OwnerUrl",
-            OwnerPlan = "OwnerPlan"
+            OwnerPlan = "OwnerPlan",
+            Domain = "Domain",
+            JobLevel = "JobLevel",
+            JobFunctionRole = "JobFunctionRole"
         }
     }
 }

@@ -8,13 +8,14 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
     {
         public static byte[] ExportToExcel(List<DemandayTeleMarketingMISRow> demandaytelemarketingmisRows)
         {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using var package = new ExcelPackage();
             var ws = package.Workbook.Worksheets.Add("MIS");
             // Headers
             string[] headers = new[]
             {
-            "CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE","Date","Additional Notes", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","ASSET","CALL STATUS","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
-        };
+                "CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE","Date","Additional Notes", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "DOMAIN", "JOB LEVEL", "JOB FUNCTION ROLE", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","ASSET","CALL STATUS","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
+            };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
             int row = 2;
@@ -32,7 +33,10 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.AdditionalNotes;
                 ws.Cells[row, col++].Value = en.Email;
                 ws.Cells[row, col++].Value = en.WorkPhone;
-                ws.Cells[row, col++].Value = en.AlternativeNumber;                                
+                ws.Cells[row, col++].Value = en.AlternativeNumber;
+                ws.Cells[row, col++].Value = en.Domain;
+                ws.Cells[row, col++].Value = en.JobLevel;
+                ws.Cells[row, col++].Value = en.JobFunctionRole;
                 ws.Cells[row, col++].Value = en.Street;
                 ws.Cells[row, col++].Value = en.City;
                 ws.Cells[row, col++].Value = en.State;

@@ -8,6 +8,9 @@
         Email: Serenity.StringEditor;
         WorkPhone: Serenity.StringEditor;
         AlternativeNumber: Serenity.StringEditor;
+        Domain: Serenity.StringEditor;
+        JobLevel: Serenity.StringEditor;
+        JobFunctionRole: Serenity.StringEditor;
         CompanyName: Serenity.StringEditor;
         Industry: Serenity.StringEditor;
         Revenue: Serenity.StringEditor;
@@ -78,6 +81,9 @@
                     'Email', w1,
                     'WorkPhone', w1,
                     'AlternativeNumber', w1,
+                    'Domain', w1,
+                    'JobLevel', w1,
+                    'JobFunctionRole', w1,
                     'CompanyName', w1,
                     'Industry', w1,
                     'Revenue', w1,

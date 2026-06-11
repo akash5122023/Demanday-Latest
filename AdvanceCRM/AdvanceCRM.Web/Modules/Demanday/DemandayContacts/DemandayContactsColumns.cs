@@ -76,6 +76,9 @@ namespace AdvanceCRM.Demanday.Columns
         public string Email { get; set; }
         public string WorkPhone { get; set; }
         public string AlternativeNumber { get; set; }
+        public string Domain { get; set; }
+        public string JobLevel { get; set; }
+        public string JobFunctionRole { get; set; }
         public string Street { get; set; }
         public string City { get; set; }
         public string State { get; set; }

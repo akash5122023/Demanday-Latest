@@ -26,6 +26,7 @@
         Code?: string;
         Link?: string;
         Md5?: string;
+        Slot?: string;
         OwnerId?: number;
         DemandayEnquiryAgentsName?: string;
         DemandayEnquiryTlName?: string;
@@ -141,6 +142,7 @@
             Code = "Code",
             Link = "Link",
             Md5 = "Md5",
+            Slot = "Slot",
             OwnerId = "OwnerId",
             DemandayEnquiryAgentsName = "DemandayEnquiryAgentsName",
             DemandayEnquiryTlName = "DemandayEnquiryTlName",

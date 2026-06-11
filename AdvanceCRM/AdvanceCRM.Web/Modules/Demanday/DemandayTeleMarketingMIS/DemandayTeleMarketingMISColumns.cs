@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -28,6 +28,9 @@ namespace AdvanceCRM.Demanday.Columns
         public String Email { get; set; }
         public String WorkPhone { get; set; }
         public String AlternativeNumber { get; set; }
+        public string Domain { get; set; }
+        public string JobLevel { get; set; }
+        public string JobFunctionRole { get; set; }
         public String Street { get; set; }
         public String City { get; set; }
         public String State { get; set; }

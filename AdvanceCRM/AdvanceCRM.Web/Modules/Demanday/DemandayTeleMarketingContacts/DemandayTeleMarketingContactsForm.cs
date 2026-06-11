@@ -35,6 +35,12 @@ namespace AdvanceCRM.Demanday.Forms
         public string WorkPhone { get; set; }
         [HalfWidth]
         public string AlternativeNumber { get; set; }
+        [HalfWidth]
+        public string Domain { get; set; }
+        [HalfWidth]
+        public string JobLevel { get; set; }
+        [HalfWidth]
+        public string JobFunctionRole { get; set; }
 
         [Category("Company Information")]
         [HalfWidth]

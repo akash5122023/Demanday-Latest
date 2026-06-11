@@ -1,6 +1,7 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayTeamLeaderForm {
         CampaignId: Serenity.StringEditor;
+        Slot: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
         Title: Serenity.StringEditor;
@@ -50,6 +51,7 @@
 
                 Q.initFormType(DemandayTeamLeaderForm, [
                     'CampaignId', w0,
+                    'Slot', w0,
                     'FirstName', w0,
                     'LastName', w0,
                     'Title', w0,

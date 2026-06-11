@@ -81,6 +81,36 @@ namespace AdvanceCRM.Demanday {
             });
 
             buttons.push({
+                title: 'Export to Excel',
+                cssClass: 'export-excel-button',
+                icon: 'fa-file-excel',
+                onClick: () => {
+                    const url = '/Services/Demanday/DemandayTeamLeader/ListExcel';
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.style.display = 'none';
+                    var take = document.createElement('input');
+                    take.type = 'hidden';
+                    take.name = 'Take';
+                    take.value = '0';
+                    form.appendChild(take);
+                    // Export only selected records; if none selected, export all.
+                    const selectedKeys = this.rowSelection.getSelectedKeys().map(x => Number(x));
+                    if (selectedKeys && selectedKeys.length) {
+                        var idsInput = document.createElement('input');
+                        idsInput.type = 'hidden';
+                        idsInput.name = 'Ids';
+                        idsInput.value = selectedKeys.join(',');
+                        form.appendChild(idsInput);
+                    }
+                    document.body.appendChild(form);
+                    form.submit();
+                    document.body.removeChild(form);
+                }
+            });
+
+            buttons.push({
                 title: 'Import from Excel',
                 cssClass: 'import-excel-button',
                 icon: 'fa-file-import',

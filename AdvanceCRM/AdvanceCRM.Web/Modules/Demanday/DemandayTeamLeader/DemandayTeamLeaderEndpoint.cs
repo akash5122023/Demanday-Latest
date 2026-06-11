@@ -78,6 +78,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     throw new ValidationError("Enquiry record not found!");
                 var demandayquality = new DemandayQualityRow
                 {
+                    Slot = demandayteamleader.Slot,
                     CompanyName = demandayteamleader.CompanyName,
                     FirstName = demandayteamleader.FirstName,
                     LastName = demandayteamleader.LastName,
@@ -122,14 +123,56 @@ namespace AdvanceCRM.Demanday.Endpoints
         {
             public List<int> Ids { get; set; }
         }
-        public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
-            [FromServices] IDemandayTeamLeaderListHandler handler,
-            [FromServices] IExcelExporter exporter)
+        [HttpPost, IgnoreAntiforgeryToken, AuthorizeList(typeof(DemandayTeamLeaderRow))]
+        public FileContentResult ListExcel(
+            IDbConnection connection,
+            [FromForm] ListRequest request,
+            [FromForm] string Ids,
+            [FromServices] IDemandayTeamLeaderListHandler handler)
         {
-            var data = List(connection, request, handler).Entities;
-            var bytes = exporter.Export(data, typeof(Columns.DemandayTeamLeaderColumns), request.ExportColumns);
-            return ExcelContentResult.Create(bytes, "DemandayTeamLeaderList_" +
-                DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
+            request ??= new ListRequest { Take = 0 };
+            var data = List(connection, request, handler).Entities.ToList();
+
+            // When records are selected in the grid, export only those; otherwise export all.
+            if (!string.IsNullOrWhiteSpace(Ids))
+            {
+                var idList = Ids.Split(',').Select(x =>
+                {
+                    int v; return int.TryParse(x.Trim(), out v) ? (int?)v : null;
+                }).Where(x => x.HasValue).Select(x => x!.Value).ToHashSet();
+                if (idList.Count > 0)
+                    data = data.Where(x => x.Id.HasValue && idList.Contains(x.Id.Value)).ToList();
+            }
+
+            // Ensure the "Created By" (OwnerUsername) column is populated for export.
+            var ownerIds = data.Where(x => x.OwnerId.HasValue &&
+                                           string.IsNullOrEmpty(x.OwnerUsername))
+                                .Select(x => x.OwnerId.Value)
+                                .Distinct()
+                                .ToList();
+            if (ownerIds.Count > 0)
+            {
+                var uFlds = AdvanceCRM.Administration.UserRow.Fields;
+                var userMap = connection.List<AdvanceCRM.Administration.UserRow>(q => q
+                        .Select(uFlds.UserId)
+                        .Select(uFlds.Username)
+                        .Where(uFlds.UserId.In(ownerIds)))
+                    .Where(u => u.UserId.HasValue)
+                    .GroupBy(u => u.UserId.Value)
+                    .ToDictionary(g => g.Key, g => g.First().Username);
+
+                foreach (var row in data)
+                {
+                    if (string.IsNullOrEmpty(row.OwnerUsername) && row.OwnerId.HasValue &&
+                        userMap.TryGetValue(row.OwnerId.Value, out var uname))
+                        row.OwnerUsername = uname;
+                }
+            }
+
+            var bytes = DemandayTeamLeaderExcelExporter.ExportToExcel(data);
+            var fileName = "DemandayTeamLeaderList_" +
+                DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx";
+            return ExcelContentResult.Create(bytes, fileName);
         }
 
         // Download a blank Excel template containing the importable Demanday Team Leader columns.
@@ -137,7 +180,7 @@ namespace AdvanceCRM.Demanday.Endpoints
         {
             var headers = new[]
             {
-                "Campaign Id", "First Name", "Last Name", "Title", "Email",
+                "Slot", "Campaign Id", "First Name", "Last Name", "Title", "Email",
                 "Work Phone", "Alternative Number", "Company Name", "Industry", "Revenue",
                 "Company Employee Size", "ZoomInfo Industry", "Sub Industry", "ZoomInfo Employee Size",
                 "Street", "City", "State", "Zip Code", "Country",
@@ -202,6 +245,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var teamLeader = new MyRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
+                                Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
                                 LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),
