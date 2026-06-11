@@ -8,6 +8,7 @@
         export declare function Retrieve(request: Serenity.RetrieveRequest, onSuccess?: (response: Serenity.RetrieveResponse<DemandayTeleMarketingTeamLeaderRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function List(request: Serenity.ListRequest, onSuccess?: (response: Serenity.ListResponse<DemandayTeleMarketingTeamLeaderRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function MoveToQuality(request: MoveToQualityRequest, onSuccess?: (response: StandardResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
+        export declare function ImportExcel(request: Serenity.ServiceRequest, onSuccess?: (response: Microsoft.AspNetCore.Mvc.IActionResult) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
 
         export declare const enum Methods {
             Create = "Demanday/DemandayTeleMarketingTeamLeader/Create",
@@ -15,7 +16,8 @@
             Delete = "Demanday/DemandayTeleMarketingTeamLeader/Delete",
             Retrieve = "Demanday/DemandayTeleMarketingTeamLeader/Retrieve",
             List = "Demanday/DemandayTeleMarketingTeamLeader/List",
-            MoveToQuality = "Demanday/DemandayTeleMarketingTeamLeader/MoveToQuality"
+            MoveToQuality = "Demanday/DemandayTeleMarketingTeamLeader/MoveToQuality",
+            ImportExcel = "Demanday/DemandayTeleMarketingTeamLeader/ImportExcel"
         }
 
         [
@@ -24,7 +26,8 @@
             'Delete', 
             'Retrieve', 
             'List', 
-            'MoveToQuality'
+            'MoveToQuality', 
+            'ImportExcel'
         ].forEach(x => {
             (<any>DemandayTeleMarketingTeamLeaderService)[x] = function (r, s, o) {
                 return Q.serviceRequest(baseUrl + '/' + x, r, s, o);

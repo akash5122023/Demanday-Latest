@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Web.Modules.Common.AppServices;
+using AdvanceCRM.Web.Modules.Common.AppServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
-using static MVC.Views.Demanday;
 using MyRow = AdvanceCRM.Demanday.DemandayTeleMarketingContactsRow;
 
 namespace AdvanceCRM.Demanday.Endpoints
@@ -58,10 +57,10 @@ namespace AdvanceCRM.Demanday.Endpoints
 
         [HttpPost, IgnoreAntiforgeryToken, AuthorizeList(typeof(DemandayContactsRow))]
         public FileContentResult ListExcel(
-         IDbConnection connection,
-         [FromForm] ListRequest request, // Bind from form POSTs
-         [FromForm] string Ids,
-         [FromServices] IDemandayTeleMarketingContactsListHandler handler)
+             IDbConnection connection,
+             [FromForm] ListRequest request, // Bind from form POSTs
+             [FromForm] string Ids,
+             [FromServices] IDemandayTeleMarketingContactsListHandler handler)
         {
             request ??= new ListRequest { Take = 0 }; // Defensive: always have a request
             var data = List(connection, request, handler).Entities.ToList();
@@ -78,6 +77,7 @@ namespace AdvanceCRM.Demanday.Endpoints
             var fileName = "DemandayContactsList_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".xlsx";
             return Serenity.Web.ExcelContentResult.Create(bytes, fileName);
         }
+
         [HttpPost, IgnoreAntiforgeryToken]
         [RequestSizeLimit(52428800)]
         [RequestFormLimits(MultipartBodyLengthLimit = 52428800)]
@@ -106,10 +106,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
                                 FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
                                 LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),
-                                Domain = ExcelImportHelper.GetText(ws, row, map, "Domain"),
                                 Title = ExcelImportHelper.GetText(ws, row, map, "Title"),
-                                JobLevel = ExcelImportHelper.GetText(ws, row, map, "JobLevel", "Job Level", "Job_Level"),
-                                JobFunctionRole = ExcelImportHelper.GetText(ws, row, map, "JobFunctionRole", "Job Function Role"),
                                 Email = ExcelImportHelper.GetText(ws, row, map, "Email"),
                                 WorkPhone = ExcelImportHelper.GetText(ws, row, map, "WorkPhone", "Work Phone"),
                                 AlternativeNumber = ExcelImportHelper.GetText(ws, row, map, "AlternativeNumber", "Alternative Number"),
@@ -118,7 +115,6 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 State = ExcelImportHelper.GetText(ws, row, map, "State"),
                                 ZipCode = ExcelImportHelper.GetText(ws, row, map, "ZipCode", "Zip Code"),
                                 Country = ExcelImportHelper.GetText(ws, row, map, "Country"),
-                                Continents = ExcelImportHelper.GetText(ws, row, map, "Continents"),
                                 Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
                                 SubIndustry = ExcelImportHelper.GetText(ws, row, map, "SubIndustry", "Sub Industry"),
                                 ZoomInfoIndustry = ExcelImportHelper.GetText(ws, row, map, "ZoomInfoIndustry", "ZoomInfo Industry", "ZOOMINFO INDUSTRY"),
@@ -132,7 +128,6 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 RevenueLink = ExcelImportHelper.GetText(ws, row, map, "RevenueLink", "Revenue Link"),
                                 EmailFormat = ExcelImportHelper.GetText(ws, row, map, "EmailFormat", "Email Format"),
                                 AdressLink = ExcelImportHelper.GetText(ws, row, map, "AdressLink", "Adress Link", "AddressLink", "Address Link"),
-                                ProspectUrl = ExcelImportHelper.GetText(ws, row, map, "ProspectUrl", "Prospect Url", "Prospect URL", "ProspectURL"),
                                 PrimaryReason = ExcelImportHelper.GetText(ws, row, map, "PrimaryReason", "Primary Reason"),
                                 Category = ExcelImportHelper.GetText(ws, row, map, "Category"),
                                 Comments = ExcelImportHelper.GetText(ws, row, map, "Comments"),
@@ -181,9 +176,9 @@ namespace AdvanceCRM.Demanday.Endpoints
                 return Content("Import failed: " + ex.Message + "\n" + ex.StackTrace, "text/plain");
             }
         }
+
         private static int? GetInt(object val) { if (val == null) return null; int i; return int.TryParse(val.ToString(), out i) ? i : null; }
         private static decimal? GetDecimal(object val) { if (val == null) return null; decimal d; return decimal.TryParse(val.ToString(), out d) ? d : null; }
         private static DateTime? GetDate(object val) { if (val == null) return null; DateTime dt; return DateTime.TryParse(val.ToString(), out dt) ? dt : null; }
-
     }
 }

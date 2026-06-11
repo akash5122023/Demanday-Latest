@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -70,11 +70,8 @@ namespace AdvanceCRM.Demanday.Columns
         public string CompanyName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Domain { get; set; }
         public string Title { get; set; }
         public string CampaignId { get; set; }
-        public string JobLevel { get; set; }
-        public string JobFunctionRole { get; set; }
         [QuickFilter]
         public string Email { get; set; }
         public string WorkPhone { get; set; }
@@ -86,7 +83,6 @@ namespace AdvanceCRM.Demanday.Columns
         public string ZipCode { get; set; }
         [QuickFilter]
         public string Country { get; set; }
-        public string Continents { get; set; }
         public string Industry { get; set; }
         public string SubIndustry { get; set; }
         public string ZoomInfoIndustry { get; set; }
@@ -99,7 +95,6 @@ namespace AdvanceCRM.Demanday.Columns
         public string CompanyEmployeeSize { get; set; }
         public string EmailFormat { get; set; }
         public string AdressLink { get; set; }
-        public string ProspectUrl { get; set; }
         public string PrimaryReason { get; set; }
         public string Category { get; set; }
         public string Comments { get; set; }

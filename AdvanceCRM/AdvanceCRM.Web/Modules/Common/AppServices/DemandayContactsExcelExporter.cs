@@ -8,12 +8,13 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
     {
         public static byte[] ExportToExcel(List<DemandayContactsRow> demandaycontactsRows)
         {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using var package = new ExcelPackage();
             var ws = package.Workbook.Worksheets.Add("FLS");
             // Headers
             string[] headers = new[]
             {
-            "CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "DOMAIN","DATE","TITLE","JOB_LEVEL","Job_Function_Role", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","CONTINENTS", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE","COMPANY EMPLOYEE SIZE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","ProspectURL","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
+            "CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE","DATE", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY", "COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
         };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
@@ -27,11 +28,8 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.CompanyName;
                 ws.Cells[row, col++].Value = en.FirstName;
                 ws.Cells[row, col++].Value = en.LastName;
-                ws.Cells[row, col++].Value = en.Domain;
-                ws.Cells[row, col++].Value = en.Date?.ToString("MM-dd-yyyy");
                 ws.Cells[row, col++].Value = en.Title;
-                ws.Cells[row, col++].Value = en.JobLevel;
-                ws.Cells[row, col++].Value = en.JobFunctionRole;
+                ws.Cells[row, col++].Value = en.Date?.ToString("MM-dd-yyyy");
                 ws.Cells[row, col++].Value = en.Email;
                 ws.Cells[row, col++].Value = en.WorkPhone;
                 ws.Cells[row, col++].Value = en.AlternativeNumber;
@@ -40,19 +38,17 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.State;
                 ws.Cells[row, col++].Value = en.ZipCode;
                 ws.Cells[row, col++].Value = en.Country;
-                ws.Cells[row, col++].Value = en.Continents;
+                ws.Cells[row, col++].Value = en.CompanyEmployeeSize;
                 ws.Cells[row, col++].Value = en.Industry;
                 ws.Cells[row, col++].Value = en.SubIndustry;
                 ws.Cells[row, col++].Value = en.ZoomInfoIndustry;
                 ws.Cells[row, col++].Value = en.ZoomInfoEmployeeSize;
                 ws.Cells[row, col++].Value = en.Revenue;
-                ws.Cells[row, col++].Value = en.CompanyEmployeeSize;
                 ws.Cells[row, col++].Value = en.ProfileLink;
                 ws.Cells[row, col++].Value = en.CompanyLink;
                 ws.Cells[row, col++].Value = en.RevenueLink;
                 ws.Cells[row, col++].Value = en.EmailFormat;
                 ws.Cells[row, col++].Value = en.AdressLink;
-                ws.Cells[row, col++].Value = en.ProspectUrl;
                 ws.Cells[row, col++].Value = en.PrimaryReason;
                 ws.Cells[row, col++].Value = en.Category;
                 ws.Cells[row, col++].Value = en.Comments;

@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -117,11 +117,6 @@ namespace AdvanceCRM.Demanday.Columns
         public String VerificationMode { get; set; }
         public String Asset1 { get; set; }
         public String Asset2 { get; set; }
-        public String Domain { get; set; }
-        public String JobLevel { get; set; }
-        public String JobFunctionRole { get; set; }
-        public String Continents { get; set; }
-        public String ProspectUrl { get; set; }
         [QuickFilter]
         public String OwnerUsername { get; set; }
     }

@@ -25,6 +25,7 @@
         CompanyLink: Serenity.StringEditor;
         RevenueLink: Serenity.StringEditor;
         AddressLink: Serenity.StringEditor;
+        Link: Serenity.StringEditor;
         EmailFormat: Serenity.StringEditor;
         Tenurity: Serenity.StringEditor;
         Code: Serenity.StringEditor;
@@ -79,6 +80,7 @@
                     'CompanyLink', w0,
                     'RevenueLink', w0,
                     'AddressLink', w0,
+                    'Link', w0,
                     'EmailFormat', w0,
                     'Tenurity', w0,
                     'Code', w0,

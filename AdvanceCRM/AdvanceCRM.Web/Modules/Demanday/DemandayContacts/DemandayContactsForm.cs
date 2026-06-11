@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -78,13 +78,7 @@ namespace AdvanceCRM.Demanday.Forms
         [HalfWidth]
         public string LastName { get; set; }
         [HalfWidth]
-        public string Domain { get; set; }
-        [HalfWidth]
         public string Title { get; set; }
-        [HalfWidth]
-        public string JobLevel { get; set; }
-        [HalfWidth]
-        public string JobFunctionRole { get; set; }
         [HalfWidth]
         public string Email { get; set; }
         [HalfWidth]
@@ -121,8 +115,6 @@ namespace AdvanceCRM.Demanday.Forms
         public string ZipCode { get; set; }
         [HalfWidth]
         public string Country { get; set; }
-        [HalfWidth]
-        public string Continents { get; set; }
 
         [Category("Links & References")]
         [HalfWidth]
@@ -133,8 +125,6 @@ namespace AdvanceCRM.Demanday.Forms
         public string RevenueLink { get; set; }
         [HalfWidth]
         public string AdressLink { get; set; }
-        [HalfWidth]
-        public string ProspectUrl { get; set; }
         [HalfWidth]
         public string EmailFormat { get; set; }
         [HalfWidth]

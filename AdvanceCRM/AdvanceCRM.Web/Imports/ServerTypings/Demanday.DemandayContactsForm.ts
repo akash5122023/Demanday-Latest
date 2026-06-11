@@ -4,10 +4,7 @@
         Slot: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
-        Domain: Serenity.StringEditor;
         Title: Serenity.StringEditor;
-        JobLevel: Serenity.StringEditor;
-        JobFunctionRole: Serenity.StringEditor;
         Email: Serenity.StringEditor;
         WorkPhone: Serenity.StringEditor;
         AlternativeNumber: Serenity.StringEditor;
@@ -23,12 +20,10 @@
         State: Serenity.StringEditor;
         ZipCode: Serenity.StringEditor;
         Country: Serenity.StringEditor;
-        Continents: Serenity.StringEditor;
         ProfileLink: Serenity.StringEditor;
         CompanyLink: Serenity.StringEditor;
         RevenueLink: Serenity.StringEditor;
         AdressLink: Serenity.StringEditor;
-        ProspectUrl: Serenity.StringEditor;
         EmailFormat: Serenity.StringEditor;
         Link: Serenity.StringEditor;
         QaStatus: Serenity.StringEditor;
@@ -74,10 +69,7 @@
                     'Slot', w1,
                     'FirstName', w1,
                     'LastName', w1,
-                    'Domain', w1,
                     'Title', w1,
-                    'JobLevel', w1,
-                    'JobFunctionRole', w1,
                     'Email', w1,
                     'WorkPhone', w1,
                     'AlternativeNumber', w1,
@@ -93,12 +85,10 @@
                     'State', w1,
                     'ZipCode', w1,
                     'Country', w1,
-                    'Continents', w1,
                     'ProfileLink', w1,
                     'CompanyLink', w1,
                     'RevenueLink', w1,
                     'AdressLink', w1,
-                    'ProspectUrl', w1,
                     'EmailFormat', w1,
                     'Link', w1,
                     'QaStatus', w1,

@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -73,7 +73,9 @@ namespace AdvanceCRM.Demanday.Forms
         [HalfWidth]
         public string AddressLink { get; set; }
         [HalfWidth]
-public string EmailFormat { get; set; }
+        public string Link { get; set; }
+        [HalfWidth]
+        public string EmailFormat { get; set; }
 
 
         [Category("Additional Details")]
