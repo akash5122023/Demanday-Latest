@@ -3,12 +3,13 @@
     ViewData["Title"] = Localizer.Get("Db.Toolkit.OpenCampaign.EntityPlural");
 }
 
+<partial name="~/Modules/Common/_GridFilterPanel.cshtml" />
+
 <div id="GridDiv"></div>
 
 <script type="text/javascript">
     jQuery(function () {
-        new AdvanceCRM.Toolkit.OpenCampaignGrid($('#GridDiv'), {}).init();
-
-        Q.initFullHeightGridPage($('#GridDiv'));
+        var grid = new AdvanceCRM.Toolkit.OpenCampaignGrid($('#GridDiv'), {}).init();
+        window.attachGridFilterPanel(grid);
     });
 </script>

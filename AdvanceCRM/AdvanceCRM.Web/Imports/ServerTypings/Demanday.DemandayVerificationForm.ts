@@ -1,7 +1,7 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayVerificationForm {
         AgentName: Serenity.StringEditor;
-        CdqaComments: Serenity.TextAreaEditor;
+        CdqaComments: _Ext.HardCodedLookupEditor;
         CompanyName: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
@@ -27,7 +27,7 @@
 
                 var s = Serenity;
                 var w0 = s.StringEditor;
-                var w1 = s.TextAreaEditor;
+                var w1 = _Ext.HardCodedLookupEditor;
                 var w2 = s.EmailEditor;
                 var w3 = s.DateTimeEditor;
                 var w4 = s.LookupEditor;

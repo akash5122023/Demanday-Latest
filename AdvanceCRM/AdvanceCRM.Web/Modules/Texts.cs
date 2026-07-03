@@ -210,6 +210,16 @@ namespace AdvanceCRM
                 public static LocalText GeneralSettings = "General Settings";
                 public static LocalText Language = "Language";
                 public static LocalText Theme = "Theme";
+                public static LocalText ThemeModernize = "Modernize";
+                public static LocalText ThemeModernizeLight = "Modernize Light";
+                public static LocalText ThemeColor = "Theme Color";
+                public static LocalText ThemeColorBlue = "Blue";
+                public static LocalText ThemeColorAqua = "Aqua";
+                public static LocalText ThemeColorPurple = "Purple";
+                public static LocalText ThemeColorTeal = "Teal";
+                public static LocalText ThemeColorCyan = "Cyan";
+                public static LocalText ThemeColorOrange = "Orange";
+                public static LocalText ThemeColorWhite = "White";
                 public static LocalText ThemeBlack = "Black";
                 public static LocalText ThemeBlackLight = "Black Light";
                 public static LocalText ThemeBlue = "Blue";

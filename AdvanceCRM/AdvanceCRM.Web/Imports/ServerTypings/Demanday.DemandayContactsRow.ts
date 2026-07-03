@@ -21,6 +21,7 @@
         Country?: string;
         Continents?: string;
         CompanyEmployeeSize?: string;
+        CompanyEmployeeSizeNum?: number;
         Industry?: string;
         Revenue?: string;
         ProfileLink?: string;
@@ -130,6 +131,7 @@
             Country = "Country",
             Continents = "Continents",
             CompanyEmployeeSize = "CompanyEmployeeSize",
+            CompanyEmployeeSizeNum = "CompanyEmployeeSizeNum",
             Industry = "Industry",
             Revenue = "Revenue",
             ProfileLink = "ProfileLink",

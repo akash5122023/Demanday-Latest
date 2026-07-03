@@ -38,26 +38,28 @@ namespace AdvanceCRM.Toolkit {
                 title: 'Campaign'
             });
 
-            return filters;
+            return this.orderQuickFilters(filters);
         }
 
         protected getButtons() {
             var buttons = super.getButtons();
 
-            buttons.push({
-                title: 'Import',
-                cssClass: 'export-xlsx-button',
-                hint: "Import Tal Campaign from Excel",
-                onClick: () => {
-                    var dialog = new TalCampaignExcelImportDialog();
-                    dialog.element.on('dialogclose', () => {
-                        this.refresh();
-                        dialog = null;
-                    });
-                    dialog.dialogOpen();
-                },
-                separator: true
-            });
+            if (Q.Authorization.hasPermission("TalCampaign:Import")) {
+                buttons.push({
+                    title: 'Import',
+                    cssClass: 'export-xlsx-button',
+                    hint: "Import Tal Campaign from Excel",
+                    onClick: () => {
+                        var dialog = new TalCampaignExcelImportDialog();
+                        dialog.element.on('dialogclose', () => {
+                            this.refresh();
+                            dialog = null;
+                        });
+                        dialog.dialogOpen();
+                    },
+                    separator: true
+                });
+            }
 
             return buttons;
         }

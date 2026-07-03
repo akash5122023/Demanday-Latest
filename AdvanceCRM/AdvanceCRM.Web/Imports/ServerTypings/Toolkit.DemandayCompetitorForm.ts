@@ -4,6 +4,7 @@
         CampaignId: Serenity.LookupEditor;
         CompanyName: Serenity.StringEditor;
         Domain: Serenity.StringEditor;
+        Email: Serenity.StringEditor;
         Cpc: Serenity.StringEditor;
         OwnerId: Administration.UserEditor;
     }
@@ -28,6 +29,7 @@
                     'CampaignId', w0,
                     'CompanyName', w1,
                     'Domain', w1,
+                    'Email', w1,
                     'Cpc', w1,
                     'OwnerId', w2
                 ]);

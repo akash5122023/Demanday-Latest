@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface TalCampaignExcelImportForm {
+        CampaignId: Serenity.LookupEditor;
         FileName: Serenity.ImageUploadEditor;
     }
 
@@ -14,10 +15,12 @@
                 TalCampaignExcelImportForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.ImageUploadEditor;
+                var w0 = s.LookupEditor;
+                var w1 = s.ImageUploadEditor;
 
                 Q.initFormType(TalCampaignExcelImportForm, [
-                    'FileName', w0
+                    'CampaignId', w0,
+                    'FileName', w1
                 ]);
             }
         }

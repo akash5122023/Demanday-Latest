@@ -1,0 +1,286 @@
+@*
+    Shared vertical filter panel for any Serenity grid page.
+    Include once per grid page and call window.attachGridFilterPanel(grid) after the grid is init'd.
+    It moves Serenity's REAL quick-filter bar (with proper lookup values) into a collapsible
+    left sidebar. Hidden by default; toggled by the toolbar "Filters" button.
+*@
+<style type="text/css">
+    .dv-flt-layout {
+        display: flex; gap: 14px; align-items: stretch; height: calc(100vh - 140px);
+    }
+    .dv-flt-panel {
+        flex: 0 0 300px; display: flex; flex-direction: column; background: #ffffff;
+        border: 1px solid #e7e9f0; border-radius: 12px; box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
+        overflow: hidden; font-size: 13px;
+    }
+    .dv-flt-panel.dv-collapsed { display: none; }
+    .dv-flt-layout > .dv-grid-el { flex: 1 1 auto; min-width: 0; height: 100%; }
+
+    /* Header */
+    .dvf-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 16px; border-bottom: 1px solid #eef0f5;
+    }
+    .dvf-title { font-weight: 700; color: #111827; font-size: 15px; }
+    .dvf-title i { color: #4f46e5; margin-right: 6px; }
+    .dvf-hide { color: #6b7280; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .dvf-hide:hover { color: #111827; }
+
+    /* Stats */
+    .dvf-stats { display: flex; padding: 14px 12px; gap: 8px; border-bottom: 1px solid #eef0f5; }
+    .dvf-stat { flex: 1; text-align: center; }
+    .dvf-stat .n { font-size: 22px; font-weight: 800; line-height: 1; color: #111827; }
+    .dvf-stat .n.blue { color: #4f46e5; }
+    .dvf-stat .n.red { color: #dc2626; }
+    .dvf-stat .l { margin-top: 5px; font-size: 12px; color: #6b7280; }
+
+    /* Host that receives Serenity's real quick-filter editors, laid out vertically */
+    .dvf-host { flex: 1 1 auto; overflow-y: auto; padding: 16px; }
+    .dvf-host .quick-filters-bar,
+    .dvf-host .s-QuickFiltersBar {
+        display: block !important; background: transparent !important; border: none !important;
+        padding: 0 !important; margin: 0 !important; box-shadow: none !important; width: 100% !important;
+    }
+    .dvf-host .quick-filters-bar > * { display: block !important; }
+    .dvf-host .quick-filter-item {
+        display: block !important; float: none !important; width: 100% !important;
+        margin: 0 0 16px 0 !important; padding: 0 !important;
+    }
+    .dvf-host .quick-filter-label {
+        display: block !important; float: none !important; width: auto !important;
+        font-weight: 600 !important; color: #374151 !important; font-size: 13px !important;
+        margin: 0 0 6px 0 !important; padding: 0 !important; text-align: left !important;
+    }
+
+    /* Collapsible filters: the label acts as a clickable header, input hidden until expanded */
+    .dvf-host .quick-filter-item.dvf-collapsible { margin: 0 0 10px 0 !important; }
+    .dvf-host .quick-filter-item.dvf-collapsible > .quick-filter-label {
+        display: flex !important; align-items: center; justify-content: space-between;
+        cursor: pointer; margin: 0 !important; padding: 9px 12px !important;
+        background: #f9fafb; border: 1px solid #eef0f5; border-radius: 8px;
+        -webkit-user-select: none; user-select: none;
+    }
+    .dvf-host .quick-filter-item.dvf-collapsible > .quick-filter-label:hover { background: #f3f4f6; }
+    .dvf-host .quick-filter-item.dvf-collapsible > .quick-filter-label::after {
+        content: '\25be'; margin-left: 8px; color: #9ca3af; font-size: 12px;
+        transition: transform .15s ease;
+    }
+    .dvf-host .quick-filter-item.dvf-collapsible.dvf-collapsed > .quick-filter-label::after {
+        transform: rotate(-90deg);
+    }
+    .dvf-host .quick-filter-item.dvf-collapsed > *:not(.quick-filter-label) { display: none !important; }
+    /* active (filled) filters stay highlighted even while collapsed */
+    .dvf-host .quick-filter-item.quick-filter-active > .quick-filter-label {
+        border-color: #4f46e5; color: #4f46e5 !important;
+    }
+    /* Include vs Exclude identification by background colour (only when the filter is active). */
+    .dvf-host .quick-filter-item.quick-filter-active.dv-mode-include > .quick-filter-label {
+        background: #eff6ff !important; border-color: #2563eb !important; color: #1d4ed8 !important;
+    }
+    .dvf-host .quick-filter-item.quick-filter-active.dv-mode-exclude > .quick-filter-label {
+        background: #fef2f2 !important; border-color: #dc2626 !important; color: #b91c1c !important;
+    }
+    /* subtle tint on the input area too, matching the mode */
+    .dvf-host .quick-filter-item.quick-filter-active.dv-mode-exclude .select2-choices,
+    .dvf-host .quick-filter-item.quick-filter-active.dv-mode-exclude textarea {
+        background: #fff5f5 !important; border-color: #fca5a5 !important;
+    }
+    .dvf-host .quick-filter-item.quick-filter-active.dv-mode-include .select2-choices,
+    .dvf-host .quick-filter-item.quick-filter-active.dv-mode-include textarea {
+        background: #f5f9ff !important;
+    }
+    .dvf-host .quick-filter-item.dvf-collapsible > *:not(.quick-filter-label) { margin-top: 8px; }
+    .dvf-host .quick-filter-item .select2-container { width: 100% !important; }
+    .dvf-host .quick-filter-item input.editor,
+    .dvf-host .quick-filter-item input.s-Editor,
+    .dvf-host .quick-filter-item input[type=text],
+    .dvf-host .quick-filter-item textarea,
+    .dvf-host .quick-filter-item select {
+        width: 100% !important; box-sizing: border-box !important;
+        border: 1px solid #e5e7eb !important; border-radius: 8px !important; padding: 8px 10px !important;
+    }
+    .dvf-host .quick-filter-item textarea {
+        resize: vertical !important; min-height: 76px !important; line-height: 1.4 !important;
+        font-family: inherit !important;
+    }
+
+    /* + Include All / − Exclude All buttons (below each filter input) */
+    .dvf-host .dv-inc-exc {
+        display: flex; gap: 8px; margin-top: 9px;
+    }
+    .dvf-host .dv-ie-btn {
+        flex: 1; border: 1px solid transparent; border-radius: 7px;
+        font-size: 12px; font-weight: 700; padding: 7px 10px; cursor: pointer;
+        text-align: center; line-height: 1.4; transition: background .15s ease, border-color .15s ease;
+    }
+    .dvf-host .dv-inc { background: #e8f0fe; color: #2563eb; }
+    .dvf-host .dv-exc { background: #fde8e8; color: #dc2626; }
+    .dvf-host .dv-inc:hover { background: #dbeafe; }
+    .dvf-host .dv-exc:hover { background: #fbd5d5; }
+    .dvf-host .dv-inc.active { background: #dbeafe; border-color: #2563eb; }
+    .dvf-host .dv-exc.active { background: #fbd5d5; border-color: #dc2626; }
+    .dvf-host .select2-selection { border-radius: 8px !important; border-color: #e5e7eb !important; }
+
+    /* Dropdown popup shows ~7 options then scrolls (select2 renders its list under the page body). */
+    .select2-results { max-height: 224px !important; }
+
+    /* Multi-select filter boxes match the single-select (Employee Size) look; chips wrap & scroll. */
+    .dvf-host .quick-filter-item .select2-choice {
+        border: 1px solid #e5e7eb !important; border-radius: 8px !important; height: 36px !important;
+    }
+    .dvf-host .quick-filter-item .select2-choices {
+        border: 1px solid #e5e7eb !important; border-radius: 8px !important;
+        min-height: 38px !important; max-height: 180px; overflow-y: auto; padding: 4px 6px !important;
+    }
+    /* Selected values stack one per line (instead of wrapping inline). */
+    .dvf-host .quick-filter-item .select2-choices .select2-search-choice {
+        display: block !important; float: none !important; width: auto !important;
+        margin: 3px 0 !important; box-sizing: border-box; position: relative;
+    }
+    .dvf-host .quick-filter-item .select2-choices .select2-search-field {
+        display: block !important; float: none !important; width: 100% !important; clear: both;
+    }
+    .dvf-host .quick-filter-item .select2-choices .select2-search-field input {
+        width: 100% !important;
+    }
+
+    /* Footer */
+    .dvf-foot {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 16px; border-top: 1px solid #eef0f5; color: #6b7280;
+    }
+    .dvf-clear { color: #6b7280; cursor: pointer; font-weight: 600; }
+    .dvf-clear:hover { color: #dc2626; }
+    .dvf-results { font-weight: 600; }
+
+    @@media (max-width: 900px) {
+        .dv-flt-layout { flex-direction: column; height: auto; }
+        .dv-flt-panel { flex: none; }
+        .dv-flt-layout > .dv-grid-el { height: 70vh; }
+    }
+</style>
+
+<script type="text/javascript">
+window.attachGridFilterPanel = function (grid) {
+    if (!grid || !grid.element || !grid.element.length) return;
+    var $grid = grid.element;
+    if ($grid.closest('.dv-flt-layout').length) return;   // avoid double-attach
+
+    // Build the layout: [panel][grid]
+    var $layout = $('<div class="dv-flt-layout"></div>');
+    var $panel = $(
+        '<div class="dv-flt-panel dv-collapsed">' +
+            '<div class="dvf-head">' +
+                '<span class="dvf-title"><i class="fa fa-filter"></i>Filters</span>' +
+                '<span class="dvf-hide">Hide &times;</span>' +
+            '</div>' +
+            '<div class="dvf-stats">' +
+                '<div class="dvf-stat"><div class="n dvf-total">0</div><div class="l">Total</div></div>' +
+                '<div class="dvf-stat"><div class="n blue dvf-filtered">0</div><div class="l">Filtered</div></div>' +
+                '<div class="dvf-stat"><div class="n red dvf-active">0</div><div class="l">Active</div></div>' +
+            '</div>' +
+            '<div class="dvf-host"></div>' +
+            '<div class="dvf-foot">' +
+                '<span class="dvf-clear">Clear all</span>' +
+                '<span class="dvf-results">0 results</span>' +
+            '</div>' +
+        '</div>'
+    );
+
+    $grid.before($layout);
+    $layout.append($panel);
+    $grid.addClass('dv-grid-el').appendTo($layout);
+    var $host = $panel.find('.dvf-host');
+
+    // ---- Move Serenity's REAL quick-filter bar into the panel ----
+    function moveBar() {
+        var $bar = $();
+        try {
+            if (typeof grid.ensureQuickFilterBar === 'function') {
+                var bar = grid.ensureQuickFilterBar();
+                if (bar && bar.element) $bar = bar.element;
+            }
+        } catch (e) { }
+        if (!$bar.length) $bar = $layout.find('.quick-filters-bar, .s-QuickFiltersBar').first();
+        if (!$bar.length) $bar = $('.quick-filters-bar, .s-QuickFiltersBar').first();
+        if ($bar.length) { $bar.appendTo($host).show().css('display', 'block'); setupCollapsible(); return true; }
+        return false;
+    }
+    if (!moveBar()) setTimeout(moveBar, 400);
+
+    // ---- Collapsible filters: show only the filter name; click it to reveal the input + Include/Exclude ----
+    function setupCollapsible() {
+        $host.find('.quick-filter-item').each(function () {
+            var $item = $(this);
+            if ($item.hasClass('dvf-collapsible')) return;
+            $item.addClass('dvf-collapsible dvf-collapsed');
+        });
+    }
+    $host.on('click', '.quick-filter-label', function () {
+        var $item = $(this).closest('.quick-filter-item');
+        $item.toggleClass('dvf-collapsed');
+        if (!$item.hasClass('dvf-collapsed')) $(window).trigger('resize');   // let select2 size itself
+    });
+    setupCollapsible();
+    setTimeout(setupCollapsible, 500);
+
+    // ---- Stats ----
+    function activeCount() {
+        var n = 0;
+        $host.find('.quick-filter-item').each(function () {
+            var has = false;
+            $(this).find('input, select, textarea').each(function () {
+                var v = $(this).val();
+                if (v != null && ('' + v).length) has = true;
+            });
+            if (has) n++;
+        });
+        return n;
+    }
+    // "Total" is derived from the grid's own list response (no filter => filtered count == total),
+    // so we never fire an extra COUNT(*) query. Important for very large tables (e.g. ET Contacts ~1M rows).
+    var totalKnown = null;
+    function updateStats() {
+        var active = activeCount();
+        var filtered = 0;
+        try {
+            var pi = grid.view.getPagingInfo && grid.view.getPagingInfo();
+            filtered = (pi && pi.totalCount != null) ? pi.totalCount : (grid.view.getLength() || 0);
+        } catch (e) { }
+        if (active === 0) totalKnown = filtered;               // baseline = unfiltered count
+        var total = (totalKnown != null) ? totalKnown : filtered;
+        $panel.find('.dvf-total').text(total);
+        $panel.find('.dvf-filtered').text(filtered);
+        $panel.find('.dvf-active').text(active);
+        $panel.find('.dvf-results').text(filtered + ' results');
+    }
+    if (grid.view && grid.view.onDataChanged)
+        grid.view.onDataChanged.subscribe(function () { updateStats(); });
+
+    // ---- Header / footer actions ----
+    $panel.on('click', '.dvf-hide', function () { $panel.addClass('dv-collapsed'); });
+    $panel.on('click', '.dvf-clear', function () {
+        $host.find('select').each(function () { $(this).val(null).trigger('change'); });
+        $host.find('input[type=text], input:not([type]), textarea').each(function () {
+            $(this).val('').trigger('change').trigger('keyup');
+        });
+        setTimeout(updateStats, 300);
+    });
+
+    // ---- Replace the toolbar "Filters" button so it toggles this panel ----
+    function bindButton() {
+        var $btn = grid.element.find('.tool-button.show-quick-filters');
+        if (!$btn.length) $btn = $layout.find('.tool-button.show-quick-filters');
+        if (!$btn.length) return false;
+        $btn.off('click').on('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            var collapsed = $panel.toggleClass('dv-collapsed').hasClass('dv-collapsed');
+            if (!collapsed) $(window).trigger('resize');   // let select2 recalc width
+        });
+        return true;
+    }
+    if (!bindButton()) setTimeout(bindButton, 400);
+
+    Q.initFullHeightGridPage($layout);
+};
+</script>

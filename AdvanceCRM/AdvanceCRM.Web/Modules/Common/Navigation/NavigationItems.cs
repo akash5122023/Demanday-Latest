@@ -7,6 +7,7 @@ using AdvanceCRM.BizMail.Pages;
 using AdvanceCRM.Contacts.Pages;
 using AdvanceCRM.Demanday.Pages;
 using AdvanceCRM.DMS.Pages;
+using AdvanceCRM.DNCContact.Pages;
 using AdvanceCRM.Employee.Pages;
 using AdvanceCRM.Enquiry.Pages;
 using AdvanceCRM.Feedback.Pages;
@@ -77,21 +78,22 @@ using Serenity.Navigation;
 //[assembly: NavigationLink(1455, "Products/Bom", typeof(BomController), icon: "fa-bar-chart", Permission = "Bom:Read", Title = "Bom")]
 //[assembly: NavigationLink(1460, "Products/Inventory", typeof(InventoryController), icon: "fa-server", Permission = "Inventory:Read", Title = "Inventory")]
 //[assembly: NavigationLink(1456, "Products/Itinerary", typeof(ItineraryController), icon: "fa-truck", Permission = "Itinerary:Read", Title = "Itinerary")]
-//[assembly: NavigationLink(1205, "Attendance", typeof(AttendanceController), icon: "fa-calendar-check-o", Permission = "Attendance:Read", Title = "Attendance")]
+[assembly: NavigationLink(1205, "Attendance", typeof(AttendanceController), icon: "fa-calendar-check-o", Permission = "Attendance:Read", Title = "Attendance")]
 //[assembly: NavigationLink(1205, "DMS", typeof(DMSController), icon: "fa-folder-o", Permission = "DMS:Read", Title = "DMS")]
 //[assembly: NavigationLink(1206, "Employee", typeof(EmployeeController), icon: "fa-address-book", Permission = "Employee:Read", Title = "Employee")]
 
-//[assembly: NavigationMenu(1500, "Toolkit", icon: "fa-exchange", Title = "Toolkit")]
-//[assembly: NavigationLink(1501, "Toolkit/Master Supression", typeof(MasterSupressionController), icon: "icon-book-open", Permission = "MasterSupression:Read", Title = "Master Supression")]
-//[assembly: NavigationLink(1504, "Toolkit/Client Supression", typeof(ClientSupressionController), icon: "fa-file-text-o", Permission = "ClientSupression:Read", Title = "Client Supression")]
-//[assembly: NavigationLink(1506, "Toolkit/Open Campaign", typeof(OpenCampaignController), icon: "fa-list-alt", Permission = "OpenCampaign:Read", Title = "Open Campaign")]
-//[assembly: NavigationLink(1507, "Toolkit/Tal Campaign", typeof(TalCampaignController), icon: "fa-file-text-o", Permission = "TalCampaign:Read", Title = "Tal Campaign")]
-//[assembly: NavigationLink(1508, "Toolkit/Demanday Competitor", typeof(DemandayCompetitorController), icon: "fa-file-text-o", Permission = "DemandayCompetitor:Read", Title = "Demanday Competitor")]
-//[assembly: NavigationLink(1509, "Toolkit/Demanday Specs", typeof(DemandaySpecsController), icon: "icon-docs", Permission = "DemandaySpecs:Read", Title = "Demanday Specs")]
+[assembly: NavigationMenu(1500, "Toolkit", icon: "fa-exchange", Title = "Toolkit")]
+[assembly: NavigationLink(1500, "Toolkit/Verify Sheets", typeof(VerifySheetsController), icon: "fa-check-square-o", Permission = "Toolkit:VerifySheets", Title = "Verify Sheets")]
+[assembly: NavigationLink(1501, "Toolkit/Master Supression", typeof(MasterSupressionController), icon: "icon-book-open", Permission = "MasterSupression:Read", Title = "Master Supression")]
+[assembly: NavigationLink(1504, "Toolkit/Client Supression", typeof(ClientSupressionController), icon: "fa-file-text-o", Permission = "ClientSupression:Read", Title = "Client Supression")]
+[assembly: NavigationLink(1506, "Toolkit/Open Campaign", typeof(OpenCampaignController), icon: "fa-list-alt", Permission = "OpenCampaign:Read", Title = "Open Campaign")]
+[assembly: NavigationLink(1507, "Toolkit/Tal Campaign", typeof(TalCampaignController), icon: "fa-file-text-o", Permission = "TalCampaign:Read", Title = "Tal Campaign")]
+[assembly: NavigationLink(1508, "Toolkit/Demanday Competitor", typeof(DemandayCompetitorController), icon: "fa-file-text-o", Permission = "DemandayCompetitor:Read", Title = "Demanday Competitor")]
+[assembly: NavigationLink(1509, "Toolkit/Demanday Specs", typeof(DemandaySpecsController), icon: "icon-docs", Permission = "DemandaySpecs:Read", Title = "Demanday Specs")]
 //[assembly: NavigationLink(1505, "Toolkit/Sales Return", typeof(SalesReturnController), icon: "fa-reply-all", Permission = "SalesReturn:Read", Title = "Sales Return")]
 
-//[assembly: NavigationMenu(1450, "Purchase", icon: "fa-cart-plus", Title = "Purchase")]
-//[assembly: NavigationLink(1451, "Purchase/Purchase Order", typeof(PurchaseOrderController), icon: "fa-cart-arrow-down", Permission = "PurchaseOrder:Read", Title = "Purchase Order")]
+//[assembly: NavigationMenu(1531, "DNCContact", icon: "fa-cart-plus", Title = "Purchase")]
+[assembly: NavigationLink(1531, "DNCContacts", typeof(DncContactsController), icon: "fa-cart-arrow-down", Permission = "DNCContacts:Read", Title = "DNC Contact")]
 //[assembly: NavigationLink(1452, "Purchase/Purchase", typeof(PurchaseController), icon: "icon-basket-loaded", Permission = "Purchase:Read", Title = "Purchase")]
 //[assembly: NavigationLink(1453, "Purchase/Purchase Return", typeof(PurchaseReturnController), icon: "fa-reply-all", Permission = "PurchaseReturn:Read", Title = "Purchase Return")]
 //[assembly: NavigationLink(1454, "Purchase/GrnTwo", typeof(GrnTwoController), icon: "fa-truck", Permission = "GrnTwo:Read", Title = "GRN")]
@@ -185,7 +187,7 @@ using Serenity.Navigation;
 
 
 ////Addon
-//[assembly: NavigationMenu(6000, "Reports", icon: "ion-android-archive", Title = "Reports")]
+[assembly: NavigationMenu(6000, "Reports", icon: "ion-android-archive", Title = "Reports")]
 ////[assembly: NavigationLink(6001, "Reports/Enquiry Reports", typeof(UserDetailReportController), icon: "fa-group", Permission = "Reports:Enquiry", Title = "Detailed")]
 //[assembly: NavigationLink(6002, "Reports/Enquiry Reports", typeof(EnquiryReportController), icon: "fa-group", Permission = "Reports:Enquiry", Title = "Enquiry")]
 //[assembly: NavigationLink(6003, "Reports/Quotation Reports", typeof(QuotationReportController), icon: "fa-file-text", Permission = "Reports:Quotation", Title = "Quotation")]
@@ -216,7 +218,7 @@ using Serenity.Navigation;
 //[assembly: NavigationLink(6501, "Reports/GST Reports/GSTR-2/B2BUR", url: ("~/Reports/GSTR2B2BURReport"), permission: "Reports:GSTR2", icon: "fa-file", Title = "B2BUR")]
 
 ////Attendance Report
-//[assembly: NavigationLink(6552, "Reports/Attendance", typeof(AttendanceReportController), icon: "fa-calendar-check-o", Permission = "Reports:Attendance", Title = "Attendance")]
+[assembly: NavigationLink(6552, "Reports/Attendance", typeof(AttendanceReportController), icon: "fa-calendar-check-o", Permission = "Reports:Attendance", Title = "Attendance")]
 
 
 ////Followup Report

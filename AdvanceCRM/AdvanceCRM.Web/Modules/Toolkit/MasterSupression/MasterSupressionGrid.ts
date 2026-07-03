@@ -38,27 +38,29 @@ namespace AdvanceCRM.Toolkit {
                 title: 'Campaign'
             });
 
-            return filters;
+            return this.orderQuickFilters(filters);
         }
 
         protected getButtons() {
             var buttons = super.getButtons();
             //buttons.shift();
 
-            buttons.push({
-                title: 'Import',
-                cssClass: 'export-xlsx-button',
-                hint: "Import Master Suppression from Excel",
-                onClick: () => {
-                    var dialog = new MasterSupressionExcelImportDialog();
-                    dialog.element.on('dialogclose', () => {
-                        this.refresh();
-                        dialog = null;
-                    });
-                    dialog.dialogOpen();
-                },
-                separator: true
-            });
+            if (Q.Authorization.hasPermission("MasterSupression:Import")) {
+                buttons.push({
+                    title: 'Import',
+                    cssClass: 'export-xlsx-button',
+                    hint: "Import Master Suppression from Excel",
+                    onClick: () => {
+                        var dialog = new MasterSupressionExcelImportDialog();
+                        dialog.element.on('dialogclose', () => {
+                            this.refresh();
+                            dialog = null;
+                        });
+                        dialog.dialogOpen();
+                    },
+                    separator: true
+                });
+            }
 
             return buttons;
         }

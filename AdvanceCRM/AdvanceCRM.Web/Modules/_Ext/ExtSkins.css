@@ -1117,3 +1117,1013 @@
         border-right: 1px solid #d2d2d2
     }
 }
+
+/*--------------------------------- Modernize skin ----------------------*/
+/* Exact clone of the Azure Light skin block — only the palette is changed.
+   Activated by body.skin-modernize or body.skin-modernize-light. */
+.skin-modernize .ui-dialog .ui-dialog-titlebar, .skin-modernize-light .ui-dialog .ui-dialog-titlebar {
+    background-color: #1f7dce
+}
+
+.skin-modernize .sidebar-menu li > a > .fa-angle-left, .skin-modernize-light .sidebar-menu li > a > .fa-angle-left {
+    right: 5px
+}
+
+.skin-modernize .sidebar-form, .skin-modernize-light .sidebar-form {
+    border-radius: 3px;
+    margin: 20px 10px 10px 10px
+}
+
+.skin-modernize .sidebar-menu > li > a, .skin-modernize-light .sidebar-menu > li > a {
+    border-left: 3px solid transparent;
+    font-size: 14px
+}
+
+.skin-modernize .sidebar-menu .treeview-menu > li > a, .skin-modernize-light .sidebar-menu .treeview-menu > li > a {
+    font-size: 13px
+}
+
+.skin-modernize .sidebar-form input[type="text"], .skin-modernize-light .sidebar-form input[type="text"], .skin-modernize .sidebar-form .btn, .skin-modernize-light .sidebar-form .btn {
+    box-shadow: none;
+    border: 1px solid transparent;
+    height: 35px
+}
+
+.skin-modernize .sidebar-form .btn, .skin-modernize-light .sidebar-form .btn {
+    color: #999
+}
+
+.skin-modernize .control-sidebar-dark, .skin-modernize-light .control-sidebar-dark, .skin-modernize .control-sidebar-dark + .control-sidebar-bg, .skin-modernize-light .control-sidebar-dark + .control-sidebar-bg {
+    background: #2475b7
+}
+
+.skin-modernize .main-header .logo, .skin-modernize-light .main-header .logo {
+    height: 50px;
+    font-weight: 600
+}
+
+.skin-modernize .main-header .navbar, .skin-modernize-light .main-header .navbar {
+    background-color: #1d6db1;
+    z-index: 999;
+    min-height: initial
+}
+
+.skin-modernize .main-header .sidebar-toggle, .skin-modernize-light .main-header .sidebar-toggle {
+    font-size: 2.5rem;
+    color: #fff;
+    line-height: 20px;
+    border-right: 1px solid #016fce;
+    padding: 15px 15px
+}
+
+.skin-modernize .main-header .logo, .skin-modernize-light .main-header .logo {
+    font-family: 'Open Sans';
+    color: #fff;
+    z-index: 1000;
+    background-color: #1f7dce;
+    padding: 0 0
+}
+
+.skin-modernize .navbar-nav > li > a, .skin-modernize-light .navbar-nav > li > a {
+    border-left: 1px solid #016fce;
+    color: #fff
+}
+
+.skin-modernize .navbar-nav > .user-menu .user-image, .skin-modernize-light .navbar-nav > .user-menu .user-image {
+    border: 2px solid rgba(255,255,255,.4)
+}
+
+.skin-modernize .navbar-nav > li > a:hover, .skin-modernize-light .navbar-nav > li > a:hover, .skin-modernize .navbar-nav > li > a:active, .skin-modernize-light .navbar-nav > li > a:active, .skin-modernize .navbar-nav > li > a:focus, .skin-modernize-light .navbar-nav > li > a:focus {
+    background: transparent;
+    color: #90ee90
+}
+
+.skin-modernize .navbar-nav .open > a, .skin-modernize-light .navbar-nav .open > a, .skin-modernize .navbar-nav .open > a:hover, .skin-modernize-light .navbar-nav .open > a:hover, .skin-modernize .navbar-nav .open > a:focus, .skin-modernize-light .navbar-nav .open > a:focus {
+    background: #096bc0;
+    color: #90ee90
+}
+
+.skin-modernize .navbar-nav > li > a[data-toggle=control-sidebar], .skin-modernize-light .navbar-nav > li > a[data-toggle=control-sidebar] {
+    font-size: 18px
+}
+
+.skin-modernize section.content > .s-DataGrid, .skin-modernize-light section.content > .s-DataGrid {
+    border-radius: 0;
+    border-top: 1px solid #f0f0f0
+}
+
+.skin-modernize .grid-title, .skin-modernize-light .grid-title, .skin-modernize .panel-titlebar, .skin-modernize-light .panel-titlebar {
+    color: #1f7fce;
+    font-size: 17px
+}
+
+.skin-modernize .s-Panel, .skin-modernize-light .s-Panel {
+    border-radius: 0;
+    border-top: 1px solid #f0f0f0
+}
+
+.skin-modernize .sidebar-menu .treeview-menu > li > a > .fa, .skin-modernize-light .sidebar-menu .treeview-menu > li > a > .fa, .skin-modernize .sidebar-menu .treeview-menu > li > a > .glyphicon, .skin-modernize-light .sidebar-menu .treeview-menu > li > a > .glyphicon, .skin-modernize .sidebar-menu .treeview-menu > li > a > .ion, .skin-modernize-light .sidebar-menu .treeview-menu > li > a > .ion {
+    font-size: 14px
+}
+
+.skin-modernize .sidebar-menu > li > a > .fa, .skin-modernize-light .sidebar-menu > li > a > .fa, .skin-modernize .sidebar-menu > li > a > .glyphicon, .skin-modernize-light .sidebar-menu > li > a > .glyphicon, .skin-modernize .sidebar-menu > li > a > .ion, .skin-modernize-light .sidebar-menu > li > a > .ion {
+    font-size: 18px
+}
+
+.skin-modernize .sidebar-menu > li > a > .nav-icon, .skin-modernize-light .sidebar-menu > li > a > .nav-icon {
+    width: 23px
+}
+
+.skin-modernize .sidebar-menu .treeview-menu > li > a > .nav-icon, .skin-modernize-light .sidebar-menu .treeview-menu > li > a > .nav-icon {
+    width: 19px
+}
+
+.skin-modernize .main-header li.user-header, .skin-modernize-light .main-header li.user-header {
+    background-color: #1f7dce
+}
+
+.skin-modernize .s-QuickSearchBar .quick-search-icon, .skin-modernize-light .s-QuickSearchBar .quick-search-icon {
+    background: #1f7fce
+}
+
+.skin-modernize .quick-filters-bar, .skin-modernize-light .quick-filters-bar {
+    border: none;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #f9f9f9;
+    border-radius: 0
+}
+
+.skin-modernize .s-FilterDisplayBar, .skin-modernize-light .s-FilterDisplayBar {
+    border-color: #e1e9f1;
+    margin-bottom: 0
+}
+
+.skin-modernize .slick-header-column.ui-state-default, .skin-modernize-light .slick-header-column.ui-state-default {
+    color: #016fce
+}
+
+.skin-modernize .slick-cell > a, .skin-modernize-light .slick-cell > a {
+    color: #30569c
+}
+
+.skin-modernize .main-sidebar {
+    background-color: #1f7dce;
+    background: linear-gradient(-65deg,#222d32,#1f7dce)
+}
+
+.skin-modernize .sidebar a {
+    color: #dee5fb
+}
+
+.skin-modernize .sidebar-menu > li > .treeview-menu {
+    background-color: rgba(85,133,175,.2)
+}
+
+.skin-modernize .sidebar-menu > li:hover > a, .skin-modernize .sidebar-menu > li.active > a {
+    color: #fff;
+    border-left-color: #9ccbf7;
+    background-color: rgba(0,0,0,.3)
+}
+
+.skin-modernize .sidebar-menu > li li:hover > a, .skin-modernize .sidebar-menu li li.active > a {
+    color: #83f78c
+}
+
+.skin-modernize .sidebar-form {
+    border: 1px solid rgba(0,0,0,.2)
+}
+
+    .skin-modernize .sidebar-form input[type="text"], .skin-modernize .sidebar-form .btn {
+        background-color: rgba(0,0,0,.15)
+    }
+
+    .skin-modernize .sidebar-form input[type="text"] {
+        color: #bbb
+    }
+
+.skin-modernize-light .content-wrapper, .skin-modernize-light .right-side {
+    background-color: #f4f8fb
+}
+
+.skin-modernize-light .main-sidebar {
+    background-color: #fff
+}
+
+.skin-modernize-light .sidebar a {
+    color: #222
+}
+
+.skin-modernize-light .sidebar-menu > li > .treeview-menu {
+    background-color: rgba(196,196,196,.2)
+}
+
+.skin-modernize-light .sidebar-menu > li:hover > a, .skin-modernize-light .sidebar-menu > li.active > a {
+    color: #fff;
+    border-left-color: #64b7ff;
+    background-color: #016fce
+}
+
+    .skin-modernize-light .sidebar-menu > li:hover > a i.nav-icon, .skin-modernize-light .sidebar-menu > li.active > a i.nav-icon {
+        color: #fff
+    }
+
+.skin-modernize-light .sidebar-menu .nav-icon {
+    color: #31386b
+}
+
+.skin-modernize-light .sidebar-menu > li > a > .nav-icon {
+    color: #575b7b
+}
+
+.skin-modernize-light .sidebar-menu .treeview-menu {
+    padding-top: 4px;
+    padding-bottom: 4px
+}
+
+    .skin-modernize-light .sidebar-menu .treeview-menu > li > a {
+        padding-left: 19px
+    }
+
+    .skin-modernize-light .sidebar-menu .treeview-menu > li {
+        margin: 1px 4px 1px 0
+    }
+
+.skin-modernize-light .sidebar-menu li > a > .fa-angle-left {
+    right: 1px
+}
+
+.skin-modernize-light .sidebar-menu > li > ul > li:hover > a, .skin-modernize-light .sidebar-menu > li > ul > li.active > a {
+    color: #fff;
+    background-color: #4393d5;
+    border-radius: 13px;
+    border-right: 4px solid #c0d7f3;
+    border-left: 4px solid #c0d7f3;
+    box-shadow: 0 0 2px white;
+    padding-left: 15px
+}
+
+    .skin-modernize-light .sidebar-menu > li > ul > li:hover > a .nav-icon, .skin-modernize-light .sidebar-menu > li > ul > li.active > a .nav-icon {
+        color: #fff
+    }
+
+.skin-modernize-light .sidebar-form input[type="text"], .skin-modernize-light .sidebar-form .btn {
+    background-color: #eaf1f7
+}
+
+.skin-modernize-light .sidebar-menu > li li li:hover > a, .skin-modernize-light .sidebar-menu li li li.active > a {
+    color: #0595ec
+}
+
+    .skin-modernize-light .sidebar-menu > li li li:hover > a .nav-icon, .skin-modernize-light .sidebar-menu li li li.active > a .nav-icon {
+        color: #50316b
+    }
+
+.skin-modernize-light .sidebar-form input[type="text"] {
+    color: #666
+}
+
+@media(min-width: 768px) {
+    .skin-modernize .content, .skin-modernize-light .content {
+        padding: 25px 15px 15px 20px
+    }
+
+    .skin-modernize .content-header, .skin-modernize-light .content-header {
+        padding-left: 20px
+    }
+
+    .skin-modernize .main-header .navbar, .skin-modernize-light .main-header .navbar {
+        min-height: 62px;
+        margin-left: 0;
+        background: #1f7dce
+    }
+
+    .skin-modernize .main-header .sidebar-toggle, .skin-modernize-light .main-header .sidebar-toggle {
+        padding-right: 1.25rem;
+        position: absolute;
+        left: 4px;
+        top: -8px;
+        line-height: inherit;
+        border-right: 1px solid transparent;
+        padding: 21px 15px
+    }
+
+    .skin-modernize .main-header .logo, .skin-modernize-light .main-header .logo {
+        position: absolute;
+        left: 6rem;
+        border-left: 1px solid #016fce;
+        top: 6px;
+        background-color: transparent;
+        padding: 0 15px
+    }
+
+        .skin-modernize .main-header .logo b, .skin-modernize-light .main-header .logo b {
+            float: left;
+            margin-left: 8px
+        }
+
+    .skin-modernize .navbar-nav, .skin-modernize-light .navbar-nav {
+        margin-top: 6px
+    }
+
+        .skin-modernize .navbar-nav > li > a, .skin-modernize-light .navbar-nav > li > a {
+            line-height: 20px;
+            padding: 15px 22px;
+            font-size: 15px
+        }
+
+        .skin-modernize .navbar-nav > .user-menu .user-image, .skin-modernize-light .navbar-nav > .user-menu .user-image {
+            height: 45px;
+            width: 45px;
+            margin-top: -12px
+        }
+
+    .skin-modernize.fixed .content-wrapper, .skin-modernize-light.fixed .content-wrapper, .skin-modernize.fixed .right-side, .skin-modernize-light.fixed .right-side {
+        padding-top: 62px
+    }
+
+    .skin-modernize .main-sidebar, .skin-modernize-light .main-sidebar, .skin-modernize .left-side, .skin-modernize-light .left-side {
+        padding-top: 62px
+    }
+
+    .skin-modernize.sidebar-mini.sidebar-collapse .main-header .navbar, .skin-modernize-light.sidebar-mini.sidebar-collapse .main-header .navbar {
+        margin-left: 0
+    }
+
+    .skin-modernize.sidebar-mini.sidebar-collapse .main-header .logo, .skin-modernize-light.sidebar-mini.sidebar-collapse .main-header .logo {
+        width: 80px
+    }
+
+        .skin-modernize.sidebar-mini.sidebar-collapse .main-header .logo > .logo-mini, .skin-modernize-light.sidebar-mini.sidebar-collapse .main-header .logo > .logo-mini {
+            margin-left: 0;
+            margin-right: 0
+        }
+
+    .skin-modernize.sidebar-mini.sidebar-collapse .main-sidebar, .skin-modernize-light.sidebar-mini.sidebar-collapse .main-sidebar {
+        width: 62px !important
+    }
+
+    .skin-modernize.sidebar-mini.sidebar-collapse .content-wrapper, .skin-modernize-light.sidebar-mini.sidebar-collapse .content-wrapper, .skin-modernize.sidebar-mini.sidebar-collapse .right-side, .skin-modernize-light.sidebar-mini.sidebar-collapse .right-side, .skin-modernize.sidebar-mini.sidebar-collapse .main-footer, .skin-modernize-light.sidebar-mini.sidebar-collapse .main-footer {
+        margin-left: 62px !important
+    }
+}
+
+@media(min-width: 768px) {
+    .skin-modernize .main-header {
+        box-shadow: 0 2px 5px rgba(24,96,158,.6)
+    }
+
+    .skin-modernize .main-sidebar {
+        box-shadow: 2px 0 3px rgba(24,96,158,.2);
+        border-right: 1px solid #0a59a0
+    }
+
+    .skin-modernize-light .main-header {
+        box-shadow: 0 1px 3px rgba(40,37,89,.3)
+    }
+
+    .skin-modernize-light .main-sidebar {
+        border-right: 1px solid #d2d2d2
+    }
+}
+
+/*--------------------------------- Theme color overrides for Modernize ---------------*/
+/* Each block re-skins the Modernize palette. Only effective when body has both
+   .skin-modernize (or .skin-modernize-light) and .theme-color-<name>. The default
+   .theme-color-blue is already covered by the base Modernize block above. */
+
+/* AQUA (#0074ba / #005d96 / #66a8d6) */
+body.skin-modernize.theme-color-aqua .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize-light.theme-color-aqua .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize.theme-color-aqua .main-header li.user-header,
+body.skin-modernize-light.theme-color-aqua .main-header li.user-header,
+body.skin-modernize.theme-color-aqua .s-QuickSearchBar .quick-search-icon,
+body.skin-modernize-light.theme-color-aqua .s-QuickSearchBar .quick-search-icon { background-color: #0074ba; background: #0074ba }
+body.skin-modernize.theme-color-aqua .main-header .navbar,
+body.skin-modernize-light.theme-color-aqua .main-header .navbar,
+body.skin-modernize.theme-color-aqua .main-header .sidebar-toggle,
+body.skin-modernize-light.theme-color-aqua .main-header .sidebar-toggle { background-color: #005d96 }
+body.skin-modernize.theme-color-aqua .main-header .sidebar-toggle,
+body.skin-modernize-light.theme-color-aqua .main-header .sidebar-toggle,
+body.skin-modernize.theme-color-aqua .navbar-nav > li > a,
+body.skin-modernize-light.theme-color-aqua .navbar-nav > li > a { border-color: #005d96 }
+body.skin-modernize.theme-color-aqua .navbar-nav .open > a,
+body.skin-modernize-light.theme-color-aqua .navbar-nav .open > a { background: #00578b }
+body.skin-modernize.theme-color-aqua .grid-title,
+body.skin-modernize-light.theme-color-aqua .grid-title,
+body.skin-modernize.theme-color-aqua .panel-titlebar,
+body.skin-modernize-light.theme-color-aqua .panel-titlebar,
+body.skin-modernize.theme-color-aqua .slick-header-column.ui-state-default,
+body.skin-modernize-light.theme-color-aqua .slick-header-column.ui-state-default { color: #0074ba }
+body.skin-modernize.theme-color-aqua .main-sidebar { background: linear-gradient(-65deg,#222d32,#0074ba) }
+body.skin-modernize-light.theme-color-aqua .sidebar-menu > li:hover > a,
+body.skin-modernize-light.theme-color-aqua .sidebar-menu > li.active > a { background-color: #005d96; border-left-color: #66a8d6 }
+body.skin-modernize-light.theme-color-aqua .sidebar-menu > li > ul > li:hover > a,
+body.skin-modernize-light.theme-color-aqua .sidebar-menu > li > ul > li.active > a { background-color: #0074ba; border-left-color: #c7e0f0; border-right-color: #c7e0f0 }
+body.skin-modernize-light.theme-color-aqua .sidebar-menu > li li li:hover > a,
+body.skin-modernize-light.theme-color-aqua .sidebar-menu li li li.active > a { color: #0074ba }
+body.skin-modernize.theme-color-aqua .navbar-nav > li > a:hover,
+body.skin-modernize-light.theme-color-aqua .navbar-nav > li > a:hover,
+body.skin-modernize.theme-color-aqua .navbar-nav > li > a:focus,
+body.skin-modernize-light.theme-color-aqua .navbar-nav > li > a:focus,
+body.skin-modernize.theme-color-aqua .sidebar-menu > li li:hover > a,
+body.skin-modernize.theme-color-aqua .sidebar-menu li li.active > a { color: #b3d7ec }
+
+/* PURPLE (#763eba / #5d2f95 / #ad8dd2) */
+body.skin-modernize.theme-color-purple .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize-light.theme-color-purple .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize.theme-color-purple .main-header li.user-header,
+body.skin-modernize-light.theme-color-purple .main-header li.user-header,
+body.skin-modernize.theme-color-purple .s-QuickSearchBar .quick-search-icon,
+body.skin-modernize-light.theme-color-purple .s-QuickSearchBar .quick-search-icon { background-color: #763eba; background: #763eba }
+body.skin-modernize.theme-color-purple .main-header .navbar,
+body.skin-modernize-light.theme-color-purple .main-header .navbar { background-color: #5d2f95 }
+body.skin-modernize.theme-color-purple .main-header .sidebar-toggle,
+body.skin-modernize-light.theme-color-purple .main-header .sidebar-toggle,
+body.skin-modernize.theme-color-purple .navbar-nav > li > a,
+body.skin-modernize-light.theme-color-purple .navbar-nav > li > a { border-color: #5d2f95 }
+body.skin-modernize.theme-color-purple .navbar-nav .open > a,
+body.skin-modernize-light.theme-color-purple .navbar-nav .open > a { background: #4f2680 }
+body.skin-modernize.theme-color-purple .grid-title,
+body.skin-modernize-light.theme-color-purple .grid-title,
+body.skin-modernize.theme-color-purple .panel-titlebar,
+body.skin-modernize-light.theme-color-purple .panel-titlebar,
+body.skin-modernize.theme-color-purple .slick-header-column.ui-state-default,
+body.skin-modernize-light.theme-color-purple .slick-header-column.ui-state-default { color: #763eba }
+body.skin-modernize.theme-color-purple .main-sidebar { background: linear-gradient(-65deg,#222d32,#763eba) }
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li:hover > a,
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li.active > a { background-color: #5d2f95; border-left-color: #ad8dd2 }
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li > ul > li:hover > a,
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li > ul > li.active > a { background-color: #763eba; border-left-color: #dcc7ee; border-right-color: #dcc7ee }
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li li li:hover > a,
+body.skin-modernize-light.theme-color-purple .sidebar-menu li li li.active > a { color: #763eba }
+body.skin-modernize.theme-color-purple .navbar-nav > li > a:hover,
+body.skin-modernize-light.theme-color-purple .navbar-nav > li > a:hover,
+body.skin-modernize.theme-color-purple .navbar-nav > li > a:focus,
+body.skin-modernize-light.theme-color-purple .navbar-nav > li > a:focus,
+body.skin-modernize.theme-color-purple .sidebar-menu > li li:hover > a,
+body.skin-modernize.theme-color-purple .sidebar-menu li li.active > a { color: #d4c2eb }
+
+/* TEAL (#0a7ea4 / #086682 / #66b6ce) */
+body.skin-modernize.theme-color-teal .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize-light.theme-color-teal .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize.theme-color-teal .main-header li.user-header,
+body.skin-modernize-light.theme-color-teal .main-header li.user-header,
+body.skin-modernize.theme-color-teal .s-QuickSearchBar .quick-search-icon,
+body.skin-modernize-light.theme-color-teal .s-QuickSearchBar .quick-search-icon { background-color: #0a7ea4; background: #0a7ea4 }
+body.skin-modernize.theme-color-teal .main-header .navbar,
+body.skin-modernize-light.theme-color-teal .main-header .navbar { background-color: #086682 }
+body.skin-modernize.theme-color-teal .main-header .sidebar-toggle,
+body.skin-modernize-light.theme-color-teal .main-header .sidebar-toggle,
+body.skin-modernize.theme-color-teal .navbar-nav > li > a,
+body.skin-modernize-light.theme-color-teal .navbar-nav > li > a { border-color: #086682 }
+body.skin-modernize.theme-color-teal .navbar-nav .open > a,
+body.skin-modernize-light.theme-color-teal .navbar-nav .open > a { background: #075c75 }
+body.skin-modernize.theme-color-teal .grid-title,
+body.skin-modernize-light.theme-color-teal .grid-title,
+body.skin-modernize.theme-color-teal .panel-titlebar,
+body.skin-modernize-light.theme-color-teal .panel-titlebar,
+body.skin-modernize.theme-color-teal .slick-header-column.ui-state-default,
+body.skin-modernize-light.theme-color-teal .slick-header-column.ui-state-default { color: #0a7ea4 }
+body.skin-modernize.theme-color-teal .main-sidebar { background: linear-gradient(-65deg,#222d32,#0a7ea4) }
+body.skin-modernize-light.theme-color-teal .sidebar-menu > li:hover > a,
+body.skin-modernize-light.theme-color-teal .sidebar-menu > li.active > a { background-color: #086682; border-left-color: #66b6ce }
+body.skin-modernize-light.theme-color-teal .sidebar-menu > li > ul > li:hover > a,
+body.skin-modernize-light.theme-color-teal .sidebar-menu > li > ul > li.active > a { background-color: #0a7ea4; border-left-color: #c7e2eb; border-right-color: #c7e2eb }
+body.skin-modernize-light.theme-color-teal .sidebar-menu > li li li:hover > a,
+body.skin-modernize-light.theme-color-teal .sidebar-menu li li li.active > a { color: #0a7ea4 }
+body.skin-modernize.theme-color-teal .navbar-nav > li > a:hover,
+body.skin-modernize-light.theme-color-teal .navbar-nav > li > a:hover,
+body.skin-modernize.theme-color-teal .navbar-nav > li > a:focus,
+body.skin-modernize-light.theme-color-teal .navbar-nav > li > a:focus,
+body.skin-modernize.theme-color-teal .sidebar-menu > li li:hover > a,
+body.skin-modernize.theme-color-teal .sidebar-menu li li.active > a { color: #b3dbe6 }
+
+/* CYAN (#01c0c8 / #019aa1 / #66dade) */
+body.skin-modernize.theme-color-cyan .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize-light.theme-color-cyan .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize.theme-color-cyan .main-header li.user-header,
+body.skin-modernize-light.theme-color-cyan .main-header li.user-header,
+body.skin-modernize.theme-color-cyan .s-QuickSearchBar .quick-search-icon,
+body.skin-modernize-light.theme-color-cyan .s-QuickSearchBar .quick-search-icon { background-color: #01c0c8; background: #01c0c8 }
+body.skin-modernize.theme-color-cyan .main-header .navbar,
+body.skin-modernize-light.theme-color-cyan .main-header .navbar { background-color: #019aa1 }
+body.skin-modernize.theme-color-cyan .main-header .sidebar-toggle,
+body.skin-modernize-light.theme-color-cyan .main-header .sidebar-toggle,
+body.skin-modernize.theme-color-cyan .navbar-nav > li > a,
+body.skin-modernize-light.theme-color-cyan .navbar-nav > li > a { border-color: #019aa1 }
+body.skin-modernize.theme-color-cyan .navbar-nav .open > a,
+body.skin-modernize-light.theme-color-cyan .navbar-nav .open > a { background: #018a90 }
+body.skin-modernize.theme-color-cyan .grid-title,
+body.skin-modernize-light.theme-color-cyan .grid-title,
+body.skin-modernize.theme-color-cyan .panel-titlebar,
+body.skin-modernize-light.theme-color-cyan .panel-titlebar,
+body.skin-modernize.theme-color-cyan .slick-header-column.ui-state-default,
+body.skin-modernize-light.theme-color-cyan .slick-header-column.ui-state-default { color: #01c0c8 }
+body.skin-modernize.theme-color-cyan .main-sidebar { background: linear-gradient(-65deg,#222d32,#01c0c8) }
+body.skin-modernize-light.theme-color-cyan .sidebar-menu > li:hover > a,
+body.skin-modernize-light.theme-color-cyan .sidebar-menu > li.active > a { background-color: #019aa1; border-left-color: #66dade }
+body.skin-modernize-light.theme-color-cyan .sidebar-menu > li > ul > li:hover > a,
+body.skin-modernize-light.theme-color-cyan .sidebar-menu > li > ul > li.active > a { background-color: #01c0c8; border-left-color: #c2eef0; border-right-color: #c2eef0 }
+body.skin-modernize-light.theme-color-cyan .sidebar-menu > li li li:hover > a,
+body.skin-modernize-light.theme-color-cyan .sidebar-menu li li li.active > a { color: #01c0c8 }
+body.skin-modernize.theme-color-cyan .navbar-nav > li > a:hover,
+body.skin-modernize-light.theme-color-cyan .navbar-nav > li > a:hover,
+body.skin-modernize.theme-color-cyan .navbar-nav > li > a:focus,
+body.skin-modernize-light.theme-color-cyan .navbar-nav > li > a:focus,
+body.skin-modernize.theme-color-cyan .sidebar-menu > li li:hover > a,
+body.skin-modernize.theme-color-cyan .sidebar-menu li li.active > a { color: #b3e9eb }
+
+/* ORANGE (#fb9678 / #d97256 / #fdc1b1) */
+body.skin-modernize.theme-color-orange .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize-light.theme-color-orange .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize.theme-color-orange .main-header li.user-header,
+body.skin-modernize-light.theme-color-orange .main-header li.user-header,
+body.skin-modernize.theme-color-orange .s-QuickSearchBar .quick-search-icon,
+body.skin-modernize-light.theme-color-orange .s-QuickSearchBar .quick-search-icon { background-color: #fb9678; background: #fb9678 }
+body.skin-modernize.theme-color-orange .main-header .navbar,
+body.skin-modernize-light.theme-color-orange .main-header .navbar { background-color: #d97256 }
+body.skin-modernize.theme-color-orange .main-header .sidebar-toggle,
+body.skin-modernize-light.theme-color-orange .main-header .sidebar-toggle,
+body.skin-modernize.theme-color-orange .navbar-nav > li > a,
+body.skin-modernize-light.theme-color-orange .navbar-nav > li > a { border-color: #d97256 }
+body.skin-modernize.theme-color-orange .navbar-nav .open > a,
+body.skin-modernize-light.theme-color-orange .navbar-nav .open > a { background: #c4634a }
+body.skin-modernize.theme-color-orange .grid-title,
+body.skin-modernize-light.theme-color-orange .grid-title,
+body.skin-modernize.theme-color-orange .panel-titlebar,
+body.skin-modernize-light.theme-color-orange .panel-titlebar,
+body.skin-modernize.theme-color-orange .slick-header-column.ui-state-default,
+body.skin-modernize-light.theme-color-orange .slick-header-column.ui-state-default { color: #d97256 }
+body.skin-modernize.theme-color-orange .main-sidebar { background: linear-gradient(-65deg,#222d32,#fb9678) }
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li:hover > a,
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li.active > a { background-color: #d97256; border-left-color: #fdc1b1 }
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li > ul > li:hover > a,
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li > ul > li.active > a { background-color: #fb9678; border-left-color: #ffd6c8; border-right-color: #ffd6c8 }
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li li li:hover > a,
+body.skin-modernize-light.theme-color-orange .sidebar-menu li li li.active > a { color: #d97256 }
+body.skin-modernize.theme-color-orange .navbar-nav > li > a:hover,
+body.skin-modernize-light.theme-color-orange .navbar-nav > li > a:hover,
+body.skin-modernize.theme-color-orange .navbar-nav > li > a:focus,
+body.skin-modernize-light.theme-color-orange .navbar-nav > li > a:focus,
+body.skin-modernize.theme-color-orange .sidebar-menu > li li:hover > a,
+body.skin-modernize.theme-color-orange .sidebar-menu li li.active > a { color: #ffd6c8 }
+
+/*--------------------------------- Modernize sidebar icons --------------------------*/
+/* Larger, evenly-spaced icons sitting in a subtle rounded container — Spike-style.
+   Container fills with primary color on hover/active; icon turns white. */
+
+.skin-modernize .sidebar-menu > li > a,
+.skin-modernize-light .sidebar-menu > li > a {
+    display: flex;
+    align-items: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.skin-modernize .sidebar-menu > li > a > .fa,
+.skin-modernize-light .sidebar-menu > li > a > .fa,
+.skin-modernize .sidebar-menu > li > a > .glyphicon,
+.skin-modernize-light .sidebar-menu > li > a > .glyphicon,
+.skin-modernize .sidebar-menu > li > a > .ion,
+.skin-modernize-light .sidebar-menu > li > a > .ion {
+    font-size: 18px;
+}
+
+.skin-modernize .sidebar-menu > li > a > .nav-icon,
+.skin-modernize-light .sidebar-menu > li > a > .nav-icon {
+    /* Rounded icon "chip" — 32px square, light bg, primary icon color. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    border-radius: 8px;
+    background: rgba(93, 135, 255, 0.12);
+    color: #5d87ff;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* Light skin: chip on a white sidebar */
+.skin-modernize-light .sidebar-menu > li > a > .nav-icon {
+    background: rgba(93, 135, 255, 0.10);
+    color: #5d87ff;
+}
+
+/* Dark skin: chip on the gradient sidebar — softer translucent backdrop */
+.skin-modernize .sidebar-menu > li > a > .nav-icon {
+    background: rgba(255, 255, 255, 0.10);
+    color: #dee5fb;
+}
+
+/* Hover */
+.skin-modernize-light .sidebar-menu > li:hover > a > .nav-icon {
+    background: rgba(93, 135, 255, 0.20);
+    color: #5d87ff;
+}
+
+.skin-modernize .sidebar-menu > li:hover > a > .nav-icon {
+    background: rgba(255, 255, 255, 0.20);
+    color: #ffffff;
+}
+
+/* Active — full primary fill with white icon (Spike pill effect) */
+.skin-modernize .sidebar-menu > li.active > a > .nav-icon,
+.skin-modernize-light .sidebar-menu > li.active > a > .nav-icon {
+    background: #ffffff;
+    color: #5d87ff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Treeview submenu icons — smaller chip */
+.skin-modernize .sidebar-menu .treeview-menu > li > a > .nav-icon,
+.skin-modernize-light .sidebar-menu .treeview-menu > li > a > .nav-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 8px;
+    border-radius: 6px;
+    background: transparent;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Per-theme-color recolor: chip background tint + active fill use the active palette */
+body.skin-modernize-light.theme-color-aqua   .sidebar-menu > li > a > .nav-icon { background: rgba(0,116,186,0.10); color: #0074ba }
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li > a > .nav-icon { background: rgba(118,62,186,0.10); color: #763eba }
+body.skin-modernize-light.theme-color-teal   .sidebar-menu > li > a > .nav-icon { background: rgba(10,126,164,0.10); color: #0a7ea4 }
+body.skin-modernize-light.theme-color-cyan   .sidebar-menu > li > a > .nav-icon { background: rgba(1,192,200,0.12); color: #019aa1 }
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li > a > .nav-icon { background: rgba(251,150,120,0.15); color: #d97256 }
+
+body.skin-modernize-light.theme-color-aqua   .sidebar-menu > li:hover > a > .nav-icon { background: rgba(0,116,186,0.20); color: #0074ba }
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li:hover > a > .nav-icon { background: rgba(118,62,186,0.20); color: #763eba }
+body.skin-modernize-light.theme-color-teal   .sidebar-menu > li:hover > a > .nav-icon { background: rgba(10,126,164,0.20); color: #0a7ea4 }
+body.skin-modernize-light.theme-color-cyan   .sidebar-menu > li:hover > a > .nav-icon { background: rgba(1,192,200,0.22); color: #019aa1 }
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li:hover > a > .nav-icon { background: rgba(251,150,120,0.25); color: #d97256 }
+
+body.skin-modernize.theme-color-aqua   .sidebar-menu > li.active > a > .nav-icon,
+body.skin-modernize-light.theme-color-aqua   .sidebar-menu > li.active > a > .nav-icon { color: #0074ba }
+body.skin-modernize.theme-color-purple .sidebar-menu > li.active > a > .nav-icon,
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li.active > a > .nav-icon { color: #763eba }
+body.skin-modernize.theme-color-teal   .sidebar-menu > li.active > a > .nav-icon,
+body.skin-modernize-light.theme-color-teal   .sidebar-menu > li.active > a > .nav-icon { color: #0a7ea4 }
+body.skin-modernize.theme-color-cyan   .sidebar-menu > li.active > a > .nav-icon,
+body.skin-modernize-light.theme-color-cyan   .sidebar-menu > li.active > a > .nav-icon { color: #01c0c8 }
+body.skin-modernize.theme-color-orange .sidebar-menu > li.active > a > .nav-icon,
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li.active > a > .nav-icon { color: #d97256 }
+
+/* WHITE — header + sidebar both white, header text black, primary stays modernize blue */
+body.skin-modernize.theme-color-white .main-header .navbar,
+body.skin-modernize-light.theme-color-white .main-header .navbar,
+body.skin-modernize.theme-color-white .main-header .logo,
+body.skin-modernize-light.theme-color-white .main-header .logo {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #2a3547 !important;
+    border-bottom: 1px solid #eaeef3;
+}
+
+body.skin-modernize.theme-color-white .main-header .logo,
+body.skin-modernize-light.theme-color-white .main-header .logo {
+    color: #2a3547 !important;
+    border-right: 1px solid #eaeef3;
+}
+
+body.skin-modernize.theme-color-white .main-header .sidebar-toggle,
+body.skin-modernize-light.theme-color-white .main-header .sidebar-toggle {
+    color: #2a3547 !important;
+    background: transparent !important;
+    border-right: 1px solid #eaeef3 !important;
+}
+
+body.skin-modernize.theme-color-white .main-header .sidebar-toggle:hover,
+body.skin-modernize-light.theme-color-white .main-header .sidebar-toggle:hover {
+    background: #f5f6fa !important;
+    color: #2a3547 !important;
+}
+
+body.skin-modernize.theme-color-white .navbar-nav > li > a,
+body.skin-modernize-light.theme-color-white .navbar-nav > li > a {
+    color: #2a3547 !important;
+    border-left: 1px solid #eaeef3 !important;
+}
+
+body.skin-modernize.theme-color-white .navbar-nav > li > a:hover,
+body.skin-modernize-light.theme-color-white .navbar-nav > li > a:hover,
+body.skin-modernize.theme-color-white .navbar-nav > li > a:focus,
+body.skin-modernize-light.theme-color-white .navbar-nav > li > a:focus {
+    background: #f5f6fa !important;
+    color: #5d87ff !important;
+}
+
+body.skin-modernize.theme-color-white .navbar-nav .open > a,
+body.skin-modernize-light.theme-color-white .navbar-nav .open > a {
+    background: #f0f4ff !important;
+    color: #5d87ff !important;
+}
+
+/* Sidebar = white in BOTH skin variants (overrides the dark gradient of skin-modernize) */
+body.skin-modernize.theme-color-white .main-sidebar,
+body.skin-modernize-light.theme-color-white .main-sidebar {
+    background: #ffffff !important;
+    border-right: 1px solid #eaeef3;
+}
+
+body.skin-modernize.theme-color-white .sidebar a,
+body.skin-modernize-light.theme-color-white .sidebar a {
+    color: #2a3547 !important;
+}
+
+/* Active pill = blue primary, white text */
+body.skin-modernize.theme-color-white .sidebar-menu > li.active > a::before,
+body.skin-modernize-light.theme-color-white .sidebar-menu > li.active > a::before {
+    background: #5d87ff;
+}
+
+body.skin-modernize.theme-color-white .sidebar-menu > li:hover > a::before,
+body.skin-modernize-light.theme-color-white .sidebar-menu > li:hover > a::before {
+    background: rgba(93, 135, 255, 0.12);
+}
+
+body.skin-modernize.theme-color-white .sidebar-menu > li.active > a,
+body.skin-modernize-light.theme-color-white .sidebar-menu > li.active > a {
+    color: #ffffff !important;
+}
+
+/* Icon chip on white sidebar */
+body.skin-modernize.theme-color-white .sidebar-menu > li > a > .nav-icon,
+body.skin-modernize-light.theme-color-white .sidebar-menu > li > a > .nav-icon {
+    background: rgba(93, 135, 255, 0.10);
+    color: #5d87ff;
+}
+
+body.skin-modernize.theme-color-white .sidebar-menu > li:hover > a > .nav-icon,
+body.skin-modernize-light.theme-color-white .sidebar-menu > li:hover > a > .nav-icon {
+    background: rgba(93, 135, 255, 0.20);
+    color: #5d87ff;
+}
+
+body.skin-modernize.theme-color-white .sidebar-menu > li.active > a > .nav-icon,
+body.skin-modernize-light.theme-color-white .sidebar-menu > li.active > a > .nav-icon {
+    background: rgba(255, 255, 255, 0.30);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+/* Grid/panel title text + dialog titlebar still use the modernize blue accent */
+body.skin-modernize.theme-color-white .grid-title,
+body.skin-modernize-light.theme-color-white .grid-title,
+body.skin-modernize.theme-color-white .panel-titlebar,
+body.skin-modernize-light.theme-color-white .panel-titlebar,
+body.skin-modernize.theme-color-white .slick-header-column.ui-state-default,
+body.skin-modernize-light.theme-color-white .slick-header-column.ui-state-default {
+    color: #5d87ff;
+}
+
+body.skin-modernize.theme-color-white .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize-light.theme-color-white .ui-dialog .ui-dialog-titlebar,
+body.skin-modernize.theme-color-white .main-header li.user-header,
+body.skin-modernize-light.theme-color-white .main-header li.user-header,
+body.skin-modernize.theme-color-white .s-QuickSearchBar .quick-search-icon,
+body.skin-modernize-light.theme-color-white .s-QuickSearchBar .quick-search-icon {
+    background: #5d87ff;
+    background-color: #5d87ff;
+}
+
+/*--------------------------------- Modernize sidebar polish (pill, slide animation, scrollbar) -----*/
+
+/* Right-rounded shape for menu items + slide-in hover/active background.
+   Only the RIGHT corners are rounded; left edge stays flush with the sidebar. */
+.skin-modernize .sidebar-menu > li > a,
+.skin-modernize-light .sidebar-menu > li > a {
+    position: relative;
+    overflow: hidden;
+    margin: 3px 12px 3px 0;        /* no left margin — pill touches left edge */
+    border-radius: 0 999px 999px 0;
+    background: transparent !important;
+    border-left: 0 !important;
+    padding-left: 14px;
+    padding-right: 14px;
+    z-index: 1;
+}
+
+/* Sliding fill (left → right) — pseudo-element so it animates underneath the text/icon */
+.skin-modernize .sidebar-menu > li > a::before,
+.skin-modernize-light .sidebar-menu > li > a::before {
+    content: '';
+    position: absolute;
+    inset: 0;                      /* top:0 right:0 bottom:0 left:0 */
+    width: 0;
+    background: rgba(93, 135, 255, 0.12);
+    border-radius: inherit;
+    transition: width 0.28s cubic-bezier(.22,.61,.36,1);
+    z-index: -1;
+}
+
+.skin-modernize-light .sidebar-menu > li:hover > a::before,
+.skin-modernize-light .sidebar-menu > li.active > a::before {
+    width: 100%;
+}
+
+.skin-modernize .sidebar-menu > li:hover > a::before,
+.skin-modernize .sidebar-menu > li.active > a::before {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Active = full primary fill */
+.skin-modernize .sidebar-menu > li.active > a::before,
+.skin-modernize-light .sidebar-menu > li.active > a::before {
+    background: #5d87ff;
+}
+
+.skin-modernize-light .sidebar-menu > li.active > a {
+    color: #ffffff !important;
+    background: transparent !important;        /* pseudo provides the bg */
+}
+
+.skin-modernize-light .sidebar-menu > li.active > a > .nav-icon {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+/* Per-theme-color active fill */
+body.skin-modernize.theme-color-aqua   .sidebar-menu > li.active > a::before,
+body.skin-modernize-light.theme-color-aqua   .sidebar-menu > li.active > a::before { background: #0074ba }
+body.skin-modernize.theme-color-purple .sidebar-menu > li.active > a::before,
+body.skin-modernize-light.theme-color-purple .sidebar-menu > li.active > a::before { background: #763eba }
+body.skin-modernize.theme-color-teal   .sidebar-menu > li.active > a::before,
+body.skin-modernize-light.theme-color-teal   .sidebar-menu > li.active > a::before { background: #0a7ea4 }
+body.skin-modernize.theme-color-cyan   .sidebar-menu > li.active > a::before,
+body.skin-modernize-light.theme-color-cyan   .sidebar-menu > li.active > a::before { background: #01c0c8 }
+body.skin-modernize.theme-color-orange .sidebar-menu > li.active > a::before,
+body.skin-modernize-light.theme-color-orange .sidebar-menu > li.active > a::before { background: #fb9678 }
+
+/* Custom thin scrollbar inside the sidebar */
+.skin-modernize .main-sidebar,
+.skin-modernize-light .main-sidebar,
+.skin-modernize .sidebar,
+.skin-modernize-light .sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(93,135,255,0.35) transparent;
+}
+
+.skin-modernize .main-sidebar::-webkit-scrollbar,
+.skin-modernize-light .main-sidebar::-webkit-scrollbar,
+.skin-modernize .sidebar::-webkit-scrollbar,
+.skin-modernize-light .sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.skin-modernize .main-sidebar::-webkit-scrollbar-track,
+.skin-modernize-light .main-sidebar::-webkit-scrollbar-track,
+.skin-modernize .sidebar::-webkit-scrollbar-track,
+.skin-modernize-light .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.skin-modernize .main-sidebar::-webkit-scrollbar-thumb,
+.skin-modernize-light .main-sidebar::-webkit-scrollbar-thumb,
+.skin-modernize .sidebar::-webkit-scrollbar-thumb,
+.skin-modernize-light .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(93,135,255,0.35);
+    border-radius: 999px;
+}
+
+.skin-modernize .main-sidebar:hover::-webkit-scrollbar-thumb,
+.skin-modernize-light .main-sidebar:hover::-webkit-scrollbar-thumb,
+.skin-modernize .sidebar:hover::-webkit-scrollbar-thumb,
+.skin-modernize-light .sidebar:hover::-webkit-scrollbar-thumb {
+    background: rgba(93,135,255,0.55);
+}
+
+/* Submenu slide too — right-rounded only, flush to left edge */
+.skin-modernize .sidebar-menu .treeview-menu > li > a,
+.skin-modernize-light .sidebar-menu .treeview-menu > li > a {
+    position: relative;
+    overflow: hidden;
+    margin: 1px 16px 1px 0;
+    border-radius: 0 999px 999px 0;
+    z-index: 1;
+}
+
+.skin-modernize .sidebar-menu .treeview-menu > li > a::before,
+.skin-modernize-light .sidebar-menu .treeview-menu > li > a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 0;
+    background: rgba(93, 135, 255, 0.10);
+    border-radius: inherit;
+    transition: width 0.25s cubic-bezier(.22,.61,.36,1);
+    z-index: -1;
+}
+
+.skin-modernize-light .sidebar-menu .treeview-menu > li:hover > a::before,
+.skin-modernize-light .sidebar-menu .treeview-menu > li.active > a::before {
+    width: 100%;
+}
+
+.skin-modernize .sidebar-menu .treeview-menu > li:hover > a::before,
+.skin-modernize .sidebar-menu .treeview-menu > li.active > a::before {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.10);
+}
+
+/*--------------------------------- Modernize header (icons + punch buttons) ----------*/
+
+/* Top-right nav icons — soft hover halo. No layout-affecting properties
+   (no margin/padding/position changes) so SlickGrid's drag plugin keeps
+   its expected offset math on header elements. */
+.skin-modernize .navbar-nav > li > a,
+.skin-modernize-light .navbar-nav > li > a {
+    border-left: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.skin-modernize .navbar-nav > li > a > .fa,
+.skin-modernize-light .navbar-nav > li > a > .fa {
+    font-size: 18px;
+}
+
+.skin-modernize .navbar-nav > li > a:hover,
+.skin-modernize-light .navbar-nav > li > a:hover,
+.skin-modernize .navbar-nav > li > a:focus,
+.skin-modernize-light .navbar-nav > li > a:focus {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+/* Notification badge dot — small red circle in top-right of icon */
+.skin-modernize .navbar-nav > li > a > .label,
+.skin-modernize-light .navbar-nav > li > a > .label,
+.skin-modernize .navbar-nav > li > a > .badge,
+.skin-modernize-light .navbar-nav > li > a > .badge {
+    border-radius: 999px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 18px;
+    line-height: 14px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+    top: 4px;
+    right: 4px;
+}
+
+/* User avatar in top nav — clean circle */
+.skin-modernize .navbar-nav > .user-menu .user-image,
+.skin-modernize-light .navbar-nav > .user-menu .user-image {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+}
+
+/* PUNCH IN / PUNCH OUT — modern pill with soft glow */
+.skin-modernize #punchInButton,
+.skin-modernize-light #punchInButton,
+.skin-modernize #punchOutButton,
+.skin-modernize-light #punchOutButton {
+    border: 0;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    padding: 8px 18px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.skin-modernize #punchInButton,
+.skin-modernize-light #punchInButton {
+    background: linear-gradient(135deg, #13deb9 0%, #0fa78f 100%);
+    color: #ffffff;
+}
+
+.skin-modernize #punchInButton:hover,
+.skin-modernize-light #punchInButton:hover {
+    background: linear-gradient(135deg, #0fa78f 0%, #098f7a 100%);
+    box-shadow: 0 6px 18px rgba(15, 167, 143, 0.45);
+    transform: translateY(-1px);
+}
+
+.skin-modernize #punchOutButton,
+.skin-modernize-light #punchOutButton {
+    background: linear-gradient(135deg, #fa896b 0%, #d94e2e 100%);
+    color: #ffffff;
+}
+
+.skin-modernize #punchOutButton:hover,
+.skin-modernize-light #punchOutButton:hover {
+    background: linear-gradient(135deg, #d94e2e 0%, #b53a1d 100%);
+    box-shadow: 0 6px 18px rgba(217, 78, 46, 0.45);
+    transform: translateY(-1px);
+}
+
+.skin-modernize #punchInButton .fa,
+.skin-modernize-light #punchInButton .fa,
+.skin-modernize #punchOutButton .fa,
+.skin-modernize-light #punchOutButton .fa {
+    margin-right: 6px;
+    font-size: 14px;
+}

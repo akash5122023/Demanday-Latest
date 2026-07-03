@@ -26,6 +26,44 @@
                 $FirstCategory.hide();
 
         }
+
+        protected afterLoadEntity() {
+            super.afterLoadEntity();
+            this.addUrlOpenLinks();
+        }
+
+        // Adds a clickable "open link" icon inside URL fields on Demanday & Toolkit edit forms.
+        private addUrlOpenLinks() {
+            let svc = (this.getService && this.getService()) || '';
+            if (svc.indexOf('Demanday/') !== 0 && svc.indexOf('Toolkit/') !== 0)
+                return;
+
+            const linkFields = ['ProfileLink', 'CompanyLink', 'RevenueLink', 'AddressLink', 'AdressLink', 'Link', 'Domain'];
+
+            for (let field of linkFields) {
+                let input = this.byId(field);
+                if (!input || !input.length)
+                    continue;
+
+                // Don't wrap or resize the input (that breaks the field width); just overlay an
+                // absolutely-positioned icon inside the input's existing container.
+                let holder = input.parent();
+                if (!holder.length || holder.children('.url-open-link').length)
+                    continue;
+
+                holder.addClass('url-link-holder');
+
+                let link = $('<a class="url-open-link" target="_blank" rel="noopener" title="Open link"><i class="fa fa-external-link"></i></a>');
+                link.on('click', (e) => {
+                    let val = ('' + (input.val() || '')).trim();
+                    if (!val) { e.preventDefault(); return; }
+                    if (!/^(https?:|mailto:|tel:)/i.test(val))
+                        val = 'https://' + val;
+                    link.attr('href', val);
+                });
+                holder.append(link);
+            }
+        }
         protected getToolbarButtons(): Serenity.ToolButton[] {
             let buttons = super.getToolbarButtons();
 

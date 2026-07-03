@@ -12,6 +12,8 @@
                 $('body').addClass('skin-' + select.val());
             });
 
+            Q.addOption(select, 'modernize', Q.text('Site.Layout.ThemeModernize'));
+            Q.addOption(select, 'modernize-light', Q.text('Site.Layout.ThemeModernizeLight'));
             Q.addOption(select, 'azure', Q.text('Site.Layout.ThemeAzure'));
             Q.addOption(select, 'azure-light', Q.text('Site.Layout.ThemeAzureLight'));
             Q.addOption(select, 'cosmos', Q.text('Site.Layout.ThemeCosmos'));

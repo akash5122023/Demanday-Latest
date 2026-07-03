@@ -23,6 +23,8 @@ namespace AdvanceCRM.Toolkit.Forms
         [HalfWidth]
         public String Domain { get; set; }
         [HalfWidth]
+        public String Email { get; set; }
+        [HalfWidth]
         public Int64 Cpc { get; set; }
         [Category("Representatives")]
         [HalfWidth]

@@ -7,12 +7,13 @@
     <script>var CKEDITOR_BASEPATH = '@Url.Content("~/Scripts/ckeditor/")';</script>
     @Html.ScriptBundle("CKEditor")
 }
+<partial name="~/Modules/Common/_GridFilterPanel.cshtml" />
+
 <div id="GridDiv"></div>
 
 <script type="text/javascript">
     jQuery(function () {
-        new AdvanceCRM.Contacts.ContactsGrid($('#GridDiv'), {}).init();
-
-        Q.initFullHeightGridPage($('#GridDiv'));
+        var grid = new AdvanceCRM.Contacts.ContactsGrid($('#GridDiv'), {}).init();
+        window.attachGridFilterPanel(grid);
     });
 </script>

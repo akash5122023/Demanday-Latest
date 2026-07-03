@@ -7,6 +7,7 @@ using Serenity.Reporting;
 using Serenity.Services;
 using Serenity.Web;
 using AdvanceCRM.Web.Helpers;
+using AdvanceCRM.Masters;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -82,28 +83,49 @@ namespace AdvanceCRM.Toolkit.Endpoints
                 DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
         }
 
-        [HttpPost, ServiceAuthorize("Administration:General")]
+        [HttpPost, ServiceAuthorize("TalCampaign:Import")]
         public ActionResult DownloadTemplate(IDbConnection connection, RetrieveRequest request)
         {
-            string templateFile = Path.Combine(_env.ContentRootPath, "Templates", "TalCampaign_Template.xlsx");
-            byte[] bytes = System.IO.File.ReadAllBytes(templateFile);
+            string[] headers = { "Company Name", "Domain", "User Name" };
 
-            var Output = File(bytes, System.Net.Mime.MediaTypeNames.Application.Octet, "TalCampaign_Template.xlsx");
-            return Output;
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("TalCampaign");
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var cell = ws.Cells[1, i + 1];
+                    cell.Value = headers[i];
+                    cell.Style.Font.Bold = true;
+                    ws.Column(i + 1).Width = 25;
+                }
+
+                byte[] bytes = package.GetAsByteArray();
+                return File(bytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "TalCampaign_Template.xlsx");
+            }
         }
 
-        [HttpPost, ServiceAuthorize("Administration:General")]
-        public ExcelImportResponse ExcelImport(IUnitOfWork uow, ExcelImportRequest request)
+        [HttpPost, ServiceAuthorize("TalCampaign:Import")]
+        public ExcelImportResponse ExcelImport(IUnitOfWork uow, TalCampaignExcelImportRequest request)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
             if (string.IsNullOrWhiteSpace(request.FileName))
                 throw new ArgumentNullException(nameof(request.FileName));
+            if (request.CampaignId == null)
+                throw new ValidationError("Please select a Campaign before importing");
 
             UploadHelper.CheckFileNameSecurity(request.FileName);
 
             if (!request.FileName.StartsWith("temporary/", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentOutOfRangeException("filename");
+
+            // The Team Leader selects the Campaign in the dialog; every imported row is tagged with it
+            // (and its parent Master Account).
+            var campaign = uow.Connection.TryById<DemandayCampaignIdRow>(request.CampaignId.Value);
+            if (campaign == null)
+                throw new ValidationError("Selected campaign was not found");
 
             string physicalPath = UploadHelper.DbFilePath(request.FileName);
 
@@ -122,26 +144,48 @@ namespace AdvanceCRM.Toolkit.Endpoints
             if (worksheet == null)
                 throw new ValidationError("Uploaded excel file does not contain any worksheet");
 
+            // The "User Name" column assigns each row to an Enquiry agent. Match on display name or login name.
+            var userLookup = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var u in uow.Connection.List<AdvanceCRM.Administration.UserRow>())
+            {
+                if (u.UserId == null)
+                    continue;
+                if (!string.IsNullOrWhiteSpace(u.DisplayName) && !userLookup.ContainsKey(u.DisplayName.Trim()))
+                    userLookup[u.DisplayName.Trim()] = u.UserId.Value;
+                if (!string.IsNullOrWhiteSpace(u.Username) && !userLookup.ContainsKey(u.Username.Trim()))
+                    userLookup[u.Username.Trim()] = u.UserId.Value;
+            }
+
             for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
             {
                 try
                 {
                     var companyName = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
                     var domain = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
-                    var cpc = Convert.ToInt64(worksheet.Cells[row, 3].Value ?? 0);
-                    var agentsName = Convert.ToInt32(worksheet.Cells[row, 4].Value ?? 0);
-                    var reason = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
+                    var userName = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
 
-                    if (string.IsNullOrEmpty(companyName) && string.IsNullOrEmpty(domain))
+                    if (string.IsNullOrEmpty(companyName) && string.IsNullOrEmpty(domain) && string.IsNullOrEmpty(userName))
                         continue;
+
+                    if (string.IsNullOrEmpty(userName))
+                    {
+                        response.ErrorList.Add($"Row {row}: User Name is required");
+                        continue;
+                    }
+
+                    if (!userLookup.TryGetValue(userName, out var agentId))
+                    {
+                        response.ErrorList.Add($"Row {row}: User '{userName}' not found");
+                        continue;
+                    }
 
                     var newRow = new MyRow
                     {
                         CompanyName = companyName,
                         Domain = domain,
-                        Cpc = cpc,
-                        AgentsName = agentsName,
-                        Reason = reason,
+                        AgentsName = agentId,
+                        CampaignId = campaign.Id,
+                        MasterAccountId = campaign.DemandayMasterAccountId,
                         OwnerId = Convert.ToInt32(Context.User.GetIdentifier())
                     };
 

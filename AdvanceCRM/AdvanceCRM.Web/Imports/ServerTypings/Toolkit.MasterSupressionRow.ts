@@ -10,6 +10,8 @@
         Date?: string;
         OwnerId?: number;
         MasterAccountId?: number;
+        MasterAccountAccountNumber?: string;
+        CampaignCampaignId?: string;
         OwnerUsername?: string;
         OwnerDisplayName?: string;
         OwnerEmail?: string;
@@ -76,6 +78,8 @@
             Date = "Date",
             OwnerId = "OwnerId",
             MasterAccountId = "MasterAccountId",
+            MasterAccountAccountNumber = "MasterAccountAccountNumber",
+            CampaignCampaignId = "CampaignCampaignId",
             OwnerUsername = "OwnerUsername",
             OwnerDisplayName = "OwnerDisplayName",
             OwnerEmail = "OwnerEmail",

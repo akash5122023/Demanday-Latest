@@ -8,6 +8,9 @@ namespace AdvanceCRM.Toolkit.Forms
     [FormScript("Toolkit.DemandaySpecsExcelImport")]
     public class DemandaySpecsExcelImportForm
     {
+        [LookupEditor("Masters.DemandayCampaignId"), Required]
+        public Int32? CampaignId { get; set; }
+
         [FileUploadEditor(DisplayFileName = true), Required]
         public String FileName { get; set; }
     }

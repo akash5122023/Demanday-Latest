@@ -146,6 +146,12 @@
           "PermissionKey": "Administration:General"
         },
         {
+          "Tablename": "dbo.DNCContacts",
+          "Identifier": "DncContacts",
+          "Module": "DNCContact",
+          "PermissionKey": "Administration:General"
+        },
+        {
           "Tablename": "dbo.EnquiryContacts",
           "Identifier": "EnquiryContacts",
           "Module": "Demanday",

@@ -1,0 +1,1028 @@
+@* ===================== Internal User Chat (floating popup) ===================== *@
+<style>
+    #icrm-chat * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    #icrm-chat-launcher {
+        position: fixed; bottom: 22px; right: 22px; width: 58px; height: 58px;
+        border-radius: 50%; background: linear-gradient(135deg, #2b8cff 0%, #0062E6 100%);
+        color: #fff; border: none; box-shadow: 0 6px 18px rgba(0,98,230,.45);
+        cursor: pointer; z-index: 1045; font-size: 24px; display: flex;
+        align-items: center; justify-content: center; transition: transform .15s ease, box-shadow .15s ease;
+    }
+    #icrm-chat-launcher:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 22px rgba(0,98,230,.55); }
+    #icrm-chat-launcher .icrm-badge {
+        position: absolute; top: -3px; right: -3px; background: #DC3545; color: #fff;
+        border-radius: 11px; min-width: 21px; height: 21px; line-height: 21px;
+        font-size: 11px; font-weight: 700; padding: 0 5px; text-align: center;
+        display: none; box-shadow: 0 0 0 2px #fff; }
+    #icrm-chat-panel {
+        position: fixed; bottom: 90px; right: 22px; width: 366px; height: 500px;
+        max-height: calc(100vh - 120px); background: #fff; border: 1px solid #dbe1e8;
+        border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.28); z-index: 1045;
+        display: none; flex-direction: column; overflow: hidden; font-size: 13.5px; color: #2b2f33;
+    }
+    #icrm-chat-panel.open { display: flex; animation: icrmPop .18s ease; }
+    @@keyframes icrmPop { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .icrm-head { background: linear-gradient(135deg, #2b8cff 0%, #0062E6 100%); color: #fff;
+        padding: 12px 14px; display: flex; align-items: center; gap: 9px; }
+    .icrm-head .icrm-title { font-weight: 700; font-size: 15px; flex: 1; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis; }
+    .icrm-head .icrm-sub { font-size: 11px; opacity: .9; font-weight: 500; }
+    .icrm-head button { background: rgba(255,255,255,.15); border: none; color: #fff; cursor: pointer;
+        font-size: 15px; width: 28px; height: 28px; border-radius: 50%; padding: 0;
+        display: inline-flex; align-items: center; justify-content: center; transition: background .15s; }
+    .icrm-head button:hover { background: rgba(255,255,255,.3); }
+    .icrm-online-toggle { display: none; align-items: center; gap: 5px; cursor: pointer;
+        flex: 0 0 auto; user-select: none; }
+    .icrm-online-toggle .icrm-ol-label { font-size: 10.5px; font-weight: 700; opacity: .92;
+        letter-spacing: .2px; }
+    .icrm-online-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .icrm-online-track { width: 34px; height: 18px; border-radius: 10px; flex: 0 0 34px;
+        background: rgba(255,255,255,.35); position: relative; transition: background .15s; }
+    .icrm-online-knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+        border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+    .icrm-online-toggle input:checked + .icrm-online-track { background: #8a93a0; }
+    .icrm-online-toggle input:checked + .icrm-online-track .icrm-online-knob { left: 18px; }
+    .icrm-avatar { width: 36px; height: 36px; border-radius: 50%; flex: 0 0 36px;
+        object-fit: cover; display: inline-flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 700; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+    /* Online/offline dot on the header avatar */
+    .icrm-head-avatar-wrap { position: relative; display: inline-block; flex: 0 0 36px; }
+    .icrm-head-dot { position: absolute; bottom: -1px; right: -1px; width: 12px; height: 12px;
+        border-radius: 50%; background: #9aa3ab; border: 2px solid #0a66d6; transition: background .2s; }
+    .icrm-head-dot.on { background: #28a745; box-shadow: 0 0 4px rgba(40,167,69,.7); }
+    .icrm-body { flex: 1; overflow-y: auto; background: #eef1f6; }
+    .icrm-search { padding: 9px; border-bottom: 1px solid #e5e9ee; background: #fff; }
+    .icrm-search input { width: 100%; padding: 8px 12px; border: 1px solid #d7dde3;
+        border-radius: 20px; outline: none; font-size: 13px; transition: border-color .15s, box-shadow .15s; }
+    .icrm-search input:focus { border-color: #2b8cff; box-shadow: 0 0 0 3px rgba(43,140,255,.15); }
+    .icrm-contact { display: flex; align-items: center; gap: 11px; padding: 10px 13px;
+        cursor: pointer; border-bottom: 1px solid #e9edf2; background: #fff; transition: background .12s; }
+    .icrm-contact:hover { background: #eaf2ff; }
+    .icrm-contact .icrm-meta { flex: 1; min-width: 0; }
+    .icrm-contact .icrm-name { font-weight: 700; font-size: 13.5px; color: #1f2329; }
+    .icrm-contact .icrm-status { font-size: 11px; font-weight: 600; margin-top: 1px; }
+    .icrm-status .on { color: #28a745; } .icrm-status .off { color: #9aa3ab; }
+    .icrm-contact .icrm-cbadge { background: #28a745; color: #fff; border-radius: 11px;
+        min-width: 21px; height: 21px; line-height: 21px; text-align: center; font-size: 11px;
+        font-weight: 700; padding: 0 6px; margin-left: auto; flex: 0 0 auto; align-self: center;
+        display: inline-block; box-shadow: 0 1px 3px rgba(40,167,69,.4); }
+    .icrm-conv { padding: 12px; display: flex; flex-direction: column; gap: 7px; }
+    .icrm-msg { display: flex; flex-direction: column; max-width: 78%; }
+    .icrm-msg.mine { align-self: flex-end; align-items: flex-end; }
+    .icrm-msg.theirs { align-self: flex-start; align-items: flex-start; }
+    .icrm-bubble { padding: 8px 12px; border-radius: 14px; white-space: pre-wrap;
+        word-wrap: break-word; font-weight: 500; line-height: 1.35; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .icrm-msg.mine .icrm-bubble { background: linear-gradient(135deg, #2b8cff 0%, #0071f0 100%);
+        color: #fff; border-bottom-right-radius: 4px; }
+    .icrm-msg.theirs .icrm-bubble { background: #fff; color: #2b2f33; border: 1px solid #e5e9ee;
+        border-bottom-left-radius: 4px; }
+    .icrm-time { font-size: 10px; color: #9aa3ab; font-weight: 600; margin-top: 3px;
+        display: inline-flex; align-items: center; gap: 3px; }
+    .icrm-ticks { display: inline-flex; align-items: center; color: #8a939b; line-height: 0; }
+    .icrm-ticks.read { color: #34b7f1; } /* WhatsApp blue */
+    .icrm-typing { display: inline-flex; align-items: center; gap: 4px; padding: 11px 14px !important; }
+    .icrm-typing span { width: 7px; height: 7px; border-radius: 50%; background: #9aa3ab;
+        display: inline-block; animation: icrmBlink 1.3s infinite both; }
+    .icrm-typing span:nth-child(2) { animation-delay: .2s; }
+    .icrm-typing span:nth-child(3) { animation-delay: .4s; }
+    @@keyframes icrmBlink { 0%, 80%, 100% { transform: translateY(0); opacity: .35; }
+        40% { transform: translateY(-4px); opacity: 1; } }
+    .icrm-foot { display: none; padding: 9px; border-top: 1px solid #e5e9ee; background: #fff;
+        gap: 8px; }
+    .icrm-foot.open { display: flex; }
+    .icrm-foot input { flex: 1; padding: 9px 14px; border: 1px solid #d7dde3;
+        border-radius: 20px; outline: none; font-size: 13px; transition: border-color .15s, box-shadow .15s; }
+    .icrm-foot input:focus { border-color: #2b8cff; box-shadow: 0 0 0 3px rgba(43,140,255,.15); }
+    .icrm-foot button { background: linear-gradient(135deg, #2b8cff 0%, #0062E6 100%); color: #fff;
+        border: none; border-radius: 20px; padding: 0 18px; cursor: pointer; font-weight: 700;
+        transition: filter .15s; }
+    .icrm-foot button:hover { filter: brightness(1.08); }
+    .icrm-empty { text-align: center; color: #9aa3ab; font-weight: 600; padding: 22px; }
+    /* ---- Attachments ---- */
+    .icrm-img-wrap { position: relative; display: inline-block; line-height: 0; }
+    .icrm-msg-img { max-width: 210px; max-height: 210px; border-radius: 10px; display: block;
+        cursor: pointer; border: 1px solid rgba(0,0,0,.08); }
+    .icrm-img-dl { position: absolute; top: 7px; right: 7px; width: 28px; height: 28px;
+        border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; display: inline-flex;
+        align-items: center; justify-content: center; text-decoration: none; opacity: 0;
+        transition: opacity .15s; }
+    .icrm-img-wrap:hover .icrm-img-dl { opacity: 1; }
+    .icrm-img-dl:hover { background: rgba(0,0,0,.8); }
+    .icrm-file-dl { flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
+        margin-left: auto; }
+    .icrm-msg.mine .icrm-file-dl { color: #fff; }
+    .icrm-msg.mine .icrm-file-dl:hover { background: rgba(255,255,255,.2); }
+    .icrm-msg.theirs .icrm-file-dl { color: #5a6571; }
+    .icrm-msg.theirs .icrm-file-dl:hover { background: #eef1f6; }
+    .icrm-msg.mine .icrm-bubble.icrm-att, .icrm-msg.theirs .icrm-bubble.icrm-att {
+        padding: 5px; }
+    .icrm-file { display: flex; align-items: center; gap: 9px; text-decoration: none;
+        padding: 4px 4px; min-width: 168px; max-width: 230px; }
+    .icrm-file .icrm-fico { width: 36px; height: 36px; flex: 0 0 36px; border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 700;
+        font-size: 11px; }
+    .icrm-file .icrm-fico.pdf { background: #e0382d; }
+    .icrm-file .icrm-fico.excel { background: #1d7044; }
+    .icrm-file .icrm-fmeta { min-width: 0; }
+    .icrm-file .icrm-fname { font-weight: 700; font-size: 12.5px; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis; max-width: 168px; }
+    .icrm-msg.mine .icrm-file .icrm-fname { color: #fff; }
+    .icrm-msg.theirs .icrm-file .icrm-fname { color: #1f2329; }
+    .icrm-file .icrm-fsub { font-size: 10.5px; opacity: .8; font-weight: 600; }
+    .icrm-msg.mine .icrm-file .icrm-fsub { color: rgba(255,255,255,.85); }
+    .icrm-msg.theirs .icrm-file .icrm-fsub { color: #8a939b; }
+    /* attach button + selected-file preview chip in the footer */
+    .icrm-foot .icrm-attach { background: none; padding: 0; width: 34px; flex: 0 0 34px;
+        color: #5a6571; border-radius: 50%; }
+    .icrm-foot .icrm-attach:hover { filter: none; background: #eef1f6; }
+    .icrm-attach-pre { display: none; padding: 7px 9px 0; background: #fff;
+        max-height: 116px; overflow-y: auto; }
+    .icrm-attach-pre.open { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .icrm-attach-pre .icrm-chip { display: inline-flex; align-items: center; gap: 7px;
+        background: #eaf2ff; border: 1px solid #cfe2ff; border-radius: 8px; padding: 5px 9px;
+        max-width: 100%; }
+    .icrm-attach-pre img { width: 32px; height: 32px; object-fit: cover; border-radius: 5px; }
+    .icrm-attach-pre .icrm-chip-name { font-size: 12px; font-weight: 600; color: #1f2329;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; }
+    .icrm-attach-pre .icrm-chip-x { cursor: pointer; color: #9aa3ab; font-weight: 700;
+        font-size: 15px; line-height: 1; padding: 0 2px; }
+    .icrm-attach-pre .icrm-chip-x:hover { color: #DC3545; }
+    /* ---- Groups + admin controls ---- */
+    .icrm-newgroup { display: flex; align-items: center; gap: 8px; padding: 10px 13px;
+        background: #fff; border-bottom: 1px solid #e9edf2; cursor: pointer; font-weight: 700;
+        color: #0062E6; font-size: 13px; transition: background .12s; }
+    .icrm-newgroup:hover { background: #eaf2ff; }
+    .icrm-newgroup .icrm-ng-ico { width: 22px; height: 22px; border-radius: 50%; flex: 0 0 22px;
+        background: linear-gradient(135deg, #2b8cff 0%, #0062E6 100%); color: #fff; font-weight: 700;
+        display: inline-flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; }
+    .icrm-sec { padding: 7px 13px 3px; font-size: 10.5px; font-weight: 700; letter-spacing: .4px;
+        text-transform: uppercase; color: #9aa3ab; background: #eef1f6; }
+    .icrm-sender { font-size: 11px; font-weight: 700; margin-bottom: 2px; }
+    /* admin chat-access switch on each contact */
+    .icrm-access-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .icrm-access { margin-left: auto; flex: 0 0 auto; position: relative; cursor: pointer;
+        display: inline-flex; align-items: center; }
+    .icrm-access-wrap .icrm-access { margin-left: 0; }
+    .icrm-access input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .icrm-access-track { width: 34px; height: 18px; border-radius: 10px; flex: 0 0 34px;
+        background: #cfd6de; position: relative; transition: background .15s; }
+    .icrm-access-knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+        border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+    .icrm-access input:checked + .icrm-access-track { background: #28a745; }
+    .icrm-access input:checked + .icrm-access-track .icrm-access-knob { left: 18px; }
+    /* create-group form */
+    .icrm-ngform { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .icrm-ngform .icrm-ng-name { padding: 9px 12px; border: 1px solid #d7dde3; border-radius: 8px;
+        outline: none; font-size: 13px; }
+    .icrm-ngform .icrm-ng-name:focus { border-color: #2b8cff; box-shadow: 0 0 0 3px rgba(43,140,255,.15); }
+    .icrm-ng-hint { font-size: 11px; font-weight: 700; color: #9aa3ab; text-transform: uppercase;
+        letter-spacing: .3px; }
+    .icrm-ng-members { border: 1px solid #e5e9ee; border-radius: 8px; background: #fff;
+        max-height: 220px; overflow-y: auto; }
+    .icrm-ng-member { display: flex; align-items: center; gap: 10px; padding: 8px 11px;
+        border-bottom: 1px solid #f0f3f7; cursor: pointer; }
+    .icrm-ng-member:last-child { border-bottom: none; }
+    .icrm-ng-member:hover { background: #f5f9ff; }
+    .icrm-ng-member input { width: 16px; height: 16px; flex: 0 0 16px; }
+    .icrm-ng-member .icrm-avatar { width: 30px; height: 30px; flex: 0 0 30px; font-size: 12px; }
+    .icrm-ng-mname { font-weight: 600; font-size: 13px; color: #1f2329; }
+    .icrm-ng-create { background: linear-gradient(135deg, #2b8cff 0%, #0062E6 100%); color: #fff;
+        border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-weight: 700; font-size: 13.5px;
+        transition: filter .15s; }
+    .icrm-ng-create:hover { filter: brightness(1.08); }
+    .icrm-ng-create:disabled { opacity: .6; cursor: default; }
+    /* admins-only group: read-only footer notice for non-admin members */
+    .icrm-readonly { display: none; align-items: center; justify-content: center; gap: 7px;
+        padding: 12px; border-top: 1px solid #e5e9ee; background: #f7f8fa; color: #8a939b;
+        font-size: 12.5px; font-weight: 600; }
+    .icrm-readonly.open { display: flex; }
+    /* "only admins can send" choice in the create-group form */
+    .icrm-ng-adminonly { display: flex; align-items: center; gap: 9px; padding: 9px 11px;
+        background: #fff; border: 1px solid #e5e9ee; border-radius: 8px; cursor: pointer; }
+    .icrm-ng-adminonly input { width: 16px; height: 16px; flex: 0 0 16px; }
+    .icrm-ng-adminonly .icrm-ng-ao-txt { min-width: 0; }
+    .icrm-ng-adminonly .icrm-ng-ao-title { font-weight: 700; font-size: 13px; color: #1f2329; }
+    .icrm-ng-adminonly .icrm-ng-ao-sub { font-size: 11px; color: #8a939b; font-weight: 600; }
+    /* edit-group: remove member + delete group */
+    .icrm-eg-remove { margin-left: auto; flex: 0 0 auto; cursor: pointer; color: #9aa3ab;
+        font-weight: 700; font-size: 18px; line-height: 1; width: 24px; height: 24px;
+        border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+        transition: background .12s, color .12s; }
+    .icrm-eg-remove:hover { background: #ffe9ea; color: #DC3545; }
+    .icrm-eg-delete { background: #fff; color: #DC3545; border: 1px solid #f3c2c6; border-radius: 8px;
+        padding: 10px; cursor: pointer; font-weight: 700; font-size: 13px; transition: background .12s; }
+    .icrm-eg-delete:hover { background: #ffe9ea; }
+</style>
+
+<div id="icrm-chat">
+    <button id="icrm-chat-launcher" title="Chat">
+        <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+        <span class="icrm-badge"></span>
+    </button>
+    <div id="icrm-chat-panel">
+        <div class="icrm-head">
+            <button class="icrm-back" style="display:none" title="Back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <span class="icrm-head-avatar-wrap" style="display:none">
+                <span class="icrm-avatar icrm-head-avatar"></span>
+                <span class="icrm-head-dot"></span>
+            </span>
+            <span class="icrm-title">Messages<div class="icrm-sub"></div></span>
+            <label class="icrm-online-toggle" title="Toggle to show offline users">
+                <span class="icrm-ol-label">Offline</span>
+                <input type="checkbox" class="icrm-online-cb" />
+                <span class="icrm-online-track"><span class="icrm-online-knob"></span></span>
+            </label>
+            <button class="icrm-gedit" style="display:none" title="Edit group">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                </svg>
+            </button>
+            <button class="icrm-close" title="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="icrm-search">
+            <input type="text" placeholder="Search contacts..." />
+        </div>
+        <div class="icrm-body"></div>
+        <div class="icrm-attach-pre"></div>
+        <div class="icrm-foot">
+            <button type="button" class="icrm-attach" title="Attach picture, PDF or Excel">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+            </button>
+            <input type="file" class="icrm-file-input" style="display:none" multiple
+                   accept="image/*,.pdf,.xls,.xlsx,.csv" />
+            <input type="text" placeholder="Type your message" />
+            <button class="icrm-send">Send</button>
+        </div>
+        <div class="icrm-readonly">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Only admins can send messages</span>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function () {
+    var URL_CONTACTS = '@Url.Action("Contacts", "Chat")';
+    var URL_MESSAGES = '@Url.Action("Messages", "Chat")';
+    var URL_SEND = '@Url.Action("Send", "Chat")';
+    var URL_CONVSTATE = '@Url.Action("ConvState", "Chat")';
+    var URL_TYPING = '@Url.Action("Typing", "Chat")';
+    var URL_GROUPMESSAGES = '@Url.Action("GroupMessages", "Chat")';
+    var URL_SENDGROUP = '@Url.Action("SendGroup", "Chat")';
+    var URL_CREATEGROUP = '@Url.Action("CreateGroup", "Chat")';
+    var URL_SETACCESS = '@Url.Action("SetChatAccess", "Chat")';
+    var URL_GROUPMEMBERS = '@Url.Action("GroupMembers", "Chat")';
+    var URL_UPDATEGROUP = '@Url.Action("UpdateGroup", "Chat")';
+    var URL_ADDMEMBERS = '@Url.Action("AddGroupMembers", "Chat")';
+    var URL_REMOVEMEMBER = '@Url.Action("RemoveGroupMember", "Chat")';
+    var URL_DELETEGROUP = '@Url.Action("DeleteGroup", "Chat")';
+
+    // The chat polls every few seconds. Mark every Chat request non-global so it does NOT
+    // trigger jQuery's global ajax events (ajaxStart/ajaxStop/jQuery.active). Those events drive
+    // Serenity's Router and loading indicator — leaving them coupled made the whole page appear
+    // to refresh on each poll. With global:false the chat updates in complete isolation.
+    $.ajaxPrefilter(function (options) {
+        if (options.url && options.url.toLowerCase().indexOf('/chat/') > -1)
+            options.global = false;
+    });
+
+    var POLL_MS = 4000;
+    var CONV_POLL_MS = 2000; // faster poll for ticks + typing while a chat is open
+
+    // WhatsApp-style tick marks (single = sent, double = delivered, double-blue = read).
+    var SVG_SINGLE = '<svg viewBox="0 0 18 12" width="16" height="11"><path d="M2 6.6l3.4 3.6L16 1.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var SVG_DOUBLE = '<svg viewBox="0 0 24 12" width="18" height="11"><path d="M1 6.6l3.4 3.6L13.6 1.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.2 6.6l3.4 3.6L20.8 1.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    var $root = $('#icrm-chat'), $panel = $('#icrm-chat-panel'),
+        $launcher = $('#icrm-chat-launcher'), $badge = $launcher.find('.icrm-badge'),
+        $body = $panel.find('.icrm-body'), $search = $panel.find('.icrm-search'),
+        $foot = $panel.find('.icrm-foot'), $input = $foot.find('input[type=text]'),
+        $attachBtn = $foot.find('.icrm-attach'), $fileInput = $foot.find('.icrm-file-input'),
+        $attachPre = $panel.find('.icrm-attach-pre'),
+        $back = $panel.find('.icrm-back'), $title = $panel.find('.icrm-title'),
+        $sub = $panel.find('.icrm-sub'), $headAvatar = $panel.find('.icrm-head-avatar-wrap'),
+        $readonly = $panel.find('.icrm-readonly'), $gedit = $panel.find('.icrm-gedit');
+
+    // Toggle the green (online) / grey (offline) dot on the header avatar.
+    function setHeadDot(online) { $panel.find('.icrm-head-dot').toggleClass('on', !!online); }
+
+    var state = { view: 'list', contactId: null, contactName: '', groupId: null, lastId: 0,
+                  contacts: [], groups: [], isAdmin: false, restricted: false, filter: '',
+                  showOffline: false, typing: false, pendingFiles: [] };
+    var pollTimer = null;
+    var convTimer = null;
+    var lastTypingPing = 0;
+    var prevUnread = null; // key (userId or 'g'+groupId) -> last seen unread count, to detect new messages
+
+    // ---- New-message notification: toast + sound + desktop (browser) notification ----
+    var _audioCtx = null;
+    function playBeep() {
+        try {
+            var Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+            if (!_audioCtx) _audioCtx = new Ctx();
+            if (_audioCtx.state === 'suspended') _audioCtx.resume();
+            var o = _audioCtx.createOscillator(), g = _audioCtx.createGain();
+            o.type = 'sine'; o.frequency.value = 880;
+            g.gain.setValueAtTime(0.0001, _audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.25, _audioCtx.currentTime + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.0001, _audioCtx.currentTime + 0.35);
+            o.connect(g); g.connect(_audioCtx.destination);
+            o.start(); o.stop(_audioCtx.currentTime + 0.36);
+        } catch (e) { /* audio not available */ }
+    }
+    function showDesktopNotification(title, body) {
+        try {
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            // Only pop a desktop notification when the tab is not focused.
+            if (document.visibilityState === 'visible' && document.hasFocus()) return;
+            var n = new Notification(title, { body: body, tag: 'icrm-chat-' + title });
+            n.onclick = function () { window.focus(); n.close(); };
+            setTimeout(function () { n.close(); }, 6000);
+        } catch (e) { /* notifications not available */ }
+    }
+    function notifyNewMessage(name, count) {
+        if (window.toastr) toastr.info(count + ' new message(s)', name);
+        playBeep();
+        showDesktopNotification(name, count + ' new message(s)');
+    }
+
+    function colorFor(name) {
+        var colors = ['#007BFF','#28A745','#17A2B8','#6610F2','#E83E8C','#FD7E14','#20C997'];
+        var s = 0; name = name || '?';
+        for (var i = 0; i < name.length; i++) s += name.charCodeAt(i);
+        return colors[s % colors.length];
+    }
+    function avatarEl(c) {
+        if (c.avatar)
+            return $('<img class="icrm-avatar"/>').attr('src', c.avatar).on('error', function () {
+                $(this).replaceWith(initialsEl(c.name));
+            });
+        return initialsEl(c.name);
+    }
+    function initialsEl(name) {
+        var ini = (name || '?').trim().charAt(0).toUpperCase();
+        return $('<span class="icrm-avatar"></span>').text(ini)
+            .css('background', colorFor(name));
+    }
+
+    function groupAvatarEl(name) {
+        return $('<span class="icrm-avatar"></span>').css('background', '#6c5ce7').html(
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" ' +
+            'stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2">' +
+            '</path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87">' +
+            '</path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>');
+    }
+
+    function renderContacts() {
+        $body.empty();
+
+        // Admin-only header action: create a new group.
+        if (state.isAdmin) {
+            $('<div class="icrm-newgroup"></div>')
+                .html('<span class="icrm-ng-ico">+</span> New Group')
+                .on('click', openCreateGroup)
+                .appendTo($body);
+        }
+
+        var filterMatch = function (name) {
+            return !state.filter || (name || '').toLowerCase().indexOf(state.filter) > -1;
+        };
+
+        // Groups section (shown on the default/online view, and when searching).
+        var groups = (state.groups || []).filter(function (g) { return filterMatch(g.name); });
+        if (!state.showOffline && groups.length) {
+            $body.append('<div class="icrm-sec">Groups</div>');
+            groups.forEach(function (g) {
+                var $c = $('<div class="icrm-contact"></div>');
+                var $meta = $('<div class="icrm-meta"></div>')
+                    .append($('<div class="icrm-name"></div>').text(g.name))
+                    .append($('<div class="icrm-status"></div>').html('<span class="off">Group</span>'));
+                $c.append(groupAvatarEl(g.name)).append($meta);
+                if (g.unread > 0)
+                    $c.append($('<span class="icrm-cbadge"></span>').text(g.unread));
+                $c.on('click', function () { openGroup(g.groupId, g.name); });
+                $body.append($c);
+            });
+        }
+
+        var items = state.contacts.filter(function (c) {
+            // Default shows online users; toggle ON shows offline users.
+            if (state.showOffline ? c.online : !c.online) return false;
+            return filterMatch(c.name);
+        });
+        if (!state.showOffline && groups.length && items.length)
+            $body.append('<div class="icrm-sec">People</div>');
+        if (!items.length && !(!state.showOffline && groups.length)) {
+            $body.append('<div class="icrm-empty">' +
+                (state.showOffline ? 'No offline users' : 'No online users') + '</div>'); return;
+        }
+        items.forEach(function (c) {
+            var $c = $('<div class="icrm-contact"></div>').data('id', c.userId).data('name', c.name);
+            var $meta = $('<div class="icrm-meta"></div>')
+                .append($('<div class="icrm-name"></div>').text(c.name))
+                .append($('<div class="icrm-status"></div>').html(c.online
+                    ? '<span class="on">&#9679; Online</span>' : '<span class="off">&#9679; Offline</span>'));
+            $c.append(avatarEl(c)).append($meta);
+            // Admin: a switch to turn this user's chat access on/off.
+            if (state.isAdmin)
+                $c.append(accessToggleEl(c));
+            else if (c.unread > 0)
+                $c.append($('<span class="icrm-cbadge"></span>').text(c.unread));
+            $c.on('click', function () { openConversation(c.userId, c.name); });
+            $body.append($c);
+        });
+    }
+
+    // Admin switch shown on each contact to enable/disable that user's chat.
+    function accessToggleEl(c) {
+        var $wrap = $('<label class="icrm-access" title="Chat access"></label>')
+            .on('click', function (e) { e.stopPropagation(); });
+        var $cb = $('<input type="checkbox" />').prop('checked', c.chatEnabled !== false);
+        $cb.on('change', function () {
+            var enabled = this.checked;
+            $.post(URL_SETACCESS, { userId: c.userId, enabled: enabled }).done(function () {
+                c.chatEnabled = enabled;
+                if (window.toastr)
+                    toastr.success(c.name + (enabled ? ' chat enabled' : ' chat disabled'));
+            }).fail(function () {
+                if (window.toastr) toastr.error('Could not update chat access.');
+            });
+        });
+        $wrap.append($cb).append('<span class="icrm-access-track"><span class="icrm-access-knob"></span></span>');
+        if (c.unread > 0)
+            $wrap = $('<div class="icrm-access-wrap"></div>')
+                .append($('<span class="icrm-cbadge"></span>').text(c.unread)).append($wrap);
+        return $wrap;
+    }
+
+    // SVG download icon reused by image overlay and file cards.
+    var SVG_DOWNLOAD = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>';
+
+    function downloadLink(att, cls) {
+        return $('<a></a>').addClass(cls).attr('href', att.url)
+            .attr('download', att.name || 'attachment').attr('title', 'Download')
+            .html(SVG_DOWNLOAD);
+    }
+
+    // Build the bubble that holds an attachment: image preview, or a file card for pdf/excel.
+    function attachmentBubble(att) {
+        var $bubble = $('<div class="icrm-bubble icrm-att"></div>');
+        if (att.type === 'image') {
+            var $wrap = $('<div class="icrm-img-wrap"></div>');
+            $('<img class="icrm-msg-img"/>').attr('src', att.url).attr('alt', att.name || '')
+                .attr('title', att.name || '')
+                .on('click', function () { window.open(att.url, '_blank'); })
+                .appendTo($wrap);
+            $wrap.append(downloadLink(att, 'icrm-img-dl'));
+            return $bubble.append($wrap);
+        }
+        var label = att.type === 'excel' ? 'XLS' : (att.type === 'pdf' ? 'PDF' : 'FILE');
+        var $card = $('<div class="icrm-file"></div>');
+        $card.append($('<span class="icrm-fico"></span>').addClass(att.type).text(label));
+        $card.append($('<div class="icrm-fmeta"></div>')
+            .append($('<div class="icrm-fname"></div>').text(att.name || 'attachment'))
+            .append($('<div class="icrm-fsub"></div>').text('Click to open')));
+        // Clicking the name/icon opens the file; the icon at the end downloads it.
+        $card.find('.icrm-fico, .icrm-fmeta').css('cursor', 'pointer')
+            .on('click', function () { window.open(att.url, '_blank'); });
+        $card.append(downloadLink(att, 'icrm-file-dl'));
+        return $bubble.append($card);
+    }
+
+    function tickEl(status) {
+        var doubled = (status === 'delivered' || status === 'read');
+        return $('<span class="icrm-ticks"></span>')
+            .toggleClass('read', status === 'read')
+            .attr('data-status', status)
+            .html(doubled ? SVG_DOUBLE : SVG_SINGLE);
+    }
+
+    function renderMessages(msgs, append) {
+        if (!append) $body.html('<div class="icrm-conv"></div>');
+        var $conv = $body.find('.icrm-conv');
+        if (!$conv.length) { $body.html('<div class="icrm-conv"></div>'); $conv = $body.find('.icrm-conv'); }
+        // Keep the typing bubble (if any) below freshly appended messages.
+        $conv.find('.icrm-typing-row').remove();
+        msgs.forEach(function (m) {
+            if (m.id > state.lastId) state.lastId = m.id;
+            var $m = $('<div class="icrm-msg"></div>').addClass(m.mine ? 'mine' : 'theirs')
+                .attr('data-id', m.id);
+            // In group chats, label each incoming message with the sender's name.
+            if (!m.mine && m.sender)
+                $m.append($('<div class="icrm-sender"></div>').text(m.sender)
+                    .css('color', colorFor(m.sender)));
+            if (m.attachment)
+                $m.append(attachmentBubble(m.attachment));
+            if (m.message)
+                $m.append($('<div class="icrm-bubble"></div>').text(m.message));
+            var $time = $('<div class="icrm-time"></div>').text(m.time);
+            if (m.mine) $time.append(tickEl(m.status || 'sent'));
+            $m.append($time);
+            $conv.append($m);
+        });
+        $body.scrollTop($body[0].scrollHeight);
+    }
+
+    // Update tick marks of my outgoing messages from a ConvState response.
+    function applyStatuses(statuses) {
+        var map = {};
+        (statuses || []).forEach(function (s) { map[s.id] = s.delivered ? 'delivered' : 'sent'; });
+        $body.find('.icrm-msg.mine').each(function () {
+            var $m = $(this), id = +$m.attr('data-id');
+            var $t = $m.find('.icrm-ticks');
+            if (!id || !$t.length) return;
+            if ($t.attr('data-status') === 'read') return; // read is terminal
+            // Not in the unread list anymore => the receiver has read it.
+            var status = map.hasOwnProperty(id) ? map[id] : 'read';
+            if (status !== $t.attr('data-status')) $t.replaceWith(tickEl(status));
+        });
+    }
+
+    // Show / hide the "other user is typing" bubble at the bottom of the conversation.
+    function showTyping(on) {
+        var $conv = $body.find('.icrm-conv');
+        if (!$conv.length) return;
+        var $row = $conv.find('.icrm-typing-row');
+        if (on) {
+            if (!$row.length) {
+                $conv.append('<div class="icrm-msg theirs icrm-typing-row">' +
+                    '<div class="icrm-bubble icrm-typing"><span></span><span></span><span></span></div></div>');
+                $body.scrollTop($body[0].scrollHeight);
+            }
+        } else {
+            $row.remove();
+        }
+    }
+
+    function showListView() {
+        state.view = 'list'; state.contactId = null; state.groupId = null; state.lastId = 0;
+        state.typing = false;
+        stopConvPoll(); clearPendingFiles();
+        $back.hide(); $headAvatar.hide(); $foot.removeClass('open'); $readonly.removeClass('open');
+        $gedit.css('display', 'none');
+        $title.contents().first().replaceWith('Messages'); $sub.text('');
+        $search.show(); $panel.find('.icrm-online-toggle').css('display', 'inline-flex');
+        renderContacts();
+    }
+
+    // Open a group conversation. Groups have no presence/typing/ticks — just messages.
+    function openGroup(id, name) {
+        state.view = 'group'; state.groupId = id; state.contactId = null; state.contactName = name;
+        state.lastId = 0; state.typing = false; clearPendingFiles();
+        $back.show(); $search.hide();
+        // Admins-only group: hide the composer for non-admin members and show a notice.
+        var g = (state.groups || []).filter(function (x) { return x.groupId === id; })[0];
+        var canSend = !g || g.canSend !== false;
+        $foot.toggleClass('open', canSend);
+        $readonly.toggleClass('open', !canSend);
+        $panel.find('.icrm-online-toggle').css('display', 'none');
+        $gedit.css('display', state.isAdmin ? 'inline-flex' : 'none');
+        $title.contents().first().replaceWith(document.createTextNode(name));
+        $sub.text(g && g.onlyAdminsCanSend ? 'Group · Admins only' : 'Group');
+        $headAvatar.show().find('.icrm-head-avatar')
+            .replaceWith(groupAvatarEl(name).addClass('icrm-head-avatar'));
+        setHeadDot(false);
+        $body.html('<div class="icrm-empty">Loading...</div>');
+        loadGroupMessages(false);
+        $input.focus();
+    }
+
+    function openConversation(id, name) {
+        state.view = 'conv'; state.contactId = id; state.groupId = null; state.contactName = name;
+        state.lastId = 0;
+        state.typing = false; clearPendingFiles();
+        $back.show(); $search.hide(); $foot.addClass('open'); $readonly.removeClass('open');
+        $gedit.css('display', 'none');
+        $panel.find('.icrm-online-toggle').css('display', 'none');
+        $title.contents().first().replaceWith(document.createTextNode(name));
+        var c = state.contacts.filter(function (x) { return x.userId === id; })[0];
+        $sub.text(c && c.online ? 'Online' : 'Offline');
+        $headAvatar.show().find('.icrm-head-avatar')
+            .replaceWith(avatarEl({ name: name, avatar: c && c.avatar }).addClass('icrm-head-avatar'));
+        setHeadDot(c && c.online);
+        $body.html('<div class="icrm-empty">Loading...</div>');
+        loadMessages(false);
+        loadConvState();
+        startConvPoll();
+        $input.focus();
+    }
+
+    function loadContacts() {
+        $.getJSON(URL_CONTACTS, function (res) {
+            // Admin switched my chat off → hide the whole widget.
+            if (res && res.disabled) {
+                $root.hide(); $panel.removeClass('open'); stopPolling(); stopConvPoll();
+                return;
+            }
+            $root.show();
+
+            var contacts = res.contacts || [];
+            var groups = res.groups || [];
+            state.isAdmin = !!res.isAdmin;
+            state.restricted = !!res.restricted; // my 1:1 chat is off; only groups are available
+
+            // Detect newly received messages (users + groups) and notify, skipping the open conversation.
+            if (prevUnread) {
+                contacts.forEach(function (c) {
+                    var was = prevUnread['u' + c.userId] || 0;
+                    var openHere = (state.view === 'conv' && state.contactId === c.userId && $panel.hasClass('open'));
+                    if (c.unread > was && !openHere) notifyNewMessage(c.name, c.unread - was);
+                });
+                groups.forEach(function (g) {
+                    var was = prevUnread['g' + g.groupId] || 0;
+                    var openHere = (state.view === 'group' && state.groupId === g.groupId && $panel.hasClass('open'));
+                    if (g.unread > was && !openHere) notifyNewMessage(g.name, g.unread - was);
+                });
+            }
+            prevUnread = {};
+            contacts.forEach(function (c) { prevUnread['u' + c.userId] = c.unread; });
+            groups.forEach(function (g) { prevUnread['g' + g.groupId] = g.unread; });
+
+            state.contacts = contacts;
+            state.groups = groups;
+            if (res.totalUnread > 0) $badge.text(res.totalUnread).css('display', 'block'); else $badge.css('display', 'none');
+            if (state.view === 'list') {
+                // Restricted (chat-disabled) users get a groups-only list — no search/people controls.
+                if (state.restricted) {
+                    $search.hide();
+                    $panel.find('.icrm-online-toggle').css('display', 'none');
+                }
+                renderContacts();
+            }
+            else if (state.view === 'conv') {
+                var c2 = state.contacts.filter(function (x) { return x.userId === state.contactId; })[0];
+                setHeadDot(c2 && c2.online);
+                if (!state.typing) $sub.text(c2 && c2.online ? 'Online' : 'Offline');
+            }
+        });
+    }
+
+    function loadGroupMessages(append) {
+        if (state.view !== 'group' || !state.groupId) return;
+        $.getJSON(URL_GROUPMESSAGES, { groupId: state.groupId, afterId: append ? state.lastId : 0 },
+            function (msgs) {
+                if (!append && (!msgs || !msgs.length)) {
+                    $body.html('<div class="icrm-empty">No messages yet. Say hi!</div>'); return;
+                }
+                if (msgs && msgs.length) renderMessages(msgs, append);
+            });
+    }
+
+    function loadConvState() {
+        if (state.view !== 'conv' || !state.contactId) return;
+        $.getJSON(URL_CONVSTATE, { withUserId: state.contactId }, function (res) {
+            if (!res || state.view !== 'conv') return;
+            applyStatuses(res.statuses);
+            state.typing = !!res.typing;
+            showTyping(state.typing);
+            if (state.typing) {
+                $sub.text('typing…');
+            } else {
+                var c = state.contacts.filter(function (x) { return x.userId === state.contactId; })[0];
+                setHeadDot(c && c.online);
+                $sub.text(c && c.online ? 'Online' : 'Offline');
+            }
+        });
+    }
+
+    function loadMessages(append) {
+        if (state.view !== 'conv' || !state.contactId) return;
+        $.getJSON(URL_MESSAGES, { withUserId: state.contactId, afterId: append ? state.lastId : 0 },
+            function (msgs) {
+                if (!append && (!msgs || !msgs.length)) {
+                    $body.html('<div class="icrm-empty">No messages yet. Say hi!</div>'); return;
+                }
+                if (msgs && msgs.length) renderMessages(msgs, append);
+            });
+    }
+
+    function sendMessage() {
+        var text = $input.val().trim();
+        var files = state.pendingFiles;
+        var isGroup = state.view === 'group';
+        if ((!text && !files.length) || (!state.contactId && !state.groupId)) return;
+
+        var fd = new FormData();
+        if (isGroup) fd.append('groupId', state.groupId);
+        else fd.append('toUserId', state.contactId);
+        fd.append('message', text);
+        files.forEach(function (f) { fd.append('files', f); });
+
+        $input.val('');
+        clearPendingFiles();
+
+        $.ajax({
+            url: isGroup ? URL_SENDGROUP : URL_SEND, type: 'POST', data: fd,
+            processData: false, contentType: false, dataType: 'json'
+        }).done(function (res) {
+            if (res && res.success && res.messages) renderMessages(res.messages, true);
+            else if (window.toastr) toastr.error((res && res.error) || 'Message could not be sent.');
+        }).fail(function () {
+            if (window.toastr) toastr.error('Upload failed. Please try again.');
+        });
+    }
+
+    // ---- Admin: create-group form (rendered inside the panel body) ----
+    function openCreateGroup() {
+        state.view = 'newgroup'; stopConvPoll(); clearPendingFiles();
+        $back.show(); $search.hide(); $foot.removeClass('open'); $readonly.removeClass('open');
+        $headAvatar.hide(); $gedit.css('display', 'none');
+        $panel.find('.icrm-online-toggle').css('display', 'none');
+        $title.contents().first().replaceWith('New Group'); $sub.text('');
+
+        var $form = $('<div class="icrm-ngform"></div>');
+        $form.append('<input type="text" class="icrm-ng-name" placeholder="Group name" maxlength="150" />');
+        $form.append(
+            '<label class="icrm-ng-adminonly"><input type="checkbox" class="icrm-ng-ao" />' +
+            '<span class="icrm-ng-ao-txt"><div class="icrm-ng-ao-title">Only admins can send</div>' +
+            '<div class="icrm-ng-ao-sub">Members can read but not post (like a WhatsApp announcement group)</div>' +
+            '</span></label>');
+        $form.append('<div class="icrm-ng-hint">Select members</div>');
+        var $list = $('<div class="icrm-ng-members"></div>');
+        (state.contacts || []).slice().sort(function (a, b) {
+            return (a.name || '').localeCompare(b.name || '');
+        }).forEach(function (c) {
+            var $row = $('<label class="icrm-ng-member"></label>');
+            $row.append($('<input type="checkbox" />').val(c.userId));
+            $row.append(avatarEl(c));
+            $row.append($('<span class="icrm-ng-mname"></span>').text(c.name));
+            $list.append($row);
+        });
+        $form.append($list);
+        $form.append('<button type="button" class="icrm-ng-create">Create Group</button>');
+        $body.html('').append($form);
+
+        $form.find('.icrm-ng-create').on('click', function () {
+            var name = $form.find('.icrm-ng-name').val().trim();
+            var onlyAdmins = $form.find('.icrm-ng-ao').is(':checked');
+            var members = $form.find('.icrm-ng-members input:checked').map(function () {
+                return +this.value;
+            }).get();
+            if (!name) { if (window.toastr) toastr.warning('Enter a group name.'); return; }
+            if (!members.length) { if (window.toastr) toastr.warning('Select at least one member.'); return; }
+            $(this).prop('disabled', true);
+            $.post(URL_CREATEGROUP, { name: name, memberIds: members, onlyAdminsCanSend: onlyAdmins }).done(function (res) {
+                if (res && res.success) {
+                    if (window.toastr) toastr.success('Group "' + res.name + '" created');
+                    loadContacts(); showListView();
+                } else if (window.toastr) toastr.error((res && res.error) || 'Could not create group.');
+            }).fail(function () {
+                if (window.toastr) toastr.error('Could not create group.');
+            });
+        });
+        $form.find('.icrm-ng-name').focus();
+    }
+
+    // ---- Admin: edit-group screen (rename, admins-only, add/remove members, delete) ----
+    function openEditGroup(id, name) {
+        state.view = 'editgroup'; state.groupId = id; state.contactName = name;
+        stopConvPoll(); clearPendingFiles();
+        $back.show(); $search.hide(); $foot.removeClass('open'); $readonly.removeClass('open');
+        $headAvatar.hide(); $gedit.css('display', 'none');
+        $panel.find('.icrm-online-toggle').css('display', 'none');
+        $title.contents().first().replaceWith('Edit Group'); $sub.text('');
+        $body.html('<div class="icrm-empty">Loading...</div>');
+        $.getJSON(URL_GROUPMEMBERS, { groupId: id }, function (res) {
+            if (!res || !res.success) {
+                if (window.toastr) toastr.error((res && res.error) || 'Could not load group.');
+                showListView(); loadContacts(); return;
+            }
+            renderEditGroup(res);
+        });
+    }
+
+    function renderEditGroup(data) {
+        state.contactName = data.name;
+        $title.contents().first().replaceWith('Edit Group');
+        var memberIds = (data.members || []).map(function (m) { return m.userId; });
+
+        var $form = $('<div class="icrm-ngform"></div>');
+        $form.append($('<input type="text" class="icrm-ng-name" maxlength="150" />').val(data.name));
+        var $ao = $('<label class="icrm-ng-adminonly"><input type="checkbox" class="icrm-ng-ao" />' +
+            '<span class="icrm-ng-ao-txt"><div class="icrm-ng-ao-title">Only admins can send</div>' +
+            '<div class="icrm-ng-ao-sub">Members can read but not post</div></span></label>');
+        $ao.find('.icrm-ng-ao').prop('checked', !!data.onlyAdminsCanSend);
+        $form.append($ao);
+        $form.append('<button type="button" class="icrm-ng-create icrm-eg-save">Save changes</button>');
+
+        // Current members with a remove button each.
+        $form.append('<div class="icrm-ng-hint">Members (' + (data.members || []).length + ')</div>');
+        var $mlist = $('<div class="icrm-ng-members"></div>');
+        (data.members || []).forEach(function (m) {
+            var $row = $('<div class="icrm-ng-member"></div>');
+            $row.append(avatarEl(m));
+            $row.append($('<span class="icrm-ng-mname"></span>').text(m.name));
+            $row.append($('<span class="icrm-eg-remove" title="Remove">&times;</span>')
+                .on('click', function () {
+                    $.post(URL_REMOVEMEMBER, { groupId: data.groupId, userId: m.userId }).done(function (r) {
+                        if (r && r.success) { loadContacts(); openEditGroup(data.groupId, state.contactName); }
+                        else if (window.toastr) toastr.error('Could not remove member.');
+                    });
+                }));
+            $mlist.append($row);
+        });
+        $form.append($mlist);
+
+        // Non-members that can be added.
+        var addable = (state.contacts || []).filter(function (c) {
+            return memberIds.indexOf(c.userId) === -1;
+        }).sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); });
+        if (addable.length) {
+            $form.append('<div class="icrm-ng-hint">Add members</div>');
+            var $alist = $('<div class="icrm-ng-members"></div>');
+            addable.forEach(function (c) {
+                var $row = $('<label class="icrm-ng-member"></label>');
+                $row.append($('<input type="checkbox" class="icrm-eg-add" />').val(c.userId));
+                $row.append(avatarEl(c));
+                $row.append($('<span class="icrm-ng-mname"></span>').text(c.name));
+                $alist.append($row);
+            });
+            $form.append($alist);
+            $form.append('<button type="button" class="icrm-ng-create icrm-eg-add-btn">Add selected</button>');
+        }
+
+        $form.append('<button type="button" class="icrm-eg-delete">Delete Group</button>');
+        $body.html('').append($form);
+
+        $form.find('.icrm-eg-save').on('click', function () {
+            var nm = $form.find('.icrm-ng-name').val().trim();
+            var oa = $form.find('.icrm-ng-ao').is(':checked');
+            if (!nm) { if (window.toastr) toastr.warning('Enter a group name.'); return; }
+            $.post(URL_UPDATEGROUP, { groupId: data.groupId, name: nm, onlyAdminsCanSend: oa }).done(function (r) {
+                if (r && r.success) {
+                    if (window.toastr) toastr.success('Group updated');
+                    loadContacts(); openEditGroup(data.groupId, nm);
+                } else if (window.toastr) toastr.error((r && r.error) || 'Could not update group.');
+            });
+        });
+
+        $form.find('.icrm-eg-add-btn').on('click', function () {
+            var ids = $form.find('.icrm-eg-add:checked').map(function () { return +this.value; }).get();
+            if (!ids.length) { if (window.toastr) toastr.warning('Select members to add.'); return; }
+            $.post(URL_ADDMEMBERS, { groupId: data.groupId, memberIds: ids }).done(function (r) {
+                if (r && r.success) { loadContacts(); openEditGroup(data.groupId, state.contactName); }
+                else if (window.toastr) toastr.error('Could not add members.');
+            });
+        });
+
+        $form.find('.icrm-eg-delete').on('click', function () {
+            if (!window.confirm('Delete this group for everyone?')) return;
+            $.post(URL_DELETEGROUP, { groupId: data.groupId }).done(function (r) {
+                if (r && r.success) {
+                    if (window.toastr) toastr.success('Group deleted');
+                    showListView(); loadContacts();
+                } else if (window.toastr) toastr.error('Could not delete group.');
+            });
+        });
+    }
+
+    // ---- Attachment picker (footer) — supports multiple files ----
+    function clearPendingFiles() {
+        state.pendingFiles = [];
+        $fileInput.val('');
+        $attachPre.removeClass('open').empty();
+    }
+
+    function removePendingFile(file) {
+        var i = state.pendingFiles.indexOf(file);
+        if (i > -1) state.pendingFiles.splice(i, 1);
+        renderPendingFiles();
+    }
+
+    function renderPendingFiles() {
+        $attachPre.empty();
+        if (!state.pendingFiles.length) { $attachPre.removeClass('open'); return; }
+        state.pendingFiles.forEach(function (file) {
+            var $chip = $('<div class="icrm-chip"></div>');
+            if (/^image\//.test(file.type)) {
+                var url = URL.createObjectURL(file);
+                $('<img/>').attr('src', url)
+                    .on('load', function () { URL.revokeObjectURL(url); }).appendTo($chip);
+            }
+            $chip.append($('<span class="icrm-chip-name"></span>').text(file.name));
+            $chip.append($('<span class="icrm-chip-x" title="Remove">&times;</span>')
+                .on('click', function () { removePendingFile(file); }));
+            $attachPre.append($chip);
+        });
+        $attachPre.addClass('open');
+    }
+
+    function addPendingFiles(fileList) {
+        for (var i = 0; i < fileList.length; i++) {
+            var f = fileList[i];
+            if (f.size > 20 * 1024 * 1024) {
+                if (window.toastr) toastr.error(f.name + ' is larger than 20 MB.');
+                continue;
+            }
+            state.pendingFiles.push(f);
+        }
+        renderPendingFiles();
+    }
+
+    function startPolling() {
+        if (pollTimer) return;
+        pollTimer = setInterval(function () {
+            if (document.hidden) return; // skip work while tab is in the background
+            loadContacts();
+            if (state.view === 'conv') loadMessages(true);
+            else if (state.view === 'group') loadGroupMessages(true);
+        }, POLL_MS);
+    }
+    function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
+    function startConvPoll() {
+        if (convTimer) return;
+        convTimer = setInterval(function () {
+            if (document.hidden) return;
+            if (state.view === 'conv') loadConvState();
+        }, CONV_POLL_MS);
+    }
+    function stopConvPoll() { if (convTimer) { clearInterval(convTimer); convTimer = null; } }
+
+    $launcher.on('click', function () {
+        // Ask for desktop-notification permission on first interaction.
+        if (('Notification' in window) && Notification.permission === 'default') {
+            try { Notification.requestPermission(); } catch (e) { /* older browsers */ }
+        }
+        if ($panel.hasClass('open')) { $panel.removeClass('open'); stopPolling(); stopConvPoll(); }
+        else { $panel.addClass('open'); showListView(); loadContacts(); startPolling(); }
+    });
+    $panel.find('.icrm-close').on('click', function () { $panel.removeClass('open'); stopPolling(); stopConvPoll(); });
+    $gedit.on('click', function () {
+        if (state.view === 'group' && state.groupId) openEditGroup(state.groupId, state.contactName);
+    });
+    $back.on('click', function () {
+        // From the edit screen, go back to the group conversation; otherwise to the list.
+        if (state.view === 'editgroup' && state.groupId) openGroup(state.groupId, state.contactName);
+        else { showListView(); loadContacts(); }
+    });
+    $panel.find('.icrm-online-cb').on('change', function () {
+        state.showOffline = this.checked;
+        if (state.view === 'list') renderContacts();
+    });
+    $foot.find('.icrm-send').on('click', sendMessage);
+    $input.on('keydown', function (e) { if (e.which === 13) { e.preventDefault(); sendMessage(); } });
+    // Attachment picker (multiple files)
+    $attachBtn.on('click', function () { $fileInput.trigger('click'); });
+    $fileInput.on('change', function () {
+        if (this.files && this.files.length) addPendingFiles(this.files);
+        // Reset so re-selecting the same file fires change again; chips hold the real list.
+        $fileInput.val('');
+        $input.focus();
+    });
+    // Notify the other user that I'm typing (throttled to once every 2.5s).
+    $input.on('input', function () {
+        if (!state.contactId || !$input.val().trim()) return;
+        var now = Date.now();
+        if (now - lastTypingPing > 2500) {
+            lastTypingPing = now;
+            $.post(URL_TYPING, { toUserId: state.contactId });
+        }
+    });
+    $search.find('input').on('input', function () {
+        state.filter = $(this).val().toLowerCase(); if (state.view === 'list') renderContacts();
+    });
+
+    // Lightweight background poll while the panel is CLOSED so new-message
+    // notifications still arrive, but at a slow 30s cadence (and paused when the
+    // tab is hidden) so the rest of the application is not hit by constant calls.
+    // While the panel is OPEN, start/stopPolling handles the faster live polling.
+    var BG_POLL_MS = 30000;
+    setInterval(function () {
+        if (document.hidden || $panel.hasClass('open')) return;
+        loadContacts();
+    }, BG_POLL_MS);
+    // Refresh once as soon as the tab becomes visible again.
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) return;
+        if (!$panel.hasClass('open')) loadContacts();
+        else if (state.view === 'conv') { loadMessages(true); loadConvState(); }
+        else if (state.view === 'group') loadGroupMessages(true);
+    });
+    loadContacts();
+})();
+</script>

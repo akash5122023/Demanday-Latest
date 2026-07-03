@@ -16,7 +16,9 @@ namespace AdvanceCRM.Demanday.Forms
         [HalfWidth]
         public String AgentName { get; set; }
 
-        [HalfWidth, TextAreaEditor(Rows = 3)]
+        [HalfWidth]
+        [EditorType("_Ext.HardCodedLookupEditor")]
+        [EditorOption("sourceCSV", "Company Confirm,Voice Mail,Ringing,Not Found,Not Working,Invalid Number")]
         public String CdqaComments { get; set; }
 
         //[HalfWidth, LookupEditor(typeof(CampaignRow))]

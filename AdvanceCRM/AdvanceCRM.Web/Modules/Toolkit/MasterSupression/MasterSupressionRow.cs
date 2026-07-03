@@ -33,7 +33,7 @@ namespace AdvanceCRM.Toolkit
         //    set => fields.CampaignId[this] = value;
         //}
 
-        [DisplayName("Company Name"), Size(200), NameProperty]
+        [DisplayName("Company Name"), Size(200), QuickSearch, NameProperty]
         public String CompanyName
         {
             get => fields.CompanyName[this];
@@ -54,14 +54,14 @@ namespace AdvanceCRM.Toolkit
             set => fields.LastName[this] = value;
         }
 
-        [DisplayName("Email"), Size(200)]
+        [DisplayName("Email"), Size(200), QuickSearch]
         public String Email
         {
             get => fields.Email[this];
             set => fields.Email[this] = value;
         }
 
-        [DisplayName("Domain"), Size(50)]
+        [DisplayName("Domain"), Size(50), QuickSearch]
         public String Domain
         {
             get => fields.Domain[this];
@@ -89,6 +89,21 @@ namespace AdvanceCRM.Toolkit
             get => fields.CampaignId[this];
             set => fields.CampaignId[this] = value;
         }
+
+        [DisplayName("Account Number"), Expression("jMasterAccount.[AccountNumber]")]
+        public String MasterAccountAccountNumber
+        {
+            get => fields.MasterAccountAccountNumber[this];
+            set => fields.MasterAccountAccountNumber[this] = value;
+        }
+
+        [DisplayName("Campaign Id"), Expression("jCampaign.[CampaignId]")]
+        public String CampaignCampaignId
+        {
+            get => fields.CampaignCampaignId[this];
+            set => fields.CampaignCampaignId[this] = value;
+        }
+
         [DisplayName("Created By"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jOwner"), TextualField("OwnerUsername"), ReadOnly(true)]
         [Administration.UserEditor]
         public Int32? OwnerId
@@ -394,6 +409,9 @@ namespace AdvanceCRM.Toolkit
 
             public Int32Field MasterAccountId;
             //public Int32Field CampaignId;
+
+            public StringField MasterAccountAccountNumber;
+            public StringField CampaignCampaignId;
 
             public StringField OwnerUsername;
             public StringField OwnerDisplayName;

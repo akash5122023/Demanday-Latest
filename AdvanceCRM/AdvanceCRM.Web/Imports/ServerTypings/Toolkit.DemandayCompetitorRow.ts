@@ -3,6 +3,7 @@
         Id?: number;
         CompanyName?: string;
         Domain?: string;
+        Email?: string;
         Cpc?: number;
         MasterAccountId?: number;
         CampaignId?: number;
@@ -69,6 +70,7 @@
             Id = "Id",
             CompanyName = "CompanyName",
             Domain = "Domain",
+            Email = "Email",
             Cpc = "Cpc",
             MasterAccountId = "MasterAccountId",
             CampaignId = "CampaignId",

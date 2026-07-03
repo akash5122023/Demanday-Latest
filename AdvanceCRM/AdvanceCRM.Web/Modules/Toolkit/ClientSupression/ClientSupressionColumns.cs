@@ -14,15 +14,16 @@ namespace AdvanceCRM.Toolkit.Columns
     {
         [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
-        [EditLink]
-        public Int32 CampaignId { get; set; }
+        [EditLink, DisplayName("Campaign Id")]
+        public String CampaignCampaignId { get; set; }
+        [DisplayName("Account Number")]
+        public String MasterAccountAccountNumber { get; set; }
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }
         public String Email { get; set; }
         public String Domain { get; set; }
         public DateTime Date { get; set; }
-        //public String MasterAccountCampaignId { get; set; }
         public String OwnerUsername { get; set; }
     }
 }

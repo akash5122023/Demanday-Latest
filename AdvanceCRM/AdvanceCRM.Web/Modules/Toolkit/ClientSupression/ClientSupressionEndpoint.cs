@@ -7,6 +7,7 @@ using Serenity.Reporting;
 using Serenity.Services;
 using Serenity.Web;
 using AdvanceCRM.Web.Helpers;
+using AdvanceCRM.Masters;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -82,17 +83,30 @@ namespace AdvanceCRM.Toolkit.Endpoints
                 DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
         }
 
-        [HttpPost, ServiceAuthorize("Administration:General")]
+        [HttpPost, ServiceAuthorize("ClientSupression:Import")]
         public ActionResult DownloadTemplate(IDbConnection connection, RetrieveRequest request)
         {
-            string templateFile = Path.Combine(_env.ContentRootPath, "Templates", "ClientSupression_Template.xlsx");
-            byte[] bytes = System.IO.File.ReadAllBytes(templateFile);
+            string[] headers = { "Campaign Id", "Company Name", "First Name", "Last Name", "Email", "Domain", "Date" };
 
-            var Output = File(bytes, System.Net.Mime.MediaTypeNames.Application.Octet, "ClientSupression_Template.xlsx");
-            return Output;
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("ClientSupression");
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    var cell = ws.Cells[1, i + 1];
+                    cell.Value = headers[i];
+                    cell.Style.Font.Bold = true;
+                    ws.Column(i + 1).Width = 20;
+                }
+
+                byte[] bytes = package.GetAsByteArray();
+                return File(bytes,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "ClientSupression_Template.xlsx");
+            }
         }
 
-        [HttpPost, ServiceAuthorize("Administration:General")]
+        [HttpPost, ServiceAuthorize("ClientSupression:Import")]
         public ExcelImportResponse ExcelImport(IUnitOfWork uow, ExcelImportRequest request)
         {
             if (request == null)
@@ -122,19 +136,39 @@ namespace AdvanceCRM.Toolkit.Endpoints
             if (worksheet == null)
                 throw new ValidationError("Uploaded excel file does not contain any worksheet");
 
+            // Client Suppression is uploaded campaign-wise; resolve the Campaign Id column to a Campaign
+            // (and its parent Master Account).
+            var campaignLookup = uow.Connection.List<DemandayCampaignIdRow>()
+                .Where(c => !string.IsNullOrWhiteSpace(c.CampaignId))
+                .GroupBy(c => c.CampaignId.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
             for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
             {
                 try
                 {
-                    var companyName = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
-                    var firstName = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
-                    var lastName = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
-                    var email = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
-                    var domain = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
-                    var dateStr = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
+                    var campaignId = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
+                    var companyName = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
+                    var firstName = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
+                    var lastName = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
+                    var email = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
+                    var domain = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
+                    var dateStr = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
 
-                    if (string.IsNullOrEmpty(companyName) && string.IsNullOrEmpty(email))
+                    if (string.IsNullOrEmpty(campaignId) && string.IsNullOrEmpty(companyName) && string.IsNullOrEmpty(email))
                         continue;
+
+                    if (string.IsNullOrEmpty(campaignId))
+                    {
+                        response.ErrorList.Add($"Row {row}: Campaign Id is required");
+                        continue;
+                    }
+
+                    if (!campaignLookup.TryGetValue(campaignId, out var campaign))
+                    {
+                        response.ErrorList.Add($"Row {row}: Campaign Id '{campaignId}' not found");
+                        continue;
+                    }
 
                     DateTime? date = null;
                     if (!string.IsNullOrEmpty(dateStr))
@@ -145,6 +179,8 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
                     var newRow = new MyRow
                     {
+                        CampaignId = campaign.Id,
+                        MasterAccountId = campaign.DemandayMasterAccountId,
                         CompanyName = companyName,
                         FirstName = firstName,
                         LastName = lastName,

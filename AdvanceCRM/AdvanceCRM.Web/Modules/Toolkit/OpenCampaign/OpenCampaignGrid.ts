@@ -38,7 +38,7 @@ namespace AdvanceCRM.Toolkit {
                 title: 'Campaign'
             });
 
-            return filters;
+            return this.orderQuickFilters(filters);
         }
     }
 }

@@ -232,11 +232,11 @@ namespace MVC
             {
                 public const string CampaignBmIndex = "~/Modules/BizMail/CampaignBm/CampaignBmIndex.cshtml";
             }
-
         }
 
         public static class Common
         {
+            public const string _GridFilterPanel = "~/Modules/Common/_GridFilterPanel.cshtml";
             public static class Activation
             {
                 public const string ActivationIndex = "~/Modules/Common/Activation/ActivationIndex.cshtml";
@@ -370,6 +370,15 @@ namespace MVC
         public static class DMS
         {
             public const string DMSIndex = "~/Modules/DMS/DMSIndex.cshtml";
+        }
+
+        public static class DNCContact
+        {
+            public static class DncContacts
+            {
+                public const string DncContactsIndex = "~/Modules/DNCContact/DncContacts/DncContactsIndex.cshtml";
+            }
+
         }
 
         public static class Employee
@@ -527,9 +536,34 @@ namespace MVC
                 public const string DemandayCampaignIdIndex = "~/Modules/Masters/DemandayCampaignId/DemandayCampaignIdIndex.cshtml";
             }
 
+            public static class DemandayCountryMaster
+            {
+                public const string DemandayCountryMasterIndex = "~/Modules/Masters/DemandayCountryMaster/DemandayCountryMasterIndex.cshtml";
+            }
+
+            public static class DemandayEmployeeSizeMaster
+            {
+                public const string DemandayEmployeeSizeMasterIndex = "~/Modules/Masters/DemandayEmployeeSizeMaster/DemandayEmployeeSizeMasterIndex.cshtml";
+            }
+
+            public static class DemandayJobFunctionMaster
+            {
+                public const string DemandayJobFunctionMasterIndex = "~/Modules/Masters/DemandayJobFunctionMaster/DemandayJobFunctionMasterIndex.cshtml";
+            }
+
+            public static class DemandayJobLevelMaster
+            {
+                public const string DemandayJobLevelMasterIndex = "~/Modules/Masters/DemandayJobLevelMaster/DemandayJobLevelMasterIndex.cshtml";
+            }
+
             public static class DemandayMasterAccount
             {
                 public const string DemandayMasterAccountIndex = "~/Modules/Masters/DemandayMasterAccount/DemandayMasterAccountIndex.cshtml";
+            }
+
+            public static class DemandaySubIndustryMaster
+            {
+                public const string DemandaySubIndustryMasterIndex = "~/Modules/Masters/DemandaySubIndustryMaster/DemandaySubIndustryMasterIndex.cshtml";
             }
 
             public static class DemandayTeleMarketingEnquiryCampaignQuestions
@@ -1198,6 +1232,7 @@ namespace MVC
 
         public static class Shared
         {
+            public const string _ChatWidget = "~/Views/Shared/_ChatWidget.cshtml";
             public const string _Layout = "~/Views/Shared/_Layout.cshtml";
             public const string _LayoutHead = "~/Views/Shared/_LayoutHead.cshtml";
             public const string _LayoutHeader = "~/Views/Shared/_LayoutHeader.cshtml";
@@ -1425,6 +1460,11 @@ namespace MVC
             public static class TalCampaign
             {
                 public const string TalCampaignIndex = "~/Modules/Toolkit/TalCampaign/TalCampaignIndex.cshtml";
+            }
+
+            public static class VerifySheets
+            {
+                public const string VerifySheetsIndex = "~/Modules/Toolkit/VerifySheets/VerifySheetsIndex.cshtml";
             }
 
         }

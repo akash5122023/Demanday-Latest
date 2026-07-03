@@ -10,7 +10,7 @@
     var hideNav = Context.Request.Query["hideNav"] == "1";
     var logged = Serenity.Authorization.Username;
     var themeCookie = Context.Request.Cookies["ThemePreference"];
-    var theme = !string.IsNullOrEmpty(themeCookie) ? themeCookie : "azure-light";
+    var theme = !string.IsNullOrEmpty(themeCookie) ? themeCookie : "modernize-light";
     var darkSidebar = theme != null && theme.IndexOf("light") < 0;
     var rtl = System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
     var user = (UserDefinition)Serenity.Authorization.UserDefinition;

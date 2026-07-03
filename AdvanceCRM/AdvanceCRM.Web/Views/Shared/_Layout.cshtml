@@ -31,7 +31,9 @@
     var hideNav = Context.Request.Query["hideNav"] == "1";
     var logged = Serenity.Authorization.Username;
     var themeCookie = Context.Request.Cookies["ThemePreference"];
-    var theme = !string.IsNullOrEmpty(themeCookie) ? themeCookie : "azure-light";
+    var theme = !string.IsNullOrEmpty(themeCookie) ? themeCookie : "modernize-light";
+    var themeColorCookie = Context.Request.Cookies["ThemeColorPreference"];
+    var themeColor = !string.IsNullOrEmpty(themeColorCookie) ? themeColorCookie : "blue";
     var darkSidebar = theme != null && theme.IndexOf("light") < 0;
     var rtl = System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
     var user = (UserDefinition)Serenity.Authorization.UserDefinition;
@@ -58,7 +60,7 @@
     @RenderSection("Head", false)
     <title>@(ViewData["Title"]) - @Texts.Site.Layout.WhiteLabel CRM</title>
 </head>
-<body id="s-@(ViewData["PageId"])Page" class="@(ViewData["BodyClass"]) fixed sidebar-mini hold-transition skin-@theme @(darkSidebar ? "dark-sidebar" : "light-sidebar")@(hideNav ? " no-navigation" : " has-layout-event")@(rtl ? " rtl" : "")">
+<body id="s-@(ViewData["PageId"])Page" class="@(ViewData["BodyClass"]) fixed sidebar-mini hold-transition skin-@theme theme-color-@themeColor @(darkSidebar ? "dark-sidebar" : "light-sidebar")@(hideNav ? " no-navigation" : " has-layout-event")@(rtl ? " rtl" : "")">
     <div id="PageBackground" style="display: none"></div>
     @if (hideNav)
     {
@@ -198,12 +200,12 @@
 
                             <!-- Add Punch In and Punch Out buttons here -->
                             @*<li>
-            <a href="javascript:;" class="btn btn-success navbar-btn" onclick="punchIn()" style="padding: 5px 10px; font-size: 12px;">
+            <a href="javascript:;" class="btn btn-success navbar-btn" style="padding: 5px 10px; font-size: 12px;">
                 <i class="fa fa-sign-in"></i> Punch In
             </a>
         </li>
         <li>
-            <a href="javascript:;" class="btn btn-danger navbar-btn" onclick="punchOut()" style="padding: 5px 10px; font-size: 12px;">
+            <a href="javascript:;" class="btn btn-danger navbar-btn" style="padding: 5px 10px; font-size: 12px;">
                 <i class="fa fa-sign-out"></i> Punch Out
             </a>
         </li>
@@ -214,10 +216,10 @@
         </li>*@
 
                             <li class="d-flex justify-content-center align-items-center flex-column my-3" style="padding-top: 8px; padding-right: 8px;">
-                                <button class="btn btn-success mb-2 px-4 py-2" id="punchInButton" data-toggle="tooltip" data-placement="bottom" title="Punch In" onclick="punchIn()">
+                                <button class="btn btn-success mb-2 px-4 py-2" id="punchInButton" data-toggle="tooltip" data-placement="bottom" title="Punch In">
                                     <i class="fa fa-clock-o"></i> Punch In
                                 </button>
-                                <button class="btn btn-danger px-4 py-2" id="punchOutButton" data-toggle="tooltip" data-placement="bottom" title="Punch Out" onclick="punchOut()" style="display: none;">
+                                <button class="btn btn-danger px-4 py-2" id="punchOutButton" data-toggle="tooltip" data-placement="bottom" title="Punch Out" style="display: none;">
                                     <i class="fa fa-clock-o"></i> Punch Out
                                 </button>
                             </li>
@@ -319,6 +321,11 @@
                             <div class="form-group" style="margin-top: 15px;">
                                 <label class="control-sidebar-subheading">@Texts.Site.Layout.Theme</label>
                                 <select id="ThemeSelect" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label class="control-sidebar-subheading">@Texts.Site.Layout.ThemeColor</label>
+                                <select id="ThemeColorSelect" class="form-control"></select>
                             </div>
                         </form>
                     </div>
@@ -443,75 +450,172 @@
                     }
                 }
             </script>*@
-        <script>
-                     document.addEventListener("DOMContentLoaded", function () {
-                         CheckPunchStatus(); // Check status on page load
-
-                document.getElementById("punchInButton").addEventListener("click", function () {
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function (position) {
-                            var latitude = position.coords.latitude;
-                            var longitude = position.coords.longitude;
-                            var coordinates = latitude + "," + longitude;
-
-                            var apiKey = "YOUR_GOOGLE_API_KEY"; // Replace with your actual API key
-                            var location = "Office";
-                            var userId = @userIdValue; // Ensure Razor renders this correctly
-
-                            var apiUrl = `/api/Leads/PunchIn?UserId=${userId}&Location=${encodeURIComponent(location)}&Coordinates=${encodeURIComponent(coordinates)}`;
-
-                            $.ajax({
-                                url: apiUrl,
-                                type: 'POST',
-                                success: function (response) {
-                                    alert(response);
-                                    CheckPunchStatus(); // Refresh button states
-                                },
-                                error: function (xhr, status, error) {
-                                    alert("Error: " + error);
-                                }
-                            });
-
-                        }, function (error) {
-                            alert("Geolocation error: " + error.message);
-                        });
-                    } else {
-                        alert("Geolocation is not supported by this browser.");
-                    }
-                });
-
-                document.getElementById("punchOutButton").addEventListener("click", function () {
-                    var userId = @userIdValue;
-                    var apiUrl = `/api/Leads/PunchOut?UserId=${userId}`;
-
-                    $.ajax({
-                        url: apiUrl,
-                        type: 'POST',
-                        success: function (response) {
-                            document.getElementById("punchInButton").style.display = "none";
-                        },
-                        error: function (xhr, status, error) {
-                            alert("Error: " + error);
-                        }
-                    });
-                });
-            });
-
-                        function CheckPunchStatus() {
+                <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var punchInButton = document.getElementById("punchInButton");
+                var punchOutButton = document.getElementById("punchOutButton");
                 var userId = @userIdValue;
 
-                fetch(`/api/Leads/CheckPunchStatus?UserId=${userId}`)
-                    .then(response => response.text())
-                    .then(data => {
-                        console.log(data);
-                        if (data === "PunchedIn") {
+                if (!punchInButton || !punchOutButton || !userId) {
+                    return;
+                }
 
-                            document.getElementById("punchInButton").style.display = "none";
-                           document.getElementById("punchOutButton").style.display = "inline-block";
+                function setPunchButtonState(status) {
+                    var normalized = (status || "").trim();
+                    var isPunchedIn = normalized === "PunchedIn";
+
+                    punchInButton.style.display = isPunchedIn ? "none" : "inline-block";
+                    punchOutButton.style.display = isPunchedIn ? "inline-block" : "none";
+                }
+
+                function setButtonBusy(button, isBusy) {
+                    if (!button) {
+                        return;
+                    }
+
+                    button.disabled = isBusy;
+                    button.style.pointerEvents = isBusy ? "none" : "";
+                    button.style.opacity = isBusy ? "0.7" : "";
+                }
+
+                function notifyPunchChanged(status, message) {
+                    window.dispatchEvent(new CustomEvent("attendance:punch-changed", {
+                        detail: {
+                            status: status,
+                            message: message || ""
+                        }
+                    }));
+                }
+
+                function shouldRefreshAttendanceView() {
+                    var path = (window.location.pathname || "").toLowerCase();
+                    return path === "/" ||
+                        path.indexOf("/account/profile") >= 0 ||
+                        path.indexOf("/reports/leaderboard") >= 0;
+                }
+
+                function handleRequestError(xhr, fallbackMessage) {
+                    var responseText = xhr && typeof xhr.responseText === "string"
+                        ? xhr.responseText.trim()
+                        : "";
+                    var message = responseText || fallbackMessage;
+                    Q.notifyError(message);
+                    CheckPunchStatus();
+                }
+
+                function refreshAttendanceContext(status, message) {
+                    setPunchButtonState(status);
+                    notifyPunchChanged(status, message);
+
+                    if (shouldRefreshAttendanceView()) {
+                        window.setTimeout(function () {
+                            window.location.reload();
+                        }, 500);
+                    }
+                }
+
+                function postPunchRequest(url, successStatus, activeButton, fallbackErrorMessage) {
+                    setButtonBusy(activeButton, true);
+
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        success: function (response) {
+                            Q.notifySuccess(response);
+                            refreshAttendanceContext(successStatus, response);
+                        },
+                        error: function (xhr) {
+                            handleRequestError(xhr, fallbackErrorMessage);
+                        },
+                        complete: function () {
+                            setButtonBusy(punchInButton, false);
+                            setButtonBusy(punchOutButton, false);
                         }
                     });
-            }
+                }
 
+                function triggerPunchIn(location, coordinates) {
+                    var resolvedLocation = location || "Location not captured";
+                    var resolvedCoordinates = coordinates || "";
+                    var apiUrl = `/api/Leads/PunchIn?UserId=${userId}&Location=${encodeURIComponent(resolvedLocation)}&Coordinates=${encodeURIComponent(resolvedCoordinates)}`;
+                    postPunchRequest(apiUrl, "PunchedIn", punchInButton, "Unable to record punch-in right now.");
+                }
+
+                punchInButton.addEventListener("click", function () {
+                    if (punchInButton.disabled) {
+                        return;
+                    }
+
+                    if (!navigator.geolocation) {
+                        triggerPunchIn("Location not captured", "");
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var latitude = position.coords.latitude;
+                        var longitude = position.coords.longitude;
+                        var coordinates = latitude + "," + longitude;
+                        triggerPunchIn("Office", coordinates);
+                    }, function () {
+                        Q.notifyInfo("Location not captured. Punch-in will continue without coordinates.");
+                        triggerPunchIn("Location not captured", "");
+                    }, {
+                        enableHighAccuracy: false,
+                        timeout: 7000,
+                        maximumAge: 0
+                    });
+                });
+
+                window.CheckPunchStatus = function () {
+                    fetch(`/api/Leads/CheckPunchStatus?UserId=${userId}`, {
+                        credentials: "same-origin"
+                    })
+                        .then(function (response) {
+                            return response.text();
+                        })
+                        .then(function (data) {
+                            var normalized = (data || "").trim();
+                            console.log("PunchStatus: " + normalized);
+                            setPunchButtonState(normalized);
+                        })
+                        .catch(function () {
+                            setPunchButtonState("NoPunch");
+                        });
+                };
+
+                function triggerPunchOut(coordinates) {
+                    var resolvedCoordinates = coordinates || "";
+                    var apiUrl = `/api/Leads/PunchOut?UserId=${userId}&Coordinates=${encodeURIComponent(resolvedCoordinates)}`;
+                    postPunchRequest(apiUrl, "PunchedOut", punchOutButton, "Unable to record punch-out right now.");
+                }
+
+                punchOutButton.addEventListener("click", function () {
+                    if (punchOutButton.disabled) {
+                        return;
+                    }
+
+                    if (!navigator.geolocation) {
+                        triggerPunchOut("");
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var latitude = position.coords.latitude;
+                        var longitude = position.coords.longitude;
+                        var coordinates = latitude + "," + longitude;
+                        triggerPunchOut(coordinates);
+                    }, function () {
+                        Q.notifyInfo("Location not captured. Punch-out will continue without coordinates.");
+                        triggerPunchOut("");
+                    }, {
+                        enableHighAccuracy: false,
+                        timeout: 7000,
+                        maximumAge: 0
+                    });
+                });
+
+                window.CheckPunchStatus();
+            });
         </script>
         <script type="text/javascript">
 
@@ -545,6 +649,7 @@
                 new AdvanceCRM.Common.SidebarSearch($('#SidebarSearch'), $('#SidebarMenu')).init();
                 new AdvanceCRM.Common.LanguageSelection($('#LanguageSelect'), '@(System.Globalization.CultureInfo.CurrentUICulture.Name)');
                 new AdvanceCRM.Common.ThemeSelection($('#ThemeSelect'));
+                new AdvanceCRM.Common.ThemeColorSelection($('#ThemeColorSelect'));
             @RenderSection("PageInitScript", false);
 
                 var doLayout = function () {
@@ -575,6 +680,7 @@
             });
         </script>
         @RenderSection("Scripts", false)
+        @Html.Partial("_ChatWidget")
     }
 </body>
 </html>

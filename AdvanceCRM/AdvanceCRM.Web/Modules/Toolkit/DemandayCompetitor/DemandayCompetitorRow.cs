@@ -39,6 +39,13 @@ namespace AdvanceCRM.Toolkit
             set => fields.Domain[this] = value;
         }
 
+        [DisplayName("Email"), Size(200)]
+        public String Email
+        {
+            get => fields.Email[this];
+            set => fields.Email[this] = value;
+        }
+
         [DisplayName("CPC"), Column("CPC")]
         public Int64? Cpc
         {
@@ -379,6 +386,7 @@ namespace AdvanceCRM.Toolkit
             public Int32Field Id;
             public StringField CompanyName;
             public StringField Domain;
+            public StringField Email;
             public Int64Field Cpc;
             public Int32Field MasterAccountId;
             public Int32Field CampaignId;

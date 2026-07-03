@@ -13,6 +13,8 @@ namespace AdvanceCRM.Demanday {
         constructor(container: JQuery) {
             super(container);
         }
+
+
 		protected getButtons(): Serenity.ToolButton[] {
 			let buttons = super.getButtons();
 

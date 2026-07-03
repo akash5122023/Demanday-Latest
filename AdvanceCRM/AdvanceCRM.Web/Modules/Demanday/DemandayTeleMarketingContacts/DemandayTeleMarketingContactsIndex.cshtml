@@ -3,12 +3,13 @@
     ViewData["Title"] = Localizer.Get("Db.Demanday.DemandayTeleMarketingContacts.EntityPlural");
 }
 
+<partial name="~/Modules/Common/_GridFilterPanel.cshtml" />
+
 <div id="GridDiv"></div>
 
 <script type="text/javascript">
     jQuery(function () {
-        new AdvanceCRM.Demanday.DemandayTeleMarketingContactsGrid($('#GridDiv'), {}).init();
-
-        Q.initFullHeightGridPage($('#GridDiv'));
+        var grid = new AdvanceCRM.Demanday.DemandayTeleMarketingContactsGrid($('#GridDiv'), {}).init();
+        window.attachGridFilterPanel(grid);
     });
 </script>

@@ -98,6 +98,11 @@ namespace AdvanceCRM
             });
             services.Configure<IISServerOptions>(options =>
             {
+                // App runs in-process under IIS, so the Kestrel AllowSynchronousIO setting
+                // above has no effect. Serenity's ResultWithStatus / Excel export writes the
+                // response synchronously, which IIS rejects unless this is enabled. This fixes
+                // the "Synchronous operations are disallowed" error on all export endpoints.
+                options.AllowSynchronousIO = true;
                 options.MaxRequestBodySize = maxUploadBytes;
             });
             services.Configure<FormOptions>(options =>
@@ -232,6 +237,11 @@ namespace AdvanceCRM
             services.Replace(ServiceDescriptor.Singleton<IConnectionStrings, TenantAwareSqlConnections>());
 
             services.AddSingleton<IReportRegistry, ReportRegistry>();
+            // Serenity's Excel exporter normally comes from the Serenity.Extensions package, which
+            // this project does not reference. Register our EPPlus-based implementation so the grid
+            // "Export to Excel" action works across all modules (Toolkit and others).
+            services.AddSingleton<IDataReportExcelRenderer, AdvanceCRM.Web.Modules.Common.Reporting.ExcelDataReportRenderer>();
+            services.AddSingleton<IExcelExporter, AdvanceCRM.Web.Modules.Common.Reporting.ExcelExporter>();
             services.AddSingleton<IDataMigrations, DataMigrations>();
             services.AddSingleton<Common.IEmailSender, Common.EmailSender>();
             services.AddSingleton<Common.ICommonService, Common.CommonService>();

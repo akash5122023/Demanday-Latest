@@ -47,5 +47,15 @@ namespace AdvanceCRM.Demanday.Endpoints
         {
             return handler.List(connection, request);
         }
+
+        public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
+            [FromServices] IDemandayTeleMarketingEnquiryQADetailsListHandler handler,
+            [FromServices] Serenity.Reporting.IExcelExporter exporter)
+        {
+            var data = List(connection, request, handler).Entities;
+            var bytes = exporter.Export(data, typeof(AdvanceCRM.Demanday.Columns.DemandayTeleMarketingEnquiryQADetailsColumns), request.ExportColumns);
+            return ExcelContentResult.Create(bytes, "DemandayTeleMarketingEnquiryQADetailsList_" +
+                DateTime.Now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".xlsx");
+        }
     }
 }

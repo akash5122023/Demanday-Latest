@@ -8,6 +8,7 @@ using Serenity.Services;
 using Serenity.Web;
 using AdvanceCRM.Web.Helpers;
 using AdvanceCRM.Toolkit;
+using AdvanceCRM.Masters;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
                 DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
         }
 
-        [HttpPost, ServiceAuthorize("Administration:General")]
+        [HttpPost, ServiceAuthorize("DemandaySpecs:Import")]
         public ActionResult DownloadTemplate(IDbConnection connection, RetrieveRequest request)
         {
             string templateFile = Path.Combine(_env.ContentRootPath, "Templates", "DemandaySpecs_Template.xlsx");
@@ -97,18 +98,26 @@ namespace AdvanceCRM.Toolkit.Endpoints
             return Output;
         }
 
-        [HttpPost, ServiceAuthorize("Administration:General")]
-        public ExcelImportResponse ExcelImport(IUnitOfWork uow, ExcelImportRequest request)
+        [HttpPost, ServiceAuthorize("DemandaySpecs:Import")]
+        public ExcelImportResponse ExcelImport(IUnitOfWork uow, DemandaySpecsExcelImportRequest request)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
             if (string.IsNullOrWhiteSpace(request.FileName))
                 throw new ArgumentNullException(nameof(request.FileName));
+            if (request.CampaignId == null)
+                throw new ValidationError("Please select a Campaign before importing");
 
             UploadHelper.CheckFileNameSecurity(request.FileName);
 
             if (!request.FileName.StartsWith("temporary/", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentOutOfRangeException("filename");
+
+            // The Team Leader selects the Campaign in the dialog; every imported row is tagged with it
+            // (and its parent Master Account).
+            var campaign = uow.Connection.TryById<DemandayCampaignIdRow>(request.CampaignId.Value);
+            if (campaign == null)
+                throw new ValidationError("Selected campaign was not found");
 
             string physicalPath = UploadHelper.DbFilePath(request.FileName);
 
@@ -126,6 +135,8 @@ namespace AdvanceCRM.Toolkit.Endpoints
             var worksheet = ep.Workbook.Worksheets.FirstOrDefault();
             if (worksheet == null)
                 throw new ValidationError("Uploaded excel file does not contain any worksheet");
+
+            int ownerId = Convert.ToInt32(Context.User.GetIdentifier());
 
             for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
             {
@@ -166,7 +177,10 @@ namespace AdvanceCRM.Toolkit.Endpoints
                         ZipCode = zipCode,
                         Country = country,
                         Comments = comments,
-                        AdditionalNotes = additionalNotes
+                        AdditionalNotes = additionalNotes,
+                        CampaignId = campaign.Id,
+                        MasterAccountId = campaign.DemandayMasterAccountId,
+                        OwnerId = ownerId
                     };
 
                     uow.Connection.Insert(newRow);

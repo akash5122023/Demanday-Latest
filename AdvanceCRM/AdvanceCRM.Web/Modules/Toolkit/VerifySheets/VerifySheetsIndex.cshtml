@@ -1,0 +1,73 @@
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Verify Sheets";
+}
+
+<style>
+    .verify-sheets-page { padding: 18px 22px; }
+
+    .verify-sheets-page .vs-toolbar {
+        display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 22px;
+    }
+    .verify-sheets-page .vs-campaign-holder .select2-container { min-width: 240px; }
+    .verify-sheets-page .vs-campaign-holder input { min-width: 240px; }
+
+    .verify-sheets-page .vs-dropdown { position: relative; }
+    .verify-sheets-page .vs-verify-btn {
+        background: #1b62d6; color: #fff; border: none; border-radius: 6px;
+        padding: 8px 16px; font-weight: 600; cursor: pointer;
+    }
+    .verify-sheets-page .vs-verify-btn .caret { margin-left: 6px; }
+    .verify-sheets-page .vs-verify-menu {
+        display: none; position: absolute; top: 110%; left: 0; z-index: 1000;
+        background: #fff; border: 1px solid #e3e8ef; border-radius: 8px;
+        box-shadow: 0 6px 24px rgba(20,40,80,.12); padding: 6px 0; min-width: 200px;
+    }
+    .verify-sheets-page .vs-verify-item {
+        display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+        font-weight: 400; margin: 0; cursor: pointer; white-space: nowrap;
+    }
+    .verify-sheets-page .vs-verify-item:hover { background: #f3f7ff; }
+
+    .verify-sheets-page .vs-export-btn {
+        background: #fff; color: #34425a; border: 1px solid #d7dce5; border-radius: 6px;
+        padding: 8px 16px; font-weight: 600; cursor: pointer;
+    }
+    .verify-sheets-page .vs-export-btn:hover { background: #f6f8fb; }
+
+    .verify-sheets-page .vs-section {
+        background: #fff; border: 1px solid #eef1f6; border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(20,40,80,.04); padding: 16px 18px; margin-bottom: 22px;
+    }
+    .verify-sheets-page .vs-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .verify-sheets-page .vs-title { color: #1b62d6; font-size: 16px; font-weight: 700; }
+    .verify-sheets-page .vs-count {
+        background: #eaf1ff; color: #1b62d6; border-radius: 20px;
+        font-size: 12px; font-weight: 600; padding: 2px 10px;
+    }
+
+    .verify-sheets-page .vs-table-wrap { overflow-x: auto; }
+    .verify-sheets-page .vs-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .verify-sheets-page .vs-table thead th {
+        background: #f4f7fc; color: #1b62d6; text-align: left; font-weight: 600;
+        padding: 10px 12px; border-bottom: 1px solid #e6ebf3; white-space: nowrap;
+    }
+    .verify-sheets-page .vs-table tbody td {
+        padding: 10px 12px; border-bottom: 1px solid #f0f3f8; color: #34425a;
+    }
+    .verify-sheets-page .vs-table tbody tr:hover { background: #fafbfe; }
+    .verify-sheets-page .vs-table tbody td:first-child { color: #1b62d6; font-weight: 600; }
+
+    .verify-sheets-page .vs-empty, .verify-sheets-page .vs-loading, .verify-sheets-page .vs-error {
+        padding: 18px 4px; color: #8a95a6; font-size: 13px;
+    }
+    .verify-sheets-page .vs-error { color: #c0392b; }
+</style>
+
+<div id="VerifySheetsDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.Toolkit.VerifySheetsPage($('#VerifySheetsDiv'));
+    });
+</script>

@@ -30,39 +30,24 @@ namespace AdvanceCRM.Toolkit
                 return;
             }
 
-            // Get current logged-in user's ID using the ClaimsPrincipal extension
+            // Team Leaders upload and assign the data, so they (anyone who can insert) see all rows.
+            if (Context.Permissions.HasPermission("TalCampaign:Insert"))
+            {
+                return;
+            }
+
+            // Everyone else (Enquiry agents) sees only the rows assigned to them via the "User Name" column.
             var userIdStr = Context.User.GetIdentifier();
 
             if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
             {
-                // Check if user has a role containing "Enquiry"
-                if (HasEnquiryRole(userId))
-                {
-                    return; // Users with Enquiry role can see all campaigns
-                }
-
-                // Filter records where AgentsName matches the logged-in user's UserId
-                // This ensures users only see records assigned to them
                 query.Where(MyRow.Fields.AgentsName == userId);
             }
-        }
-
-        private bool HasEnquiryRole(int userId)
-        {
-            // Get all role IDs for the current user
-            var userRoleIds = Connection.Query<int>(
-                "SELECT RoleId FROM UserRoles WHERE UserId = @userId",
-                new { userId }).ToList();
-
-            if (userRoleIds.Count == 0)
-                return false;
-
-            // Check if any of these roles contain "Enquiry" in their name
-            var hasEnquiryRole = Connection.Exists<RoleRow>(
-                new Criteria(RoleRow.Fields.RoleId).In(userRoleIds) &
-                new Criteria(RoleRow.Fields.RoleName).Contains("Enquiry"));
-
-            return hasEnquiryRole;
+            else
+            {
+                // No identifiable user: show nothing rather than leaking everyone's data.
+                query.Where(MyRow.Fields.AgentsName == -1);
+            }
         }
     }
 }

@@ -38,24 +38,26 @@ namespace AdvanceCRM.Toolkit {
                 title: 'Campaign'
             });
 
-            return filters;
+            return this.orderQuickFilters(filters);
         }
 
         protected getButtons(): Serenity.ToolButton[] {
             var buttons = super.getButtons();
 
-            buttons.push({
-                title: 'Import from Excel',
-                cssClass: 'export-xlsx-button',
-                onClick: () => {
-                    var dialog = new DemandaySpecsExcelImportDialog();
-                    dialog.element.on('dialogclose', () => {
-                        this.refresh();
-                    });
-                    dialog.dialogOpen();
-                },
-                separator: true
-            });
+            if (Q.Authorization.hasPermission("DemandaySpecs:Import")) {
+                buttons.push({
+                    title: 'Import from Excel',
+                    cssClass: 'export-xlsx-button',
+                    onClick: () => {
+                        var dialog = new DemandaySpecsExcelImportDialog();
+                        dialog.element.on('dialogclose', () => {
+                            this.refresh();
+                        });
+                        dialog.dialogOpen();
+                    },
+                    separator: true
+                });
+            }
 
             return buttons;
         }

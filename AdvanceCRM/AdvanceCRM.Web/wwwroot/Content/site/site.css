@@ -9858,6 +9858,12 @@ section.content > .s-DataGrid {
 .s-Toolkit-DemandaySpecsDialog .caption {
   width: 150px;
 }
+.s-DNCContact-DncContactsDialog > .size {
+  width: 650px;
+}
+.s-DNCContact-DncContactsDialog .caption {
+  width: 150px;
+}
 .main-header .logo {
   width: 400px;
   overflow: visible;
@@ -10447,4 +10453,29 @@ section.content > .s-DataGrid {
 }
 .s-EmployeeAssestsDialog .caption {
   width: 150px;
+}
+/* Make grid cell data selectable (Demanday/Toolkit & all grids) */
+.slick-cell,
+.slick-cell * {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+/* Clickable "open link" icon inside URL fields on edit forms (input untouched) */
+.url-link-holder {
+  position: relative;
+}
+.url-open-link {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1b62d6;
+  cursor: pointer;
+  text-decoration: none;
+  z-index: 5;
+}
+.url-open-link:hover {
+  color: #0d47a1;
 }

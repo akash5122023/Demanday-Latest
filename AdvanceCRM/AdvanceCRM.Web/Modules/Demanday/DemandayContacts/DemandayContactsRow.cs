@@ -190,6 +190,15 @@ namespace AdvanceCRM.Demanday
             set => fields.CompanyEmployeeSize[this] = value;
         }
 
+        // Numeric view of CompanyEmployeeSize (a text column) for safe range filtering.
+        // TRY_CAST returns NULL for non-numeric values so it never errors the query.
+        [DisplayName("Company Employee Size (Number)"), Expression("TRY_CAST(T0.[CompanyEmployeeSize] AS INT)")]
+        public Int32? CompanyEmployeeSizeNum
+        {
+            get => fields.CompanyEmployeeSizeNum[this];
+            set => fields.CompanyEmployeeSizeNum[this] = value;
+        }
+
         [DisplayName("Industry"), Size(100)]
         public String Industry
         {
@@ -693,6 +702,7 @@ namespace AdvanceCRM.Demanday
             public StringField Country;
             public StringField Continents;
             public StringField CompanyEmployeeSize;
+            public Int32Field CompanyEmployeeSizeNum;
             public StringField Industry;
             public StringField Revenue;
             public StringField ProfileLink;
