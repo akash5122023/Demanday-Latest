@@ -165,14 +165,14 @@
 
                     let exclude = (h.widget as any).dvExclude && (h.widget as any).dvExclude();
 
-                    // Exact match (not "contains"), so "Chief Financial Officer" does NOT also
-                    // pull in "Group Chief Financial Officer".
-                    // Include => field = v1 OR field = v2 ...  Exclude => field != v1 AND field != v2 ...
+                    // "Contains" match so typing part of a value works (e.g. "Director" matches
+                    // "Finance Director", "IT Director"). Include => matches ANY (OR of like).
+                    // Exclude => matches NONE (AND of not-like).
                     let combined: any[] = null;
                     for (let v of vals) {
                         let crit: any[] = exclude
-                            ? [Serenity.Criteria(field), '!=', v]
-                            : [Serenity.Criteria(field), '=', v];
+                            ? [Serenity.Criteria(field), 'not like', '%' + v + '%']
+                            : [Serenity.Criteria(field), 'like', '%' + v + '%'];
                         combined = combined == null ? crit
                             : (exclude ? Serenity.Criteria.and(combined, crit)
                                        : Serenity.Criteria.or(combined, crit));
