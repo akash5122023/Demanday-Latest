@@ -37,14 +37,31 @@ namespace AdvanceCRM
                 {
                     webBuilder.UseStaticWebAssets();
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseSentry(o =>
+                    webBuilder.UseSentry((context, o) =>
                     {
-                        o.Dsn = "http://2ae72040ad1de90745b9f72be614d48e@server.abitcons.com:9000/18";
-                        // When configuring for the first time, to see what the SDK is doing:
-                        o.Debug = true;
-                        // Set TracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-                        // We recommend adjusting this value in production.
-                        o.TracesSampleRate = 1.0;
+                        var cfg = context.Configuration;
+                        var dsn = cfg["Sentry:Dsn"];
+
+                        // Enable Sentry only when explicitly turned on AND a DSN is configured.
+                        // Default: OFF in Development (so a locally-unreachable Sentry server can
+                        // never stall requests), ON elsewhere.
+                        var enabled = cfg.GetValue<bool?>("Sentry:Enabled")
+                                      ?? !context.HostingEnvironment.IsDevelopment();
+
+                        if (!enabled || string.IsNullOrWhiteSpace(dsn))
+                        {
+                            // An empty DSN makes the SDK inert: no background worker, no network
+                            // calls, CaptureException/CaptureMessage become no-ops.
+                            o.Dsn = string.Empty;
+                            return;
+                        }
+
+                        o.Dsn = dsn;
+                        o.Debug = false;
+                        // Sample a fraction of transactions instead of every single request.
+                        o.TracesSampleRate = cfg.GetValue<double?>("Sentry:TracesSampleRate") ?? 0.1;
+                        // Never let an unreachable/slow Sentry server block app shutdown or requests.
+                        o.ShutdownTimeout = System.TimeSpan.FromSeconds(2);
                     });
                 })
                 .ConfigureAppConfiguration((builderContext, config) =>
