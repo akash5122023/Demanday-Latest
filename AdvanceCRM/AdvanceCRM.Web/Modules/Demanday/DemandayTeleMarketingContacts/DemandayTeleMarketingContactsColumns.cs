@@ -65,21 +65,23 @@ namespace AdvanceCRM.Demanday.Columns
         //public String OwnerUsername { get; set; }
         [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
+        [QuickFilter]
         public String CampaignId { get; set; }
         //public String AgentsName { get; set; }
         //public String TlName { get; set; }
         //public String CampaignId { get; set; }
-        [QuickFilter]
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }
-        public String Title { get; set; }
         [QuickFilter]
+        public String Title { get; set; }
         public String Email { get; set; }
         public String WorkPhone { get; set; }
         public String AlternativeNumber { get; set; }
         public string Domain { get; set; }
+        [QuickFilter]
         public string JobLevel { get; set; }
+        [QuickFilter]
         public string JobFunctionRole { get; set; }
         public String Street { get; set; }
         public String City { get; set; }
@@ -88,7 +90,9 @@ namespace AdvanceCRM.Demanday.Columns
         [QuickFilter]
         public String Country { get; set; }
         public string CompanyEmployeeSize { get; set; }
+        [QuickFilter]
         public String Industry { get; set; }
+        [QuickFilter]
         public String SubIndustry { get; set; }
         public string ZoomInfoIndustry { get; set; }
         public string ZoomInfoEmployeeSize { get; set; }
@@ -97,6 +101,7 @@ namespace AdvanceCRM.Demanday.Columns
         public string Revenue { get; set; }
         public String ProfileLink { get; set; }
         public String CompanyLink { get; set; }
+        [QuickFilter]
         public System.DateTime? Date { get; set; }
         public String RevenueLink { get; set; }
         public String EmailFormat { get; set; }
@@ -120,7 +125,6 @@ namespace AdvanceCRM.Demanday.Columns
         public String VerificationMode { get; set; }
         public String Asset1 { get; set; }
         public String Asset2 { get; set; }
-        [QuickFilter]
         public String OwnerUsername { get; set; }
     }
 }

@@ -679,6 +679,19 @@
             new Serenity.FavoriteViewsMixin({
                 grid: this
             });
+
+            // Import / Export are permission-gated per sub-module (e.g. "DemandayContacts:Import",
+            // "DemandayContacts:Export"). Hide the buttons when the user lacks the permission.
+            let svc = (this.getService && this.getService()) || '';
+            let prefix = svc.split('/').pop();
+            if (prefix) {
+                setTimeout(() => {
+                    if (!Authorization.hasPermission(prefix + ':Import'))
+                        this.element.find('.tool-button.import-excel-button, .tool-button.download-template-button').hide();
+                    if (!Authorization.hasPermission(prefix + ':Export'))
+                        this.element.find('.tool-button.export-excel-button, .tool-button.export-xlsx-button').hide();
+                }, 0);
+            }
         }
     }
 }

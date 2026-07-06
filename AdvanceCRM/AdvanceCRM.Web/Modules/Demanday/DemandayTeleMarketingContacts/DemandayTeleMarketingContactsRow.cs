@@ -33,7 +33,7 @@ namespace AdvanceCRM.Demanday
             set => fields.AgentsName[this] = value;
         }
 
-        [DisplayName("Tl Name"), Size(100)]
+        [DisplayName("Tl Name"), Size(100), QuickSearch]
         public String TlName
         {
             get => fields.TlName[this];
@@ -46,55 +46,55 @@ namespace AdvanceCRM.Demanday
             get => fields.QADetails[this];
             set => fields.QADetails[this] = value;
         }
-        [DisplayName("Campaign Id"), Size(100)]
+        [DisplayName("Campaign Id"), Size(100), QuickSearch]
         public String CampaignId
         {
             get => fields.CampaignId[this];
             set => fields.CampaignId[this] = value;
         }
 
-        [DisplayName("Company Name"), Size(200)]
+        [DisplayName("Company Name"), Size(200), QuickSearch]
         public String CompanyName
         {
             get => fields.CompanyName[this];
             set => fields.CompanyName[this] = value;
         }
 
-        [DisplayName("First Name"), Size(100)]
+        [DisplayName("First Name"), Size(100), QuickSearch]
         public String FirstName
         {
             get => fields.FirstName[this];
             set => fields.FirstName[this] = value;
         }
 
-        [DisplayName("Last Name"), Size(100)]
+        [DisplayName("Last Name"), Size(100), QuickSearch]
         public String LastName
         {
             get => fields.LastName[this];
             set => fields.LastName[this] = value;
         }
 
-        [DisplayName("Title"), Size(150)]
+        [DisplayName("Title"), Size(150), QuickSearch]
         public String Title
         {
             get => fields.Title[this];
             set => fields.Title[this] = value;
         }
-        [DisplayName("ZoomInfo Employee Size"), Size(100)]
+        [DisplayName("ZoomInfo Employee Size"), Size(100), QuickSearch]
         public String ZoomInfoEmployeeSize
         {
             get => fields.ZoomInfoEmployeeSize[this];
             set => fields.ZoomInfoEmployeeSize[this] = value;
         }
 
-        [DisplayName("ZoomInfo Industry"), Size(100)]
+        [DisplayName("ZoomInfo Industry"), Size(100), QuickSearch]
         public String ZoomInfoIndustry
         {
             get => fields.ZoomInfoIndustry[this];
             set => fields.ZoomInfoIndustry[this] = value;
         }
 
-        [DisplayName("Sub Industry"), Size(100)]
+        [DisplayName("Sub Industry"), Size(100), QuickSearch]
         public String SubIndustry
         {
             get => fields.SubIndustry[this];
@@ -106,214 +106,214 @@ namespace AdvanceCRM.Demanday
             get => fields.Date[this];
             set => fields.Date[this] = value;
         }
-        [DisplayName("Asset"), Size(100)]
+        [DisplayName("Asset"), Size(100), QuickSearch]
         public String Asset
         {
             get => fields.Asset[this];
             set => fields.Asset[this] = value;
         }
-        [DisplayName("Call Status"), Size(100)]
+        [DisplayName("Call Status"), Size(100), QuickSearch]
         public String CallStatus
         {
             get => fields.CallStatus[this];
             set => fields.CallStatus[this] = value;
         }
-        [DisplayName("Additional Notes"), Size(2000)]
+        [DisplayName("Additional Notes"), Size(2000), QuickSearch]
         public String AdditionalNotes
         {
             get => fields.AdditionalNotes[this];
             set => fields.AdditionalNotes[this] = value;
         }
-        [DisplayName("Email"), Size(200)]
+        [DisplayName("Email"), Size(200), QuickSearch]
         public String Email
         {
             get => fields.Email[this];
             set => fields.Email[this] = value;
         }
 
-        [DisplayName("Work Phone"), Size(50)]
+        [DisplayName("Work Phone"), Size(50), QuickSearch]
         public String WorkPhone
         {
             get => fields.WorkPhone[this];
             set => fields.WorkPhone[this] = value;
         }
 
-        [DisplayName("Alternative Number"), Size(50)]
+        [DisplayName("Alternative Number"), Size(50), QuickSearch]
         public String AlternativeNumber
         {
             get => fields.AlternativeNumber[this];
             set => fields.AlternativeNumber[this] = value;
         }
 
-        [DisplayName("Street"), Size(200)]
+        [DisplayName("Street"), Size(200), QuickSearch]
         public String Street
         {
             get => fields.Street[this];
             set => fields.Street[this] = value;
         }
 
-        [DisplayName("City"), Size(100)]
+        [DisplayName("City"), Size(100), QuickSearch]
         public String City
         {
             get => fields.City[this];
             set => fields.City[this] = value;
         }
 
-        [DisplayName("State"), Size(100)]
+        [DisplayName("State"), Size(100), QuickSearch]
         public String State
         {
             get => fields.State[this];
             set => fields.State[this] = value;
         }
 
-        [DisplayName("Zip Code"), Size(20)]
+        [DisplayName("Zip Code"), Size(20), QuickSearch]
         public String ZipCode
         {
             get => fields.ZipCode[this];
             set => fields.ZipCode[this] = value;
         }
 
-        [DisplayName("Country"), Size(100)]
+        [DisplayName("Country"), Size(100), QuickSearch]
         public String Country
         {
             get => fields.Country[this];
             set => fields.Country[this] = value;
         }
 
-        [DisplayName("Company Employee Size"), Size(100)]
+        [DisplayName("Company Employee Size"), Size(100), QuickSearch]
         public String CompanyEmployeeSize
         {
             get => fields.CompanyEmployeeSize[this];
             set => fields.CompanyEmployeeSize[this] = value;
         }
 
-        [DisplayName("Industry"), Size(100)]
+        [DisplayName("Industry"), Size(100), QuickSearch]
         public String Industry
         {
             get => fields.Industry[this];
             set => fields.Industry[this] = value;
         }
 
-        [DisplayName("Revenue"), Size(50)]
+        [DisplayName("Revenue"), Size(50), QuickSearch]
         public String Revenue
         {
             get => fields.Revenue[this];
             set => fields.Revenue[this] = value;
         }
 
-        [DisplayName("Profile Link"), Size(2000)]
+        [DisplayName("Profile Link"), Size(2000), QuickSearch]
         public String ProfileLink
         {
             get => fields.ProfileLink[this];
             set => fields.ProfileLink[this] = value;
         }
 
-        [DisplayName("Company Link"), Size(2000)]
+        [DisplayName("Company Link"), Size(2000), QuickSearch]
         public String CompanyLink
         {
             get => fields.CompanyLink[this];
             set => fields.CompanyLink[this] = value;
         }
 
-        [DisplayName("Revenue Link"), Size(2000)]
+        [DisplayName("Revenue Link"), Size(2000), QuickSearch]
         public String RevenueLink
         {
             get => fields.RevenueLink[this];
             set => fields.RevenueLink[this] = value;
         }
 
-        [DisplayName("Email Format"), Size(100)]
+        [DisplayName("Email Format"), Size(100), QuickSearch]
         public String EmailFormat
         {
             get => fields.EmailFormat[this];
             set => fields.EmailFormat[this] = value;
         }
 
-        [DisplayName("Adress Link"), Size(2000)]
+        [DisplayName("Adress Link"), Size(2000), QuickSearch]
         public String AdressLink
         {
             get => fields.AdressLink[this];
             set => fields.AdressLink[this] = value;
         }
 
-        [DisplayName("Tenurity"), Size(100)]
+        [DisplayName("Tenurity"), Size(100), QuickSearch]
         public String Tenurity
         {
             get => fields.Tenurity[this];
             set => fields.Tenurity[this] = value;
         }
 
-        [DisplayName("Code"), Size(100)]
+        [DisplayName("Code"), Size(100), QuickSearch]
         public String Code
         {
             get => fields.Code[this];
             set => fields.Code[this] = value;
         }
 
-        [DisplayName("Link"), Size(2000)]
+        [DisplayName("Link"), Size(2000), QuickSearch]
         public String Link
         {
             get => fields.Link[this];
             set => fields.Link[this] = value;
         }
 
-        [DisplayName("Md5"), Size(64)]
+        [DisplayName("Md5"), Size(64), QuickSearch]
         public String Md5
         {
             get => fields.Md5[this];
             set => fields.Md5[this] = value;
         }
 
-        [DisplayName("Slot"), Column("SLOT"), Size(100)]
+        [DisplayName("Slot"), Column("SLOT"), Size(100), QuickSearch]
         public String Slot
         {
             get => fields.Slot[this];
             set => fields.Slot[this] = value;
         }
 
-        [DisplayName("Primary Reason"), Size(200)]
+        [DisplayName("Primary Reason"), Size(200), QuickSearch]
         public String PrimaryReason
         {
             get => fields.PrimaryReason[this];
             set => fields.PrimaryReason[this] = value;
         }
 
-        [DisplayName("Category"), Size(100)]
+        [DisplayName("Category"), Size(100), QuickSearch]
         public String Category
         {
             get => fields.Category[this];
             set => fields.Category[this] = value;
         }
 
-        [DisplayName("Comments"), Size(2000)]
+        [DisplayName("Comments"), Size(2000), QuickSearch]
         public String Comments
         {
             get => fields.Comments[this];
             set => fields.Comments[this] = value;
         }
 
-        [DisplayName("Qa Status"), Size(100)]
+        [DisplayName("Qa Status"), Size(100), QuickSearch]
         public String QaStatus
         {
             get => fields.QaStatus[this];
             set => fields.QaStatus[this] = value;
         }
 
-        [DisplayName("Delivery Status"), Size(100)]
+        [DisplayName("Delivery Status"), Size(100), QuickSearch]
         public String DeliveryStatus
         {
             get => fields.DeliveryStatus[this];
             set => fields.DeliveryStatus[this] = value;
         }
 
-        [DisplayName("Agent Name"), Size(100)]
+        [DisplayName("Agent Name"), Size(100), QuickSearch]
         public String AgentName
         {
             get => fields.AgentName[this];
             set => fields.AgentName[this] = value;
         }
 
-        [DisplayName("Qa Name"), Size(100)]
+        [DisplayName("Qa Name"), Size(100), QuickSearch]
         public String QaName
         {
             get => fields.QaName[this];
@@ -341,63 +341,63 @@ namespace AdvanceCRM.Demanday
             set => fields.DeliveryDate[this] = value;
         }
 
-        [DisplayName("Source"), Size(100)]
+        [DisplayName("Source"), Size(100), QuickSearch]
         public String Source
         {
             get => fields.Source[this];
             set => fields.Source[this] = value;
         }
 
-        [DisplayName("Verification Mode"), Size(100)]
+        [DisplayName("Verification Mode"), Size(100), QuickSearch]
         public String VerificationMode
         {
             get => fields.VerificationMode[this];
             set => fields.VerificationMode[this] = value;
         }
 
-        [DisplayName("Asset1"), Size(200)]
+        [DisplayName("Asset1"), Size(200), QuickSearch]
         public String Asset1
         {
             get => fields.Asset1[this];
             set => fields.Asset1[this] = value;
         }
 
-        [DisplayName("Asset2"), Size(200)]
+        [DisplayName("Asset2"), Size(200), QuickSearch]
         public String Asset2
         {
             get => fields.Asset2[this];
             set => fields.Asset2[this] = value;
         }
 
-        [DisplayName("Domain"), Size(100)]
+        [DisplayName("Domain"), Size(100), QuickSearch]
         public String Domain
         {
             get => fields.Domain[this];
             set => fields.Domain[this] = value;
         }
 
-        [DisplayName("Job Level"), Column("Job_Level"), Size(100)]
+        [DisplayName("Job Level"), Column("Job_Level"), Size(100), QuickSearch]
         public String JobLevel
         {
             get => fields.JobLevel[this];
             set => fields.JobLevel[this] = value;
         }
 
-        [DisplayName("Job Function Role"), Column("Job_Function_Role"), Size(200)]
+        [DisplayName("Job Function Role"), Column("Job_Function_Role"), Size(200), QuickSearch]
         public String JobFunctionRole
         {
             get => fields.JobFunctionRole[this];
             set => fields.JobFunctionRole[this] = value;
         }
 
-        [DisplayName("Continents"), Size(100)]
+        [DisplayName("Continents"), Size(100), QuickSearch]
         public String Continents
         {
             get => fields.Continents[this];
             set => fields.Continents[this] = value;
         }
 
-        [DisplayName("Prospect Url"), Column("ProspectURL"), Size(100)]
+        [DisplayName("Prospect Url"), Column("ProspectURL"), Size(100), QuickSearch]
         public String ProspectUrl
         {
             get => fields.ProspectUrl[this];
