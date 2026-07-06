@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using OfficeOpenXml;
+using Serenity;
+using Serenity.Abstractions;
+using Serenity.Data;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace AdvanceCRM.Masters
 {
@@ -54,6 +58,37 @@ namespace AdvanceCRM.Masters
                 }
             }
             return result;
+        }
+
+        // Inserts any of the given values that don't already exist (case-insensitive) into the
+        // master table. Used by module imports (DemandayContacts etc.) to auto-grow the masters
+        // that back the filter dropdowns. masterTable is a fixed constant (never user input).
+        // Returns how many new values were inserted.
+        public static int SyncMaster(IUnitOfWork uow, ITwoLevelCache cache, RowFieldsBase fields,
+            string masterTable, IEnumerable<string> values)
+        {
+            if (values == null) return 0;
+            var connection = uow.Connection;
+
+            var existing = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var n in connection.Query<string>("SELECT Name FROM dbo.[" + masterTable + "]"))
+                if (!string.IsNullOrWhiteSpace(n)) existing.Add(n.Trim());
+
+            int added = 0;
+            foreach (var v in values)
+            {
+                var val = (v ?? "").Trim();
+                if (val.Length == 0 || existing.Contains(val)) continue;
+                connection.Execute("INSERT INTO dbo.[" + masterTable + "] (Name) VALUES (@n)", new { n = val });
+                existing.Add(val);
+                added++;
+            }
+
+            // Invalidate the lookup cache so the master's filter dropdown picks up the new values.
+            if (added > 0 && cache != null && fields != null)
+                cache.ExpireGroupItems(fields.GenerationKey);
+
+            return added;
         }
     }
 }

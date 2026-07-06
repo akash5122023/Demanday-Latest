@@ -90,10 +90,7 @@ namespace AdvanceCRM.Demanday {
 								throw new Error(msg || 'Failed to import.');
 							})).then(msg => {
 								alert(msg || 'Import completed successfully.');
-								if (typeof (this as any).refresh === 'function')
-									(this as any).refresh();
-								else
-									window.location.reload();
+								window.location.reload();
 							}).catch(err => {
 								alert('Excel import failed: ' + err.message);
 							});

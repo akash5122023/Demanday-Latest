@@ -225,7 +225,7 @@
 <!-- Main row -->
 <div class="row">
     <!-- Left col -->
-    <section class="col-lg-6 connectedSortable">
+    <section class="col-lg-12 connectedSortable">
 
         @if (Serenity.Authorization.HasPermission("Products:StockAlert") && (Model.StockData == true))
         {
@@ -1830,103 +1830,6 @@
 
 
         </section><!-- /.Left col -->
-    <!-- **********Second Column********** -->
-    <!-- right col (We are only adding the ID to make the widgets sortable)-->
-    <section class="col-lg-6 connectedSortable">
-        <!-- Enquiry graph -->
-        <div class="box box-solid" style="background: linear-gradient(to right, #4caf50, #8bc34a); color: #fff;">
-            <div class="box-header">
-                <i class="fa fa-th"></i>
-                <h3 class="box-title">My Enquiry Chart (10 days)</h3>
-                <div class="box-tools pull-right">
-                    <button class="btn btn-sm" style="background-color: #8bc34a; color: #fff;" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
-                    </button>
-                    <button class="btn btn-sm" style="background-color: #8bc34a; color: #fff;" data-widget="remove">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="box-body border-radius-none">
-                <div class="chart" id="line-chart-enq" style="height: 250px;"></div>
-            </div>
-        </div>
-        <!-- Quotation graph -->
-        <div class="box box-solid" style="background: linear-gradient(to right, #2196f3, #9c27b0); color: #fff;">
-            <div class="box-header">
-                <i class="fa fa-th"></i>
-                <h3 class="box-title">My Quotation Chart (10 days)</h3>
-                <div class="box-tools pull-right">
-                    <button class="btn btn-sm" style="background-color: #9c27b0; color: #fff;" data-widget="collapse">
-                        <i class="fa fa-minus"></i>
-                    </button>
-                    <button class="btn btn-sm" style="background-color: #9c27b0; color: #fff;" data-widget="remove">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="box-body border-radius-none">
-                <div class="chart" id="line-chart-quot" style="height: 250px;"></div>
-            </div>
-        </div>
-
-        <!-- Quick email widget -->
-        <div class="box box-info" style="border-color: #2196f3;">
-            <div class="box-header" style="background: linear-gradient(to right, #2196f3, #42a5f5); color: #fff;">
-                <i class="fa fa-envelope"></i>
-                <h3 class="box-title">Quick Email</h3>
-                <div class="pull-right box-tools">
-                    <button class="btn btn-sm" style="background-color: #42a5f5; color: #fff;" data-widget="remove">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="box-body">
-                <div class="form-group">
-                    <input type="email" class="form-control" name="emailto" placeholder="Email to:" id="emailto">
-                </div>
-                <div class="form-group">
-                    <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject">
-                </div>
-                <div>
-                    <textarea class="textarea" id="messageBody" name="messageBody" placeholder="Message"
-                              style="width: 100%; height: 125px; font-size: 14px; line-height: 18px; border: 1px solid #42a5f5; padding: 10px;"></textarea>
-                </div>
-                <div class="box-footer clearfix">
-                    <button class="pull-right btn" style="background-color: #42a5f5; color: #fff;" id="sendEmail" onclick="SendQuickMail();">
-                        Send <i class="fa fa-arrow-circle-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- Quick SMS widget -->
-        <div class="box box-info" style="border-color: #ff1744;">
-            <div class="box-header" style="background: linear-gradient(to right, #ff1744, #ff5252); color: #fff;">
-                <i class="fa fa-envelope"></i>
-                <h3 class="box-title">Quick SMS</h3>
-                <div class="pull-right box-tools">
-                    <button class="btn btn-sm" style="background-color: #ff5252; color: #fff;" data-widget="remove">
-                        <i class="fa fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="box-body">
-                <div class="form-group">
-                    <input type="text" class="form-control" name="phone" placeholder="Add multiple numbers separated by commas" id="phone">
-                </div>
-                <div>
-                    <textarea class="textarea" id="smsBody" name="smsBody" placeholder="SMS content goes here"
-                              style="width: 100%; height: 125px; font-size: 14px; line-height: 18px; border: 1px solid #ff5252; padding: 10px;"></textarea>
-                </div>
-                <div class="box-footer clearfix">
-                    <button class="pull-right btn" style="background-color: #ff5252; color: #fff;" id="sendSMS" onclick="SendQuickSMS();">
-                        Send <i class="fa fa-arrow-circle-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </section>
 
 </div><!-- /.row (main row) -->
 
@@ -1979,9 +1882,8 @@
 
     $(function () {
 
-  $("#messageBody").wysihtml5();
         //Enquiry chart
-        if ( @Model.EnqListChart.Count() > 0) {
+        if (document.getElementById('line-chart-enq') && @Model.EnqListChart.Count() > 0) {
             var line = new Morris.Line({
                 element: 'line-chart-enq',
                 resize: true,
@@ -2010,7 +1912,7 @@
         }
 
         //Quotation chart
-        if ( @Model.QuotListChart.Count() > 0) {
+        if (document.getElementById('line-chart-quot') && @Model.QuotListChart.Count() > 0) {
             var line = new Morris.Line({
                 element: 'line-chart-quot',
                 resize: true,

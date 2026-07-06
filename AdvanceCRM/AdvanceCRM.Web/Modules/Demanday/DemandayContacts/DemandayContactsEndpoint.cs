@@ -81,7 +81,7 @@ namespace AdvanceCRM.Demanday.Endpoints
         [HttpPost, IgnoreAntiforgeryToken]
         [RequestSizeLimit(52428800)]
         [RequestFormLimits(MultipartBodyLengthLimit = 52428800)]
-        public IActionResult ImportExcel([FromServices] IUnitOfWork uow, IFormFile file, [FromServices] IDemandayContactsSaveHandler saveHandler)
+        public IActionResult ImportExcel([FromServices] IUnitOfWork uow, IFormFile file, [FromServices] IDemandayContactsSaveHandler saveHandler, [FromServices] Serenity.Abstractions.ITwoLevelCache cache)
         {
             try
             {
@@ -89,11 +89,19 @@ namespace AdvanceCRM.Demanday.Endpoints
                     return Content("Please upload a valid .xlsx file.", "text/plain");
                 int imported = 0, skipped = 0, failed = 0;
                 var errors = new List<string>();
+
+                // Filter-master values seen in this file (auto-inserted into masters after import).
+                var mCountry = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var mJobLevel = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var mJobFunction = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var mSubIndustry = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                 using (var package = new ExcelPackage(file.OpenReadStream()))
                 {
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
+
                     for (int row = 2; row <= rowCount; row++)
                     {
                         try
@@ -152,6 +160,13 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 Md5 = ExcelImportHelper.GetText(ws, row, map, "Md5", "MD5"),
                                 OwnerId = ExcelImportHelper.GetUserId(ws, row, map, uow.Connection, "OwnerId", "Owner", "Owner Name", "OwnerName", "Created By", "CreatedBy")
                             };
+                            // Remember the filter-master values from this row (even if the contact
+                            // itself is skipped) so new ones get added to the masters.
+                            if (!string.IsNullOrWhiteSpace(demandaycontacts.Country)) mCountry.Add(demandaycontacts.Country.Trim());
+                            if (!string.IsNullOrWhiteSpace(demandaycontacts.JobLevel)) mJobLevel.Add(demandaycontacts.JobLevel.Trim());
+                            if (!string.IsNullOrWhiteSpace(demandaycontacts.JobFunctionRole)) mJobFunction.Add(demandaycontacts.JobFunctionRole.Trim());
+                            if (!string.IsNullOrWhiteSpace(demandaycontacts.SubIndustry)) mSubIndustry.Add(demandaycontacts.SubIndustry.Trim());
+
                             if (demandaycontacts.Id.HasValue && demandaycontacts.Id.Value > 0)
                             {
                                 skipped++; continue;
@@ -167,9 +182,22 @@ namespace AdvanceCRM.Demanday.Endpoints
                         }
                     }
                 }
+
+                // Auto-grow the filter masters with any new Country / Job Level / Job Function /
+                // Sub Industry values found in this file.
+                int newMasters = 0;
+                try
+                {
+                    newMasters += AdvanceCRM.Masters.MasterExcelImportHelper.SyncMaster(uow, cache, AdvanceCRM.Masters.DemandayCountryMasterRow.Fields, "DemandayCountryMaster", mCountry);
+                    newMasters += AdvanceCRM.Masters.MasterExcelImportHelper.SyncMaster(uow, cache, AdvanceCRM.Masters.DemandayJobLevelMasterRow.Fields, "DemandayJobLevelMaster", mJobLevel);
+                    newMasters += AdvanceCRM.Masters.MasterExcelImportHelper.SyncMaster(uow, cache, AdvanceCRM.Masters.DemandayJobFunctionMasterRow.Fields, "DemandayJobFunctionMaster", mJobFunction);
+                    newMasters += AdvanceCRM.Masters.MasterExcelImportHelper.SyncMaster(uow, cache, AdvanceCRM.Masters.DemandaySubIndustryMasterRow.Fields, "DemandaySubIndustryMaster", mSubIndustry);
+                }
+                catch { }
+
                 if (imported == 0 && failed > 0)
                     return Content("All rows failed to import.\n" + string.Join("\n", errors), "text/plain");
-                return Content($"Added: {imported}, Skipped (existing IDs): {skipped}, Failed: {failed}\n" + (errors.Count > 0 ? string.Join("\n", errors) : ""), "text/plain");
+                return Content($"Added: {imported}, Skipped (existing IDs): {skipped}, Failed: {failed}, New master values: {newMasters}\n" + (errors.Count > 0 ? string.Join("\n", errors) : ""), "text/plain");
             }
             catch (Exception ex)
             {

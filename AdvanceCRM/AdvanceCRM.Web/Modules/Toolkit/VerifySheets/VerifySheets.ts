@@ -26,6 +26,7 @@ namespace AdvanceCRM.Toolkit {
     export class VerifySheetsPage {
 
         private element: JQuery;
+        private accountEditor: Serenity.LookupEditor;
         private campaignEditor: Serenity.LookupEditor;
         private sheets: VsSheet[];
         private visible: { [key: string]: boolean } = {};
@@ -106,6 +107,7 @@ namespace AdvanceCRM.Toolkit {
             el.addClass('verify-sheets-page');
 
             var toolbar = $('<div class="vs-toolbar"></div>').appendTo(el);
+            $('<div class="vs-account-holder"></div>').appendTo(toolbar);
             $('<div class="vs-campaign-holder"></div>').appendTo(toolbar);
 
             // Verify Sheets multi-select dropdown
@@ -141,6 +143,14 @@ namespace AdvanceCRM.Toolkit {
                     window.location.href = Q.resolveUrl('~/Toolkit/VerifySheets/ExportExcel?campaignId=' + campaignId);
                 });
 
+            // Upload: import an Excel into a chosen sub-module for the selected campaign.
+            var importWrap = $('<div class="vs-import"></div>').appendTo(toolbar);
+            var importSel = $('<select class="vs-import-sheet" title="Import into"></select>').appendTo(importWrap);
+            this.sheets.forEach(s => $('<option></option>').attr('value', s.key).text(s.title).appendTo(importSel));
+            $('<button type="button" class="vs-upload-btn"><i class="fa fa-upload"></i> Upload</button>')
+                .appendTo(importWrap)
+                .on('click', () => this.doUpload(String(importSel.val())));
+
             // Sections
             var body = $('<div class="vs-sections"></div>').appendTo(el);
             this.sheets.forEach(s => {
@@ -151,11 +161,22 @@ namespace AdvanceCRM.Toolkit {
                 $('<div class="vs-card-body"></div>').appendTo(sec);
             });
 
-            // Campaign editor
+            // Account editor drives the Campaign cascade.
+            this.accountEditor = Serenity.Widget.create({
+                type: Serenity.LookupEditor,
+                element: e => e.appendTo(el.find('.vs-account-holder')).attr('id', 'vsAccountId').attr('placeholder', 'Account'),
+                options: <Serenity.LookupEditorOptions>{ lookupKey: 'Masters.DemandayMasterAccount' }
+            });
+
+            // Campaign editor — cascaded from the selected Account.
             this.campaignEditor = Serenity.Widget.create({
                 type: Serenity.LookupEditor,
                 element: e => e.appendTo(el.find('.vs-campaign-holder')).attr('placeholder', 'Campaign ID'),
-                options: <Serenity.LookupEditorOptions>{ lookupKey: 'Masters.DemandayCampaignId' }
+                options: <any>{
+                    lookupKey: 'Masters.DemandayCampaignId',
+                    cascadeFrom: 'vsAccountId',
+                    cascadeField: 'DemandayMasterAccountId'
+                }
             });
             this.campaignEditor.changeSelect2(() => this.loadAll());
 
@@ -164,6 +185,36 @@ namespace AdvanceCRM.Toolkit {
 
         private sheetByKey(key: string): VsSheet {
             return this.sheets.filter(s => s.key === key)[0];
+        }
+
+        private doUpload(sheetKey: string) {
+            var campaignId = this.getCampaignId();
+            if (campaignId == null) {
+                Q.notifyError('Please select a Campaign first.');
+                return;
+            }
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.xlsx';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+            fileInput.onchange = () => {
+                if (fileInput.files && fileInput.files.length > 0) {
+                    var fd = new FormData();
+                    fd.append('file', fileInput.files[0]);
+                    fd.append('campaignId', String(campaignId));
+                    fd.append('sheet', sheetKey);
+                    fetch(Q.resolveUrl('~/Toolkit/VerifySheets/ImportExcel'), { method: 'POST', body: fd })
+                        .then(r => r.text().then(msg => {
+                            alert(msg || 'Import completed.');
+                            var sheet = this.sheetByKey(sheetKey);
+                            if (sheet) this.loadSheet(sheet);
+                        }))
+                        .catch(err => alert('Upload failed: ' + err));
+                }
+                if (fileInput.parentNode) document.body.removeChild(fileInput);
+            };
+            fileInput.click();
         }
 
         private getCampaignId(): number {
