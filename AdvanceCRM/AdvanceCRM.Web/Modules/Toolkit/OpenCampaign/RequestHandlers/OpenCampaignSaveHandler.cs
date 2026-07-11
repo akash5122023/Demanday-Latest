@@ -23,7 +23,22 @@ namespace AdvanceCRM.Toolkit
             base.SetInternalFields();
 
             if (IsCreate)
-                Row.OwnerId = Convert.ToInt32(User.GetIdentifier());
+            {
+                var userId = Convert.ToInt32(User.GetIdentifier());
+                Row.OwnerId = userId;
+
+                // Dialog adds without a SrNo get the next free serial number.
+                if (Row.SrNo == null)
+                    Row.SrNo = ToolkitSrNoHelper.NextSrNo(Connection, "[dbo].[OpenCampaign]");
+
+                // "Demanday User" and "Time Stamp" record who added the domain and when. Neither is
+                // editable on the form, so until now nothing ever filled them in.
+                if (Row.DemandayUserId == null)
+                    Row.DemandayUserId = userId;
+
+                if (Row.TimeStamp == null)
+                    Row.TimeStamp = DateTime.Now;
+            }
         }
     }
 }

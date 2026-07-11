@@ -96,6 +96,8 @@ namespace AdvanceCRM.Demanday.Columns
         public string Comments { get; set; }
         public string QaStatus { get; set; }
         public string DeliveryStatus { get; set; }
+        [DisplayName("Email Team Status")]
+        public AdvanceCRM.EmailTeam.EmailTeamStatus? EmailTeamStatus { get; set; }
         public string AgentName { get; set; }
         public string QaName { get; set; }
         public System.DateTime? CallDate { get; set; }

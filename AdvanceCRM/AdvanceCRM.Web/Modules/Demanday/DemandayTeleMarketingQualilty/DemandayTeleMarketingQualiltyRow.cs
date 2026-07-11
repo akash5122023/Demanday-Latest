@@ -264,6 +264,15 @@ public String EmailFormat
             set => fields.DeliveryStatus[this] = value;
         }
 
+        // Written by the TM Email Team module whenever it changes its own Status – see
+        // TeleMarketingEmailTeamSaveHandler. Read-only here; edit it from the TM Email Team grid.
+        [DisplayName("Email Team Status"), ReadOnly(true)]
+        public AdvanceCRM.TeleMarketingEmailTeam.TeleMarketingEmailTeamStatus? EmailTeamStatus
+        {
+            get => (AdvanceCRM.TeleMarketingEmailTeam.TeleMarketingEmailTeamStatus?)fields.EmailTeamStatus[this];
+            set => fields.EmailTeamStatus[this] = (Int32?)value;
+        }
+
         [DisplayName("Agent Name"), Size(100)]
         public String AgentName
         {
@@ -696,6 +705,7 @@ public String EmailFormat
             public StringField Comments;
             public StringField QaStatus;
             public StringField DeliveryStatus;
+            public Int32Field EmailTeamStatus;
             public StringField AgentName;
             public StringField QaName;
             public DateTimeField CallDate;

@@ -30,6 +30,7 @@
         Comments?: string;
         QaStatus?: string;
         DeliveryStatus?: string;
+        EmailTeamStatus?: TeleMarketingEmailTeam.TeleMarketingEmailTeamStatus;
         AgentName?: string;
         QaName?: string;
         CallDate?: string;
@@ -139,6 +140,7 @@
             Comments = "Comments",
             QaStatus = "QaStatus",
             DeliveryStatus = "DeliveryStatus",
+            EmailTeamStatus = "EmailTeamStatus",
             AgentName = "AgentName",
             QaName = "QaName",
             CallDate = "CallDate",

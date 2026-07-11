@@ -1,0 +1,832 @@
+using AdvanceCRM.Administration;
+using AdvanceCRM.Demanday;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Serenity;
+using Serenity.Abstractions;
+using Serenity.Data;
+using Serenity.Web;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace AdvanceCRM.EmailVerification.Pages
+{
+    /// <summary>
+    /// Email Verification tool page. The verification / trace / bulk endpoints below are
+    /// wired up as stubs for now — the actual verification API will be plugged in later,
+    /// so only the marked "TODO: call real API" sections need to change at that point.
+    /// </summary>
+    [PageAuthorize("EmailVerification:Read")]
+    public class EmailVerificationController : Controller
+    {
+        [Route("EmailVerification")]
+        public ActionResult Index()
+        {
+            return View("~/Modules/EmailVerification/EmailVerificationIndex.cshtml");
+        }
+
+        // Single email verification via ZeroBounce. The API key lives in
+        // appsettings.json under "EmailVerification:ZeroBounceApiKey".
+        //
+        // Two guards wrap the actual API call:
+        //  1) Shared cache — if the email was already verified by anyone, the stored Valid/Invalid
+        //     result is returned for free (no API call, no quota spent).
+        //  2) Per-user quota — a fresh (uncached) verification consumes one of the user's allowance;
+        //     when the allowance is exhausted the request is refused.
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/Verify")]
+        public async Task<JsonResult> Verify([FromForm] string email,
+            [FromServices] IConfiguration configuration,
+            [FromServices] IHttpClientFactory httpClientFactory,
+            [FromServices] ISqlConnections sqlConnections,
+            [FromServices] IUserAccessor userAccessor)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return new JsonResult(new EmailVerificationResult
+                {
+                    Success = false,
+                    Message = "Please enter an email address."
+                });
+
+            var trimmed = email.Trim();
+            var key = trimmed.ToLowerInvariant();
+            var userId = GetCurrentUserId(userAccessor);
+
+            // 1) Already verified by someone? Return the shared result without spending a check.
+            var cached = FindCached(sqlConnections, key);
+            if (cached != null)
+            {
+                var q = GetQuota(sqlConnections, configuration, userId, ensureRow: false);
+                return new JsonResult(new EmailVerificationResult
+                {
+                    Success = true,
+                    Email = trimmed,
+                    Status = string.IsNullOrEmpty(cached.Status) ? "unknown" : cached.Status,
+                    Message = BuildVerifyMessage(cached.Status, cached.SubStatus),
+                    FromCache = true,
+                    VerifiedDate = cached.VerifiedDate?.ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture),
+                    Allowed = q.Allowed,
+                    Used = q.Used,
+                    Remaining = q.Remaining
+                });
+            }
+
+            // 2) Not cached — enforce the per-user search limit before hitting the API.
+            var quota = GetQuota(sqlConnections, configuration, userId, ensureRow: false);
+            if (quota.Remaining <= 0)
+                return new JsonResult(new EmailVerificationResult
+                {
+                    Success = false,
+                    Email = trimmed,
+                    LimitReached = true,
+                    Allowed = quota.Allowed,
+                    Used = quota.Used,
+                    Remaining = 0,
+                    Message = "You have reached your verification limit (" + quota.Used + " / " +
+                        quota.Allowed + "). Please contact an administrator to increase it."
+                });
+
+            var apiKey = configuration["EmailVerification:ZeroBounceApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+                return new JsonResult(new EmailVerificationResult
+                {
+                    Success = false,
+                    Email = trimmed,
+                    Message = "Verification API key is not configured.",
+                    Allowed = quota.Allowed,
+                    Used = quota.Used,
+                    Remaining = quota.Remaining
+                });
+
+            try
+            {
+                var url = "https://api.zerobounce.net/v2/validate?api_key=" +
+                          Uri.EscapeDataString(apiKey) +
+                          "&email=" + Uri.EscapeDataString(trimmed) +
+                          "&ip_address=";
+
+                var client = httpClientFactory.CreateClient();
+                using var apiResponse = await client.GetAsync(url);
+                var body = await apiResponse.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+
+                // ZeroBounce reports key/credit problems as an "error" string (or "Message").
+                // Those are not real verifications, so they neither spend quota nor get cached.
+                var apiError = GetJsonString(root, "error") ?? GetJsonString(root, "Message");
+                if (!string.IsNullOrEmpty(apiError))
+                    return new JsonResult(new EmailVerificationResult
+                    {
+                        Success = false,
+                        Email = trimmed,
+                        Message = apiError,
+                        Allowed = quota.Allowed,
+                        Used = quota.Used,
+                        Remaining = quota.Remaining
+                    });
+
+                // status: valid | invalid | catch-all | unknown | spamtrap | abuse | do_not_mail
+                var status = GetJsonString(root, "status");
+                var subStatus = GetJsonString(root, "sub_status");
+                status = string.IsNullOrEmpty(status) ? "unknown" : status;
+
+                // A real verification happened: spend one from the quota and store the result so
+                // every other user benefits from it next time.
+                var after = ConsumeQuota(sqlConnections, configuration, userId);
+                SaveCached(sqlConnections, key, status, subStatus,
+                    BuildVerifyMessage(status, subStatus), userId);
+
+                return new JsonResult(new EmailVerificationResult
+                {
+                    Success = true,
+                    Email = trimmed,
+                    Status = status,
+                    Message = BuildVerifyMessage(status, subStatus),
+                    FromCache = false,
+                    Allowed = after.Allowed,
+                    Used = after.Used,
+                    Remaining = after.Remaining
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new EmailVerificationResult
+                {
+                    Success = false,
+                    Email = trimmed,
+                    Message = "Verification request failed: " + ex.Message,
+                    Allowed = quota.Allowed,
+                    Used = quota.Used,
+                    Remaining = quota.Remaining
+                });
+            }
+        }
+
+        // ZeroBounce only exposes validation, not mail-route tracing, so Trace runs the same
+        // verification and reports the deliverability result (subject to the same cache + quota).
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/Trace")]
+        public Task<JsonResult> Trace([FromForm] string email,
+            [FromServices] IConfiguration configuration,
+            [FromServices] IHttpClientFactory httpClientFactory,
+            [FromServices] ISqlConnections sqlConnections,
+            [FromServices] IUserAccessor userAccessor)
+        {
+            return Verify(email, configuration, httpClientFactory, sqlConnections, userAccessor);
+        }
+
+        // Reports the signed-in user's current quota (used / allowed / remaining) and whether they
+        // may manage other users' quotas. The page shows this and refreshes it after each verify.
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/QuotaStatus")]
+        public JsonResult QuotaStatus(
+            [FromServices] IConfiguration configuration,
+            [FromServices] ISqlConnections sqlConnections,
+            [FromServices] IUserAccessor userAccessor,
+            [FromServices] IPermissionService permissions)
+        {
+            var userId = GetCurrentUserId(userAccessor);
+            var q = GetQuota(sqlConnections, configuration, userId, ensureRow: false);
+            return new JsonResult(new QuotaStatusResult
+            {
+                Success = true,
+                Allowed = q.Allowed,
+                Used = q.Used,
+                Remaining = q.Remaining,
+                CanManageQuota = permissions != null && permissions.HasPermission(ManageQuotaPermission)
+            });
+        }
+
+        private static string BuildVerifyMessage(string status, string subStatus)
+        {
+            var detail = string.IsNullOrWhiteSpace(subStatus)
+                ? ""
+                : " (" + subStatus.Replace('_', ' ') + ")";
+
+            switch ((status ?? "").ToLowerInvariant())
+            {
+                case "valid": return "Deliverable — the mailbox exists and accepts mail.";
+                case "invalid": return "Undeliverable — the mailbox does not exist." + detail;
+                case "catch-all": return "Catch-all domain — accepts any address, so existence can't be confirmed.";
+                case "spamtrap": return "Spam trap — do not mail this address.";
+                case "abuse": return "Abuse address — the recipient marks mail as spam.";
+                case "do_not_mail": return "Do not mail — role/disposable/toxic address." + detail;
+                case "unknown": return "Could not be verified (mail server did not give a clear answer)." + detail;
+                default:
+                    return string.IsNullOrEmpty(detail) ? "Verification completed." : detail.Trim();
+            }
+        }
+
+        private static string GetJsonString(JsonElement root, string propertyName)
+        {
+            if (root.ValueKind == JsonValueKind.Object &&
+                root.TryGetProperty(propertyName, out var prop) &&
+                prop.ValueKind == JsonValueKind.String)
+                return prop.GetString();
+            return null;
+        }
+
+        // Shortest term we will run a query for. The page searches as the user types, so
+        // a single character would scan both contact tables on nearly every keystroke.
+        private const int MinSearchLength = 2;
+
+        // Row cap per source table, so a broad term like "@" can't pull the whole table.
+        private const int PerSourceLimit = 50;
+
+        /// <summary>
+        /// As-you-type contact lookup: matches the term anywhere inside Email and returns
+        /// hits from both DemandayContacts and DemandayTeleMarketingContacts.
+        /// </summary>
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/SearchContacts")]
+        public JsonResult SearchContacts([FromForm] string email,
+            [FromServices] ISqlConnections sqlConnections)
+        {
+            var term = email?.Trim();
+            if (string.IsNullOrEmpty(term) || term.Length < MinSearchLength)
+                return new JsonResult(new ContactSearchResult { Success = true });
+
+            // Escape LIKE wildcards so a term such as "100%" or "a_b" is matched literally.
+            var pattern = EscapeLikePattern(term);
+            var result = new ContactSearchResult { Success = true };
+
+            // If the term is itself a full email that has already been verified by anyone, surface
+            // that shared Valid/Invalid result so the user knows the outcome before spending a check.
+            if (LooksLikeEmail(term))
+            {
+                var cached = FindCached(sqlConnections, term.ToLowerInvariant());
+                if (cached != null)
+                {
+                    result.CacheHit = true;
+                    result.CachedEmail = cached.Email;
+                    result.CachedStatus = string.IsNullOrEmpty(cached.Status) ? "unknown" : cached.Status;
+                    result.CachedMessage = BuildVerifyMessage(cached.Status, cached.SubStatus);
+                    result.CachedVerifiedDate = cached.VerifiedDate?.ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture);
+                }
+            }
+
+            using (var connection = sqlConnections.NewFor<DemandayContactsRow>())
+            {
+                var f = DemandayContactsRow.Fields;
+                // Take one extra row purely to detect that the cap was hit.
+                var rows = connection.List<DemandayContactsRow>(q => q
+                    .Select(f.Id).Select(f.CampaignId).Select(f.FirstName).Select(f.LastName)
+                    .Select(f.Email).Select(f.CompanyName).Select(f.Title)
+                    .Select(f.WorkPhone).Select(f.Country)
+                    .Where(new Criteria(f.Email).Contains(pattern))
+                    .OrderBy(f.Email)
+                    .Take(PerSourceLimit + 1));
+
+                if (rows.Count > PerSourceLimit)
+                {
+                    result.Truncated = true;
+                    rows = rows.Take(PerSourceLimit).ToList();
+                }
+
+                result.Items.AddRange(rows.Select(r => new ContactSearchItem
+                {
+                    Source = "ETContact",
+                    Id = r.Id,
+                    CampaignId = r.CampaignId,
+                    FirstName = r.FirstName,
+                    LastName = r.LastName,
+                    Email = r.Email,
+                    CompanyName = r.CompanyName,
+                    Title = r.Title,
+                    WorkPhone = r.WorkPhone,
+                    Country = r.Country
+                }));
+            }
+
+            using (var connection = sqlConnections.NewFor<DemandayTeleMarketingContactsRow>())
+            {
+                var f = DemandayTeleMarketingContactsRow.Fields;
+                var rows = connection.List<DemandayTeleMarketingContactsRow>(q => q
+                    .Select(f.Id).Select(f.CampaignId).Select(f.FirstName).Select(f.LastName)
+                    .Select(f.Email).Select(f.CompanyName).Select(f.Title)
+                    .Select(f.WorkPhone).Select(f.Country)
+                    .Where(new Criteria(f.Email).Contains(pattern))
+                    .OrderBy(f.Email)
+                    .Take(PerSourceLimit + 1));
+
+                if (rows.Count > PerSourceLimit)
+                {
+                    result.Truncated = true;
+                    rows = rows.Take(PerSourceLimit).ToList();
+                }
+
+                result.Items.AddRange(rows.Select(r => new ContactSearchItem
+                {
+                    Source = "TM ETContact",
+                    Id = r.Id,
+                    CampaignId = r.CampaignId,
+                    FirstName = r.FirstName,
+                    LastName = r.LastName,
+                    Email = r.Email,
+                    CompanyName = r.CompanyName,
+                    Title = r.Title,
+                    WorkPhone = r.WorkPhone,
+                    Country = r.Country
+                }));
+            }
+
+            if (result.Truncated)
+                result.Message = "Showing the first " + PerSourceLimit +
+                    " matches per module. Refine the search to narrow it down.";
+
+            return new JsonResult(result);
+        }
+
+        // SQL Server treats %, _, [ and ] as LIKE metacharacters. Wrapping each in brackets
+        // makes it match literally without needing an ESCAPE clause.
+        private static string EscapeLikePattern(string value)
+        {
+            return value
+                .Replace("[", "[[]")
+                .Replace("%", "[%]")
+                .Replace("_", "[_]");
+        }
+
+        // Permission that unlocks the quota-management panel and its endpoints.
+        private const string ManageQuotaPermission = "EmailVerification:ManageQuota";
+
+        // Quota granted to a user who has no explicit row yet. Overridable via
+        // appsettings.json -> "EmailVerification:DefaultQuota".
+        private const int DefaultQuotaFallback = 50;
+
+        // ---- Admin: per-user quota management (gated by EmailVerification:ManageQuota) ----
+
+        /// <summary>Lists every active user with their current allowed / used verification counts.</summary>
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/ListQuota")]
+        public JsonResult ListQuota(
+            [FromServices] IConfiguration configuration,
+            [FromServices] ISqlConnections sqlConnections,
+            [FromServices] IPermissionService permissions)
+        {
+            if (permissions == null || !permissions.HasPermission(ManageQuotaPermission))
+                return new JsonResult(new QuotaListResult { Success = false, Message = "You are not allowed to manage quotas." });
+
+            var defaultQuota = GetDefaultQuota(configuration);
+            var result = new QuotaListResult { Success = true, CanManageQuota = true };
+
+            using var connection = sqlConnections.NewFor<UserRow>();
+
+            var uf = UserRow.Fields;
+            var users = connection.List<UserRow>(q => q
+                .Select(uf.UserId).Select(uf.Username).Select(uf.DisplayName)
+                .Where(new Criteria(uf.IsActive) == 1)
+                .OrderBy(uf.Username));
+
+            var quotas = connection.List<EmailVerificationQuotaRow>(q => q.SelectTableFields());
+            var byUser = quotas.Where(x => x.UserId != null)
+                .GroupBy(x => x.UserId.Value)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            foreach (var u in users)
+            {
+                if (u.UserId == null)
+                    continue;
+                byUser.TryGetValue(u.UserId.Value, out var qr);
+                result.Items.Add(new QuotaAdminItem
+                {
+                    UserId = u.UserId.Value,
+                    Username = u.Username,
+                    DisplayName = u.DisplayName,
+                    AllowedCount = qr?.AllowedCount ?? defaultQuota,
+                    UsedCount = qr?.UsedCount ?? 0
+                });
+            }
+
+            return new JsonResult(result);
+        }
+
+        /// <summary>Sets a user's allowed verification count (and optionally resets their used count).</summary>
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/SetQuota")]
+        public JsonResult SetQuota([FromForm] int userId, [FromForm] int allowedCount, [FromForm] bool resetUsed,
+            [FromServices] ISqlConnections sqlConnections,
+            [FromServices] IPermissionService permissions)
+        {
+            if (permissions == null || !permissions.HasPermission(ManageQuotaPermission))
+                return new JsonResult(new SimpleResult { Success = false, Message = "You are not allowed to manage quotas." });
+
+            if (userId <= 0)
+                return new JsonResult(new SimpleResult { Success = false, Message = "Invalid user." });
+            if (allowedCount < 0)
+                allowedCount = 0;
+
+            using var connection = sqlConnections.NewFor<EmailVerificationQuotaRow>();
+            var f = EmailVerificationQuotaRow.Fields;
+            var row = connection.TryFirst<EmailVerificationQuotaRow>(q => q
+                .SelectTableFields()
+                .Where(new Criteria(f.UserId) == userId));
+
+            if (row == null)
+            {
+                connection.InsertAndGetID(new EmailVerificationQuotaRow
+                {
+                    UserId = userId,
+                    AllowedCount = allowedCount,
+                    UsedCount = 0
+                });
+            }
+            else
+            {
+                row.AllowedCount = allowedCount;
+                if (resetUsed)
+                    row.UsedCount = 0;
+                connection.UpdateById(row);
+            }
+
+            return new JsonResult(new SimpleResult { Success = true, Message = "Saved." });
+        }
+
+        // ---- Shared cache + quota helpers ----
+
+        private static int GetDefaultQuota(IConfiguration configuration)
+        {
+            var raw = configuration?["EmailVerification:DefaultQuota"];
+            if (int.TryParse(raw, out var v) && v >= 0)
+                return v;
+            return DefaultQuotaFallback;
+        }
+
+        private static int? GetCurrentUserId(IUserAccessor userAccessor)
+        {
+            var id = userAccessor?.User?.GetIdentifier();
+            if (!string.IsNullOrEmpty(id) && int.TryParse(id, out var uid))
+                return uid;
+            return null;
+        }
+
+        private static bool LooksLikeEmail(string s)
+        {
+            if (string.IsNullOrEmpty(s) || s.IndexOf(' ') >= 0)
+                return false;
+            var at = s.IndexOf('@');
+            return at > 0 && at < s.Length - 1 && s.IndexOf('.', at) > at;
+        }
+
+        private static EmailVerificationResultRow FindCached(ISqlConnections sqlConnections, string emailKey)
+        {
+            using var connection = sqlConnections.NewFor<EmailVerificationResultRow>();
+            var f = EmailVerificationResultRow.Fields;
+            return connection.TryFirst<EmailVerificationResultRow>(q => q
+                .SelectTableFields()
+                .Where(new Criteria(f.Email) == emailKey));
+        }
+
+        private static void SaveCached(ISqlConnections sqlConnections, string emailKey,
+            string status, string subStatus, string message, int? userId)
+        {
+            using var connection = sqlConnections.NewFor<EmailVerificationResultRow>();
+            var f = EmailVerificationResultRow.Fields;
+            var existing = connection.TryFirst<EmailVerificationResultRow>(q => q
+                .SelectTableFields()
+                .Where(new Criteria(f.Email) == emailKey));
+
+            if (existing != null)
+            {
+                existing.Status = status;
+                existing.SubStatus = subStatus;
+                existing.Message = message;
+                existing.VerifiedByUserId = userId;
+                existing.VerifiedDate = DateTime.Now;
+                connection.UpdateById(existing);
+            }
+            else
+            {
+                connection.InsertAndGetID(new EmailVerificationResultRow
+                {
+                    Email = emailKey,
+                    Status = status,
+                    SubStatus = subStatus,
+                    Message = message,
+                    VerifiedByUserId = userId,
+                    VerifiedDate = DateTime.Now
+                });
+            }
+        }
+
+        private static QuotaSnapshot GetQuota(ISqlConnections sqlConnections, IConfiguration configuration,
+            int? userId, bool ensureRow)
+        {
+            var defaultQuota = GetDefaultQuota(configuration);
+            if (userId == null)
+                return new QuotaSnapshot { Allowed = defaultQuota, Used = 0, Remaining = defaultQuota };
+
+            using var connection = sqlConnections.NewFor<EmailVerificationQuotaRow>();
+            var f = EmailVerificationQuotaRow.Fields;
+            var row = connection.TryFirst<EmailVerificationQuotaRow>(q => q
+                .SelectTableFields()
+                .Where(new Criteria(f.UserId) == userId.Value));
+
+            if (row == null)
+            {
+                if (ensureRow)
+                {
+                    row = new EmailVerificationQuotaRow { UserId = userId, AllowedCount = defaultQuota, UsedCount = 0 };
+                    connection.InsertAndGetID(row);
+                }
+                else
+                {
+                    return new QuotaSnapshot { Allowed = defaultQuota, Used = 0, Remaining = defaultQuota };
+                }
+            }
+
+            var allowed = row.AllowedCount ?? defaultQuota;
+            var used = row.UsedCount ?? 0;
+            return new QuotaSnapshot { Allowed = allowed, Used = used, Remaining = Math.Max(0, allowed - used) };
+        }
+
+        // Adds one to the user's used count (creating the row on first use), returning the new state.
+        private static QuotaSnapshot ConsumeQuota(ISqlConnections sqlConnections, IConfiguration configuration, int? userId)
+        {
+            var defaultQuota = GetDefaultQuota(configuration);
+            if (userId == null)
+                return new QuotaSnapshot { Allowed = defaultQuota, Used = 0, Remaining = defaultQuota };
+
+            using var connection = sqlConnections.NewFor<EmailVerificationQuotaRow>();
+            var f = EmailVerificationQuotaRow.Fields;
+            var row = connection.TryFirst<EmailVerificationQuotaRow>(q => q
+                .SelectTableFields()
+                .Where(new Criteria(f.UserId) == userId.Value));
+
+            if (row == null)
+                row = new EmailVerificationQuotaRow { UserId = userId, AllowedCount = defaultQuota, UsedCount = 0 };
+
+            var allowed = row.AllowedCount ?? defaultQuota;
+            var used = (row.UsedCount ?? 0) + 1;
+            row.AllowedCount = allowed;
+            row.UsedCount = used;
+
+            if (row.Id == null)
+                connection.InsertAndGetID(row);
+            else
+                connection.UpdateById(row);
+
+            return new QuotaSnapshot { Allowed = allowed, Used = used, Remaining = Math.Max(0, allowed - used) };
+        }
+
+        private class QuotaSnapshot
+        {
+            public int Allowed;
+            public int Used;
+            public int Remaining;
+        }
+
+        // Bulk email verification (file upload).
+        // TODO: accept the uploaded file, hand it to the real bulk API and return a job id.
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/BulkVerify")]
+        public async Task<JsonResult> BulkVerify([FromForm] IFormFile file,
+            [FromServices] IConfiguration configuration,
+            [FromServices] IHttpClientFactory httpClientFactory)
+        {
+            if (file == null || file.Length == 0)
+                return new JsonResult(new BulkVerificationResult
+                {
+                    Success = false,
+                    Message = "Please choose a file with an 'Email Address' column."
+                });
+
+            var apiKey = configuration["EmailVerification:ZeroBounceApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+                return new JsonResult(new BulkVerificationResult
+                {
+                    Success = false,
+                    Message = "Verification API key is not configured."
+                });
+
+            try
+            {
+                // ZeroBounce bulk is asynchronous: upload the file, then poll for status and
+                // download the results. Our template puts the email in column 1 with a header row.
+                using var form = new MultipartFormDataContent();
+                form.Add(new StringContent(apiKey), "api_key");
+                form.Add(new StringContent("1"), "email_address_column");
+                form.Add(new StringContent("true"), "has_header_row");
+                form.Add(new StreamContent(file.OpenReadStream()), "file", file.FileName);
+
+                var client = httpClientFactory.CreateClient();
+                using var apiResponse = await client.PostAsync("https://bulkapi.zerobounce.net/v2/sendfile", form);
+                var body = await apiResponse.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+
+                if (root.TryGetProperty("success", out var okProp) &&
+                    okProp.ValueKind == JsonValueKind.True)
+                {
+                    return new JsonResult(new BulkVerificationResult
+                    {
+                        Success = true,
+                        FileId = GetJsonString(root, "file_id"),
+                        Message = GetJsonString(root, "message") ?? "File accepted."
+                    });
+                }
+
+                return new JsonResult(new BulkVerificationResult
+                {
+                    Success = false,
+                    Message = GetJsonString(root, "message") ?? GetJsonString(root, "error") ?? "Upload was rejected."
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new BulkVerificationResult
+                {
+                    Success = false,
+                    Message = "Bulk upload failed: " + ex.Message
+                });
+            }
+        }
+
+        // Polls ZeroBounce for the progress of a previously uploaded bulk file.
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/BulkStatus")]
+        public async Task<JsonResult> BulkStatus([FromForm] string fileId,
+            [FromServices] IConfiguration configuration,
+            [FromServices] IHttpClientFactory httpClientFactory)
+        {
+            if (string.IsNullOrWhiteSpace(fileId))
+                return new JsonResult(new BulkVerificationResult { Success = false, Message = "Missing file id." });
+
+            var apiKey = configuration["EmailVerification:ZeroBounceApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+                return new JsonResult(new BulkVerificationResult { Success = false, Message = "Verification API key is not configured." });
+
+            try
+            {
+                var url = "https://bulkapi.zerobounce.net/v2/filestatus?api_key=" +
+                          Uri.EscapeDataString(apiKey) + "&file_id=" + Uri.EscapeDataString(fileId);
+
+                var client = httpClientFactory.CreateClient();
+                using var apiResponse = await client.GetAsync(url);
+                var body = await apiResponse.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+
+                var status = GetJsonString(root, "file_status");
+                var percentage = GetJsonString(root, "complete_percentage");
+                var error = GetJsonString(root, "error_reason");
+
+                return new JsonResult(new BulkVerificationResult
+                {
+                    Success = true,
+                    FileId = fileId,
+                    Status = status,
+                    Percentage = percentage,
+                    Message = string.IsNullOrEmpty(error) ? null : error
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new BulkVerificationResult { Success = false, Message = "Status check failed: " + ex.Message });
+            }
+        }
+
+        // Streams the finished ZeroBounce results CSV back to the browser as a download.
+        [HttpGet]
+        [Route("EmailVerification/BulkResult")]
+        public async Task<IActionResult> BulkResult(string fileId,
+            [FromServices] IConfiguration configuration,
+            [FromServices] IHttpClientFactory httpClientFactory)
+        {
+            if (string.IsNullOrWhiteSpace(fileId))
+                return Content("Missing file id.", "text/plain");
+
+            var apiKey = configuration["EmailVerification:ZeroBounceApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+                return Content("Verification API key is not configured.", "text/plain");
+
+            var url = "https://bulkapi.zerobounce.net/v2/getfile?api_key=" +
+                      Uri.EscapeDataString(apiKey) + "&file_id=" + Uri.EscapeDataString(fileId);
+
+            var client = httpClientFactory.CreateClient();
+            var bytes = await client.GetByteArrayAsync(url);
+            return File(bytes, "text/csv", "EmailVerification_Results_" + fileId + ".csv");
+        }
+
+        // A blank Excel template: a single "Email Address" column (with a header row).
+        [HttpGet]
+        [Route("EmailVerification/DownloadBulkTemplate")]
+        public IActionResult DownloadBulkTemplate()
+        {
+            OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            using var package = new OfficeOpenXml.ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("Emails");
+            ws.Cells[1, 1].Value = "Email Address";
+            ws.Cells[1, 1].Style.Font.Bold = true;
+            ws.Cells[2, 1].Value = "name@example.com";
+            ws.Column(1).Width = 32;
+
+            var bytes = package.GetAsByteArray();
+            return File(bytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "EmailVerification_Bulk_Template.xlsx");
+        }
+    }
+
+    /// <summary>Shape returned by the bulk upload / status endpoints.</summary>
+    public class BulkVerificationResult
+    {
+        public bool Success { get; set; }
+        public string FileId { get; set; }
+        public string Status { get; set; }
+        public string Percentage { get; set; }
+        public string Message { get; set; }
+    }
+
+    /// <summary>Common shape returned by the verification endpoints.</summary>
+    public class EmailVerificationResult
+    {
+        public bool Success { get; set; }
+        public string Email { get; set; }
+        public string Status { get; set; }
+        public string Message { get; set; }
+        /// <summary>True when the result came from the shared cache (no quota was spent).</summary>
+        public bool FromCache { get; set; }
+        /// <summary>True when the request was refused because the user's quota is exhausted.</summary>
+        public bool LimitReached { get; set; }
+        /// <summary>When cached, when the email was last verified (display string).</summary>
+        public string VerifiedDate { get; set; }
+        public int Allowed { get; set; }
+        public int Used { get; set; }
+        public int Remaining { get; set; }
+    }
+
+    /// <summary>The signed-in user's quota, plus whether they can manage other users' quotas.</summary>
+    public class QuotaStatusResult
+    {
+        public bool Success { get; set; }
+        public int Allowed { get; set; }
+        public int Used { get; set; }
+        public int Remaining { get; set; }
+        public bool CanManageQuota { get; set; }
+    }
+
+    /// <summary>One row in the admin quota table.</summary>
+    public class QuotaAdminItem
+    {
+        public int UserId { get; set; }
+        public string Username { get; set; }
+        public string DisplayName { get; set; }
+        public int AllowedCount { get; set; }
+        public int UsedCount { get; set; }
+    }
+
+    public class QuotaListResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public bool CanManageQuota { get; set; }
+        public List<QuotaAdminItem> Items { get; set; } = new List<QuotaAdminItem>();
+    }
+
+    /// <summary>Minimal ok/message shape for admin save actions.</summary>
+    public class SimpleResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+    }
+
+    /// <summary>One contact row surfaced by the as-you-type search, from either source table.</summary>
+    public class ContactSearchItem
+    {
+        public string Source { get; set; }
+        public int? Id { get; set; }
+        public string CampaignId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string CompanyName { get; set; }
+        public string Title { get; set; }
+        public string WorkPhone { get; set; }
+        public string Country { get; set; }
+    }
+
+    public class ContactSearchResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public List<ContactSearchItem> Items { get; set; } = new List<ContactSearchItem>();
+        /// <summary>True when either source hit its row cap, so the grid can say so.</summary>
+        public bool Truncated { get; set; }
+        /// <summary>True when the typed term is a full email already present in the shared cache.</summary>
+        public bool CacheHit { get; set; }
+        public string CachedEmail { get; set; }
+        public string CachedStatus { get; set; }
+        public string CachedMessage { get; set; }
+        public string CachedVerifiedDate { get; set; }
+    }
+}

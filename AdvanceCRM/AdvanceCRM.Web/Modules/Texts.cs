@@ -69,7 +69,7 @@ namespace AdvanceCRM
                             FormTitle = "Welcome to " + settings["WhiteLabel"] + " CRM";
                         }
                     }
-                    public static LocalText FormTitle = "Welcome to Bizpluserp System";
+                    public static LocalText FormTitle = "Welcome to Demanday";
                     public static LocalText SignUpButton = "Purchase Plan";
                     public static LocalText SignInButton = "Sign In";
                     public static LocalText ForgotPassword = "Forgot password?";
@@ -118,7 +118,7 @@ namespace AdvanceCRM
                 }
             }
             public static LocalText LogoutLink = "Logout";
-            public static LocalText SiteTitle = "BizPlus ERP";
+            public static LocalText SiteTitle = "Demanday";
         }
 
         public static class Site
@@ -142,7 +142,7 @@ namespace AdvanceCRM
                         ContentDescription = settings["WhiteLabel"] + " CRM<em>(" + settings["WhiteLabelSlogan"] + ")</em>";
                     }
                 }
-                public static LocalText ContentDescription = "BizPlus ERP<em>(We help grow your business)</em>";
+                public static LocalText ContentDescription = "Demanday<em>(We help grow your business)</em>";
             }
 
             public static class BasicProgressDialog
@@ -202,7 +202,7 @@ namespace AdvanceCRM
                         FooterInfo = "Powered By Demanday";
                     }
                 }
-                public static LocalText WhiteLabel = "Bizplus";
+                public static LocalText WhiteLabel = "Demanday";
                 public static LocalText WhiteLabelURL = "https://www.bizpluscrm.com";
                 public static LocalText FooterCopyright = "Copyright (c) " + System.DateTime.Now.Year + ".";
                 public static LocalText FooterInfo = "Powered By Demanday";

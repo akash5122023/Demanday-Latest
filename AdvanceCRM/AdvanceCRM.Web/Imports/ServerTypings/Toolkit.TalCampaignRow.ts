@@ -1,6 +1,7 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface TalCampaignRow {
         Id?: number;
+        SrNo?: number;
         CompanyName?: string;
         Domain?: string;
         AgentsName?: number;
@@ -69,6 +70,7 @@
 
         export declare const enum Fields {
             Id = "Id",
+            SrNo = "SrNo",
             CompanyName = "CompanyName",
             Domain = "Domain",
             AgentsName = "AgentsName",

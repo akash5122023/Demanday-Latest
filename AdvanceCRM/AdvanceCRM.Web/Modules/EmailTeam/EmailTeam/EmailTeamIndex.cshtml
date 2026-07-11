@@ -1,0 +1,15 @@
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer.Get("Db.EmailTeam.EmailTeam.EntityPlural");
+}
+
+<partial name="~/Modules/Common/_GridFilterPanel.cshtml" />
+
+<div id="GridDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        var grid = new AdvanceCRM.EmailTeam.EmailTeamGrid($('#GridDiv'), {}).init();
+        window.attachGridFilterPanel(grid);
+    });
+</script>

@@ -1,6 +1,7 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface DemandaySpecsRow {
         Id?: number;
+        SrNo?: number;
         OrderId?: number;
         JobTitle?: string;
         JobLevel?: string;
@@ -78,6 +79,7 @@
 
         export declare const enum Fields {
             Id = "Id",
+            SrNo = "SrNo",
             OrderId = "OrderId",
             JobTitle = "JobTitle",
             JobLevel = "JobLevel",

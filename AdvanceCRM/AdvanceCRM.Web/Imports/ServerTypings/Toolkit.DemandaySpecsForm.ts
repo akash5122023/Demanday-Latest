@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface DemandaySpecsForm {
+        SrNo: Serenity.IntegerEditor;
         OrderId: Serenity.StringEditor;
         JobTitle: Serenity.StringEditor;
         JobLevel: Serenity.StringEditor;
@@ -28,25 +29,27 @@
                 DemandaySpecsForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.StringEditor;
-                var w1 = Administration.UserEditor;
+                var w0 = s.IntegerEditor;
+                var w1 = s.StringEditor;
+                var w2 = Administration.UserEditor;
 
                 Q.initFormType(DemandaySpecsForm, [
-                    'OrderId', w0,
-                    'JobTitle', w0,
-                    'JobLevel', w0,
-                    'JobFunction', w0,
-                    'Industry', w0,
-                    'CompanyEmployeeSize', w0,
-                    'AnnualRevenue', w0,
-                    'Address', w0,
-                    'City', w0,
-                    'State', w0,
-                    'ZipCode', w0,
-                    'Country', w0,
-                    'Comments', w0,
-                    'AdditionalNotes', w0,
-                    'OwnerId', w1
+                    'SrNo', w0,
+                    'OrderId', w1,
+                    'JobTitle', w1,
+                    'JobLevel', w1,
+                    'JobFunction', w1,
+                    'Industry', w1,
+                    'CompanyEmployeeSize', w1,
+                    'AnnualRevenue', w1,
+                    'Address', w1,
+                    'City', w1,
+                    'State', w1,
+                    'ZipCode', w1,
+                    'Country', w1,
+                    'Comments', w1,
+                    'AdditionalNotes', w1,
+                    'OwnerId', w2
                 ]);
             }
         }

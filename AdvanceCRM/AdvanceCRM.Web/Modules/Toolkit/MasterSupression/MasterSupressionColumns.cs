@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -14,6 +14,8 @@ namespace AdvanceCRM.Toolkit.Columns
     {
         [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
+        [DisplayName("Sr No"), AlignRight]
+        public Int32 SrNo { get; set; }
         [EditLink, DisplayName("Account Number")]
         public String MasterAccountAccountNumber { get; set; }
         [DisplayName("Campaign Id")]

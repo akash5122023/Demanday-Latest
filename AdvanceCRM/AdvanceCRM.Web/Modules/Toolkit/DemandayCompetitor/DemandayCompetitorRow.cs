@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Masters;
+using AdvanceCRM.Masters;
 using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
@@ -25,6 +25,14 @@ namespace AdvanceCRM.Toolkit
             set => fields.Id[this] = value;
         }
 
+        // User-facing serial number; the upsert key on import (globally unique per table).
+        [DisplayName("Sr No"), Unique]
+        public Int32? SrNo
+        {
+            get => fields.SrNo[this];
+            set => fields.SrNo[this] = value;
+        }
+
         [DisplayName("Company Name"), Size(200), QuickSearch, NameProperty]
         public String CompanyName
         {
@@ -46,8 +54,9 @@ namespace AdvanceCRM.Toolkit
             set => fields.Email[this] = value;
         }
 
-        [DisplayName("CPC"), Column("CPC")]
-        public Int64? Cpc
+        // Free text on purpose – source sheets carry values like "02 cpc" or "$0.75".
+        [DisplayName("CPC"), Column("CPC"), Size(50)]
+        public String Cpc
         {
             get => fields.Cpc[this];
             set => fields.Cpc[this] = value;
@@ -384,10 +393,11 @@ namespace AdvanceCRM.Toolkit
         public class RowFields : RowFieldsBase
         {
             public Int32Field Id;
+            public Int32Field SrNo;
             public StringField CompanyName;
             public StringField Domain;
             public StringField Email;
-            public Int64Field Cpc;
+            public StringField Cpc;
             public Int32Field MasterAccountId;
             public Int32Field CampaignId;
             public Int32Field OwnerId;

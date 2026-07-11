@@ -1,10 +1,11 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface DemandayCompetitorRow {
         Id?: number;
+        SrNo?: number;
         CompanyName?: string;
         Domain?: string;
         Email?: string;
-        Cpc?: number;
+        Cpc?: string;
         MasterAccountId?: number;
         CampaignId?: number;
         OwnerId?: number;
@@ -68,6 +69,7 @@
 
         export declare const enum Fields {
             Id = "Id",
+            SrNo = "SrNo",
             CompanyName = "CompanyName",
             Domain = "Domain",
             Email = "Email",

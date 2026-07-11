@@ -8,6 +8,10 @@ namespace AdvanceCRM.Toolkit.Forms
     [FormScript("Toolkit.MasterSupressionExcelImport")]
     public class MasterSupressionExcelImportForm
     {
+        [LookupEditor("Masters.DemandayMasterAccount"), Required]
+        [DisplayName("Master Account")]
+        public Int32? MasterAccountId { get; set; }
+
         [FileUploadEditor(DisplayFileName = true), Required]
         public String FileName { get; set; }
     }

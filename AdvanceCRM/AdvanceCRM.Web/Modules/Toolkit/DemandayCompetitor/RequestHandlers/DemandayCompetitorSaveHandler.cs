@@ -17,5 +17,14 @@ namespace AdvanceCRM.Toolkit
              : base(context)
         {
         }
+
+        protected override void SetInternalFields()
+        {
+            base.SetInternalFields();
+
+            // Dialog adds without a SrNo get the next free serial number.
+            if (IsCreate && Row.SrNo == null)
+                Row.SrNo = ToolkitSrNoHelper.NextSrNo(Connection, "[dbo].[DemandayCompetitor]");
+        }
     }
 }

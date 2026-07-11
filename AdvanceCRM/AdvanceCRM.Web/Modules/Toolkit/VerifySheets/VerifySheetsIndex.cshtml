@@ -14,17 +14,6 @@
     .verify-sheets-page .vs-account-holder .select2-container { min-width: 200px; }
     .verify-sheets-page .vs-account-holder input { min-width: 200px; }
 
-    .verify-sheets-page .vs-import { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-    .verify-sheets-page .vs-import-sheet {
-        border: 1px solid #d7dce5; border-radius: 6px; padding: 8px 10px;
-        background: #fff; color: #34425a; font-weight: 600; cursor: pointer; min-width: 160px;
-    }
-    .verify-sheets-page .vs-upload-btn {
-        background: #1b62d6; color: #fff; border: none; border-radius: 6px;
-        padding: 8px 16px; font-weight: 600; cursor: pointer;
-    }
-    .verify-sheets-page .vs-upload-btn:hover { background: #164fad; }
-
     .verify-sheets-page .vs-dropdown { position: relative; }
     .verify-sheets-page .vs-verify-btn {
         background: #1b62d6; color: #fff; border: none; border-radius: 6px;
@@ -34,13 +23,23 @@
     .verify-sheets-page .vs-verify-menu {
         display: none; position: absolute; top: 110%; left: 0; z-index: 1000;
         background: #fff; border: 1px solid #e3e8ef; border-radius: 8px;
-        box-shadow: 0 6px 24px rgba(20,40,80,.12); padding: 6px 0; min-width: 200px;
+        box-shadow: 0 6px 24px rgba(20,40,80,.12); padding: 6px 0; min-width: 240px;
     }
+    /* Row = [checkbox + title] ............ [upload icon] */
     .verify-sheets-page .vs-verify-item {
-        display: flex; align-items: center; gap: 8px; padding: 8px 16px;
-        font-weight: 400; margin: 0; cursor: pointer; white-space: nowrap;
+        display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 16px;
+        white-space: nowrap;
     }
     .verify-sheets-page .vs-verify-item:hover { background: #f3f7ff; }
+    .verify-sheets-page .vs-verify-label {
+        display: flex; align-items: center; gap: 8px; flex: 1;
+        font-weight: 400; margin: 0; padding: 4px 0; cursor: pointer;
+    }
+    .verify-sheets-page .vs-item-upload {
+        background: transparent; color: #1b62d6; border: 1px solid transparent;
+        border-radius: 6px; padding: 4px 8px; cursor: pointer; line-height: 1;
+    }
+    .verify-sheets-page .vs-item-upload:hover { background: #e6f0fd; border-color: #cfe0fb; }
 
     .verify-sheets-page .vs-export-btn {
         background: #fff; color: #34425a; border: 1px solid #d7dce5; border-radius: 6px;
@@ -48,16 +47,61 @@
     }
     .verify-sheets-page .vs-export-btn:hover { background: #f6f8fb; }
 
+    .verify-sheets-page .vs-search { position: relative; }
+    .verify-sheets-page .vs-search-input {
+        border: 1px solid #d7dce5; border-radius: 6px; padding: 8px 12px;
+        font-size: 13px; color: #34425a; background: #fff; min-width: 220px;
+    }
+    .verify-sheets-page .vs-search-input:focus { outline: none; border-color: #1b62d6; }
+
     .verify-sheets-page .vs-section {
         background: #fff; border: 1px solid #eef1f6; border-radius: 12px;
         box-shadow: 0 2px 10px rgba(20,40,80,.04); padding: 16px 18px; margin-bottom: 22px;
     }
     .verify-sheets-page .vs-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    /* Caret + title share one clickable group that collapses the section. */
+    .verify-sheets-page .vs-head-toggle {
+        display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+    }
+    .verify-sheets-page .vs-caret { color: #8a95a6; font-size: 12px; transition: transform .15s ease; }
+    .verify-sheets-page .vs-section.vs-collapsed .vs-caret { transform: rotate(-90deg); }
     .verify-sheets-page .vs-title { color: #1b62d6; font-size: 16px; font-weight: 700; }
+    /* A collapsed card needs no bottom gap under its header. */
+    .verify-sheets-page .vs-section.vs-collapsed .vs-card-head { margin-bottom: 0; }
+
+    .verify-sheets-page .vs-collapse-all {
+        background: #fff; color: #34425a; border: 1px solid #d7dce5; border-radius: 6px;
+        padding: 8px 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .verify-sheets-page .vs-collapse-all:hover { background: #f6f8fb; }
     .verify-sheets-page .vs-count {
         background: #eaf1ff; color: #1b62d6; border-radius: 20px;
         font-size: 12px; font-weight: 600; padding: 2px 10px;
     }
+    /* Inline domain quick-add (Open Campaign only), sitting just left of the Add button. */
+    .verify-sheets-page .vs-quick-add { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .verify-sheets-page .vs-quick-input {
+        border: 1px solid #d7dce5; border-radius: 6px; padding: 6px 10px;
+        font-size: 12px; color: #34425a; background: #fff; min-width: 180px;
+    }
+    .verify-sheets-page .vs-quick-input:focus { outline: none; border-color: #1b62d6; }
+    .verify-sheets-page .vs-quick-btn {
+        background: #eaf1ff; color: #1b62d6; border: 1px solid #cfe0fb; border-radius: 6px;
+        padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .verify-sheets-page .vs-quick-btn:hover { background: #dbe8fd; }
+
+    /* Add button sits at the right edge; when a quick-add group is present it follows it. */
+    .verify-sheets-page .vs-add-btn {
+        margin-left: auto; background: #1b62d6; color: #fff; border: none; border-radius: 6px;
+        padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    /* When the quick-add group is already pushed right, the Add button just tucks beside it. */
+    .verify-sheets-page .vs-quick-add + .vs-add-btn { margin-left: 8px; }
+    .verify-sheets-page .vs-add-btn:hover { background: #164fad; }
+
+    .verify-sheets-page .vs-edit-link { color: #1b62d6; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .verify-sheets-page .vs-edit-link:hover { text-decoration: underline; }
 
     .verify-sheets-page .vs-table-wrap { overflow-x: auto; }
     .verify-sheets-page .vs-table { width: 100%; border-collapse: collapse; font-size: 13px; }

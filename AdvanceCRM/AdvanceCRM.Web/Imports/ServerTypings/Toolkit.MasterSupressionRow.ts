@@ -1,6 +1,7 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface MasterSupressionRow {
         Id?: number;
+        SrNo?: number;
         CampaignId?: number;
         CompanyName?: string;
         FirstName?: string;
@@ -69,6 +70,7 @@
 
         export declare const enum Fields {
             Id = "Id",
+            SrNo = "SrNo",
             CampaignId = "CampaignId",
             CompanyName = "CompanyName",
             FirstName = "FirstName",

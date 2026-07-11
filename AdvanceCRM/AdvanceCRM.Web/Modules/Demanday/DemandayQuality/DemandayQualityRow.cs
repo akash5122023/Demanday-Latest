@@ -256,6 +256,15 @@ namespace AdvanceCRM.Demanday
             set => fields.DeliveryStatus[this] = value;
         }
 
+        // Written by the Email Team module whenever it changes its own Status – see
+        // EmailTeamSaveHandler. Read-only here; edit it from the Email Team grid.
+        [DisplayName("Email Team Status"), ReadOnly(true)]
+        public AdvanceCRM.EmailTeam.EmailTeamStatus? EmailTeamStatus
+        {
+            get => (AdvanceCRM.EmailTeam.EmailTeamStatus?)fields.EmailTeamStatus[this];
+            set => fields.EmailTeamStatus[this] = (Int32?)value;
+        }
+
         [DisplayName("Agent Name"), Size(100)]
         public String AgentName
         {
@@ -671,6 +680,7 @@ namespace AdvanceCRM.Demanday
             public StringField Comments;
             public StringField QaStatus;
             public StringField DeliveryStatus;
+            public Int32Field EmailTeamStatus;
             public StringField AgentName;
             public StringField QaName;
             public DateTimeField CallDate;

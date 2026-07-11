@@ -128,6 +128,9 @@ namespace AdvanceCRM.Demanday.Forms
         public string QaStatus { get; set; }
         [OneThirdWidth]
         public string DeliveryStatus { get; set; }
+        // Owned by the Email Team module – shown here read-only. See EmailTeamSaveHandler.
+        [OneThirdWidth]
+        public AdvanceCRM.EmailTeam.EmailTeamStatus? EmailTeamStatus { get; set; }
         [OneThirdWidth]
         public string Category { get; set; }
         [OneThirdWidth, DateTimeEditor]

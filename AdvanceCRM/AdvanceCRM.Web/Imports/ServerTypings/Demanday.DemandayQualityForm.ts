@@ -28,6 +28,7 @@
         Link: Serenity.StringEditor;
         QaStatus: Serenity.StringEditor;
         DeliveryStatus: Serenity.StringEditor;
+        EmailTeamStatus: Serenity.EnumEditor;
         Category: Serenity.StringEditor;
         CallDate: Serenity.DateTimeEditor;
         DateAudited: Serenity.DateTimeEditor;
@@ -61,8 +62,9 @@
                 var s = Serenity;
                 var w0 = s.LookupEditor;
                 var w1 = s.StringEditor;
-                var w2 = s.DateTimeEditor;
-                var w3 = s.TextAreaEditor;
+                var w2 = s.EnumEditor;
+                var w3 = s.DateTimeEditor;
+                var w4 = s.TextAreaEditor;
 
                 Q.initFormType(DemandayQualityForm, [
                     'CampaignId', w0,
@@ -93,15 +95,16 @@
                     'Link', w1,
                     'QaStatus', w1,
                     'DeliveryStatus', w1,
+                    'EmailTeamStatus', w2,
                     'Category', w1,
-                    'CallDate', w2,
-                    'DateAudited', w2,
-                    'DeliveryDate', w2,
+                    'CallDate', w3,
+                    'DateAudited', w3,
+                    'DeliveryDate', w3,
                     'AgentName', w1,
                     'QaName', w1,
                     'TlName', w1,
                     'PrimaryReason', w1,
-                    'Comments', w3,
+                    'Comments', w4,
                     'Source', w1,
                     'VerificationMode', w1,
                     'Asset1', w1,
@@ -109,7 +112,7 @@
                     'Tenurity', w1,
                     'Code', w1,
                     'Md5', w1,
-                    'Date', w2,
+                    'Date', w3,
                     'OwnerId', w0
                 ]);
             }

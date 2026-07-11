@@ -27,23 +27,20 @@ namespace AdvanceCRM.Web.Middleware
 
             var stopwatch = Stopwatch.StartNew();
 
+            // Headers are written only from here. OnStarting runs on the response-start path,
+            // before headers are flushed, and exactly once. Writing them from the finally block
+            // below instead raced with this callback: HasStarted could flip between the check
+            // and the write, so two threads mutated the same header dictionary and corrupted it
+            // (IndexOutOfRangeException inside Dictionary.TryInsert).
             context.Response.OnStarting(state =>
             {
-                var (httpContext, sw, log) = ((HttpContext Context, Stopwatch Stopwatch, ILogger<ServerTimingMiddleware> Logger))state;
+                var (httpContext, sw) = ((HttpContext Context, Stopwatch Stopwatch))state;
 
-                if (sw.IsRunning)
-                    sw.Stop();
-
-                var totalMs = sw.Elapsed.TotalMilliseconds;
-                AppendTimingHeaders(httpContext.Response, totalMs);
-
-                if (totalMs >= SlowRequestThresholdMilliseconds)
-                {
-                    log.LogWarning("Request {Method} {Path} took {Elapsed} ms", httpContext.Request.Method, httpContext.Request.Path, totalMs);
-                }
+                // Elapsed-so-far is the time to first byte, which is what Server-Timing reports.
+                AppendTimingHeaders(httpContext.Response, sw.Elapsed.TotalMilliseconds);
 
                 return Task.CompletedTask;
-            }, (context, stopwatch, logger));
+            }, (context, stopwatch));
 
             try
             {
@@ -51,18 +48,15 @@ namespace AdvanceCRM.Web.Middleware
             }
             finally
             {
-                if (!context.Response.HasStarted)
+                stopwatch.Stop();
+
+                // Logging touches no shared response state, so it is safe here — and unlike
+                // OnStarting it also runs for responses that never started (e.g. aborted).
+                var totalMs = stopwatch.Elapsed.TotalMilliseconds;
+                if (totalMs >= SlowRequestThresholdMilliseconds)
                 {
-                    if (stopwatch.IsRunning)
-                        stopwatch.Stop();
-
-                    var totalMs = stopwatch.Elapsed.TotalMilliseconds;
-                    AppendTimingHeaders(context.Response, totalMs);
-
-                    if (totalMs >= SlowRequestThresholdMilliseconds)
-                    {
-                        logger.LogWarning("Request {Method} {Path} took {Elapsed} ms", context.Request.Method, context.Request.Path, totalMs);
-                    }
+                    logger.LogWarning("Request {Method} {Path} took {Elapsed} ms",
+                        context.Request.Method, context.Request.Path, totalMs);
                 }
             }
         }

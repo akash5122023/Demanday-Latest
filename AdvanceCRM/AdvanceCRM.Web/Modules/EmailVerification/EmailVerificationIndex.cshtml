@@ -1,0 +1,139 @@
+@inject Serenity.ITextLocalizer Localizer
+@{
+    ViewData["Title"] = "Email Verification";
+}
+
+<style>
+    .email-verification-page { padding: 28px 26px; max-width: 1180px; }
+
+    /* Controls stay narrow; only the results grid uses the extra width. */
+    .email-verification-page .ev-input,
+    .email-verification-page .ev-hint,
+    .email-verification-page .ev-result { max-width: 720px; }
+
+    .email-verification-page .ev-heading {
+        font-size: 22px; font-weight: 700; color: #1f2733; margin-bottom: 18px;
+    }
+
+    .email-verification-page .ev-input {
+        width: 100%; box-sizing: border-box; border: 1px solid #d7dce5; border-radius: 6px;
+        padding: 12px 14px; font-size: 14px; color: #34425a; background: #fff;
+    }
+    .email-verification-page .ev-input:focus { outline: none; border-color: #1b62d6; }
+
+    .email-verification-page .ev-hint { color: #8a95a6; font-size: 12px; margin: 8px 0 18px; }
+
+    .email-verification-page .ev-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+
+    .email-verification-page .ev-btn {
+        background: #1b62d6; color: #fff; border: none; border-radius: 6px;
+        padding: 10px 18px; font-weight: 600; font-size: 12px; letter-spacing: .4px;
+        text-transform: uppercase; cursor: pointer;
+    }
+    .email-verification-page .ev-btn:hover { background: #164fad; }
+    .email-verification-page .ev-btn:disabled { opacity: .6; cursor: default; }
+
+    /* Bulk upload + its template button sit on one row. */
+    .email-verification-page .ev-bulk-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .email-verification-page .ev-btn-light {
+        background: #fff; color: #1b62d6; border: 1px solid #cfe0fb;
+    }
+    .email-verification-page .ev-btn-light:hover { background: #eaf1ff; }
+    .email-verification-page .ev-download {
+        display: inline-block; background: #1b62d6; color: #fff; text-decoration: none;
+        border-radius: 6px; padding: 8px 16px; font-weight: 600; font-size: 12px;
+    }
+    .email-verification-page .ev-download:hover { background: #164fad; color: #fff; }
+
+    .email-verification-page .ev-result {
+        display: none; margin-top: 22px; border: 1px solid #eef1f6; border-radius: 10px;
+        padding: 14px 16px; background: #fff; font-size: 13px; color: #34425a;
+    }
+    .email-verification-page .ev-result.ev-error { border-color: #f3c6c0; color: #c0392b; background: #fdf3f2; }
+    .email-verification-page .ev-result .ev-result-title { font-weight: 700; margin-bottom: 6px; }
+
+    /* Contact search results (DemandayContacts + DemandayTeleMarketingContacts). */
+    .email-verification-page .ev-grid-box { margin-top: 24px; }
+    .email-verification-page .ev-grid-title { font-weight: 700; color: #1f2733; margin-bottom: 8px; }
+    .email-verification-page .ev-grid-note {
+        color: #8a6d3b; background: #fcf8e3; border: 1px solid #faebcc;
+        border-radius: 6px; padding: 8px 10px; font-size: 12px; margin-bottom: 10px;
+    }
+    .email-verification-page .ev-grid-empty { color: #8a95a6; font-size: 13px; padding: 10px 0; }
+
+    .email-verification-page .ev-grid-scroll { overflow-x: auto; border: 1px solid #eef1f6; border-radius: 8px; }
+    .email-verification-page .ev-grid { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; }
+    .email-verification-page .ev-grid th, .email-verification-page .ev-grid td {
+        text-align: left; padding: 9px 12px; border-bottom: 1px solid #eef1f6; white-space: nowrap;
+    }
+    .email-verification-page .ev-grid th { background: #f7f9fc; color: #55637a; font-weight: 600; }
+    .email-verification-page .ev-grid tbody tr:last-child td { border-bottom: none; }
+    .email-verification-page .ev-grid tbody tr:hover td { background: #f9fbfe; }
+
+    .email-verification-page .ev-badge {
+        display: inline-block; border-radius: 10px; padding: 2px 9px; font-size: 11px; font-weight: 600;
+    }
+    .email-verification-page .ev-badge-dd { background: #e6f0fd; color: #1b62d6; }
+    .email-verification-page .ev-badge-tm { background: #e7f6ee; color: #1e8449; }
+
+    /* Per-user search quota banner. */
+    .email-verification-page .ev-quota {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+        max-width: 720px; margin-bottom: 18px; padding: 10px 14px;
+        border: 1px solid #eef1f6; border-radius: 8px; background: #fbfcfe;
+        font-size: 13px; color: #34425a;
+    }
+    .email-verification-page .ev-quota-label { font-weight: 600; }
+    .email-verification-page .ev-quota-pill {
+        display: inline-block; border-radius: 12px; padding: 2px 10px; font-size: 12px; font-weight: 600;
+        background: #e6f0fd; color: #1b62d6;
+    }
+    .email-verification-page .ev-quota-pill.ev-quota-low { background: #fcefd6; color: #a5741a; }
+    .email-verification-page .ev-quota-pill.ev-quota-empty { background: #fde3e0; color: #c0392b; }
+    .email-verification-page .ev-quota-manage {
+        margin-left: auto; background: #fff; color: #1b62d6; border: 1px solid #cfe0fb;
+        border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .email-verification-page .ev-quota-manage:hover { background: #eaf1ff; }
+
+    /* "Already verified" note surfaced as the user types a full email. */
+    .email-verification-page .ev-cached {
+        max-width: 720px; margin: 0 0 14px; padding: 10px 12px; border-radius: 8px;
+        font-size: 13px; border: 1px solid #eef1f6; background: #fff;
+    }
+    .email-verification-page .ev-cached.ev-cached-valid { border-color: #bfe6cf; background: #f1faf4; color: #1e6b3f; }
+    .email-verification-page .ev-cached.ev-cached-invalid { border-color: #f3c6c0; background: #fdf3f2; color: #b83227; }
+    .email-verification-page .ev-cached.ev-cached-other { border-color: #f7e4bf; background: #fcf8ec; color: #8a6d3b; }
+    .email-verification-page .ev-cached-tag { font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+    .email-verification-page .ev-cached-meta { color: #8a95a6; font-size: 11px; margin-top: 3px; }
+
+    /* Admin quota-management panel. */
+    .email-verification-page .ev-admin {
+        display: none; margin: 6px 0 22px; max-width: 720px; border: 1px solid #eef1f6;
+        border-radius: 10px; background: #fff; padding: 14px 16px;
+    }
+    .email-verification-page .ev-admin-title { font-weight: 700; color: #1f2733; margin-bottom: 10px; }
+    .email-verification-page .ev-admin-search { width: 100%; box-sizing: border-box; border: 1px solid #d7dce5;
+        border-radius: 6px; padding: 8px 10px; font-size: 13px; margin-bottom: 10px; }
+    .email-verification-page .ev-admin-scroll { max-height: 340px; overflow-y: auto; border: 1px solid #eef1f6; border-radius: 8px; }
+    .email-verification-page .ev-admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .email-verification-page .ev-admin-table th, .email-verification-page .ev-admin-table td {
+        text-align: left; padding: 8px 10px; border-bottom: 1px solid #eef1f6; white-space: nowrap;
+    }
+    .email-verification-page .ev-admin-table th { background: #f7f9fc; color: #55637a; font-weight: 600; position: sticky; top: 0; }
+    .email-verification-page .ev-admin-allowed { width: 84px; border: 1px solid #d7dce5; border-radius: 5px; padding: 5px 7px; font-size: 13px; }
+    .email-verification-page .ev-admin-save {
+        background: #1b62d6; color: #fff; border: none; border-radius: 5px; padding: 5px 12px;
+        font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .email-verification-page .ev-admin-save:hover { background: #164fad; }
+    .email-verification-page .ev-admin-used { color: #55637a; }
+</style>
+
+<div id="EmailVerificationDiv"></div>
+
+<script type="text/javascript">
+    jQuery(function () {
+        new AdvanceCRM.EmailVerification.EmailVerificationPage($('#EmailVerificationDiv'));
+    });
+</script>

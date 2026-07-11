@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Masters;
+using AdvanceCRM.Masters;
 using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
@@ -23,6 +23,14 @@ namespace AdvanceCRM.Toolkit
         {
             get => fields.Id[this];
             set => fields.Id[this] = value;
+        }
+
+        // User-facing serial number; the upsert key on import (globally unique per table).
+        [DisplayName("Sr No"), Unique]
+        public Int32? SrNo
+        {
+            get => fields.SrNo[this];
+            set => fields.SrNo[this] = value;
         }
 
         [DisplayName("Company Name"), Size(200), QuickSearch, NameProperty]
@@ -390,6 +398,7 @@ namespace AdvanceCRM.Toolkit
         public class RowFields : RowFieldsBase
         {
             public Int32Field Id;
+            public Int32Field SrNo;
             public StringField CompanyName;
             public StringField Domain;
             public Int32Field AgentsName;

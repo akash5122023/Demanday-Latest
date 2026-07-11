@@ -26,15 +26,21 @@ namespace AdvanceCRM.Toolkit {
                         if (!this.validateBeforeSave())
                             return;
 
+                        if (this.form.CampaignId.value == null || Q.isEmptyOrNull(this.form.CampaignId.value)) {
+                            Q.notifyError("Please select a Campaign!");
+                            return;
+                        }
+
                         if (this.form.FileName.value == null || Q.isEmptyOrNull(this.form.FileName.value.Filename)) {
                             Q.notifyError("Please select a file!");
                             return;
                         }
 
-                        Q.serviceCall({
+                        Q.serviceCall<ExcelImportResponse>({
                             url: Q.resolveUrl('~/Services/Toolkit/ClientSupression/ExcelImport'),
                             request: {
-                                FileName: this.form.FileName.value.Filename
+                                FileName: this.form.FileName.value.Filename,
+                                CampaignId: Q.toId(this.form.CampaignId.value)
                             },
                             onSuccess: response => {
                                 Q.notifyInfo('Inserted: ' + (response.Inserted || 0) + ', Updated: ' + (response.Updated || 0));

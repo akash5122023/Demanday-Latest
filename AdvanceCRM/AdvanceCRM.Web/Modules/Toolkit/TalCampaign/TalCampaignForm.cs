@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -13,6 +13,8 @@ namespace AdvanceCRM.Toolkit.Forms
     public class TalCampaignForm
     {
         [Category("Tal Campaign Details")]
+        [HalfWidth, DisplayName("Sr No")]
+        public Int32 SrNo { get; set; }
         [HalfWidth]
         public Int32 MasterAccountId { get; set; }
 

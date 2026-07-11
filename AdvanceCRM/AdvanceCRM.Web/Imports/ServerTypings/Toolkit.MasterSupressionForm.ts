@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface MasterSupressionForm {
+        SrNo: Serenity.IntegerEditor;
         MasterAccountId: Serenity.LookupEditor;
         CampaignId: Serenity.LookupEditor;
         CompanyName: Serenity.StringEditor;
@@ -22,21 +23,23 @@
                 MasterSupressionForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.LookupEditor;
-                var w1 = s.StringEditor;
-                var w2 = s.DateTimeEditor;
-                var w3 = Administration.UserEditor;
+                var w0 = s.IntegerEditor;
+                var w1 = s.LookupEditor;
+                var w2 = s.StringEditor;
+                var w3 = s.DateTimeEditor;
+                var w4 = Administration.UserEditor;
 
                 Q.initFormType(MasterSupressionForm, [
-                    'MasterAccountId', w0,
-                    'CampaignId', w0,
-                    'CompanyName', w1,
-                    'FirstName', w1,
-                    'LastName', w1,
-                    'Email', w1,
-                    'Domain', w1,
-                    'Date', w2,
-                    'OwnerId', w3
+                    'SrNo', w0,
+                    'MasterAccountId', w1,
+                    'CampaignId', w1,
+                    'CompanyName', w2,
+                    'FirstName', w2,
+                    'LastName', w2,
+                    'Email', w2,
+                    'Domain', w2,
+                    'Date', w3,
+                    'OwnerId', w4
                 ]);
             }
         }

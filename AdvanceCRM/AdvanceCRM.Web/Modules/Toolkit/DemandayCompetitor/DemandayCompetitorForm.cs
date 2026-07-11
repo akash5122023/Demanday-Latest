@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -13,6 +13,8 @@ namespace AdvanceCRM.Toolkit.Forms
     public class DemandayCompetitorForm
     {
         [Category("Competitor Details")]
+        [HalfWidth, DisplayName("Sr No")]
+        public Int32 SrNo { get; set; }
         [HalfWidth,Hidden]
         public Int32 MasterAccountId { get; set; }
         [HalfWidth, Hidden]
@@ -25,7 +27,7 @@ namespace AdvanceCRM.Toolkit.Forms
         [HalfWidth]
         public String Email { get; set; }
         [HalfWidth]
-        public Int64 Cpc { get; set; }
+        public String Cpc { get; set; }
         [Category("Representatives")]
         [HalfWidth]
         public Int32 OwnerId { get; set; }

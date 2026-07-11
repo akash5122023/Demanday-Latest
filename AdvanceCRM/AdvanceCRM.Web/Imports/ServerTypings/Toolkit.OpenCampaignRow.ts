@@ -1,6 +1,7 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface OpenCampaignRow {
         Id?: number;
+        SrNo?: number;
         CampaignId?: number;
         Domain?: string;
         DemandayUserId?: number;
@@ -105,6 +106,7 @@
 
         export declare const enum Fields {
             Id = "Id",
+            SrNo = "SrNo",
             CampaignId = "CampaignId",
             Domain = "Domain",
             DemandayUserId = "DemandayUserId",

@@ -27,6 +27,14 @@ namespace AdvanceCRM.Toolkit
             set => fields.Id[this] = value;
         }
 
+        // User-facing serial number; the upsert key on import (globally unique per table).
+        [DisplayName("Sr No"), Unique]
+        public Int32? SrNo
+        {
+            get => fields.SrNo[this];
+            set => fields.SrNo[this] = value;
+        }
+
         [DisplayName("Order Id")]
         [ExcelImportable]
         public Int64? OrderId
@@ -472,6 +480,7 @@ namespace AdvanceCRM.Toolkit
         public class RowFields : RowFieldsBase
         {
             public Int32Field Id;
+            public Int32Field SrNo;
             public Int64Field OrderId;
             public StringField JobTitle;
             public StringField JobLevel;

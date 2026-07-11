@@ -12,12 +12,21 @@ namespace AdvanceCRM.DNCContact.Forms
     [BasedOnRow(typeof(DncContactsRow), CheckNames = true)]
     public class DncContactsForm
     {
-        public String FirstName { get; set; }
-        public String LastName { get; set; }
-        public String Email { get; set; }
-        public String DncStatus { get; set; }
-        public String Number { get; set; }
-        public Int32 CampaignId { get; set; }
+        [HalfWidth]
         public Int32 MasterAccountId { get; set; }
+        [HalfWidth]
+        public Int32 CampaignId { get; set; }
+        [HalfWidth]
+        public String FirstName { get; set; }
+        [HalfWidth]
+        public String LastName { get; set; }
+        [HalfWidth]
+        public String Email { get; set; }
+        [HalfWidth]
+        public String DncStatus { get; set; }
+        [HalfWidth]
+        public String Number { get; set; }
+        
+        
     }
 }

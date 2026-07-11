@@ -52,6 +52,8 @@ namespace AdvanceCRM.Demanday.Columns
         public System.DateTime? Date { get; set; }
         public String QaStatus { get; set; }
         public String DeliveryStatus { get; set; }
+        [DisplayName("Email Team Status")]
+        public AdvanceCRM.TeleMarketingEmailTeam.TeleMarketingEmailTeamStatus? EmailTeamStatus { get; set; }
         public String AgentName { get; set; }
         public String QaName { get; set; }
         public DateTime CallDate { get; set; }

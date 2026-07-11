@@ -124,9 +124,11 @@ namespace AdvanceCRM.Demanday.Endpoints
             // 1️⃣ Get the Enquiry record
             var demandaytelemarketingteamleaderConn = sqlConnections.NewFor<DemandayTeleMarketingTeamLeaderRow>();
             var demandaytelemarketingqualityConn = sqlConnections.NewFor<DemandayTeleMarketingQualiltyRow>();
-            //var telemarketingteamConn = sqlConnections.NewFor<TeleMarketingTeammRow>();
+            var telemarketingemailteamConn = sqlConnections.NewFor<AdvanceCRM.TeleMarketingEmailTeam.TeleMarketingEmailTeamRow>();
 
-
+            // TM Team Leader keeps the campaign as free text, but TM Email Team stores it as an FK
+            // (and derives the master account from it). Resolve the whole batch up front.
+            var campaignByCode = LoadCampaignLookup(demandaytelemarketingteamleaderConn);
 
             foreach (var id in request.Ids)
             {
@@ -188,6 +190,24 @@ namespace AdvanceCRM.Demanday.Endpoints
                         demandaytelemarketingqualilty.Id = Convert.ToInt32(newId);
                 }
 
+                Masters.DemandayCampaignIdRow campaign = null;
+                if (!string.IsNullOrWhiteSpace(demandaytelemarketingteamleader.CampaignId))
+                    campaignByCode.TryGetValue(demandaytelemarketingteamleader.CampaignId.Trim(), out campaign);
+
+                // Same record also lands in TM Email Team. DemandayTeleMarketingQualiltyId is the
+                // link that lets TeleMarketingEmailTeamSaveHandler push status changes back into TM Quality.
+                telemarketingemailteamConn.Insert(new AdvanceCRM.TeleMarketingEmailTeam.TeleMarketingEmailTeamRow
+                {
+                    MasterAccountId = campaign?.DemandayMasterAccountId,
+                    CampaignId = campaign?.Id,
+                    FirstName = demandaytelemarketingteamleader.FirstName,
+                    LastName = demandaytelemarketingteamleader.LastName,
+                    Email = demandaytelemarketingteamleader.Email,
+                    Status = AdvanceCRM.TeleMarketingEmailTeam.TeleMarketingEmailTeamStatus.Pending,
+                    OwnerId = demandaytelemarketingteamleader.OwnerId,
+                    DemandayTeleMarketingQualiltyId = demandaytelemarketingqualilty.Id
+                });
+
                 // 4️⃣ Move QADetails from TeamLeader to new Quality record
                 var qaFlds = DemandayTeleMarketingEnquiryQADetailsRow.Fields;
                 var qaDetails = demandaytelemarketingteamleaderConn.List<DemandayTeleMarketingEnquiryQADetailsRow>(q =>
@@ -213,6 +233,19 @@ namespace AdvanceCRM.Demanday.Endpoints
 
             return response;
         }
+        // Campaign code -> campaign row (carries both the campaign Id and its master account).
+        private static Dictionary<string, Masters.DemandayCampaignIdRow> LoadCampaignLookup(IDbConnection connection)
+        {
+            var fld = Masters.DemandayCampaignIdRow.Fields;
+            return connection.List<Masters.DemandayCampaignIdRow>(q => q
+                    .Select(fld.Id)
+                    .Select(fld.CampaignId)
+                    .Select(fld.DemandayMasterAccountId))
+                .Where(x => !string.IsNullOrWhiteSpace(x.CampaignId))
+                .GroupBy(x => x.CampaignId.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+        }
+
         public class MoveToQualityRequest : ServiceRequest
         {
             public List<int> Ids { get; set; }

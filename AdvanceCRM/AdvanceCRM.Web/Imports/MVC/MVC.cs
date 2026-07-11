@@ -381,6 +381,28 @@ namespace MVC
 
         }
 
+        public static class EBBCheck
+        {
+            public static class EBBCheck_
+            {
+                public const string EBBCheckIndex = "~/Modules/EBBCheck/EBBCheck/EBBCheckIndex.cshtml";
+            }
+
+        }
+
+        public static class EmailTeam
+        {
+            public static class EmailTeam_
+            {
+                public const string EmailTeamIndex = "~/Modules/EmailTeam/EmailTeam/EmailTeamIndex.cshtml";
+            }
+        }
+
+        public static class EmailVerification
+        {
+            public const string EmailVerificationIndex = "~/Modules/EmailVerification/EmailVerificationIndex.cshtml";
+        }
+
         public static class Employee
         {
             public static class Employee_
@@ -1250,6 +1272,15 @@ namespace MVC
             public static class Tasks_
             {
                 public const string TasksIndex = "~/Modules/Tasks/Tasks/TasksIndex.cshtml";
+            }
+
+        }
+
+        public static class TeleMarketingEmailTeam
+        {
+            public static class TeleMarketingEmailTeam_
+            {
+                public const string TeleMarketingEmailTeamIndex = "~/Modules/TeleMarketingEmailTeam/TeleMarketingEmailTeam/TeleMarketingEmailTeamIndex.cshtml";
             }
 
         }

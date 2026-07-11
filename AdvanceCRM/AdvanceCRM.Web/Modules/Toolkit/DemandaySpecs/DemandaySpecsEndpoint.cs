@@ -138,32 +138,60 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
             int ownerId = Convert.ToInt32(Context.User.GetIdentifier());
 
+            // SrNo (column 1) is the upsert key: a row whose SrNo already exists is updated, not
+            // duplicated. Preload the existing SrNo -> Id map once so the loop stays a single query each.
+            var idBySrNo = uow.Connection.List<MyRow>(q => q
+                    .Select(MyRow.Fields.Id).Select(MyRow.Fields.SrNo)
+                    .Where(new Criteria(MyRow.Fields.SrNo).IsNotNull()))
+                .Where(r => r.SrNo.HasValue)
+                .GroupBy(r => r.SrNo.Value)
+                .ToDictionary(g => g.Key, g => g.First().Id.Value);
+            int maxSrNo = idBySrNo.Count == 0 ? 0 : idBySrNo.Keys.Max();
+
             for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
             {
                 try
                 {
-                    // Read all ExcelImportable fields from the Excel worksheet
-                    var orderId = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
-                    var jobTitle = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
-                    var jobLevel = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
-                    var jobFunction = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
-                    var industry = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
-                    var companyEmployeeSize = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
-                    var annualRevenue = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
-                    var address = Convert.ToString(worksheet.Cells[row, 8].Value ?? "").Trim();
-                    var city = Convert.ToString(worksheet.Cells[row, 9].Value ?? "").Trim();
-                    var state = Convert.ToString(worksheet.Cells[row, 10].Value ?? "").Trim();
-                    var zipCode = Convert.ToString(worksheet.Cells[row, 11].Value ?? "").Trim();
-                    var country = Convert.ToString(worksheet.Cells[row, 12].Value ?? "").Trim();
-                    var comments = Convert.ToString(worksheet.Cells[row, 13].Value ?? "").Trim();
-                    var additionalNotes = Convert.ToString(worksheet.Cells[row, 14].Value ?? "").Trim();
+                    var srNoStr = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
+                    var orderId = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
+                    var jobTitle = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
+                    var jobLevel = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
+                    var jobFunction = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
+                    var industry = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
+                    var companyEmployeeSize = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
+                    var annualRevenue = Convert.ToString(worksheet.Cells[row, 8].Value ?? "").Trim();
+                    var address = Convert.ToString(worksheet.Cells[row, 9].Value ?? "").Trim();
+                    var city = Convert.ToString(worksheet.Cells[row, 10].Value ?? "").Trim();
+                    var state = Convert.ToString(worksheet.Cells[row, 11].Value ?? "").Trim();
+                    var zipCode = Convert.ToString(worksheet.Cells[row, 12].Value ?? "").Trim();
+                    var country = Convert.ToString(worksheet.Cells[row, 13].Value ?? "").Trim();
+                    var comments = Convert.ToString(worksheet.Cells[row, 14].Value ?? "").Trim();
+                    var additionalNotes = Convert.ToString(worksheet.Cells[row, 15].Value ?? "").Trim();
 
                     // Skip empty rows (at least JobTitle or OrderId should have a value)
                     if (string.IsNullOrEmpty(jobTitle) && string.IsNullOrEmpty(orderId))
                         continue;
 
-                    var newRow = new MyRow
+                    int? srNo = null;
+                    if (!string.IsNullOrEmpty(srNoStr))
                     {
+                        if (!int.TryParse(srNoStr, out var parsedSrNo))
+                        {
+                            response.ErrorList.Add($"Row {row}: Sr No '{srNoStr}' is not a valid number");
+                            continue;
+                        }
+                        srNo = parsedSrNo;
+                    }
+
+                    // Blank SrNo => a brand-new row gets the next free number.
+                    if (!srNo.HasValue)
+                        srNo = ++maxSrNo;
+                    else if (srNo.Value > maxSrNo)
+                        maxSrNo = srNo.Value;
+
+                    var data = new MyRow
+                    {
+                        SrNo = srNo,
                         OrderId = string.IsNullOrEmpty(orderId) ? (long?)null : Convert.ToInt64(orderId),
                         JobTitle = jobTitle,
                         JobLevel = jobLevel,
@@ -179,12 +207,23 @@ namespace AdvanceCRM.Toolkit.Endpoints
                         Comments = comments,
                         AdditionalNotes = additionalNotes,
                         CampaignId = campaign.Id,
-                        MasterAccountId = campaign.DemandayMasterAccountId,
-                        OwnerId = ownerId
+                        MasterAccountId = campaign.DemandayMasterAccountId
                     };
 
-                    uow.Connection.Insert(newRow);
-                    response.Inserted++;
+                    if (idBySrNo.TryGetValue(srNo.Value, out var existingId))
+                    {
+                        // UpdateById only writes assigned fields, so OwnerId (creator) is preserved.
+                        data.Id = existingId;
+                        uow.Connection.UpdateById(data);
+                        response.Updated++;
+                    }
+                    else
+                    {
+                        data.OwnerId = ownerId;
+                        var newId = (int)uow.Connection.InsertAndGetID(data);
+                        idBySrNo[srNo.Value] = newId;
+                        response.Inserted++;
+                    }
                 }
                 catch (Exception ex)
                 {

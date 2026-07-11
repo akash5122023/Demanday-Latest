@@ -27,6 +27,31 @@
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Reports:Accounting")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("IVR:Click To Call")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets")]
+// Controls whether the "+ Add" buttons (and Open Campaign's quick "Add domain" box) show on the Verify Sheets page.
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Add")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailVerification:Read")]
+// Grants access to the per-user search-quota management panel on the Email Verification page.
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailVerification:ManageQuota")]
+
+// EBB Check module
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EBBCheck:Read")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EBBCheck:Insert")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EBBCheck:Update")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EBBCheck:Delete")]
+// Only the Quality team gets this – lets them change the Status field.
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EBBCheck:ChangeStatus")]
+
+// Email Team module
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailTeam:Read")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailTeam:Insert")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailTeam:Update")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailTeam:Delete")]
+
+// TM Email Team module
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("TeleMarketingEmailTeam:Read")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("TeleMarketingEmailTeam:Insert")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("TeleMarketingEmailTeam:Update")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("TeleMarketingEmailTeam:Delete")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("MasterSupression:Import")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("ClientSupression:Import")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("DemandayCompetitor:Import")]

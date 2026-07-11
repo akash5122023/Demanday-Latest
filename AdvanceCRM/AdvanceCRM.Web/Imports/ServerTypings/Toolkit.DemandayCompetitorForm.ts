@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface DemandayCompetitorForm {
+        SrNo: Serenity.IntegerEditor;
         MasterAccountId: Serenity.LookupEditor;
         CampaignId: Serenity.LookupEditor;
         CompanyName: Serenity.StringEditor;
@@ -20,18 +21,20 @@
                 DemandayCompetitorForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.LookupEditor;
-                var w1 = s.StringEditor;
-                var w2 = Administration.UserEditor;
+                var w0 = s.IntegerEditor;
+                var w1 = s.LookupEditor;
+                var w2 = s.StringEditor;
+                var w3 = Administration.UserEditor;
 
                 Q.initFormType(DemandayCompetitorForm, [
-                    'MasterAccountId', w0,
-                    'CampaignId', w0,
-                    'CompanyName', w1,
-                    'Domain', w1,
-                    'Email', w1,
-                    'Cpc', w1,
-                    'OwnerId', w2
+                    'SrNo', w0,
+                    'MasterAccountId', w1,
+                    'CampaignId', w1,
+                    'CompanyName', w2,
+                    'Domain', w2,
+                    'Email', w2,
+                    'Cpc', w2,
+                    'OwnerId', w3
                 ]);
             }
         }

@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface TalCampaignForm {
+        SrNo: Serenity.IntegerEditor;
         MasterAccountId: Serenity.LookupEditor;
         CampaignId: Serenity.LookupEditor;
         CompanyName: Serenity.StringEditor;
@@ -21,19 +22,21 @@
                 TalCampaignForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.LookupEditor;
-                var w1 = s.StringEditor;
-                var w2 = Administration.UserEditor;
+                var w0 = s.IntegerEditor;
+                var w1 = s.LookupEditor;
+                var w2 = s.StringEditor;
+                var w3 = Administration.UserEditor;
 
                 Q.initFormType(TalCampaignForm, [
-                    'MasterAccountId', w0,
-                    'CampaignId', w0,
-                    'CompanyName', w1,
-                    'Domain', w1,
-                    'Cpc', w1,
-                    'AgentsName', w0,
-                    'Reason', w1,
-                    'OwnerId', w2
+                    'SrNo', w0,
+                    'MasterAccountId', w1,
+                    'CampaignId', w1,
+                    'CompanyName', w2,
+                    'Domain', w2,
+                    'Cpc', w2,
+                    'AgentsName', w1,
+                    'Reason', w2,
+                    'OwnerId', w3
                 ]);
             }
         }

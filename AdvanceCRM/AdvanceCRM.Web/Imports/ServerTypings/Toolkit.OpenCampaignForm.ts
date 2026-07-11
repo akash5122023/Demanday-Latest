@@ -1,5 +1,6 @@
 ﻿namespace AdvanceCRM.Toolkit {
     export interface OpenCampaignForm {
+        SrNo: Serenity.IntegerEditor;
         MasterAccountId: Serenity.LookupEditor;
         CampaignId: Serenity.LookupEditor;
         Domain: Serenity.StringEditor;
@@ -18,17 +19,19 @@
                 OpenCampaignForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.LookupEditor;
-                var w1 = s.StringEditor;
-                var w2 = s.DateTimeEditor;
-                var w3 = Administration.UserEditor;
+                var w0 = s.IntegerEditor;
+                var w1 = s.LookupEditor;
+                var w2 = s.StringEditor;
+                var w3 = s.DateTimeEditor;
+                var w4 = Administration.UserEditor;
 
                 Q.initFormType(OpenCampaignForm, [
-                    'MasterAccountId', w0,
-                    'CampaignId', w0,
-                    'Domain', w1,
-                    'TimeStamp', w2,
-                    'OwnerId', w3
+                    'SrNo', w0,
+                    'MasterAccountId', w1,
+                    'CampaignId', w1,
+                    'Domain', w2,
+                    'TimeStamp', w3,
+                    'OwnerId', w4
                 ]);
             }
         }

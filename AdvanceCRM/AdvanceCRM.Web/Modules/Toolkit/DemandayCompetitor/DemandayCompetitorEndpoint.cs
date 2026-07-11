@@ -83,7 +83,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
         [HttpPost, ServiceAuthorize("DemandayCompetitor:Import")]
         public ActionResult DownloadTemplate(IDbConnection connection, RetrieveRequest request)
         {
-            string[] headers = { "Company Name", "Domain", "Email", "CPC" };
+            string[] headers = { "Sr No", "Company Name", "Domain", "Email", "CPC" };
 
             using (var package = new ExcelPackage())
             {
@@ -143,35 +143,75 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
             int ownerId = Convert.ToInt32(Context.User.GetIdentifier());
 
+            // SrNo (column 1) is the upsert key: an existing SrNo is updated, not duplicated.
+            var idBySrNo = uow.Connection.List<MyRow>(q => q
+                    .Select(MyRow.Fields.Id).Select(MyRow.Fields.SrNo)
+                    .Where(new Criteria(MyRow.Fields.SrNo).IsNotNull()))
+                .Where(r => r.SrNo.HasValue)
+                .GroupBy(r => r.SrNo.Value)
+                .ToDictionary(g => g.Key, g => g.First().Id.Value);
+            int maxSrNo = idBySrNo.Count == 0 ? 0 : idBySrNo.Keys.Max();
+
             for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
             {
                 try
                 {
-                    var companyName = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
-                    var domain = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
-                    var email = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
-                    var cpcStr = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
+                    var srNoStr = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
+                    var companyName = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
+                    var domain = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
+                    var email = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
+                    // CPC is free text – read the displayed value so "02 cpc" and "$0.75" survive.
+                    var cpc = (worksheet.Cells[row, 5].Text ?? "").Trim();
 
                     if (string.IsNullOrEmpty(companyName) && string.IsNullOrEmpty(domain) && string.IsNullOrEmpty(email))
                         continue;
 
-                    long? cpc = null;
-                    if (!string.IsNullOrEmpty(cpcStr) && long.TryParse(cpcStr, out long parsedCpc))
-                        cpc = parsedCpc;
-
-                    var newRow = new MyRow
+                    if (cpc.Length > 50)
                     {
+                        response.ErrorList.Add($"Row {row}: CPC '{cpc}' is longer than 50 characters");
+                        continue;
+                    }
+
+                    int? srNo = null;
+                    if (!string.IsNullOrEmpty(srNoStr))
+                    {
+                        if (!int.TryParse(srNoStr, out var parsedSrNo))
+                        {
+                            response.ErrorList.Add($"Row {row}: Sr No '{srNoStr}' is not a valid number");
+                            continue;
+                        }
+                        srNo = parsedSrNo;
+                    }
+
+                    if (!srNo.HasValue)
+                        srNo = ++maxSrNo;
+                    else if (srNo.Value > maxSrNo)
+                        maxSrNo = srNo.Value;
+
+                    var data = new MyRow
+                    {
+                        SrNo = srNo,
                         CompanyName = companyName,
                         Domain = domain,
                         Email = email,
-                        Cpc = cpc,
+                        Cpc = string.IsNullOrEmpty(cpc) ? null : cpc,
                         CampaignId = campaign.Id,
-                        MasterAccountId = campaign.DemandayMasterAccountId,
-                        OwnerId = ownerId
+                        MasterAccountId = campaign.DemandayMasterAccountId
                     };
 
-                    uow.Connection.Insert(newRow);
-                    response.Inserted++;
+                    if (idBySrNo.TryGetValue(srNo.Value, out var existingId))
+                    {
+                        data.Id = existingId;
+                        uow.Connection.UpdateById(data);
+                        response.Updated++;
+                    }
+                    else
+                    {
+                        data.OwnerId = ownerId;
+                        var newId = (int)uow.Connection.InsertAndGetID(data);
+                        idBySrNo[srNo.Value] = newId;
+                        response.Inserted++;
+                    }
                 }
                 catch (Exception ex)
                 {

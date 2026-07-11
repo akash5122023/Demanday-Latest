@@ -69,7 +69,11 @@ namespace AdvanceCRM.Demanday.Endpoints
             var response = new StandardResponse();
             var demandayteamleaderConn = sqlConnections.NewFor<DemandayTeamLeaderRow>();
             var demandayqualityConn = sqlConnections.NewFor<DemandayQualityRow>();
+            var emailteamConn = sqlConnections.NewFor<AdvanceCRM.EmailTeam.EmailTeamRow>();
 
+            // Team Leader keeps the campaign as free text, but Email Team stores it as an FK
+            // (and derives the master account from it). Resolve the whole batch up front.
+            var campaignByCode = LoadCampaignLookup(demandayteamleaderConn);
 
             foreach (var id in request.Ids)
             {
@@ -110,7 +114,27 @@ namespace AdvanceCRM.Demanday.Endpoints
                     OwnerId = demandayteamleader.OwnerId
                 };
 
-                demandayqualityConn.Insert(demandayquality);
+                // InsertAndGetID so the new Quality id can be stamped on the Email Team row below.
+                demandayquality.Id = (int)demandayqualityConn.InsertAndGetID(demandayquality);
+
+                Masters.DemandayCampaignIdRow campaign = null;
+                if (!string.IsNullOrWhiteSpace(demandayteamleader.CampaignId))
+                    campaignByCode.TryGetValue(demandayteamleader.CampaignId.Trim(), out campaign);
+
+                // Same record also lands in Email Team. DemandayQualityId is the link that
+                // lets EmailTeamSaveHandler push status changes back into Quality.
+                emailteamConn.Insert(new AdvanceCRM.EmailTeam.EmailTeamRow
+                {
+                    MasterAccountId = campaign?.DemandayMasterAccountId,
+                    CampaignId = campaign?.Id,
+                    FirstName = demandayteamleader.FirstName,
+                    LastName = demandayteamleader.LastName,
+                    Email = demandayteamleader.Email,
+                    Status = AdvanceCRM.EmailTeam.EmailTeamStatus.Pending,
+                    OwnerId = demandayteamleader.OwnerId,
+                    DemandayQualityId = demandayquality.Id
+                });
+
                 demandayteamleaderConn.DeleteById<DemandayTeamLeaderRow>(id);
 
                 response.Id = demandayquality.Id ?? 0;
@@ -119,6 +143,20 @@ namespace AdvanceCRM.Demanday.Endpoints
 
             return response;
         }
+
+        // Campaign code -> campaign row (carries both the campaign Id and its master account).
+        private static Dictionary<string, Masters.DemandayCampaignIdRow> LoadCampaignLookup(IDbConnection connection)
+        {
+            var fld = Masters.DemandayCampaignIdRow.Fields;
+            return connection.List<Masters.DemandayCampaignIdRow>(q => q
+                    .Select(fld.Id)
+                    .Select(fld.CampaignId)
+                    .Select(fld.DemandayMasterAccountId))
+                .Where(x => !string.IsNullOrWhiteSpace(x.CampaignId))
+                .GroupBy(x => x.CampaignId.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+        }
+
         public class MoveToDemandayQualityRequest : ServiceRequest
         {
             public List<int> Ids { get; set; }

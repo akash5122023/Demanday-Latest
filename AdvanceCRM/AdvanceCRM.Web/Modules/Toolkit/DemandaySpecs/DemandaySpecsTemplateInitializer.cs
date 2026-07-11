@@ -14,36 +14,40 @@ namespace AdvanceCRM.Toolkit
         {
             try
             {
-                // Check if template file exists and is valid (should be > 100 bytes)
-                if (File.Exists(templatePath) && new FileInfo(templatePath).Length > 100)
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+                // A pre-SrNo template has a stale header row, so regenerate unless "Sr No" is first.
+                if (File.Exists(templatePath) && new FileInfo(templatePath).Length > 100 &&
+                    FirstHeaderIsSrNo(templatePath))
                 {
-                    return; // File exists and appears valid
+                    return;
                 }
 
-                // Create or recreate the template
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                if (File.Exists(templatePath))
+                    File.Delete(templatePath);
 
                 using (var package = new ExcelPackage())
                 {
                     var worksheet = package.Workbook.Worksheets.Add("DemandaySpecs");
 
-                    // Add headers - all ExcelImportable fields from DemandaySpecsRow
+                    // Sr No is the upsert key on import; the rest are the ExcelImportable fields.
                     var headers = new string[]
                     {
-                        "Order ID",                    // 1
-                        "Job Title",                   // 2
-                        "Job Level",                   // 3
-                        "Job Function",                // 4
-                        "Industry",                    // 5
-                        "Company Employee Size",       // 6
-                        "Annual Revenue",              // 7
-                        "Address",                     // 8
-                        "City",                        // 9
-                        "State",                       // 10
-                        "Zip Code",                    // 11
-                        "Country",                     // 12
-                        "Comments",                    // 13
-                        "Additional Notes"             // 14
+                        "Sr No",                       // 1
+                        "Order ID",                    // 2
+                        "Job Title",                   // 3
+                        "Job Level",                   // 4
+                        "Job Function",                // 5
+                        "Industry",                    // 6
+                        "Company Employee Size",       // 7
+                        "Annual Revenue",              // 8
+                        "Address",                     // 9
+                        "City",                        // 10
+                        "State",                       // 11
+                        "Zip Code",                    // 12
+                        "Country",                     // 13
+                        "Comments",                    // 14
+                        "Additional Notes"             // 15
                     };
 
                     for (int col = 1; col <= headers.Length; col++)
@@ -67,6 +71,7 @@ namespace AdvanceCRM.Toolkit
                     worksheet.Column(12).Width = 12;
                     worksheet.Column(13).Width = 20;
                     worksheet.Column(14).Width = 20;
+                    worksheet.Column(15).Width = 20;
 
                     // Ensure directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(templatePath));
@@ -80,6 +85,24 @@ namespace AdvanceCRM.Toolkit
             {
                 // Log error but don't throw - template can be manually created
                 System.Diagnostics.Debug.WriteLine($"Error initializing DemandaySpecs template: {ex.Message}");
+            }
+        }
+
+        // True when cell A1 already reads "Sr No" — i.e. the template is the current layout.
+        private static bool FirstHeaderIsSrNo(string templatePath)
+        {
+            try
+            {
+                using (var package = new ExcelPackage(new FileInfo(templatePath)))
+                {
+                    var ws = package.Workbook.Worksheets.Count > 0 ? package.Workbook.Worksheets[0] : null;
+                    var first = ws?.Cells[1, 1].Value?.ToString()?.Trim();
+                    return string.Equals(first, "Sr No", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
     }

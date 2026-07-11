@@ -13,6 +13,8 @@ namespace AdvanceCRM.Toolkit.Forms
     public class DemandaySpecsForm
     {
         [Category("Specs Information")]
+        [HalfWidth, DisplayName("Sr No")]
+        public Int32 SrNo { get; set; }
         [HalfWidth]
         public Int64 OrderId { get; set; }
         [HalfWidth]
