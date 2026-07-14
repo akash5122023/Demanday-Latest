@@ -24,6 +24,7 @@ namespace AdvanceCRM.Toolkit.Columns
         public String Industry { get; set; }
         public String CompanyEmployeeSize { get; set; }
         public String AnnualRevenue { get; set; }
+        public String ExcludeCompany { get; set; }
         public String Address { get; set; }
         public String City { get; set; }
         public String State { get; set; }

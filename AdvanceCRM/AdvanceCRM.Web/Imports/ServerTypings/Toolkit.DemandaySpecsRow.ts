@@ -9,6 +9,7 @@
         Industry?: string;
         CompanyEmployeeSize?: string;
         AnnualRevenue?: string;
+        ExcludeCompany?: string;
         Address?: string;
         City?: string;
         State?: string;
@@ -87,6 +88,7 @@
             Industry = "Industry",
             CompanyEmployeeSize = "CompanyEmployeeSize",
             AnnualRevenue = "AnnualRevenue",
+            ExcludeCompany = "ExcludeCompany",
             Address = "Address",
             City = "City",
             State = "State",

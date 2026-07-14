@@ -104,16 +104,27 @@
     .verify-sheets-page .vs-edit-link:hover { text-decoration: underline; }
 
     .verify-sheets-page .vs-table-wrap { overflow-x: auto; }
-    .verify-sheets-page .vs-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    /* min-width lets a many-column sheet exceed the card and scroll horizontally instead of squashing. */
+    .verify-sheets-page .vs-table { width: 100%; min-width: max-content; border-collapse: collapse; font-size: 13px; }
     .verify-sheets-page .vs-table thead th {
         background: #f4f7fc; color: #1b62d6; text-align: left; font-weight: 600;
         padding: 10px 12px; border-bottom: 1px solid #e6ebf3; white-space: nowrap;
     }
     .verify-sheets-page .vs-table tbody td {
-        padding: 10px 12px; border-bottom: 1px solid #f0f3f8; color: #34425a;
+        padding: 10px 12px; border-bottom: 1px solid #f0f3f8; color: #34425a; white-space: nowrap;
     }
     .verify-sheets-page .vs-table tbody tr:hover { background: #fafbfe; }
     .verify-sheets-page .vs-table tbody td:first-child { color: #1b62d6; font-weight: 600; }
+
+    /* "more ++" / "less --" toggle row shown when a sheet has more than the preview limit. */
+    .verify-sheets-page .vs-table tbody tr.vs-more-row:hover { background: transparent; }
+    .verify-sheets-page .vs-more-row td {
+        text-align: center; padding: 8px 12px; background: #f8fafd; border-bottom: none;
+    }
+    .verify-sheets-page .vs-more-toggle {
+        color: #1b62d6; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 13px;
+    }
+    .verify-sheets-page .vs-more-toggle:hover { text-decoration: underline; }
 
     .verify-sheets-page .vs-empty, .verify-sheets-page .vs-loading, .verify-sheets-page .vs-error {
         padding: 18px 4px; color: #8a95a6; font-size: 13px;

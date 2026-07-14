@@ -10,6 +10,7 @@ using Serenity.Web;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -45,8 +46,16 @@ namespace AdvanceCRM.EmailVerification.Pages
             [FromServices] IConfiguration configuration,
             [FromServices] IHttpClientFactory httpClientFactory,
             [FromServices] ISqlConnections sqlConnections,
-            [FromServices] IUserAccessor userAccessor)
+            [FromServices] IUserAccessor userAccessor,
+            [FromServices] IPermissionService permissions)
         {
+            if (!CanVerify(permissions))
+                return new JsonResult(new EmailVerificationResult
+                {
+                    Success = false,
+                    Message = "You do not have permission to run verifications. You can search and view existing results only."
+                });
+
             if (string.IsNullOrWhiteSpace(email))
                 return new JsonResult(new EmailVerificationResult
                 {
@@ -177,9 +186,10 @@ namespace AdvanceCRM.EmailVerification.Pages
             [FromServices] IConfiguration configuration,
             [FromServices] IHttpClientFactory httpClientFactory,
             [FromServices] ISqlConnections sqlConnections,
-            [FromServices] IUserAccessor userAccessor)
+            [FromServices] IUserAccessor userAccessor,
+            [FromServices] IPermissionService permissions)
         {
-            return Verify(email, configuration, httpClientFactory, sqlConnections, userAccessor);
+            return Verify(email, configuration, httpClientFactory, sqlConnections, userAccessor, permissions);
         }
 
         // Reports the signed-in user's current quota (used / allowed / remaining) and whether they
@@ -200,9 +210,13 @@ namespace AdvanceCRM.EmailVerification.Pages
                 Allowed = q.Allowed,
                 Used = q.Used,
                 Remaining = q.Remaining,
-                CanManageQuota = permissions != null && permissions.HasPermission(ManageQuotaPermission)
+                CanManageQuota = permissions != null && permissions.HasPermission(ManageQuotaPermission),
+                CanVerify = CanVerify(permissions)
             });
         }
+
+        private static bool CanVerify(IPermissionService permissions)
+            => permissions != null && permissions.HasPermission(VerifyPermission);
 
         private static string BuildVerifyMessage(string status, string subStatus)
         {
@@ -337,11 +351,50 @@ namespace AdvanceCRM.EmailVerification.Pages
                 }));
             }
 
+            // Tag every returned contact with its known verification result (from single or bulk
+            // verifications) so the user sees "verified / not verified" right in the search grid.
+            AttachCachedStatuses(sqlConnections, result.Items);
+
             if (result.Truncated)
                 result.Message = "Showing the first " + PerSourceLimit +
                     " matches per module. Refine the search to narrow it down.";
 
             return new JsonResult(result);
+        }
+
+        // Looks up the shared cache once for all the search hits and stamps each item with its
+        // stored status/message, so the grid can show which emails are already verified.
+        private static void AttachCachedStatuses(ISqlConnections sqlConnections, List<ContactSearchItem> items)
+        {
+            var keys = items
+                .Select(i => i.Email?.Trim().ToLowerInvariant())
+                .Where(e => !string.IsNullOrEmpty(e))
+                .Distinct()
+                .ToList();
+            if (keys.Count == 0)
+                return;
+
+            using var connection = sqlConnections.NewFor<EmailVerificationResultRow>();
+            var f = EmailVerificationResultRow.Fields;
+            var cached = connection.List<EmailVerificationResultRow>(q => q
+                .SelectTableFields()
+                .Where(new Criteria(f.Email).In(keys)));
+
+            var byEmail = cached
+                .Where(c => !string.IsNullOrEmpty(c.Email))
+                .GroupBy(c => c.Email.ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+
+            foreach (var it in items)
+            {
+                var key = it.Email?.Trim().ToLowerInvariant();
+                if (key != null && byEmail.TryGetValue(key, out var c))
+                {
+                    it.CachedStatus = string.IsNullOrEmpty(c.Status) ? "unknown" : c.Status;
+                    it.CachedMessage = c.Message ?? BuildVerifyMessage(c.Status, c.SubStatus);
+                    it.CachedVerifiedDate = c.VerifiedDate?.ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture);
+                }
+            }
         }
 
         // SQL Server treats %, _, [ and ] as LIKE metacharacters. Wrapping each in brackets
@@ -356,6 +409,10 @@ namespace AdvanceCRM.EmailVerification.Pages
 
         // Permission that unlocks the quota-management panel and its endpoints.
         private const string ManageQuotaPermission = "EmailVerification:ManageQuota";
+
+        // Permission required to run actual verifications (single / trace / bulk). Users without
+        // it may still open the page, search contacts and see already-known statuses.
+        private const string VerifyPermission = "EmailVerification:Verify";
 
         // Quota granted to a user who has no explicit row yet. Overridable via
         // appsettings.json -> "EmailVerification:DefaultQuota".
@@ -576,6 +633,37 @@ namespace AdvanceCRM.EmailVerification.Pages
             return new QuotaSnapshot { Allowed = allowed, Used = used, Remaining = Math.Max(0, allowed - used) };
         }
 
+        // Adds <count> to the user's used count (creating the row on first use), returning the new
+        // state. Used by bulk verification, where one upload verifies many emails at once.
+        private static QuotaSnapshot ConsumeQuotaBy(ISqlConnections sqlConnections, IConfiguration configuration,
+            int? userId, int count)
+        {
+            var defaultQuota = GetDefaultQuota(configuration);
+            if (userId == null || count <= 0)
+                return GetQuota(sqlConnections, configuration, userId, ensureRow: false);
+
+            using var connection = sqlConnections.NewFor<EmailVerificationQuotaRow>();
+            var f = EmailVerificationQuotaRow.Fields;
+            var row = connection.TryFirst<EmailVerificationQuotaRow>(q => q
+                .SelectTableFields()
+                .Where(new Criteria(f.UserId) == userId.Value));
+
+            if (row == null)
+                row = new EmailVerificationQuotaRow { UserId = userId, AllowedCount = defaultQuota, UsedCount = 0 };
+
+            var allowed = row.AllowedCount ?? defaultQuota;
+            var used = (row.UsedCount ?? 0) + count;
+            row.AllowedCount = allowed;
+            row.UsedCount = used;
+
+            if (row.Id == null)
+                connection.InsertAndGetID(row);
+            else
+                connection.UpdateById(row);
+
+            return new QuotaSnapshot { Allowed = allowed, Used = used, Remaining = Math.Max(0, allowed - used) };
+        }
+
         private class QuotaSnapshot
         {
             public int Allowed;
@@ -589,8 +677,16 @@ namespace AdvanceCRM.EmailVerification.Pages
         [Route("EmailVerification/BulkVerify")]
         public async Task<JsonResult> BulkVerify([FromForm] IFormFile file,
             [FromServices] IConfiguration configuration,
-            [FromServices] IHttpClientFactory httpClientFactory)
+            [FromServices] IHttpClientFactory httpClientFactory,
+            [FromServices] IPermissionService permissions)
         {
+            if (!CanVerify(permissions))
+                return new JsonResult(new BulkVerificationResult
+                {
+                    Success = false,
+                    Message = "You do not have permission to run bulk verification."
+                });
+
             if (file == null || file.Length == 0)
                 return new JsonResult(new BulkVerificationResult
                 {
@@ -608,13 +704,32 @@ namespace AdvanceCRM.EmailVerification.Pages
 
             try
             {
+                // ZeroBounce bulk only accepts CSV/TXT — it rejects Excel with
+                // "File format is not supported, please use only CSV or TXT files."
+                // Our Bulk Template is an .xlsx, so convert any Excel upload to CSV here;
+                // CSV/TXT uploads are forwarded as-is.
+                Stream uploadStream;
+                string uploadName;
+                if (IsExcelFile(file.FileName))
+                {
+                    uploadStream = ConvertExcelToCsv(file);
+                    uploadName = System.IO.Path.GetFileNameWithoutExtension(file.FileName) + ".csv";
+                }
+                else
+                {
+                    uploadStream = file.OpenReadStream();
+                    uploadName = file.FileName;
+                }
+
                 // ZeroBounce bulk is asynchronous: upload the file, then poll for status and
-                // download the results. Our template puts the email in column 1 with a header row.
+                // download the results. The upload sheet is [Firstname | Email] with a header row,
+                // so the email lives in column 2 and the first name in column 1.
                 using var form = new MultipartFormDataContent();
                 form.Add(new StringContent(apiKey), "api_key");
-                form.Add(new StringContent("1"), "email_address_column");
+                form.Add(new StringContent("2"), "email_address_column");
+                form.Add(new StringContent("1"), "first_name_column");
                 form.Add(new StringContent("true"), "has_header_row");
-                form.Add(new StreamContent(file.OpenReadStream()), "file", file.FileName);
+                form.Add(new StreamContent(uploadStream), "file", uploadName);
 
                 var client = httpClientFactory.CreateClient();
                 using var apiResponse = await client.PostAsync("https://bulkapi.zerobounce.net/v2/sendfile", form);
@@ -650,13 +765,197 @@ namespace AdvanceCRM.EmailVerification.Pages
             }
         }
 
+        private static bool IsExcelFile(string fileName)
+        {
+            var ext = System.IO.Path.GetExtension(fileName ?? "").ToLowerInvariant();
+            return ext == ".xlsx" || ext == ".xls" || ext == ".xlsm";
+        }
+
+        // Reads the first worksheet of an uploaded Excel file and returns a CSV stream
+        // preserving the [Firstname | Email] layout ZeroBounce is configured to read.
+        private static Stream ConvertExcelToCsv(IFormFile file)
+        {
+            OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+
+            var sb = new System.Text.StringBuilder();
+            using (var input = file.OpenReadStream())
+            using (var package = new OfficeOpenXml.ExcelPackage(input))
+            {
+                var ws = package.Workbook.Worksheets.Count > 0 ? package.Workbook.Worksheets[0] : null;
+                if (ws?.Dimension != null)
+                {
+                    int rowStart = ws.Dimension.Start.Row, rowEnd = ws.Dimension.End.Row;
+                    int colStart = ws.Dimension.Start.Column, colEnd = ws.Dimension.End.Column;
+
+                    for (int r = rowStart; r <= rowEnd; r++)
+                    {
+                        var cells = new List<string>();
+                        for (int c = colStart; c <= colEnd; c++)
+                            cells.Add(CsvEscape(ws.Cells[r, c].Text));
+                        sb.Append(string.Join(",", cells)).Append("\r\n");
+                    }
+                }
+            }
+
+            var bytes = new System.Text.UTF8Encoding(false).GetBytes(sb.ToString());
+            return new MemoryStream(bytes);
+        }
+
+        private static string CsvEscape(string value)
+        {
+            value = value ?? "";
+            if (value.IndexOfAny(new[] { ',', '"', '\r', '\n' }) >= 0)
+                return "\"" + value.Replace("\"", "\"\"") + "\"";
+            return value;
+        }
+
+        // Downloads the finished ZeroBounce results and upserts each email's Valid/Invalid
+        // outcome into the shared cache. Returns how many rows were saved. Column positions
+        // are resolved from the header, so extra ZeroBounce columns don't matter.
+        private static async Task<int> ImportBulkResultsToCache(string fileId, string apiKey,
+            HttpClient client, ISqlConnections sqlConnections, int? userId)
+        {
+            var url = "https://bulkapi.zerobounce.net/v2/getfile?api_key=" +
+                      Uri.EscapeDataString(apiKey) + "&file_id=" + Uri.EscapeDataString(fileId);
+
+            var csv = await client.GetStringAsync(url);
+            var rows = ParseCsv(csv);
+            if (rows.Count < 2)
+                return 0;
+
+            var header = rows[0];
+            int emailIdx = FindColumn(header, "email address", "email");
+            int statusIdx = FindColumn(header, "zb status", "status");
+            int subStatusIdx = FindColumn(header, "zb sub status", "zb substatus", "sub status");
+            if (emailIdx < 0 || statusIdx < 0)
+                return 0;
+
+            using var connection = sqlConnections.NewFor<EmailVerificationResultRow>();
+            var f = EmailVerificationResultRow.Fields;
+            var now = DateTime.Now;
+            var saved = 0;
+
+            for (int i = 1; i < rows.Count; i++)
+            {
+                var cols = rows[i];
+                if (emailIdx >= cols.Count)
+                    continue;
+
+                var email = (cols[emailIdx] ?? "").Trim();
+                if (string.IsNullOrEmpty(email) || email.IndexOf('@') <= 0)
+                    continue;
+
+                var status = statusIdx < cols.Count ? (cols[statusIdx] ?? "").Trim() : "";
+                if (string.IsNullOrEmpty(status))
+                    status = "unknown";
+                var subStatus = subStatusIdx >= 0 && subStatusIdx < cols.Count
+                    ? (cols[subStatusIdx] ?? "").Trim() : "";
+
+                var key = email.ToLowerInvariant();
+                var message = BuildVerifyMessage(status, subStatus);
+
+                var existing = connection.TryFirst<EmailVerificationResultRow>(q => q
+                    .SelectTableFields()
+                    .Where(new Criteria(f.Email) == key));
+
+                if (existing != null)
+                {
+                    existing.Status = status;
+                    existing.SubStatus = subStatus;
+                    existing.Message = message;
+                    existing.VerifiedByUserId = userId;
+                    existing.VerifiedDate = now;
+                    connection.UpdateById(existing);
+                }
+                else
+                {
+                    connection.InsertAndGetID(new EmailVerificationResultRow
+                    {
+                        Email = key,
+                        Status = status,
+                        SubStatus = subStatus,
+                        Message = message,
+                        VerifiedByUserId = userId,
+                        VerifiedDate = now
+                    });
+                }
+
+                saved++;
+            }
+
+            return saved;
+        }
+
+        // Case-insensitive header lookup; returns the first column whose name matches any candidate.
+        private static int FindColumn(List<string> header, params string[] names)
+        {
+            for (int i = 0; i < header.Count; i++)
+            {
+                var h = (header[i] ?? "").Trim().ToLowerInvariant();
+                foreach (var n in names)
+                    if (h == n)
+                        return i;
+            }
+            return -1;
+        }
+
+        // Minimal RFC-4180 CSV reader: handles quoted fields, escaped quotes ("") and
+        // commas / newlines inside quotes. Enough for ZeroBounce result files.
+        private static List<List<string>> ParseCsv(string text)
+        {
+            var rows = new List<List<string>>();
+            if (string.IsNullOrEmpty(text))
+                return rows;
+
+            var row = new List<string>();
+            var sb = new System.Text.StringBuilder();
+            bool inQuotes = false;
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                char ch = text[i];
+                if (inQuotes)
+                {
+                    if (ch == '"')
+                    {
+                        if (i + 1 < text.Length && text[i + 1] == '"') { sb.Append('"'); i++; }
+                        else inQuotes = false;
+                    }
+                    else sb.Append(ch);
+                }
+                else if (ch == '"') inQuotes = true;
+                else if (ch == ',') { row.Add(sb.ToString()); sb.Clear(); }
+                else if (ch == '\r') { /* handled together with \n */ }
+                else if (ch == '\n')
+                {
+                    row.Add(sb.ToString()); sb.Clear();
+                    rows.Add(row); row = new List<string>();
+                }
+                else sb.Append(ch);
+            }
+
+            if (sb.Length > 0 || row.Count > 0)
+            {
+                row.Add(sb.ToString());
+                rows.Add(row);
+            }
+
+            return rows;
+        }
+
         // Polls ZeroBounce for the progress of a previously uploaded bulk file.
         [HttpPost, IgnoreAntiforgeryToken]
         [Route("EmailVerification/BulkStatus")]
         public async Task<JsonResult> BulkStatus([FromForm] string fileId,
             [FromServices] IConfiguration configuration,
-            [FromServices] IHttpClientFactory httpClientFactory)
+            [FromServices] IHttpClientFactory httpClientFactory,
+            [FromServices] ISqlConnections sqlConnections,
+            [FromServices] IUserAccessor userAccessor,
+            [FromServices] IPermissionService permissions)
         {
+            if (!CanVerify(permissions))
+                return new JsonResult(new BulkVerificationResult { Success = false, Message = "You do not have permission to run bulk verification." });
+
             if (string.IsNullOrWhiteSpace(fileId))
                 return new JsonResult(new BulkVerificationResult { Success = false, Message = "Missing file id." });
 
@@ -680,13 +979,35 @@ namespace AdvanceCRM.EmailVerification.Pages
                 var percentage = GetJsonString(root, "complete_percentage");
                 var error = GetJsonString(root, "error_reason");
 
+                // Once the file is done, fold every verified email into the shared cache so the
+                // as-you-type search shows "already verified" for these addresses, and charge the
+                // uploader's quota for the records that were verified (best-effort: a failure here
+                // must never break the status poll the page relies on).
+                var imported = 0;
+                if (!string.IsNullOrEmpty(status) &&
+                    status.Equals("Complete", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var userId = GetCurrentUserId(userAccessor);
+                        imported = await ImportBulkResultsToCache(fileId, apiKey, client,
+                            sqlConnections, userId);
+                        if (imported > 0)
+                            ConsumeQuotaBy(sqlConnections, configuration, userId, imported);
+                    }
+                    catch { /* ignore — results can still be downloaded manually */ }
+                }
+
                 return new JsonResult(new BulkVerificationResult
                 {
                     Success = true,
                     FileId = fileId,
                     Status = status,
                     Percentage = percentage,
-                    Message = string.IsNullOrEmpty(error) ? null : error
+                    Imported = imported,
+                    Message = string.IsNullOrEmpty(error)
+                        ? (imported > 0 ? imported + " email(s) verified, saved to search and counted in your quota." : null)
+                        : error
                 });
             }
             catch (Exception ex)
@@ -700,8 +1021,12 @@ namespace AdvanceCRM.EmailVerification.Pages
         [Route("EmailVerification/BulkResult")]
         public async Task<IActionResult> BulkResult(string fileId,
             [FromServices] IConfiguration configuration,
-            [FromServices] IHttpClientFactory httpClientFactory)
+            [FromServices] IHttpClientFactory httpClientFactory,
+            [FromServices] IPermissionService permissions)
         {
+            if (!CanVerify(permissions))
+                return Content("You do not have permission to download bulk results.", "text/plain");
+
             if (string.IsNullOrWhiteSpace(fileId))
                 return Content("Missing file id.", "text/plain");
 
@@ -717,18 +1042,28 @@ namespace AdvanceCRM.EmailVerification.Pages
             return File(bytes, "text/csv", "EmailVerification_Results_" + fileId + ".csv");
         }
 
-        // A blank Excel template: a single "Email Address" column (with a header row).
+        // A blank Excel template matching the bulk upload layout: [Firstname | Email] with a header row.
         [HttpGet]
         [Route("EmailVerification/DownloadBulkTemplate")]
-        public IActionResult DownloadBulkTemplate()
+        public IActionResult DownloadBulkTemplate([FromServices] IPermissionService permissions)
         {
+            if (!CanVerify(permissions))
+                return Content("You do not have permission to run bulk verification.", "text/plain");
+
             OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using var package = new OfficeOpenXml.ExcelPackage();
             var ws = package.Workbook.Worksheets.Add("Emails");
-            ws.Cells[1, 1].Value = "Email Address";
+
+            ws.Cells[1, 1].Value = "Firstname";
+            ws.Cells[1, 2].Value = "Email";
             ws.Cells[1, 1].Style.Font.Bold = true;
-            ws.Cells[2, 1].Value = "name@example.com";
-            ws.Column(1).Width = 32;
+            ws.Cells[1, 2].Style.Font.Bold = true;
+
+            ws.Cells[2, 1].Value = "Jennifer";
+            ws.Cells[2, 2].Value = "name@example.com";
+
+            ws.Column(1).Width = 20;
+            ws.Column(2).Width = 34;
 
             var bytes = package.GetAsByteArray();
             return File(bytes,
@@ -745,6 +1080,8 @@ namespace AdvanceCRM.EmailVerification.Pages
         public string Status { get; set; }
         public string Percentage { get; set; }
         public string Message { get; set; }
+        /// <summary>Number of emails verified from the bulk file (and charged to the uploader's quota).</summary>
+        public int Imported { get; set; }
     }
 
     /// <summary>Common shape returned by the verification endpoints.</summary>
@@ -773,6 +1110,8 @@ namespace AdvanceCRM.EmailVerification.Pages
         public int Used { get; set; }
         public int Remaining { get; set; }
         public bool CanManageQuota { get; set; }
+        /// <summary>True when the user may run verifications; false = search/view only.</summary>
+        public bool CanVerify { get; set; }
     }
 
     /// <summary>One row in the admin quota table.</summary>
@@ -813,6 +1152,10 @@ namespace AdvanceCRM.EmailVerification.Pages
         public string Title { get; set; }
         public string WorkPhone { get; set; }
         public string Country { get; set; }
+        /// <summary>Cached verification status for this row's email, if it was ever verified (else null).</summary>
+        public string CachedStatus { get; set; }
+        public string CachedMessage { get; set; }
+        public string CachedVerifiedDate { get; set; }
     }
 
     public class ContactSearchResult

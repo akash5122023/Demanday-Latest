@@ -160,13 +160,14 @@ namespace AdvanceCRM.Toolkit.Endpoints
                     var industry = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
                     var companyEmployeeSize = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
                     var annualRevenue = Convert.ToString(worksheet.Cells[row, 8].Value ?? "").Trim();
-                    var address = Convert.ToString(worksheet.Cells[row, 9].Value ?? "").Trim();
-                    var city = Convert.ToString(worksheet.Cells[row, 10].Value ?? "").Trim();
-                    var state = Convert.ToString(worksheet.Cells[row, 11].Value ?? "").Trim();
-                    var zipCode = Convert.ToString(worksheet.Cells[row, 12].Value ?? "").Trim();
-                    var country = Convert.ToString(worksheet.Cells[row, 13].Value ?? "").Trim();
-                    var comments = Convert.ToString(worksheet.Cells[row, 14].Value ?? "").Trim();
-                    var additionalNotes = Convert.ToString(worksheet.Cells[row, 15].Value ?? "").Trim();
+                    var excludeCompany = Convert.ToString(worksheet.Cells[row, 9].Value ?? "").Trim();
+                    var address = Convert.ToString(worksheet.Cells[row, 10].Value ?? "").Trim();
+                    var city = Convert.ToString(worksheet.Cells[row, 11].Value ?? "").Trim();
+                    var state = Convert.ToString(worksheet.Cells[row, 12].Value ?? "").Trim();
+                    var zipCode = Convert.ToString(worksheet.Cells[row, 13].Value ?? "").Trim();
+                    var country = Convert.ToString(worksheet.Cells[row, 14].Value ?? "").Trim();
+                    var comments = Convert.ToString(worksheet.Cells[row, 15].Value ?? "").Trim();
+                    var additionalNotes = Convert.ToString(worksheet.Cells[row, 16].Value ?? "").Trim();
 
                     // Skip empty rows (at least JobTitle or OrderId should have a value)
                     if (string.IsNullOrEmpty(jobTitle) && string.IsNullOrEmpty(orderId))
@@ -199,6 +200,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
                         Industry = industry,
                         CompanyEmployeeSize = companyEmployeeSize,
                         AnnualRevenue = annualRevenue,
+                        ExcludeCompany = excludeCompany,
                         Address = address,
                         City = city,
                         State = state,

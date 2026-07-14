@@ -53,8 +53,12 @@ namespace AdvanceCRM.Toolkit.Pages
             using var package = new ExcelPackage();
 
             WriteSheet(package, "Specification",
-                new[] { "ID", "Sr No", "Order ID", "Job Title", "Job Level", "Job Function", "Industry", "City", "Country" },
-                specs.Select(r => new object[] { r.Id, r.SrNo, r.OrderId, r.JobTitle, r.JobLevel, r.JobFunction, r.Industry, r.City, r.Country }));
+                new[] { "ID", "Sr No", "Order ID", "Job Title", "Job Level", "Job Function", "Industry",
+                    "Company Employee Size", "Annual Revenue", "Exclude Company", "Address", "City", "State",
+                    "Zip Code", "Country", "Comments", "Additional Notes" },
+                specs.Select(r => new object[] { r.Id, r.SrNo, r.OrderId, r.JobTitle, r.JobLevel, r.JobFunction,
+                    r.Industry, r.CompanyEmployeeSize, r.AnnualRevenue, r.ExcludeCompany, r.Address, r.City, r.State,
+                    r.ZipCode, r.Country, r.Comments, r.AdditionalNotes }));
 
             WriteSheet(package, "Email Suppression",
                 new[] { "ID", "Sr No", "Company Name", "First Name", "Last Name", "Email", "Domain" },
@@ -143,9 +147,18 @@ namespace AdvanceCRM.Toolkit.Pages
                             JobLevel = ExcelImportHelper.GetText(ws, row, map, "JobLevel", "Job Level"),
                             JobFunction = ExcelImportHelper.GetText(ws, row, map, "JobFunction", "Job Function"),
                             Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
+                            CompanyEmployeeSize = ExcelImportHelper.GetText(ws, row, map, "CompanyEmployeeSize", "Company Employee Size"),
+                            AnnualRevenue = ExcelImportHelper.GetText(ws, row, map, "AnnualRevenue", "Annual Revenue"),
+                            ExcludeCompany = ExcelImportHelper.GetText(ws, row, map, "ExcludeCompany", "Exclude Company"),
+                            Address = ExcelImportHelper.GetText(ws, row, map, "Address"),
                             City = ExcelImportHelper.GetText(ws, row, map, "City"),
-                            Country = ExcelImportHelper.GetText(ws, row, map, "Country")
+                            State = ExcelImportHelper.GetText(ws, row, map, "State"),
+                            ZipCode = ExcelImportHelper.GetText(ws, row, map, "ZipCode", "Zip Code"),
+                            Country = ExcelImportHelper.GetText(ws, row, map, "Country"),
+                            Comments = ExcelImportHelper.GetText(ws, row, map, "Comments"),
+                            AdditionalNotes = ExcelImportHelper.GetText(ws, row, map, "AdditionalNotes", "Additional Notes")
                         };
+                        ExcelImportHelper.ClampStringFields(data);
                         UpsertRow(connection, idBySrNo, srNo.Value, data, r => data.Id = r, ref imported, ref updated);
                     }
                 }

@@ -8,6 +8,7 @@
         Industry: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
         AnnualRevenue: Serenity.StringEditor;
+        ExcludeCompany: Serenity.StringEditor;
         Address: Serenity.StringEditor;
         City: Serenity.StringEditor;
         State: Serenity.StringEditor;
@@ -42,6 +43,7 @@
                     'Industry', w1,
                     'CompanyEmployeeSize', w1,
                     'AnnualRevenue', w1,
+                    'ExcludeCompany', w1,
                     'Address', w1,
                     'City', w1,
                     'State', w1,

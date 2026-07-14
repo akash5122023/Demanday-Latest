@@ -30,6 +30,10 @@
 // Controls whether the "+ Add" buttons (and Open Campaign's quick "Add domain" box) show on the Verify Sheets page.
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Add")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailVerification:Read")]
+// Grants the actual verification actions (single verify, trace, bulk upload + template).
+// Users with only EmailVerification:Read can open the page, search contacts and see any
+// already-known verification status, but cannot run new verifications.
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailVerification:Verify")]
 // Grants access to the per-user search-quota management panel on the Email Verification page.
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EmailVerification:ManageQuota")]
 

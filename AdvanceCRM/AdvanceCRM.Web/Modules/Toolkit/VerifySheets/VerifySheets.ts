@@ -32,6 +32,9 @@ namespace AdvanceCRM.Toolkit {
         return Q.htmlEncode(String(value));
     }
 
+    // A section shows at most this many rows until the user clicks "more ++" to reveal the rest.
+    var VsPreviewLimit = 5;
+
     /**
      * Verify Sheets page: pick a Campaign and view its data pulled from every Tool Kit
      * sub-module (Specification, Email Suppression, Competitor, TAL, Master Suppression,
@@ -50,6 +53,8 @@ namespace AdvanceCRM.Toolkit {
         private collapsed: { [key: string]: boolean } = {};
         /** Rows exactly as loaded from the server, before the search box filters them. */
         private loaded: { [key: string]: any[] } = {};
+        /** Whether a section is showing all its rows (true) or just the first few + "more ++". */
+        private expanded: { [key: string]: boolean } = {};
         private searchTerm = '';
 
         constructor(element: JQuery) {
@@ -65,14 +70,23 @@ namespace AdvanceCRM.Toolkit {
                     key: 'Specification', title: 'Specification',
                     list: DemandaySpecsService.List,
                     newDialog: () => new DemandaySpecsDialog(),
-                    columns: [                        { field: 'SrNo', title: 'Sr No' },
+                    columns: [
+                        { field: 'SrNo', title: 'Sr No' },
                         { field: 'OrderId', title: 'Order ID' },
                         { field: 'JobTitle', title: 'Job Title' },
                         { field: 'JobLevel', title: 'Job Level' },
                         { field: 'JobFunction', title: 'Job Function' },
                         { field: 'Industry', title: 'Industry' },
+                        { field: 'CompanyEmployeeSize', title: 'Company Employee Size' },
+                        { field: 'AnnualRevenue', title: 'Annual Revenue' },
+                        { field: 'ExcludeCompany', title: 'Exclude Company' },
+                        { field: 'Address', title: 'Address' },
                         { field: 'City', title: 'City' },
-                        { field: 'Country', title: 'Country' }
+                        { field: 'State', title: 'State' },
+                        { field: 'ZipCode', title: 'Zip Code' },
+                        { field: 'Country', title: 'Country' },
+                        { field: 'Comments', title: 'Comments' },
+                        { field: 'AdditionalNotes', title: 'Additional Notes' }
                     ]
                 },
                 {
@@ -254,6 +268,16 @@ namespace AdvanceCRM.Toolkit {
                 var id = parseInt(String(link.attr('data-id')), 10);
                 if (sheet && !isNaN(id))
                     this.openRecord(sheet, id);
+            });
+
+            // "more ++" / "less --" toggles a section between its 5-row preview and the full list.
+            el.on('click', '.vs-more-toggle', e => {
+                e.preventDefault();
+                var key = String($(e.currentTarget).attr('data-key'));
+                this.expanded[key] = !this.expanded[key];
+                var sheet = this.sheetByKey(key);
+                if (sheet)
+                    this.renderSheet(sheet);
             });
 
             // Account editor drives the Campaign cascade.
@@ -507,6 +531,8 @@ namespace AdvanceCRM.Toolkit {
             sheet.list(request,
                 response => {
                     this.loaded[sheet.key] = response.Entities || [];
+                    // A fresh load starts collapsed to the 5-row preview.
+                    this.expanded[sheet.key] = false;
                     this.renderSheet(sheet);
                 },
                 <Q.ServiceOptions<any>>{
@@ -536,10 +562,15 @@ namespace AdvanceCRM.Toolkit {
                 return;
             }
 
+            // Show only the first few rows until "more ++" is clicked, so a big sheet stays compact.
+            var isExpanded = !!this.expanded[sheet.key];
+            var hasMore = entities.length > VsPreviewLimit;
+            var visibleRows = (isExpanded || !hasMore) ? entities : entities.slice(0, VsPreviewLimit);
+
             var html = '<div class="vs-table-wrap"><table class="vs-table"><thead><tr>';
             sheet.columns.forEach(c => html += '<th>' + vsEscape(c.title) + '</th>');
             html += '</tr></thead><tbody>';
-            entities.forEach(row => {
+            visibleRows.forEach(row => {
                 html += '<tr>';
                 sheet.columns.forEach(c => {
                     // Sr No opens the record's own dialog; needs the row Id to load it.
@@ -553,6 +584,18 @@ namespace AdvanceCRM.Toolkit {
                 });
                 html += '</tr>';
             });
+
+            // A full-width row carrying the "more ++" / "less --" toggle when the sheet has 5+ rows.
+            if (hasMore) {
+                var colCount = sheet.columns.length;
+                var toggleText = isExpanded
+                    ? 'less --'
+                    : 'more ++ (' + (entities.length - VsPreviewLimit) + ' more)';
+                html += '<tr class="vs-more-row"><td colspan="' + colCount + '">' +
+                    '<a href="#" class="vs-more-toggle" data-key="' + sheet.key + '">' +
+                    vsEscape(toggleText) + '</a></td></tr>';
+            }
+
             html += '</tbody></table></div>';
             bodyEl.html(html);
         }

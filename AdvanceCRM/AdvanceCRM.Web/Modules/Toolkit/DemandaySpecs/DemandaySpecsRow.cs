@@ -91,6 +91,14 @@ namespace AdvanceCRM.Toolkit
             set => fields.AnnualRevenue[this] = value;
         }
 
+        [DisplayName("Exclude Company"), Size(4000)]
+        [ExcelImportable]
+        public String ExcludeCompany
+        {
+            get => fields.ExcludeCompany[this];
+            set => fields.ExcludeCompany[this] = value;
+        }
+
         [DisplayName("Address"), Size(200)]
         [ExcelImportable]
         public String Address
@@ -488,6 +496,7 @@ namespace AdvanceCRM.Toolkit
             public StringField Industry;
             public StringField CompanyEmployeeSize;
             public StringField AnnualRevenue;
+            public StringField ExcludeCompany;
             public StringField Address;
             public StringField City;
             public StringField State;

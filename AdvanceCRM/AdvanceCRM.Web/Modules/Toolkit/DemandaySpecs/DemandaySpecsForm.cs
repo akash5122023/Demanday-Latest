@@ -29,6 +29,8 @@ namespace AdvanceCRM.Toolkit.Forms
         public String CompanyEmployeeSize { get; set; }
         [HalfWidth]
         public String AnnualRevenue { get; set; }
+        [FullWidth]
+        public String ExcludeCompany { get; set; }
         [Category("Address Information")]
         [HalfWidth]
         public String Address { get; set; }

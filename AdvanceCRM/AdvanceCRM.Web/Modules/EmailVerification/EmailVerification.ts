@@ -19,6 +19,7 @@ namespace AdvanceCRM.EmailVerification {
         Status?: string;
         Percentage?: string;
         Message?: string;
+        Imported?: number;
     }
 
     var BulkPollMs = 4000;
@@ -34,6 +35,9 @@ namespace AdvanceCRM.EmailVerification {
         Title?: string;
         WorkPhone?: string;
         Country?: string;
+        CachedStatus?: string;
+        CachedMessage?: string;
+        CachedVerifiedDate?: string;
     }
 
     interface ContactSearchResult {
@@ -54,6 +58,7 @@ namespace AdvanceCRM.EmailVerification {
         Used?: number;
         Remaining?: number;
         CanManageQuota?: boolean;
+        CanVerify?: boolean;
     }
 
     interface QuotaAdminItem {
@@ -90,6 +95,9 @@ namespace AdvanceCRM.EmailVerification {
         private quotaBox: JQuery;
         private cachedBox: JQuery;
         private adminBox: JQuery;
+        // Container for the Verify / Bulk / Trace buttons; hidden for search-only users.
+        private actionsBox: JQuery;
+        private hintBox: JQuery;
 
         private searchTimer: any;
         // Incremented per search; a response whose token is stale gets dropped, so a slow
@@ -117,7 +125,7 @@ namespace AdvanceCRM.EmailVerification {
             this.emailInput = $('<input type="email" class="ev-input" placeholder="Email address">')
                 .appendTo(el)
                 .on('input', () => this.queueContactSearch());
-            $('<div class="ev-hint"></div>')
+            this.hintBox = $('<div class="ev-hint"></div>')
                 .text('Verify any Email Address at our free Email Checker to see if it exists')
                 .appendTo(el);
 
@@ -125,6 +133,7 @@ namespace AdvanceCRM.EmailVerification {
             this.cachedBox = $('<div class="ev-cached" style="display:none"></div>').appendTo(el);
 
             var actions = $('<div class="ev-actions"></div>').appendTo(el);
+            this.actionsBox = actions;
             $('<button type="button" class="ev-btn"></button>')
                 .text('Verify Email')
                 .appendTo(actions)
@@ -157,9 +166,30 @@ namespace AdvanceCRM.EmailVerification {
                 .then((res: QuotaStatusResult) => {
                     if (!res || !res.Success)
                         return;
-                    this.renderQuota(res.Allowed || 0, res.Used || 0, res.Remaining || 0, !!res.CanManageQuota);
+                    this.applyVerifyPermission(!!res.CanVerify);
+                    // The quota only applies to verifications; hide the banner for search-only
+                    // users, but keep it for admins who can manage other users' quotas.
+                    if (res.CanVerify || res.CanManageQuota)
+                        this.renderQuota(res.Allowed || 0, res.Used || 0, res.Remaining || 0, !!res.CanManageQuota);
+                    else
+                        this.quotaBox.hide();
                 })
                 .catch(() => { /* leave the banner hidden if the status can't be fetched */ });
+        }
+
+        /**
+         * Search-only users (EmailVerification:Read without :Verify) get no action buttons —
+         * they can search contacts and see any known status, but cannot run verifications.
+         */
+        private applyVerifyPermission(canVerify: boolean) {
+            if (canVerify) {
+                this.actionsBox.show();
+                this.hintBox.text('Verify any Email Address at our free Email Checker to see if it exists');
+            }
+            else {
+                this.actionsBox.hide();
+                this.hintBox.text('Search a contact below to see its email verification status.');
+            }
         }
 
         /** Renders (and shows) the quota banner. Called on load and after each verify. */
@@ -281,7 +311,7 @@ namespace AdvanceCRM.EmailVerification {
 
             html += '<div class="ev-grid-scroll"><table class="ev-grid"><thead><tr>' +
                 '<th>Module</th><th>Campaign</th><th>First Name</th><th>Last Name</th>' +
-                '<th>Email</th><th>Company</th><th>Title</th><th>Work Phone</th><th>Country</th>' +
+                '<th>Email</th><th>Verified</th><th>Company</th><th>Title</th><th>Work Phone</th><th>Country</th>' +
                 '</tr></thead><tbody>';
 
             for (var i = 0; i < items.length; i++) {
@@ -293,6 +323,7 @@ namespace AdvanceCRM.EmailVerification {
                     '<td>' + Q.htmlEncode(it.FirstName || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.LastName || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.Email || '') + '</td>' +
+                    '<td>' + this.verifiedBadge(it) + '</td>' +
                     '<td>' + Q.htmlEncode(it.CompanyName || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.Title || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.WorkPhone || '') + '</td>' +
@@ -302,6 +333,23 @@ namespace AdvanceCRM.EmailVerification {
 
             html += '</tbody></table></div>';
             this.gridBox.html(html);
+        }
+
+        /** Small status pill for the grid's "Verified" column, from the shared cache. */
+        private verifiedBadge(it: ContactSearchItem): string {
+            if (!it || !it.CachedStatus)
+                return '<span class="ev-vstatus ev-vstatus-none" title="Not verified yet">—</span>';
+
+            var status = it.CachedStatus.toLowerCase();
+            var cls = 'ev-vstatus ev-vstatus-other';
+            var label = it.CachedStatus;
+            if (status === 'valid') { cls = 'ev-vstatus ev-vstatus-valid'; label = 'Valid ✓'; }
+            else if (status === 'invalid') { cls = 'ev-vstatus ev-vstatus-invalid'; label = 'Invalid ✕'; }
+
+            var tip = (it.CachedMessage || '') +
+                (it.CachedVerifiedDate ? ' (verified ' + it.CachedVerifiedDate + ')' : '');
+            return '<span class="' + cls + '" title="' + Q.attrEncode(tip.trim()) + '">' +
+                Q.htmlEncode(label) + '</span>';
         }
 
         private getEmail(): string {
@@ -489,7 +537,9 @@ namespace AdvanceCRM.EmailVerification {
                     }
                     var status = (res.Status || '').toLowerCase();
                     if (status === 'complete') {
-                        this.showBulkComplete(fileId);
+                        this.showBulkComplete(fileId, res.Imported || 0);
+                        // Bulk verification charged the uploader's quota; refresh the banner.
+                        this.loadQuotaStatus();
                     }
                     else if (status === 'error' || res.Message) {
                         this.showError(res.Message || 'The file could not be processed.');
@@ -510,11 +560,14 @@ namespace AdvanceCRM.EmailVerification {
                 .show();
         }
 
-        private showBulkComplete(fileId: string) {
+        private showBulkComplete(fileId: string, imported: number) {
             var link = Q.resolveUrl('~/EmailVerification/BulkResult?fileId=' + encodeURIComponent(fileId));
+            var counted = imported > 0
+                ? '<div>' + imported + ' email(s) verified — saved to search and counted in your quota.</div>'
+                : '';
             this.resultBox.removeClass('ev-error')
                 .html('<div class="ev-result-title">Bulk verification complete</div>' +
-                    '<div>Your results are ready.</div>' +
+                    '<div>Your results are ready.</div>' + counted +
                     '<div style="margin-top:10px"><a class="ev-download" href="' + link + '">Download results (CSV)</a></div>')
                 .show();
         }

@@ -16,9 +16,10 @@ namespace AdvanceCRM.Toolkit
             {
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-                // A pre-SrNo template has a stale header row, so regenerate unless "Sr No" is first.
+                // Regenerate unless the file already has the current layout (Sr No first AND the
+                // Exclude Company column present); an older template is missing that column.
                 if (File.Exists(templatePath) && new FileInfo(templatePath).Length > 100 &&
-                    FirstHeaderIsSrNo(templatePath))
+                    TemplateIsCurrent(templatePath))
                 {
                     return;
                 }
@@ -41,13 +42,14 @@ namespace AdvanceCRM.Toolkit
                         "Industry",                    // 6
                         "Company Employee Size",       // 7
                         "Annual Revenue",              // 8
-                        "Address",                     // 9
-                        "City",                        // 10
-                        "State",                       // 11
-                        "Zip Code",                    // 12
-                        "Country",                     // 13
-                        "Comments",                    // 14
-                        "Additional Notes"             // 15
+                        "Exclude Company",             // 9
+                        "Address",                     // 10
+                        "City",                        // 11
+                        "State",                       // 12
+                        "Zip Code",                    // 13
+                        "Country",                     // 14
+                        "Comments",                    // 15
+                        "Additional Notes"             // 16
                     };
 
                     for (int col = 1; col <= headers.Length; col++)
@@ -65,13 +67,14 @@ namespace AdvanceCRM.Toolkit
                     worksheet.Column(6).Width = 22;
                     worksheet.Column(7).Width = 15;
                     worksheet.Column(8).Width = 20;
-                    worksheet.Column(9).Width = 12;
+                    worksheet.Column(9).Width = 22;
                     worksheet.Column(10).Width = 12;
-                    worksheet.Column(11).Width = 10;
-                    worksheet.Column(12).Width = 12;
-                    worksheet.Column(13).Width = 20;
+                    worksheet.Column(11).Width = 12;
+                    worksheet.Column(12).Width = 10;
+                    worksheet.Column(13).Width = 12;
                     worksheet.Column(14).Width = 20;
                     worksheet.Column(15).Width = 20;
+                    worksheet.Column(16).Width = 20;
 
                     // Ensure directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(templatePath));
@@ -88,8 +91,10 @@ namespace AdvanceCRM.Toolkit
             }
         }
 
-        // True when cell A1 already reads "Sr No" — i.e. the template is the current layout.
-        private static bool FirstHeaderIsSrNo(string templatePath)
+        // True when the template already matches the current layout: cell A1 reads "Sr No" and
+        // the "Exclude Company" column (I1) is present. An older template fails the second check
+        // and gets regenerated with the new column.
+        private static bool TemplateIsCurrent(string templatePath)
         {
             try
             {
@@ -97,7 +102,9 @@ namespace AdvanceCRM.Toolkit
                 {
                     var ws = package.Workbook.Worksheets.Count > 0 ? package.Workbook.Worksheets[0] : null;
                     var first = ws?.Cells[1, 1].Value?.ToString()?.Trim();
-                    return string.Equals(first, "Sr No", StringComparison.OrdinalIgnoreCase);
+                    var excludeCompany = ws?.Cells[1, 9].Value?.ToString()?.Trim();
+                    return string.Equals(first, "Sr No", StringComparison.OrdinalIgnoreCase) &&
+                           string.Equals(excludeCompany, "Exclude Company", StringComparison.OrdinalIgnoreCase);
                 }
             }
             catch
