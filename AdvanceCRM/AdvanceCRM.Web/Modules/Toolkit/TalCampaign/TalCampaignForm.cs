@@ -13,28 +13,28 @@ namespace AdvanceCRM.Toolkit.Forms
     public class TalCampaignForm
     {
         [Category("Tal Campaign Details")]
-        [HalfWidth, DisplayName("Sr No")]
+        [HalfWidth, DisplayName("Sr No"), ReadOnly(true)]
         public Int32 SrNo { get; set; }
-        [HalfWidth]
+        [HalfWidth, ReadOnly(true)]
         public Int32 MasterAccountId { get; set; }
 
-        [HalfWidth]
+        [HalfWidth, ReadOnly(true)]
         [LookupEditor(typeof(Masters.DemandayCampaignIdRow), CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
         public Int32 CampaignId { get; set; }
-        [HalfWidth]
+        [HalfWidth, ReadOnly(true)]
         public String CompanyName { get; set; }
-        [HalfWidth]
+        [HalfWidth, ReadOnly(true)]
         public String Domain { get; set; }
 
-        [HalfWidth]
+        [HalfWidth, ReadOnly(true)]
         public Int64 Cpc { get; set; }
-        [HalfWidth]
+        [HalfWidth, ReadOnly(true)]
         [LookupEditor("Administration.EnquiryUsersLookup")]
         public Int32 AgentsName { get; set; }
         [HalfWidth]
         public String Reason { get; set; }
         [Category("Representatives")]
-        [HalfWidth]
+        [HalfWidth, ReadOnly(true)]
         public Int32 OwnerId { get; set; }
     }
 }

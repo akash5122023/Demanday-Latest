@@ -137,6 +137,36 @@
     }
     .email-verification-page .ev-admin-save:hover { background: #164fad; }
     .email-verification-page .ev-admin-used { color: #55637a; }
+
+    /* API Setup card inside the admin panel. */
+    .email-verification-page .ev-setup {
+        margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid #eef1f6;
+    }
+    .email-verification-page .ev-setup-status {
+        font-size: 12px; padding: 8px 10px; border-radius: 6px; margin-bottom: 12px;
+    }
+    .email-verification-page .ev-setup-status.ev-setup-ok { background: #f1faf4; color: #1e6b3f; border: 1px solid #bfe6cf; }
+    .email-verification-page .ev-setup-status.ev-setup-warn { background: #fdf3f2; color: #b83227; border: 1px solid #f3c6c0; }
+    .email-verification-page .ev-setup-grid {
+        display: grid; grid-template-columns: 190px 1fr; gap: 10px 12px; align-items: center; margin-bottom: 12px;
+    }
+    .email-verification-page .ev-setup-grid label { font-size: 13px; color: #34425a; font-weight: 600; }
+    .email-verification-page .ev-setup-input {
+        width: 100%; box-sizing: border-box; border: 1px solid #d7dce5; border-radius: 6px;
+        padding: 8px 10px; font-size: 13px;
+    }
+    .email-verification-page .ev-setup-quota { max-width: 120px; }
+    .email-verification-page .ev-setup-actions { display: flex; gap: 10px; }
+    .email-verification-page .ev-setup-save {
+        background: #1b62d6; color: #fff; border: none; border-radius: 6px; padding: 8px 16px;
+        font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .email-verification-page .ev-setup-save:hover { background: #164fad; }
+    .email-verification-page .ev-setup-clear {
+        background: #fff; color: #c0392b; border: 1px solid #f0c8c2; border-radius: 6px;
+        padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .email-verification-page .ev-setup-clear:hover { background: #fdf3f2; }
 </style>
 
 <div id="EmailVerificationDiv"></div>

@@ -76,6 +76,16 @@ namespace AdvanceCRM.EmailVerification {
         Items?: QuotaAdminItem[];
     }
 
+    interface SettingsResult {
+        Success: boolean;
+        Message?: string;
+        ApiKey?: string;
+        HasApiKey?: boolean;
+        Source?: string;
+        DefaultQuota?: number;
+        CanManage?: boolean;
+    }
+
     /** Keep in sync with MinSearchLength in EmailVerificationPage.cs. */
     var MinSearchLength = 2;
     var SearchDebounceMs = 300;
@@ -105,6 +115,10 @@ namespace AdvanceCRM.EmailVerification {
         private searchToken = 0;
 
         private adminItems: QuotaAdminItem[] = [];
+        /** Current runtime settings (API key + default quota) for the "API Setup" form. */
+        private settings: SettingsResult = null;
+        /** Remembered quota-table filter so re-renders (e.g. after settings load) keep it. */
+        private adminFilter = '';
 
         constructor(element: JQuery) {
             this.element = element;
@@ -310,8 +324,7 @@ namespace AdvanceCRM.EmailVerification {
                 html += '<div class="ev-grid-note">' + Q.htmlEncode(res.Message) + '</div>';
 
             html += '<div class="ev-grid-scroll"><table class="ev-grid"><thead><tr>' +
-                '<th>Module</th><th>Campaign</th><th>First Name</th><th>Last Name</th>' +
-                '<th>Email</th><th>Verified</th><th>Company</th><th>Title</th><th>Work Phone</th><th>Country</th>' +
+                '<th>Module</th><th>First Name</th><th>Last Name</th><th>Email</th>' +
                 '</tr></thead><tbody>';
 
             for (var i = 0; i < items.length; i++) {
@@ -319,37 +332,14 @@ namespace AdvanceCRM.EmailVerification {
                 var badge = it.Source === 'TM ETContact' ? 'ev-badge-tm' : 'ev-badge-dd';
                 html += '<tr>' +
                     '<td><span class="ev-badge ' + badge + '">' + Q.htmlEncode(it.Source || '') + '</span></td>' +
-                    '<td>' + Q.htmlEncode(it.CampaignId || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.FirstName || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.LastName || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.Email || '') + '</td>' +
-                    '<td>' + this.verifiedBadge(it) + '</td>' +
-                    '<td>' + Q.htmlEncode(it.CompanyName || '') + '</td>' +
-                    '<td>' + Q.htmlEncode(it.Title || '') + '</td>' +
-                    '<td>' + Q.htmlEncode(it.WorkPhone || '') + '</td>' +
-                    '<td>' + Q.htmlEncode(it.Country || '') + '</td>' +
                     '</tr>';
             }
 
             html += '</tbody></table></div>';
             this.gridBox.html(html);
-        }
-
-        /** Small status pill for the grid's "Verified" column, from the shared cache. */
-        private verifiedBadge(it: ContactSearchItem): string {
-            if (!it || !it.CachedStatus)
-                return '<span class="ev-vstatus ev-vstatus-none" title="Not verified yet">—</span>';
-
-            var status = it.CachedStatus.toLowerCase();
-            var cls = 'ev-vstatus ev-vstatus-other';
-            var label = it.CachedStatus;
-            if (status === 'valid') { cls = 'ev-vstatus ev-vstatus-valid'; label = 'Valid ✓'; }
-            else if (status === 'invalid') { cls = 'ev-vstatus ev-vstatus-invalid'; label = 'Invalid ✕'; }
-
-            var tip = (it.CachedMessage || '') +
-                (it.CachedVerifiedDate ? ' (verified ' + it.CachedVerifiedDate + ')' : '');
-            return '<span class="' + cls + '" title="' + Q.attrEncode(tip.trim()) + '">' +
-                Q.htmlEncode(label) + '</span>';
         }
 
         private getEmail(): string {
@@ -382,7 +372,19 @@ namespace AdvanceCRM.EmailVerification {
                 return;
             }
             this.adminBox.show();
+            this.loadSettings();
             this.loadQuotaList();
+        }
+
+        /** Loads the current API key / default quota into the "API Setup" form. */
+        private loadSettings() {
+            fetch(Q.resolveUrl('~/EmailVerification/GetSettings'), { method: 'POST' })
+                .then(r => r.json())
+                .then((res: SettingsResult) => {
+                    this.settings = (res && res.Success) ? res : null;
+                    this.renderAdmin(this.adminFilter);
+                })
+                .catch(() => { /* leave the setup form in its default state */ });
         }
 
         private loadQuotaList() {
@@ -407,8 +409,77 @@ namespace AdvanceCRM.EmailVerification {
                 });
         }
 
+        /** The "API Setup" card: add / change / clear the ZeroBounce key and default quota. */
+        private renderSetupForm() {
+            var wrap = $('<div class="ev-setup"></div>').appendTo(this.adminBox);
+            $('<div class="ev-admin-title"></div>').text('API Setup').appendTo(wrap);
+
+            var s = this.settings;
+            var source = s ? (s.Source || 'none') : 'none';
+            var statusText: string, statusCls: string;
+            if (source === 'database') { statusText = 'Active — API key saved here.'; statusCls = 'ev-setup-ok'; }
+            else if (source === 'config') { statusText = 'Active — using the key from appsettings on the server. Save one here to override it.'; statusCls = 'ev-setup-ok'; }
+            else { statusText = 'Not configured — verification is disabled until a key is added.'; statusCls = 'ev-setup-warn'; }
+            $('<div class="ev-setup-status"></div>').addClass(statusCls).text(statusText).appendTo(wrap);
+
+            var grid = $('<div class="ev-setup-grid"></div>').appendTo(wrap);
+
+            $('<label></label>').text('ZeroBounce API key').appendTo(grid);
+            var keyInput = $('<input type="text" class="ev-setup-input" placeholder="Paste the ZeroBounce API key" autocomplete="off">')
+                .val(s && s.ApiKey ? s.ApiKey : '')
+                .appendTo(grid);
+
+            $('<label></label>').text('Default quota (new users)').appendTo(grid);
+            var quotaInput = $('<input type="number" min="0" class="ev-setup-input ev-setup-quota">')
+                .val(s && s.DefaultQuota != null ? String(s.DefaultQuota) : '50')
+                .appendTo(grid);
+
+            var actions = $('<div class="ev-setup-actions"></div>').appendTo(wrap);
+            var saveBtn = $('<button type="button" class="ev-setup-save">Save</button>').appendTo(actions);
+            var clearBtn = $('<button type="button" class="ev-setup-clear">Clear key</button>').appendTo(actions);
+
+            saveBtn.on('click', () => {
+                var key = String(keyInput.val() || '').trim();
+                var quota = parseInt(String(quotaInput.val()), 10);
+                if (isNaN(quota) || quota < 0) { Q.notifyError('Enter a valid default quota.'); return; }
+                this.saveSettings(key, quota, saveBtn);
+            });
+            clearBtn.on('click', () => {
+                if (!confirm('Remove the saved API key? Verification will stop working until a key is added again (unless one is set in appsettings).'))
+                    return;
+                var quota = parseInt(String(quotaInput.val()), 10);
+                this.saveSettings('', isNaN(quota) ? 50 : quota, clearBtn);
+            });
+        }
+
+        private saveSettings(apiKey: string, defaultQuota: number, btn: JQuery) {
+            btn.prop('disabled', true);
+            var fd = new FormData();
+            fd.append('apiKey', apiKey);
+            fd.append('defaultQuota', String(defaultQuota));
+
+            fetch(Q.resolveUrl('~/EmailVerification/SaveSettings'), { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then((res: { Success: boolean; Message?: string }) => {
+                    btn.prop('disabled', false);
+                    if (!res || !res.Success) {
+                        Q.notifyError(res && res.Message ? res.Message : 'Could not save settings.');
+                        return;
+                    }
+                    Q.notifySuccess(res.Message || 'Settings saved.');
+                    // Refresh the setup form (status/source) and the top quota banner.
+                    this.loadSettings();
+                    this.loadQuotaStatus();
+                })
+                .catch(() => {
+                    btn.prop('disabled', false);
+                    Q.notifyError('Could not save settings.');
+                });
+        }
+
         private renderAdmin(filter: string) {
-            var lower = (filter || '').toLowerCase();
+            this.adminFilter = filter || '';
+            var lower = this.adminFilter.toLowerCase();
             var items = this.adminItems.filter(it => {
                 if (!lower) return true;
                 return (it.Username || '').toLowerCase().indexOf(lower) >= 0 ||
@@ -416,6 +487,10 @@ namespace AdvanceCRM.EmailVerification {
             });
 
             this.adminBox.empty();
+
+            // API Setup form comes first so the key can be managed without scrolling past the quotas.
+            this.renderSetupForm();
+
             $('<div class="ev-admin-title"></div>').text('User search quotas').appendTo(this.adminBox);
 
             var search = $('<input type="text" class="ev-admin-search" placeholder="Filter users…">')

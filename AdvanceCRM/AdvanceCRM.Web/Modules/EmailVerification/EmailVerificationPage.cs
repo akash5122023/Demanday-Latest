@@ -101,13 +101,13 @@ namespace AdvanceCRM.EmailVerification.Pages
                         quota.Allowed + "). Please contact an administrator to increase it."
                 });
 
-            var apiKey = configuration["EmailVerification:ZeroBounceApiKey"];
+            var apiKey = GetApiKey(sqlConnections, configuration);
             if (string.IsNullOrWhiteSpace(apiKey))
                 return new JsonResult(new EmailVerificationResult
                 {
                     Success = false,
                     Email = trimmed,
-                    Message = "Verification API key is not configured.",
+                    Message = ApiKeyMissingMessage,
                     Allowed = quota.Allowed,
                     Used = quota.Used,
                     Remaining = quota.Remaining
@@ -431,7 +431,7 @@ namespace AdvanceCRM.EmailVerification.Pages
             if (permissions == null || !permissions.HasPermission(ManageQuotaPermission))
                 return new JsonResult(new QuotaListResult { Success = false, Message = "You are not allowed to manage quotas." });
 
-            var defaultQuota = GetDefaultQuota(configuration);
+            var defaultQuota = GetDefaultQuota(sqlConnections, configuration);
             var result = new QuotaListResult { Success = true, CanManageQuota = true };
 
             using var connection = sqlConnections.NewFor<UserRow>();
@@ -506,10 +506,115 @@ namespace AdvanceCRM.EmailVerification.Pages
             return new JsonResult(new SimpleResult { Success = true, Message = "Saved." });
         }
 
+        // ---- Admin: API setup (ZeroBounce key + default quota), gated by ManageQuota ----
+
+        /// <summary>Returns the current runtime settings so the admin "API Setup" form can show them.</summary>
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/GetSettings")]
+        public JsonResult GetSettings(
+            [FromServices] IConfiguration configuration,
+            [FromServices] ISqlConnections sqlConnections,
+            [FromServices] IPermissionService permissions)
+        {
+            if (permissions == null || !permissions.HasPermission(ManageQuotaPermission))
+                return new JsonResult(new SettingsResult { Success = false, Message = "You are not allowed to manage settings." });
+
+            var row = GetSettingsRow(sqlConnections);
+            var dbKey = row?.ApiKey;
+            var configKey = configuration?["EmailVerification:ZeroBounceApiKey"];
+
+            string source;
+            if (!string.IsNullOrWhiteSpace(dbKey)) source = "database";
+            else if (!string.IsNullOrWhiteSpace(configKey)) source = "config";
+            else source = "none";
+
+            return new JsonResult(new SettingsResult
+            {
+                Success = true,
+                // Only the DB key is editable here; a key that lives in appsettings is not echoed back.
+                ApiKey = dbKey,
+                HasApiKey = source != "none",
+                Source = source,
+                DefaultQuota = row?.DefaultQuota ?? GetDefaultQuota(sqlConnections, configuration),
+                CanManage = true
+            });
+        }
+
+        /// <summary>Saves (or clears) the ZeroBounce API key and default quota from the admin form.</summary>
+        [HttpPost, IgnoreAntiforgeryToken]
+        [Route("EmailVerification/SaveSettings")]
+        public JsonResult SaveSettings([FromForm] string apiKey, [FromForm] int? defaultQuota,
+            [FromServices] ISqlConnections sqlConnections,
+            [FromServices] IUserAccessor userAccessor,
+            [FromServices] IPermissionService permissions)
+        {
+            if (permissions == null || !permissions.HasPermission(ManageQuotaPermission))
+                return new JsonResult(new SimpleResult { Success = false, Message = "You are not allowed to manage settings." });
+
+            // A blank key clears the DB override (verification then falls back to appsettings, if any).
+            var key = string.IsNullOrWhiteSpace(apiKey) ? null : apiKey.Trim();
+            var quota = (defaultQuota.HasValue && defaultQuota.Value >= 0) ? defaultQuota : null;
+            var userId = GetCurrentUserId(userAccessor);
+
+            using var connection = sqlConnections.NewFor<EmailVerificationSettingsRow>();
+            var existing = connection.TryFirst<EmailVerificationSettingsRow>(q => q.SelectTableFields());
+
+            if (existing == null)
+            {
+                connection.InsertAndGetID(new EmailVerificationSettingsRow
+                {
+                    ApiKey = key,
+                    DefaultQuota = quota,
+                    UpdatedByUserId = userId,
+                    UpdatedDate = DateTime.Now
+                });
+            }
+            else
+            {
+                existing.ApiKey = key;
+                existing.DefaultQuota = quota;
+                existing.UpdatedByUserId = userId;
+                existing.UpdatedDate = DateTime.Now;
+                connection.UpdateById(existing);
+            }
+
+            return new JsonResult(new SimpleResult
+            {
+                Success = true,
+                Message = key == null ? "API key cleared." : "Settings saved."
+            });
+        }
+
         // ---- Shared cache + quota helpers ----
 
-        private static int GetDefaultQuota(IConfiguration configuration)
+        // Runtime settings row (ZeroBounce key + default quota) as set from the admin "API Setup"
+        // form. Null when the form has never been saved.
+        private static EmailVerificationSettingsRow GetSettingsRow(ISqlConnections sqlConnections)
         {
+            using var connection = sqlConnections.NewFor<EmailVerificationSettingsRow>();
+            return connection.TryFirst<EmailVerificationSettingsRow>(q => q.SelectTableFields());
+        }
+
+        // Effective API key: the value saved from the admin form wins; otherwise fall back to
+        // appsettings.json so existing server configs keep working.
+        private static string GetApiKey(ISqlConnections sqlConnections, IConfiguration configuration)
+        {
+            var row = GetSettingsRow(sqlConnections);
+            if (row != null && !string.IsNullOrWhiteSpace(row.ApiKey))
+                return row.ApiKey.Trim();
+            return configuration?["EmailVerification:ZeroBounceApiKey"];
+        }
+
+        // Shown when no key is available anywhere, pointing the admin at the form.
+        private const string ApiKeyMissingMessage =
+            "Verification API key is not configured. An administrator can add it from " +
+            "Email Verification → Manage Quotas → API Setup.";
+
+        private static int GetDefaultQuota(ISqlConnections sqlConnections, IConfiguration configuration)
+        {
+            var row = GetSettingsRow(sqlConnections);
+            if (row != null && row.DefaultQuota.HasValue && row.DefaultQuota.Value >= 0)
+                return row.DefaultQuota.Value;
             var raw = configuration?["EmailVerification:DefaultQuota"];
             if (int.TryParse(raw, out var v) && v >= 0)
                 return v;
@@ -576,7 +681,7 @@ namespace AdvanceCRM.EmailVerification.Pages
         private static QuotaSnapshot GetQuota(ISqlConnections sqlConnections, IConfiguration configuration,
             int? userId, bool ensureRow)
         {
-            var defaultQuota = GetDefaultQuota(configuration);
+            var defaultQuota = GetDefaultQuota(sqlConnections, configuration);
             if (userId == null)
                 return new QuotaSnapshot { Allowed = defaultQuota, Used = 0, Remaining = defaultQuota };
 
@@ -607,7 +712,7 @@ namespace AdvanceCRM.EmailVerification.Pages
         // Adds one to the user's used count (creating the row on first use), returning the new state.
         private static QuotaSnapshot ConsumeQuota(ISqlConnections sqlConnections, IConfiguration configuration, int? userId)
         {
-            var defaultQuota = GetDefaultQuota(configuration);
+            var defaultQuota = GetDefaultQuota(sqlConnections, configuration);
             if (userId == null)
                 return new QuotaSnapshot { Allowed = defaultQuota, Used = 0, Remaining = defaultQuota };
 
@@ -638,7 +743,7 @@ namespace AdvanceCRM.EmailVerification.Pages
         private static QuotaSnapshot ConsumeQuotaBy(ISqlConnections sqlConnections, IConfiguration configuration,
             int? userId, int count)
         {
-            var defaultQuota = GetDefaultQuota(configuration);
+            var defaultQuota = GetDefaultQuota(sqlConnections, configuration);
             if (userId == null || count <= 0)
                 return GetQuota(sqlConnections, configuration, userId, ensureRow: false);
 
@@ -678,6 +783,7 @@ namespace AdvanceCRM.EmailVerification.Pages
         public async Task<JsonResult> BulkVerify([FromForm] IFormFile file,
             [FromServices] IConfiguration configuration,
             [FromServices] IHttpClientFactory httpClientFactory,
+            [FromServices] ISqlConnections sqlConnections,
             [FromServices] IPermissionService permissions)
         {
             if (!CanVerify(permissions))
@@ -694,12 +800,12 @@ namespace AdvanceCRM.EmailVerification.Pages
                     Message = "Please choose a file with an 'Email Address' column."
                 });
 
-            var apiKey = configuration["EmailVerification:ZeroBounceApiKey"];
+            var apiKey = GetApiKey(sqlConnections, configuration);
             if (string.IsNullOrWhiteSpace(apiKey))
                 return new JsonResult(new BulkVerificationResult
                 {
                     Success = false,
-                    Message = "Verification API key is not configured."
+                    Message = ApiKeyMissingMessage
                 });
 
             try
@@ -959,9 +1065,9 @@ namespace AdvanceCRM.EmailVerification.Pages
             if (string.IsNullOrWhiteSpace(fileId))
                 return new JsonResult(new BulkVerificationResult { Success = false, Message = "Missing file id." });
 
-            var apiKey = configuration["EmailVerification:ZeroBounceApiKey"];
+            var apiKey = GetApiKey(sqlConnections, configuration);
             if (string.IsNullOrWhiteSpace(apiKey))
-                return new JsonResult(new BulkVerificationResult { Success = false, Message = "Verification API key is not configured." });
+                return new JsonResult(new BulkVerificationResult { Success = false, Message = ApiKeyMissingMessage });
 
             try
             {
@@ -1022,6 +1128,7 @@ namespace AdvanceCRM.EmailVerification.Pages
         public async Task<IActionResult> BulkResult(string fileId,
             [FromServices] IConfiguration configuration,
             [FromServices] IHttpClientFactory httpClientFactory,
+            [FromServices] ISqlConnections sqlConnections,
             [FromServices] IPermissionService permissions)
         {
             if (!CanVerify(permissions))
@@ -1030,9 +1137,9 @@ namespace AdvanceCRM.EmailVerification.Pages
             if (string.IsNullOrWhiteSpace(fileId))
                 return Content("Missing file id.", "text/plain");
 
-            var apiKey = configuration["EmailVerification:ZeroBounceApiKey"];
+            var apiKey = GetApiKey(sqlConnections, configuration);
             if (string.IsNullOrWhiteSpace(apiKey))
-                return Content("Verification API key is not configured.", "text/plain");
+                return Content(ApiKeyMissingMessage, "text/plain");
 
             var url = "https://bulkapi.zerobounce.net/v2/getfile?api_key=" +
                       Uri.EscapeDataString(apiKey) + "&file_id=" + Uri.EscapeDataString(fileId);
@@ -1137,6 +1244,21 @@ namespace AdvanceCRM.EmailVerification.Pages
     {
         public bool Success { get; set; }
         public string Message { get; set; }
+    }
+
+    /// <summary>Current Email Verification runtime settings for the admin "API Setup" form.</summary>
+    public class SettingsResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        /// <summary>The API key saved in the DB (null when only an appsettings key, or none, exists).</summary>
+        public string ApiKey { get; set; }
+        /// <summary>True when a usable key exists anywhere (DB or appsettings).</summary>
+        public bool HasApiKey { get; set; }
+        /// <summary>"database", "config" or "none" — where the active key comes from.</summary>
+        public string Source { get; set; }
+        public int DefaultQuota { get; set; }
+        public bool CanManage { get; set; }
     }
 
     /// <summary>One contact row surfaced by the as-you-type search, from either source table.</summary>
