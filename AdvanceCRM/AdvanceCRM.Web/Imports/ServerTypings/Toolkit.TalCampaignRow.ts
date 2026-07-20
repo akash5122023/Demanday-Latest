@@ -9,7 +9,7 @@
         MasterAccountId?: number;
         CampaignId?: number;
         OwnerId?: number;
-        Cpc?: number;
+        Cpc?: string;
         MasterAccountAccountNumber?: string;
         CampaignIdValue?: string;
         AgentDisplayName?: string;

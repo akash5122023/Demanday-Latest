@@ -27,7 +27,7 @@ namespace AdvanceCRM.Toolkit.Forms
         public String Domain { get; set; }
 
         [HalfWidth, ReadOnly(true)]
-        public Int64 Cpc { get; set; }
+        public String Cpc { get; set; }
         [HalfWidth, ReadOnly(true)]
         [LookupEditor("Administration.EnquiryUsersLookup")]
         public Int32 AgentsName { get; set; }

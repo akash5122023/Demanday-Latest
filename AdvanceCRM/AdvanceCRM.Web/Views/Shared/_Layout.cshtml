@@ -238,7 +238,8 @@
                             <li class="dropdown user user-menu">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     <img src="@userImage" class="user-image" alt="User Image">
-                                    <span class="hidden-xs">@Serenity.Authorization.Username</span>
+                                    @* Show the user's Display Name here; the username is for login only. *@
+                                    <span class="hidden-xs">@(user != null && !string.IsNullOrWhiteSpace(user.DisplayName) ? user.DisplayName : Serenity.Authorization.Username)</span>
                                 </a>
                                 <ul class="dropdown-menu">
                                     <!-- User image -->

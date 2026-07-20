@@ -91,6 +91,32 @@
     }
     .verify-sheets-page .vs-quick-btn:hover { background: #dbe8fd; }
 
+    /* Master Suppression's own Campaign + Date filter bar, right-aligned in the section header. */
+    .verify-sheets-page .vs-ms-filter { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .verify-sheets-page .vs-ms-label { font-size: 12px; color: #55637a; font-weight: 600; }
+    .verify-sheets-page .vs-ms-campaign { min-width: 150px; }
+    .verify-sheets-page .vs-ms-campaign .select2-container { min-width: 150px; }
+    .verify-sheets-page .vs-ms-date {
+        border: 1px solid #d7dce5; border-radius: 6px; padding: 5px 8px; font-size: 12px; color: #34425a; background: #fff;
+    }
+    .verify-sheets-page .vs-ms-date:focus { outline: none; border-color: #1b62d6; }
+    .verify-sheets-page .vs-ms-dash { color: #8a95a6; }
+    .verify-sheets-page .vs-ms-company {
+        border: 1px solid #d7dce5; border-radius: 6px; padding: 5px 8px; font-size: 12px;
+        color: #34425a; background: #fff; min-width: 150px;
+    }
+    .verify-sheets-page .vs-ms-company:focus { outline: none; border-color: #1b62d6; }
+
+    /* Clickable Sr No header (ascending / descending). */
+    .verify-sheets-page .vs-sort-toggle { color: #1b62d6; text-decoration: none; cursor: pointer; white-space: nowrap; }
+    .verify-sheets-page .vs-sort-toggle:hover { text-decoration: underline; }
+    .verify-sheets-page .vs-sort-arrow { font-size: 10px; }
+    .verify-sheets-page .vs-ms-clear {
+        background: #fff; color: #c0392b; border: 1px solid #f0c8c2; border-radius: 6px;
+        padding: 4px 9px; font-size: 12px; font-weight: 600; cursor: pointer; line-height: 1;
+    }
+    .verify-sheets-page .vs-ms-clear:hover { background: #fdf3f2; }
+
     /* Add button sits at the right edge; when a quick-add group is present it follows it. */
     .verify-sheets-page .vs-add-btn {
         margin-left: auto; background: #1b62d6; color: #fff; border: none; border-radius: 6px;
@@ -125,6 +151,12 @@
         color: #1b62d6; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 13px;
     }
     .verify-sheets-page .vs-more-toggle:hover { text-decoration: underline; }
+
+    /* Note shown when the sheet holds more rows than the page we fetched. */
+    .verify-sheets-page .vs-grid-note {
+        font-size: 12px; color: #8a6d3b; background: #fcf8ec; border: 1px solid #f7e4bf;
+        border-radius: 6px; padding: 7px 10px; margin-bottom: 8px;
+    }
 
     .verify-sheets-page .vs-empty, .verify-sheets-page .vs-loading, .verify-sheets-page .vs-error {
         padding: 18px 4px; color: #8a95a6; font-size: 13px;

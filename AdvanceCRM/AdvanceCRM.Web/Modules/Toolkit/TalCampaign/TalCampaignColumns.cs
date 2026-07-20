@@ -19,7 +19,7 @@ namespace AdvanceCRM.Toolkit.Columns
         [EditLink]
         public String CompanyName { get; set; }
         public String Domain { get; set; }
-        public Int64 Cpc { get; set; }
+        public String Cpc { get; set; }
         public String AgentDisplayName { get; set; }
         public String Reason { get; set; }
         public String MasterAccountAccountNumber { get; set; }

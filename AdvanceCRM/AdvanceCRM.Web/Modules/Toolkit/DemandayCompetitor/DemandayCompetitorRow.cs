@@ -54,8 +54,8 @@ namespace AdvanceCRM.Toolkit
             set => fields.Email[this] = value;
         }
 
-        // Free text on purpose – source sheets carry values like "02 cpc" or "$0.75".
-        [DisplayName("CPC"), Column("CPC"), Size(50)]
+        // Free text on purpose – source sheets carry values like "CPC 1225358", "02 cpc" or "$0.75".
+        [DisplayName("CPC"), Column("CPC"), Size(200)]
         public String Cpc
         {
             get => fields.Cpc[this];

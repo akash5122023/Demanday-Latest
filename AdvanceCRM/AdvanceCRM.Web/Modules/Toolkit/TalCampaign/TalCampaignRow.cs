@@ -39,8 +39,9 @@ namespace AdvanceCRM.Toolkit
             get => fields.CompanyName[this];
             set => fields.CompanyName[this] = value;
         }
-        [DisplayName("CPC"), Column("CPC")]
-        public Int64? Cpc
+        // Free text on purpose – source sheets carry values like "CPC 1225358", "02 cpc" or "$0.75".
+        [DisplayName("CPC"), Column("CPC"), Size(200)]
+        public String Cpc
         {
             get => fields.Cpc[this];
             set => fields.Cpc[this] = value;
@@ -407,7 +408,7 @@ namespace AdvanceCRM.Toolkit
             public Int32Field CampaignId;
             public Int32Field OwnerId;
 
-            public Int64Field Cpc;
+            public StringField Cpc;
 
             public StringField MasterAccountAccountNumber;
             public StringField CampaignIdValue;

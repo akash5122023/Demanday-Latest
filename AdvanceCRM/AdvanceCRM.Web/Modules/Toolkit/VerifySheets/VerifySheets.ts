@@ -35,6 +35,46 @@ namespace AdvanceCRM.Toolkit {
     // A section shows at most this many rows until the user clicks "more ++" to reveal the rest.
     var VsPreviewLimit = 5;
 
+    // Hard cap on rows fetched per sheet. A suppression list can hold millions of rows; asking the
+    // server for all of them makes the List query time out (and would never render usefully), so we
+    // pull one bounded page and show the true total from the server's TotalCount.
+    var VsLoadLimit = 200;
+
+    // Open Campaign is added to by several users at once, so its section refreshes itself on this
+    // interval — a domain added by anyone shows up for everyone without pressing anything.
+    var VsLivePollMs = 10000;
+
+    // Wait for typing to settle before re-querying the server for a filter.
+    var VsFilterDebounceMs = 350;
+
+    // Formats a date/time value as "hh:mm:ss AM/PM DD/MM/YYYY" (e.g. "01:24:27 AM 15/07/2026").
+    // Falls back to the raw text if the value isn't a parseable date.
+    function vsFormatTimeStamp(value: any): string {
+        if (value == null || value === '')
+            return '';
+        var d = new Date(value);
+        if (isNaN(d.getTime()))
+            return String(value);
+        var pad = (n: number) => (n < 10 ? '0' + n : '' + n);
+        var h = d.getHours();
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        var h12 = h % 12; if (h12 === 0) h12 = 12;
+        var time = pad(h12) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + ' ' + ampm;
+        var date = pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+        return time + ' ' + date;
+    }
+
+    // Formats a date value as "DD/MM/YYYY" (falls back to the raw text if unparseable).
+    function vsFormatDate(value: any): string {
+        if (value == null || value === '')
+            return '';
+        var d = new Date(value);
+        if (isNaN(d.getTime()))
+            return String(value);
+        var pad = (n: number) => (n < 10 ? '0' + n : '' + n);
+        return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+    }
+
     /**
      * Verify Sheets page: pick a Campaign and view its data pulled from every Tool Kit
      * sub-module (Specification, Email Suppression, Competitor, TAL, Master Suppression,
@@ -53,9 +93,28 @@ namespace AdvanceCRM.Toolkit {
         private collapsed: { [key: string]: boolean } = {};
         /** Rows exactly as loaded from the server, before the search box filters them. */
         private loaded: { [key: string]: any[] } = {};
+        /** True total row count on the server per sheet (we only fetch a bounded page of it). */
+        private totals: { [key: string]: number } = {};
         /** Whether a section is showing all its rows (true) or just the first few + "more ++". */
         private expanded: { [key: string]: boolean } = {};
         private searchTerm = '';
+
+        // Master Suppression's own filters (it is account-scoped, so these narrow it client-side
+        // to a Campaign and/or a Date range without re-querying the server).
+        private msCampaignEditor: Serenity.LookupEditor;
+        private msCampaignHolder: JQuery;
+        private msCampaignFilter: number = null;
+        private msDateFrom = '';
+        private msDateTo = '';
+        /** Master Suppression company-name filter (contains match, applied server-side). */
+        private msCompany = '';
+        private msCompanyTimer: any;
+
+        /** Timer that keeps the Open Campaign section in sync with other users' additions. */
+        private livePollTimer: any;
+
+        /** Sr No sort direction per sheet — descending (newest first) until the header is clicked. */
+        private sortDesc: { [key: string]: boolean } = {};
 
         constructor(element: JQuery) {
             this.element = element;
@@ -93,12 +152,12 @@ namespace AdvanceCRM.Toolkit {
                     key: 'EmailSuppression', title: 'Email Suppression',
                     list: ClientSupressionService.List,
                     newDialog: () => new ClientSupressionDialog(),
-                    columns: [                        { field: 'SrNo', title: 'Sr No' },
+                    columns: [
+                        { field: 'SrNo', title: 'Sr No' },
                         { field: 'CompanyName', title: 'Company Name' },
                         { field: 'FirstName', title: 'First Name' },
                         { field: 'LastName', title: 'Last Name' },
-                        { field: 'Email', title: 'Email' },
-                        { field: 'Domain', title: 'Domain' }
+                        { field: 'Email', title: 'Email' }
                     ]
                 },
                 {
@@ -122,7 +181,8 @@ namespace AdvanceCRM.Toolkit {
                         { field: 'CompanyName', title: 'Company Name' },
                         { field: 'Domain', title: 'Domain' },
                         { field: 'AgentDisplayName', title: 'Agent' },
-                        { field: 'Reason', title: 'Reason' }
+                        { field: 'Reason', title: 'Reason' },
+                        { field: 'Cpc', title: 'CPC' }
                     ]
                 },
                 {
@@ -130,12 +190,17 @@ namespace AdvanceCRM.Toolkit {
                     list: MasterSupressionService.List,
                     newDialog: () => new MasterSupressionDialog(),
                     scope: 'account',
-                    columns: [                        { field: 'SrNo', title: 'Sr No' },
+                    // CampaignId / CampaignCampaignId / Date drive this sheet's own Campaign + Date filter.
+                    includeColumns: ['CampaignId', 'CampaignCampaignId', 'Date'],
+                    columns: [
+                        { field: 'SrNo', title: 'Sr No' },
+                        { field: 'CampaignCampaignId', title: 'Campaign ID' },
                         { field: 'CompanyName', title: 'Company Name' },
                         { field: 'FirstName', title: 'First Name' },
                         { field: 'LastName', title: 'Last Name' },
                         { field: 'Email', title: 'Email' },
-                        { field: 'Domain', title: 'Domain' }
+                        { field: 'Domain', title: 'Domain' },
+                        { field: 'Date', title: 'Date' }
                     ]
                 },
                 {
@@ -143,11 +208,12 @@ namespace AdvanceCRM.Toolkit {
                     list: OpenCampaignService.List,
                     newDialog: () => new OpenCampaignDialog(),
                     quickAddDomain: true,
-                    includeColumns: ['DemandayUserUsername', 'MasterAccountAccountNumber'],
-                    columns: [                        { field: 'SrNo', title: 'Sr No' },
+                    includeColumns: ['DemandayUserDisplayName', 'CampaignIdValue'],
+                    columns: [
+                        { field: 'SrNo', title: 'Sr No' },
                         { field: 'Domain', title: 'Domain' },
-                        { field: 'DemandayUserUsername', title: 'Demanday User' },
-                        { field: 'MasterAccountAccountNumber', title: 'Account Number' },
+                        { field: 'DemandayUserDisplayName', title: 'Demanday User' },
+                        { field: 'CampaignIdValue', title: 'Campaign ID' },
                         { field: 'TimeStamp', title: 'Time Stamp' }
                     ]
                 }
@@ -195,8 +261,16 @@ namespace AdvanceCRM.Toolkit {
                 this.visible[key] = cb.is(':checked');
                 var sec = el.find('.vs-section[data-key="' + key + '"]');
                 sec.toggle(this.visible[key]);
-                if (this.visible[key] && this.getCampaignId() != null)
-                    this.loadSheet(this.sheetByKey(key));
+                // Re-showing a section loads it if its own prerequisite is met — an account-scoped
+                // sheet needs only the Master Account, the rest need the Campaign.
+                var shown = this.sheetByKey(key);
+                if (this.visible[key] && shown) {
+                    var ready = shown.scope === 'account'
+                        ? this.getAccountId() != null
+                        : this.getCampaignId() != null;
+                    if (ready)
+                        this.loadSheet(shown);
+                }
             });
 
             // Search box: filters the already-loaded rows of every visible sheet, matching
@@ -238,8 +312,8 @@ namespace AdvanceCRM.Toolkit {
                 $('<span class="vs-title"></span>').text(s.title).appendTo(toggle);
                 $('<span class="vs-count-badge">0</span>').appendTo(head).addClass('vs-count');
 
-                // Open Campaign: a fast "type a domain + Enter" box just left of the full Add button,
-                // so a new domain can be added without opening the whole dialog.
+                // Open Campaign keeps its fast "type a domain + Enter" box; the generic per-section
+                // "+ Add" button was removed, so other modules are populated via import only.
                 if (canAdd && s.quickAddDomain) {
                     var quick = $('<div class="vs-quick-add"></div>').appendTo(head);
                     var domainInput = $('<input type="text" class="vs-quick-input" placeholder="New domain…">')
@@ -252,11 +326,35 @@ namespace AdvanceCRM.Toolkit {
                         .on('click', () => this.quickAddDomain(s, domainInput));
                 }
 
-                if (canAdd) {
-                    $('<button type="button" class="vs-add-btn"><i class="fa fa-plus"></i> Add</button>')
-                        .appendTo(head)
-                        .on('click', () => this.addRecord(s));
+                // Master Suppression gets its own Campaign + Date filter (it is account-scoped, so the
+                // main Campaign selector does not apply to it). The campaign editor is instantiated
+                // later, once the account editor exists to cascade from.
+                if (s.key === 'MasterSuppression') {
+                    var msFilter = $('<div class="vs-ms-filter"></div>').appendTo(head);
+                    $('<span class="vs-ms-label">Company</span>').appendTo(msFilter);
+                    $('<input type="text" class="vs-ms-company" placeholder="Contains…">').appendTo(msFilter)
+                        .on('input', (e: any) => {
+                            // Debounced so a re-query fires once the user stops typing.
+                            var v = String($(e.target).val() || '');
+                            if (this.msCompanyTimer)
+                                clearTimeout(this.msCompanyTimer);
+                            this.msCompanyTimer = setTimeout(() => {
+                                this.msCompany = v.trim();
+                                this.loadSheet(s);
+                            }, VsFilterDebounceMs);
+                        });
+                    $('<span class="vs-ms-label">Campaign</span>').appendTo(msFilter);
+                    this.msCampaignHolder = $('<span class="vs-ms-campaign"></span>').appendTo(msFilter);
+                    $('<span class="vs-ms-label">Date</span>').appendTo(msFilter);
+                    $('<input type="date" class="vs-ms-date" title="From date">').appendTo(msFilter)
+                        .on('change', (e: any) => { this.msDateFrom = String($(e.target).val() || ''); this.loadSheet(s); });
+                    $('<span class="vs-ms-dash">–</span>').appendTo(msFilter);
+                    $('<input type="date" class="vs-ms-date" title="To date">').appendTo(msFilter)
+                        .on('change', (e: any) => { this.msDateTo = String($(e.target).val() || ''); this.loadSheet(s); });
+                    $('<button type="button" class="vs-ms-clear" title="Clear filters">✕</button>').appendTo(msFilter)
+                        .on('click', () => this.clearMsFilter(s));
                 }
+
                 $('<div class="vs-card-body"></div>').appendTo(sec);
             });
 
@@ -270,6 +368,17 @@ namespace AdvanceCRM.Toolkit {
                     this.openRecord(sheet, id);
             });
 
+            // Sr No header toggles ascending / descending. The sort runs on the server, so it
+            // orders the whole sheet, not just the page currently loaded.
+            el.on('click', '.vs-sort-toggle', e => {
+                e.preventDefault();
+                var key = String($(e.currentTarget).attr('data-key'));
+                this.sortDesc[key] = this.sortDesc[key] === false;
+                var sheet = this.sheetByKey(key);
+                if (sheet)
+                    this.loadSheet(sheet);
+            });
+
             // "more ++" / "less --" toggles a section between its 5-row preview and the full list.
             el.on('click', '.vs-more-toggle', e => {
                 e.preventDefault();
@@ -280,12 +389,14 @@ namespace AdvanceCRM.Toolkit {
                     this.renderSheet(sheet);
             });
 
-            // Account editor drives the Campaign cascade.
+            // Account editor drives the Campaign cascade, and on its own is enough to load the
+            // account-scoped sheets (Master Suppression).
             this.accountEditor = Serenity.Widget.create({
                 type: Serenity.LookupEditor,
                 element: e => e.appendTo(el.find('.vs-account-holder')).attr('id', 'vsAccountId').attr('placeholder', 'Account'),
                 options: <Serenity.LookupEditorOptions>{ lookupKey: 'Masters.DemandayMasterAccount' }
             });
+            this.accountEditor.changeSelect2(() => this.loadAll());
 
             // Campaign editor — cascaded from the selected Account.
             this.campaignEditor = Serenity.Widget.create({
@@ -299,7 +410,69 @@ namespace AdvanceCRM.Toolkit {
             });
             this.campaignEditor.changeSelect2(() => this.loadAll());
 
-            this.setPlaceholder('Select a Campaign ID to view its sheets.');
+            // Master Suppression's own Campaign filter — cascaded from the same Account, but it only
+            // narrows the already-loaded rows client-side (no server re-query).
+            if (this.msCampaignHolder) {
+                this.msCampaignEditor = Serenity.Widget.create({
+                    type: Serenity.LookupEditor,
+                    element: e => e.appendTo(this.msCampaignHolder).attr('placeholder', 'All campaigns'),
+                    options: <any>{
+                        lookupKey: 'Masters.DemandayCampaignId',
+                        cascadeFrom: 'vsAccountId',
+                        cascadeField: 'DemandayMasterAccountId'
+                    }
+                });
+                this.msCampaignEditor.changeSelect2(() => {
+                    var v = this.msCampaignEditor.value;
+                    var id = Q.isEmptyOrNull(v) ? NaN : parseInt(v, 10);
+                    this.msCampaignFilter = isNaN(id) ? null : id;
+                    var sheet = this.sheetByKey('MasterSuppression');
+                    if (sheet) this.loadSheet(sheet);
+                });
+            }
+
+            // Seed each section with its own "what's missing" message.
+            this.loadAll();
+        }
+
+        /** Resets the Master Suppression Campaign + Date filters back to "all". */
+        private clearMsFilter(sheet: VsSheet) {
+            this.msCampaignFilter = null;
+            this.msDateFrom = '';
+            this.msDateTo = '';
+            this.msCompany = '';
+            if (this.msCompanyTimer)
+                clearTimeout(this.msCompanyTimer);
+            if (this.msCampaignEditor)
+                this.msCampaignEditor.value = null;
+            this.element.find('.vs-ms-date').val('');
+            this.element.find('.vs-ms-company').val('');
+            this.loadSheet(sheet);
+        }
+
+        /**
+         * Server-side criteria for the Master Suppression Company + Date filters. The date "to"
+         * bound is exclusive on the next day so the whole selected day is included regardless of
+         * its time part.
+         */
+        private msDateCriteria(): any {
+            var crit: any = null;
+            // Company name is a "contains" match, so it filters the whole table server-side.
+            if (this.msCompany)
+                crit = [Serenity.Criteria('CompanyName'), 'like', '%' + this.msCompany + '%'];
+            if (this.msDateFrom) {
+                var from: any = [Serenity.Criteria('Date'), '>=', this.msDateFrom];
+                crit = crit ? Serenity.Criteria.and(crit, from) : from;
+            }
+            if (this.msDateTo) {
+                var to = new Date(this.msDateTo + 'T00:00:00');
+                to.setDate(to.getDate() + 1);
+                var pad = (n: number) => (n < 10 ? '0' + n : '' + n);
+                var next = to.getFullYear() + '-' + pad(to.getMonth() + 1) + '-' + pad(to.getDate());
+                var upper: any = [Serenity.Criteria('Date'), '<', next];
+                crit = crit ? Serenity.Criteria.and(crit, upper) : upper;
+            }
+            return crit;
         }
 
         /** Collapses/expands one section's body; the header (with its count) stays visible. */
@@ -374,6 +547,9 @@ namespace AdvanceCRM.Toolkit {
                     fetch(Q.resolveUrl('~/Toolkit/VerifySheets/ImportExcel'), { method: 'POST', body: fd })
                         .then(r => r.text().then(msg => {
                             alert(msg || 'Import completed.');
+                            // An import can create new Campaign IDs; the lookup is cached, so force a
+                            // fresh fetch and the Campaign dropdowns pick them up without a page reload.
+                            Q.reloadLookupAsync('Masters.DemandayCampaignId');
                             var sheet = this.sheetByKey(sheetKey);
                             if (sheet) this.loadSheet(sheet);
                         }))
@@ -384,37 +560,6 @@ namespace AdvanceCRM.Toolkit {
             fileInput.click();
         }
 
-        /** Opens the sub-module's own dialog, pre-tagged with the selected Campaign/Account. */
-        private addRecord(sheet: VsSheet) {
-            var campaignId = this.getCampaignId();
-            var accountId = this.getAccountId();
-            var entity: any = {};
-
-            if (sheet.scope === 'account') {
-                if (accountId == null) {
-                    Q.notifyError('Please select a Master Account first.');
-                    return;
-                }
-                // Account-wise sheet: deliberately no CampaignId.
-                entity.MasterAccountId = accountId;
-            }
-            else {
-                if (campaignId == null) {
-                    Q.notifyError('Please select a Campaign first.');
-                    return;
-                }
-                entity.CampaignId = campaignId;
-                if (accountId != null)
-                    entity.MasterAccountId = accountId;
-            }
-
-            var dlg = sheet.newDialog();
-            // EntityDialog fires this after a successful save or delete.
-            dlg.element.on('ondatachange', () => this.loadSheet(sheet));
-
-            // Passing an entity without an Id makes the dialog open in "new record" mode.
-            dlg.loadEntityAndOpenDialog(entity);
-        }
 
         /** Inserts one Open Campaign row straight from the inline domain box. */
         private quickAddDomain(sheet: VsSheet, input: JQuery) {
@@ -459,15 +604,6 @@ namespace AdvanceCRM.Toolkit {
             return isNaN(id) ? null : id;
         }
 
-        private setPlaceholder(message: string) {
-            this.loaded = {};
-            this.sheets.forEach(s => {
-                var sec = this.element.find('.vs-section[data-key="' + s.key + '"]');
-                sec.find('.vs-count').text('0');
-                sec.find('.vs-card-body').html('<div class="vs-empty">' + Q.htmlEncode(message) + '</div>');
-            });
-        }
-
         /** True when the term appears in any column the sheet actually displays. */
         private matchesSearch(sheet: VsSheet, row: any): boolean {
             if (!this.searchTerm)
@@ -491,19 +627,72 @@ namespace AdvanceCRM.Toolkit {
             });
         }
 
+        /**
+         * Account-scoped sheets (Master Suppression) only need a Master Account, so they load as
+         * soon as one is picked — no Campaign required. Campaign-scoped sheets still wait for a
+         * Campaign, and each section shows its own message about what is missing.
+         */
         private loadAll() {
             var campaignId = this.getCampaignId();
-            if (campaignId == null) {
-                this.setPlaceholder('Select a Campaign ID to view its sheets.');
-                return;
-            }
+            var accountId = this.getAccountId();
+
             this.sheets.forEach(s => {
-                if (this.visible[s.key])
-                    this.loadSheet(s);
+                if (!this.visible[s.key])
+                    return;
+                if (s.scope === 'account') {
+                    if (accountId != null)
+                        this.loadSheet(s);
+                    else
+                        this.setSheetPlaceholder(s, 'Select a Master Account to view this sheet.');
+                }
+                else {
+                    if (campaignId != null)
+                        this.loadSheet(s);
+                    else
+                        this.setSheetPlaceholder(s, 'Select a Campaign ID to view this sheet.');
+                }
             });
+
+            if (campaignId != null)
+                this.startLivePoll();
+            else
+                this.stopLivePoll();
         }
 
-        private loadSheet(sheet: VsSheet) {
+        /** Clears one section and shows why it has nothing to display. */
+        private setSheetPlaceholder(sheet: VsSheet, message: string) {
+            delete this.loaded[sheet.key];
+            delete this.totals[sheet.key];
+            var sec = this.element.find('.vs-section[data-key="' + sheet.key + '"]');
+            sec.find('.vs-count').text('0');
+            sec.find('.vs-card-body').html('<div class="vs-empty">' + Q.htmlEncode(message) + '</div>');
+        }
+
+        /**
+         * Keeps Open Campaign live: it re-reads that one section on a timer so a domain added by
+         * another user appears here on its own. The refresh is silent — no "Loading…" flash and the
+         * section's expanded / collapsed state is left exactly as the user left it.
+         */
+        private startLivePoll() {
+            this.stopLivePoll();
+            this.livePollTimer = setInterval(() => {
+                if (this.getCampaignId() == null)
+                    return;
+                var s = this.sheetByKey('OpenCampaign');
+                if (s && this.visible[s.key] && !this.collapsed[s.key])
+                    this.loadSheet(s, true);
+            }, VsLivePollMs);
+        }
+
+        private stopLivePoll() {
+            if (this.livePollTimer) {
+                clearInterval(this.livePollTimer);
+                this.livePollTimer = null;
+            }
+        }
+
+        /** @param silent background refresh: no loading flash, keeps the expanded/collapsed state. */
+        private loadSheet(sheet: VsSheet, silent?: boolean) {
             var filter: any;
             if (sheet.scope === 'account') {
                 var accountId = this.getAccountId();
@@ -518,26 +707,51 @@ namespace AdvanceCRM.Toolkit {
                 filter = { CampaignId: campaignId };
             }
 
+            // Master Suppression's own filters run on the server, so they work against the whole
+            // table rather than only the page of rows that happens to be loaded.
+            if (sheet.key === 'MasterSuppression' && this.msCampaignFilter != null)
+                filter.CampaignId = this.msCampaignFilter;
+
             var bodyEl = this.element.find('.vs-section[data-key="' + sheet.key + '"] .vs-card-body');
-            bodyEl.html('<div class="vs-loading">Loading…</div>');
+            if (!silent)
+                bodyEl.html('<div class="vs-loading">Loading…</div>');
 
             var request = <Serenity.ListRequest>{
-                EqualityFilter: filter
+                EqualityFilter: filter,
+                // Sorted by the Sr No column header; newest first until the user flips it.
+                Sort: [this.sortDesc[sheet.key] === false ? 'SrNo' : 'SrNo DESC'],
+                // Bounded page — never stream a multi-million row table into the browser.
+                Take: VsLoadLimit
             };
             // Ask for joined view columns (usernames, account numbers) — omitted by default.
             if (sheet.includeColumns)
                 request.IncludeColumns = sheet.includeColumns;
 
+            if (sheet.key === 'MasterSuppression') {
+                var crit = this.msDateCriteria();
+                if (crit)
+                    request.Criteria = crit;
+            }
+
             sheet.list(request,
                 response => {
                     this.loaded[sheet.key] = response.Entities || [];
-                    // A fresh load starts collapsed to the 5-row preview.
-                    this.expanded[sheet.key] = false;
+                    // TotalCount is the real row count on the server (we only fetched a page of it).
+                    this.totals[sheet.key] = response.TotalCount != null
+                        ? response.TotalCount
+                        : (response.Entities || []).length;
+                    // A fresh load starts collapsed to the 5-row preview; a silent poll must not
+                    // yank the view back while the user is reading an expanded list.
+                    if (!silent)
+                        this.expanded[sheet.key] = false;
                     this.renderSheet(sheet);
                 },
                 <Q.ServiceOptions<any>>{
                     blockUI: false,
                     onError: () => {
+                        // A failed background poll should leave the current data on screen.
+                        if (silent)
+                            return;
                         delete this.loaded[sheet.key];
                         bodyEl.html('<div class="vs-error">Unable to load (you may not have permission for this sheet).</div>');
                     }
@@ -545,20 +759,23 @@ namespace AdvanceCRM.Toolkit {
         }
 
         private renderSheet(sheet: VsSheet) {
+            // Filtering (campaign / date) happens server-side; these are the rows of the page we hold.
             var all = this.loaded[sheet.key] || [];
             var entities = all.filter(row => this.matchesSearch(sheet, row));
+            // The server's real row count — the loaded page may be only a slice of it.
+            var total = this.totals[sheet.key] != null ? this.totals[sheet.key] : all.length;
 
             var sec = this.element.find('.vs-section[data-key="' + sheet.key + '"]');
-            // While searching, show how much of the campaign's data is being hidden.
+            // While searching, show how much of the loaded page is being hidden.
             sec.find('.vs-count').text(this.searchTerm
-                ? entities.length + ' / ' + all.length
-                : String(all.length));
+                ? entities.length + ' / ' + total
+                : String(total));
             var bodyEl = sec.find('.vs-card-body');
 
             if (!entities.length) {
                 bodyEl.html('<div class="vs-empty">' + (this.searchTerm
                     ? 'No rows match “' + Q.htmlEncode(this.searchTerm) + '”.'
-                    : 'No records for this campaign.') + '</div>');
+                    : 'No records for this selection.') + '</div>');
                 return;
             }
 
@@ -567,8 +784,25 @@ namespace AdvanceCRM.Toolkit {
             var hasMore = entities.length > VsPreviewLimit;
             var visibleRows = (isExpanded || !hasMore) ? entities : entities.slice(0, VsPreviewLimit);
 
-            var html = '<div class="vs-table-wrap"><table class="vs-table"><thead><tr>';
-            sheet.columns.forEach(c => html += '<th>' + vsEscape(c.title) + '</th>');
+            var html = '';
+            // Be explicit when the table holds far more than the page we fetched.
+            if (total > all.length) {
+                html += '<div class="vs-grid-note">Showing the newest ' + all.length +
+                    ' of ' + total + ' records. Use the filters above or Export to Excel for the full list.</div>';
+            }
+            html += '<div class="vs-table-wrap"><table class="vs-table"><thead><tr>';
+            var desc = this.sortDesc[sheet.key] !== false;
+            sheet.columns.forEach(c => {
+                // Sr No header sorts the whole sheet server-side; the arrow shows the direction.
+                if (c.field === 'SrNo') {
+                    html += '<th><a href="#" class="vs-sort-toggle" data-key="' + sheet.key + '" ' +
+                        'title="Sort by Sr No">' + vsEscape(c.title) +
+                        ' <span class="vs-sort-arrow">' + (desc ? '▼' : '▲') + '</span></a></th>';
+                }
+                else {
+                    html += '<th>' + vsEscape(c.title) + '</th>';
+                }
+            });
             html += '</tr></thead><tbody>';
             visibleRows.forEach(row => {
                 html += '<tr>';
@@ -577,6 +811,12 @@ namespace AdvanceCRM.Toolkit {
                     if (c.field === 'SrNo' && row['Id'] != null) {
                         html += '<td><a href="#" class="vs-edit-link" data-key="' + sheet.key +
                             '" data-id="' + row['Id'] + '">' + vsEscape(row['SrNo']) + '</a></td>';
+                    }
+                    else if (c.field === 'TimeStamp') {
+                        html += '<td>' + vsEscape(vsFormatTimeStamp(row[c.field])) + '</td>';
+                    }
+                    else if (c.field === 'Date') {
+                        html += '<td>' + vsEscape(vsFormatDate(row[c.field])) + '</td>';
                     }
                     else {
                         html += '<td>' + vsEscape(row[c.field]) + '</td>';
