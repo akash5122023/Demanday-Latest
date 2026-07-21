@@ -62,27 +62,49 @@ namespace AdvanceCRM.Navigation
             var moduleKeySuffix = BuildModuleCacheKeySuffix(modules);
             var tenantKeySuffix = BuildTenantCacheKeySuffix(tenant, host);
 
-            Items = LocalCache.GetLocalStoreOnly(
-                "LeftNavigationModel:NavigationItems:" + (Context.User.GetIdentifier() ?? "-1") + tenantKeySuffix + moduleKeySuffix,
-                TimeSpan.Zero,
-                UserPermissionRow.Fields.GenerationKey,
-                () =>
-                {
-                    var navigationItems = NavigationHelper.GetNavigationItems(
-                        _permissionService,
-                        _typeSource,
-                        _serviceProvider,
-                        path => path != null && path.StartsWith("~/", StringComparison.Ordinal)
-                            ? ToAbsolute(path)
-                            : path).ToList();
+            // Build the navigation menu fresh on every request so that permission /
+            // module grants take effect immediately. The previous LocalCache.GetLocalStoreOnly
+            // kept a process-local cache keyed on UserPermissionRow.GenerationKey that did not
+            // reliably clear after a grant, so newly-allowed modules only appeared after an app
+            // restart / deploy. We now memoize only for the lifetime of the current request
+            // (to avoid rebuilding when the menu renders more than once per page), mirroring the
+            // real-time approach already used by PermissionService. This is cheap because
+            // PermissionService reads grants once per request and memoizes them.
+            var navCacheKey = "LeftNavigationModel:NavigationItems:" + (Context.User.GetIdentifier() ?? "-1") + tenantKeySuffix + moduleKeySuffix;
 
-                    if (modules != null && modules.Count > 0)
-                        FilterNavigationItems(navigationItems, modules);
+            List<NavigationItem> BuildNavigationItems()
+            {
+                var navigationItems = NavigationHelper.GetNavigationItems(
+                    _permissionService,
+                    _typeSource,
+                    _serviceProvider,
+                    path => path != null && path.StartsWith("~/", StringComparison.Ordinal)
+                        ? ToAbsolute(path)
+                        : path).ToList();
 
-                    FilterDemoOnlyNavigationItems(navigationItems, tenant, host);
+                if (modules != null && modules.Count > 0)
+                    FilterNavigationItems(navigationItems, modules);
 
-                    return navigationItems;
-                });
+                FilterDemoOnlyNavigationItems(navigationItems, tenant, host);
+
+                return navigationItems;
+            }
+
+            var httpContext = _httpContextAccessor?.HttpContext;
+            if (httpContext == null)
+            {
+                Items = BuildNavigationItems();
+            }
+            else if (httpContext.Items.TryGetValue(navCacheKey, out var existingItems) &&
+                existingItems is List<NavigationItem> cachedItems)
+            {
+                Items = cachedItems;
+            }
+            else
+            {
+                Items = BuildNavigationItems();
+                httpContext.Items[navCacheKey] = Items;
+            }
 
             SetActivePath();
         }
