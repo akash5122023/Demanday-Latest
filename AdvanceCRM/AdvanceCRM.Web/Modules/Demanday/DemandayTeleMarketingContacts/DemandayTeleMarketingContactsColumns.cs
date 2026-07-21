@@ -70,6 +70,7 @@ namespace AdvanceCRM.Demanday.Columns
         //public String AgentsName { get; set; }
         //public String TlName { get; set; }
         //public String CampaignId { get; set; }
+        [QuickFilter]
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }

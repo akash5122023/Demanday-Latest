@@ -66,6 +66,7 @@ namespace AdvanceCRM.Demanday.Columns
         [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
         public string Slot { get; set; }
+        [QuickFilter]
         public string CompanyName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
