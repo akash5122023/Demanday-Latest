@@ -41,7 +41,8 @@ namespace AdvanceCRM.Toolkit
             if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
             {
                 query.Where(
-                    (MyRow.Fields.AgentsName == userId) | (MyRow.Fields.AgentsName == null)
+                    (MyRow.Fields.AgentsName == userId) |
+                    (MyRow.Fields.AgentsName == (Int32?)null)
                 );
             }
             else
