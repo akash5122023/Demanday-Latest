@@ -42,7 +42,7 @@ namespace AdvanceCRM.Toolkit
             {
                 query.Where(
                     (MyRow.Fields.AgentsName == userId) |
-                    (MyRow.Fields.AgentsName == (Int32?)null)
+                    (MyRow.Fields.AgentsName.IsNull())
                 );
             }
             else
