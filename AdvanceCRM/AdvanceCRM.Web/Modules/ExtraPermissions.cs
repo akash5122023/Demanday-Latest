@@ -87,6 +87,8 @@
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("DemandayVerification:Export")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:Import")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:Export")]
+// Toolkit sub-modules: Import permissions
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Import")]
 // Toolkit sub-modules: Export permissions (Import keys already registered above)
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("TalCampaign:Export")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("ClientSupression:Export")]

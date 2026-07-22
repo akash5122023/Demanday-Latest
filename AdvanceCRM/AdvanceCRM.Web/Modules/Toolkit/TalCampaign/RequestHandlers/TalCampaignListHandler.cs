@@ -35,11 +35,14 @@ namespace AdvanceCRM.Toolkit
             // still only sees the rows where they are the Agent.
 
             // Everyone else sees only the rows assigned to them via the Agent column.
+            // If the agent column is empty, show the data to all users.
             var userIdStr = Context.User.GetIdentifier();
 
             if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
             {
-                query.Where(MyRow.Fields.AgentsName == userId);
+                query.Where(
+                    (MyRow.Fields.AgentsName == userId) | (MyRow.Fields.AgentsName == null)
+                );
             }
             else
             {
