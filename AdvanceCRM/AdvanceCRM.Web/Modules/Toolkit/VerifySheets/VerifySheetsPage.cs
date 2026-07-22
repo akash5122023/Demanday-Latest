@@ -42,7 +42,12 @@ namespace AdvanceCRM.Toolkit.Pages
             var tal = connection.List<TalCampaignRow>(q => q.SelectTableFields()
                 .Where(TalCampaignRow.Fields.CampaignId == campaignId));
             // Master Suppression is account-wise, so it is pulled by the campaign's parent account.
-            var masterAccountId = connection.TryById<DemandayCampaignIdRow>(campaignId)?.DemandayMasterAccountId ?? 0;
+            var campaignRow = connection.TryById<DemandayCampaignIdRow>(campaignId);
+            var masterAccountId = campaignRow?.DemandayMasterAccountId ?? 0;
+            // Export names use the human-facing values the user picked (Account Number + Campaign ID),
+            // not the internal primary keys — fall back to the id only if a value is missing.
+            var masterAccountNo = connection.TryById<Masters.DemandayMasterAccountRow>(masterAccountId)?.AccountNumber ?? masterAccountId.ToString();
+            var campaignText = string.IsNullOrWhiteSpace(campaignRow?.CampaignId) ? campaignId.ToString() : campaignRow.CampaignId;
             var masterSupp = connection.List<MasterSupressionRow>(q => q.SelectTableFields()
                 .Where(MasterSupressionRow.Fields.MasterAccountId == masterAccountId));
             var openCampaign = connection.List<OpenCampaignRow>(q => q.SelectTableFields()
@@ -109,7 +114,7 @@ namespace AdvanceCRM.Toolkit.Pages
                 foreach (var m in modules)
                 {
                     var fileBytes = BuildSingleSheetWorkbook(m.Name, m.Headers, m.Rows);
-                    var entry = zip.CreateEntry(masterAccountId + "_" + campaignId + "_" + m.Name + ".xlsx",
+                    var entry = zip.CreateEntry(masterAccountNo + "_" + campaignText + "_" + m.Name + ".xlsx",
                         System.IO.Compression.CompressionLevel.Fastest);
                     using var es = entry.Open();
                     es.Write(fileBytes, 0, fileBytes.Length);
@@ -117,7 +122,7 @@ namespace AdvanceCRM.Toolkit.Pages
             }
 
             return File(zipStream.ToArray(), "application/zip",
-                masterAccountId + "_" + campaignId + "_VerifySheets.zip");
+                masterAccountNo + "_" + campaignText + "_VerifySheets.zip");
         }
 
         // Builds a one-worksheet .xlsx (module export) and returns its bytes.
