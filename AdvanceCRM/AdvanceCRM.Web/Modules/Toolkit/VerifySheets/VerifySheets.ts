@@ -227,6 +227,7 @@ namespace AdvanceCRM.Toolkit {
             // Adding rows on this page is gated by its own permission; without it the "+ Add"
             // buttons (and Open Campaign's quick "Add domain" box) are not rendered at all.
             var canAdd = Q.Authorization.hasPermission('Toolkit:VerifySheets:Add');
+            var canImport = Q.Authorization.hasPermission('Toolkit:VerifySheets:Import');
 
             var toolbar = $('<div class="vs-toolbar"></div>').appendTo(el);
             $('<div class="vs-account-holder"></div>').appendTo(toolbar);
@@ -243,14 +244,16 @@ namespace AdvanceCRM.Toolkit {
                 var lbl = $('<label class="vs-verify-label"></label>').appendTo(item);
                 $('<input type="checkbox" checked>').attr('data-key', s.key).appendTo(lbl);
                 $('<span></span>').text(' ' + s.title).appendTo(lbl);
-                $('<button type="button" class="vs-item-upload"><i class="fa fa-upload"></i></button>')
-                    .attr('title', 'Import Excel into ' + s.title)
-                    .appendTo(item)
-                    .on('click', e => {
-                        e.stopPropagation();
-                        ddMenu.hide();
-                        this.doUpload(s.key);
-                    });
+                if (canImport) {
+                    $('<button type="button" class="vs-item-upload"><i class="fa fa-upload"></i></button>')
+                        .attr('title', 'Import Excel into ' + s.title)
+                        .appendTo(item)
+                        .on('click', e => {
+                            e.stopPropagation();
+                            ddMenu.hide();
+                            this.doUpload(s.key);
+                        });
+                }
             });
             ddBtn.on('click', e => { e.stopPropagation(); ddMenu.toggle(); });
             $(document).on('click', () => ddMenu.hide());
