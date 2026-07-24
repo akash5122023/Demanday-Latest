@@ -264,29 +264,32 @@ namespace AdvanceCRM.Administration.Endpoints
                 result.CompanyId = row.CompanyId;
             }
 
-            result.Permissions = LocalCache.GetLocalStoreOnly("ScriptUserPermissions:" + user.Id, TimeSpan.Zero,
-                UserPermissionRow.Fields.GenerationKey, () =>
-                {
-                    var permissions = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            // Build the permission map fresh on every call so that permission grants take
+            // effect immediately. The previous LocalCache.GetLocalStoreOnly kept a process-local
+            // cache keyed on UserPermissionRow.GenerationKey that did not reliably clear after a
+            // grant, so updates to an already-cached user only reflected after an app restart /
+            // deploy. permissionService.HasPermission reads grants in real time (see
+            // PermissionService). Only the set of permission KEYS (changes solely on deploy)
+            // stays cached in the static permissionsUsedFromScript field.
+            var permissions = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
-                    if (permissionsUsedFromScript == null)
+            if (permissionsUsedFromScript == null)
+            {
+                permissionsUsedFromScript = UserPermissionRepository.ListPermissionKeys(memoryCache, typeSource)
+                    .Where(permissionKey =>
                     {
-                        permissionsUsedFromScript = UserPermissionRepository.ListPermissionKeys(memoryCache, typeSource)
-                            .Where(permissionKey =>
-                            {
-                                // Optional: filter permissions if needed
-                                return true;
-                            }).ToArray();
-                    }
+                        // Optional: filter permissions if needed
+                        return true;
+                    }).ToArray();
+            }
 
-                    foreach (var permissionKey in permissionsUsedFromScript)
-                    {
-                        if (permissionService.HasPermission(permissionKey))
-                            permissions[permissionKey] = true;
-                    }
+            foreach (var permissionKey in permissionsUsedFromScript)
+            {
+                if (permissionService.HasPermission(permissionKey))
+                    permissions[permissionKey] = true;
+            }
 
-                    return permissions;
-                });
+            result.Permissions = permissions;
 
             return result;
         }

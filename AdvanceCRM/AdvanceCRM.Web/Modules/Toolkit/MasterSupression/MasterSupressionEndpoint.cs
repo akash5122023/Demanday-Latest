@@ -92,7 +92,9 @@ namespace AdvanceCRM.Toolkit.Endpoints
         [HttpPost, ServiceAuthorize("MasterSupression:Import")]
         public ActionResult DownloadTemplate(IDbConnection connection, RetrieveRequest request)
         {
-            string[] headers = { "Account Number", "Company Name", "First Name", "Last Name", "Email", "Domain", "Date" };
+            // Shared with the on-disk template so the download can never drift from the column
+            // order ExcelImport reads - it used to omit "Sr No" and shift every column by one.
+            string[] headers = SupressionTemplateInitializer.MasterSupressionHeaders;
 
             using (var package = new ExcelPackage())
             {
@@ -135,9 +137,9 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
             // A row may name a different account, so one file can span several of them.
             var accountLookup = uow.Connection.List<DemandayMasterAccountRow>()
-                .Where(a => !string.IsNullOrWhiteSpace(a.AccountNumber))
+                .Where(a => !string.IsNullOrWhiteSpace(a.AccountNumber) && a.Id.HasValue)
                 .GroupBy(a => a.AccountNumber.Trim(), StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase);
+                .ToDictionary(g => g.Key, g => g.First().Id.Value, StringComparer.OrdinalIgnoreCase);
 
             string physicalPath = UploadHelper.DbFilePath(request.FileName);
 
@@ -158,14 +160,24 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
             int ownerId = Convert.ToInt32(Context.User.GetIdentifier());
 
-            // SrNo (column 1) is the upsert key: an existing SrNo is updated, not duplicated.
-            var idBySrNo = uow.Connection.List<MyRow>(q => q
-                    .Select(MyRow.Fields.Id).Select(MyRow.Fields.SrNo)
+            // Master Suppression is imported account-wise, so the upsert key is the Account Number
+            // (column 2) plus SrNo (column 1), not SrNo alone: the same SrNo under the same
+            // account updates that row, while the same SrNo under a different account is a
+            // separate record. That lets every account restart its numbering at 1.
+            var existingRows = uow.Connection.List<MyRow>(q => q
+                    .Select(MyRow.Fields.Id).Select(MyRow.Fields.SrNo).Select(MyRow.Fields.MasterAccountId)
                     .Where(new Criteria(MyRow.Fields.SrNo).IsNotNull()))
-                .Where(r => r.SrNo.HasValue)
-                .GroupBy(r => r.SrNo.Value)
+                .Where(r => r.SrNo.HasValue && r.MasterAccountId.HasValue)
+                .ToList();
+
+            var idByAccountAndSrNo = existingRows
+                .GroupBy(r => (AccountId: r.MasterAccountId.Value, SrNo: r.SrNo.Value))
                 .ToDictionary(g => g.Key, g => g.First().Id.Value);
-            int maxSrNo = idBySrNo.Count == 0 ? 0 : idBySrNo.Keys.Max();
+
+            // Highest SrNo per account, so a blank SrNo cell continues that account's own run.
+            var maxSrNoByAccount = existingRows
+                .GroupBy(r => r.MasterAccountId.Value)
+                .ToDictionary(g => g.Key, g => g.Max(r => r.SrNo.Value));
 
             for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
             {
@@ -186,7 +198,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
                     // Blank Account Number falls back to the dialog's Master Account; a named one
                     // must resolve, otherwise the row would silently land under the wrong account.
-                    var masterAccountId = defaultAccount.Id;
+                    var masterAccountId = defaultAccount.Id.Value;
                     if (!string.IsNullOrEmpty(accountNumber))
                     {
                         if (!accountLookup.TryGetValue(accountNumber, out var resolved))
@@ -208,10 +220,15 @@ namespace AdvanceCRM.Toolkit.Endpoints
                         srNo = parsedSrNo;
                     }
 
+                    // Numbering is tracked per account, so account B's blank cells start at 1 even
+                    // when account A already runs into the thousands.
+                    maxSrNoByAccount.TryGetValue(masterAccountId, out var accountMaxSrNo);
+
                     if (!srNo.HasValue)
-                        srNo = ++maxSrNo;
-                    else if (srNo.Value > maxSrNo)
-                        maxSrNo = srNo.Value;
+                        srNo = accountMaxSrNo + 1;
+
+                    if (srNo.Value > accountMaxSrNo)
+                        maxSrNoByAccount[masterAccountId] = srNo.Value;
 
                     DateTime? date = null;
                     if (!string.IsNullOrEmpty(dateStr))
@@ -233,7 +250,9 @@ namespace AdvanceCRM.Toolkit.Endpoints
                         Date = date
                     };
 
-                    if (idBySrNo.TryGetValue(srNo.Value, out var existingId))
+                    var upsertKey = (AccountId: masterAccountId, SrNo: srNo.Value);
+
+                    if (idByAccountAndSrNo.TryGetValue(upsertKey, out var existingId))
                     {
                         data.Id = existingId;
                         uow.Connection.UpdateById(data);
@@ -243,7 +262,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
                     {
                         data.OwnerId = ownerId;
                         var newId = (int)uow.Connection.InsertAndGetID(data);
-                        idBySrNo[srNo.Value] = newId;
+                        idByAccountAndSrNo[upsertKey] = newId;
                         response.Inserted++;
                     }
                 }

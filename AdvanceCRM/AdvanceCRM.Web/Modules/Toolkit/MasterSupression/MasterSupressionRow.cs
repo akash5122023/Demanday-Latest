@@ -17,6 +17,10 @@ namespace AdvanceCRM.Toolkit
     [UpdatePermission("MasterSupression:Update")]
     [DeletePermission("MasterSupression:Delete")]
     [LookupScript("MasterSupression.MasterSupression", Permission = "MasterSupression:Read")]
+    // Suppression rows are imported account-wise, so SrNo is unique within a Master Account
+    // rather than across the table — two accounts may each number their rows from 1.
+    [UniqueConstraint(nameof(MasterAccountId), nameof(SrNo),
+        ErrorMessage = "This Sr No is already used by another record of the same Master Account!")]
     public sealed class MasterSupressionRow : Row<MasterSupressionRow.RowFields>, IIdRow, INameRow
     {
         [DisplayName("Id"), Identity, IdProperty]
@@ -26,8 +30,9 @@ namespace AdvanceCRM.Toolkit
             set => fields.Id[this] = value;
         }
 
-        // User-facing serial number; the upsert key on import (globally unique per table).
-        [DisplayName("Sr No"), Unique]
+        // User-facing serial number; the upsert key on import, scoped to MasterAccountId by the
+        // row's UniqueConstraint (see UX_MasterSupression_MasterAccountId_SrNo).
+        [DisplayName("Sr No")]
         public Int32? SrNo
         {
             get => fields.SrNo[this];

@@ -260,9 +260,18 @@ namespace AdvanceCRM.Toolkit.Pages
 
         // Highest Sr No currently in the table. New rows are numbered above it, so a freshly
         // allocated Sr No can never collide with an existing row (no lookup table needed).
-        private static int GetMaxSrNo(SqlConnection sqlConn, string tableName)
+        // scopeColumn restricts that maximum to one Master Account (Master Suppression is
+        // account-wise, so every account keeps its own 1..n sequence); it is a compile-time
+        // constant at every call site, never user input.
+        private static int GetMaxSrNo(SqlConnection sqlConn, string tableName,
+            string scopeColumn = null, int scopeValue = 0)
         {
-            using var cmd = NewCommand(sqlConn, $"SELECT ISNULL(MAX([SrNo]), 0) FROM {tableName}");
+            var sql = $"SELECT ISNULL(MAX([SrNo]), 0) FROM {tableName}";
+            if (scopeColumn != null)
+                sql += $" WHERE [{scopeColumn}] = @scope";
+            using var cmd = NewCommand(sqlConn, sql);
+            if (scopeColumn != null)
+                cmd.Parameters.AddWithValue("@scope", scopeValue);
             var v = cmd.ExecuteScalar();
             return (v == null || v == DBNull.Value) ? 0 : Convert.ToInt32(v);
         }
@@ -300,30 +309,40 @@ namespace AdvanceCRM.Toolkit.Pages
         }
 
         // Merges staging into the target: update rows whose Sr No already exists, insert the rest.
+        // scopeColumn widens that key with a second column (Master Suppression numbers each Master
+        // Account separately, so a Sr No only identifies a row within its own account) — without it
+        // the same sheet loaded under two accounts would keep overwriting one set of rows and drag
+        // them from account to account.
         private static void MergeStaging(SqlConnection sqlConn, string tableName, DataTable shape,
-            ref int imported, ref int updated)
+            ref int imported, ref int updated, string scopeColumn = null)
         {
             var colList = ColumnList(shape);
             var names = shape.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToList();
 
-            using (var cmd = NewCommand(sqlConn, $"CREATE INDEX IX_Staging_SrNo ON [{StagingTable}] ([SrNo]);"))
+            var keyCols = scopeColumn == null ? "[SrNo]" : $"[{scopeColumn}], [SrNo]";
+            using (var cmd = NewCommand(sqlConn, $"CREATE INDEX IX_Staging_SrNo ON [{StagingTable}] ({keyCols});"))
                 cmd.ExecuteNonQuery();
 
+            var keyMatch = "t.[SrNo] = s.[SrNo]";
+            if (scopeColumn != null)
+                keyMatch += $" AND t.[{scopeColumn}] = s.[{scopeColumn}]";
+
             var setList = string.Join(", ", names
-                .Where(c => !string.Equals(c, "SrNo", StringComparison.OrdinalIgnoreCase))
+                .Where(c => !string.Equals(c, "SrNo", StringComparison.OrdinalIgnoreCase) &&
+                            !string.Equals(c, scopeColumn, StringComparison.OrdinalIgnoreCase))
                 .Select(c => $"t.[{c}] = s.[{c}]"));
 
             if (!string.IsNullOrEmpty(setList))
             {
                 using var cmd = NewCommand(sqlConn,
                     $"UPDATE t SET {setList} FROM {tableName} t " +
-                    $"INNER JOIN [{StagingTable}] s ON t.[SrNo] = s.[SrNo]; SELECT @@ROWCOUNT;");
+                    $"INNER JOIN [{StagingTable}] s ON {keyMatch}; SELECT @@ROWCOUNT;");
                 updated += Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
             }
 
             using (var cmd = NewCommand(sqlConn,
                 $"INSERT INTO {tableName} ({colList}) SELECT {colList} FROM [{StagingTable}] s " +
-                $"WHERE NOT EXISTS (SELECT 1 FROM {tableName} t WHERE t.[SrNo] = s.[SrNo]); SELECT @@ROWCOUNT;"))
+                $"WHERE NOT EXISTS (SELECT 1 FROM {tableName} t WHERE {keyMatch}); SELECT @@ROWCOUNT;"))
                 imported += Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
 
             using (var cmd = NewCommand(sqlConn, $"DROP TABLE [{StagingTable}];"))
@@ -574,7 +593,9 @@ namespace AdvanceCRM.Toolkit.Pages
                     campaignHeaderFound = HasHeader(map, "CampaignId", "Campaign ID", "Campaign", "CampaignID", "Camp ID");
                     dateHeaderFound = HasHeader(map, "Date");
 
-                    int maxSrNo = GetMaxSrNo(sqlConn, table);
+                    // Numbering restarts at 1 in every Master Account, so both the highest existing
+                    // Sr No and the upsert key below are scoped to the selected account.
+                    int maxSrNo = GetMaxSrNo(sqlConn, table, "MasterAccountId", masterAccountId);
                     CreateStaging(sqlConn, table, batch);
                     for (int row = 2; row <= rowCount; row++)
                     {
@@ -619,7 +640,7 @@ namespace AdvanceCRM.Toolkit.Pages
                         if (batch.Rows.Count >= BulkBatchSize) FlushBatch(sqlConn, batch);
                     }
                     FlushBatch(sqlConn, batch);
-                    MergeStaging(sqlConn, table, batch, ref imported, ref updated);
+                    MergeStaging(sqlConn, table, batch, ref imported, ref updated, "MasterAccountId");
                 }
                 else if (sheet == "OpenCampaign")
                 {

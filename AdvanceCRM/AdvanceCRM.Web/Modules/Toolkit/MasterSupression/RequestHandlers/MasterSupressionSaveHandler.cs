@@ -22,9 +22,11 @@ namespace AdvanceCRM.Toolkit
         {
             base.SetInternalFields();
 
-            // Dialog adds without a SrNo get the next free serial number.
+            // Dialog adds without a SrNo get the next free serial number within their own Master
+            // Account, so each account keeps its own 1..n sequence.
             if (IsCreate && Row.SrNo == null)
-                Row.SrNo = ToolkitSrNoHelper.NextSrNo(Connection, "[dbo].[MasterSupression]");
+                Row.SrNo = ToolkitSrNoHelper.NextSrNo(Connection, "[dbo].[MasterSupression]",
+                    "MasterAccountId", Row.MasterAccountId);
         }
     }
 }

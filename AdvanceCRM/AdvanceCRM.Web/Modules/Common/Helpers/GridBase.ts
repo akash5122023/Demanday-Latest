@@ -103,16 +103,13 @@
                     // Match on "contains" so a stored value like "admin@gmail.com" or "gmail.com"
                     // is both matched by the "gmail.com" domain.
                     // Include => record matches ANY domain (OR of like).
-                    // Exclude => record matches NONE (AND of not-like).
-                    let combined: any[] = null;
-                    for (let d of domains) {
-                        let crit: any[] = exclude
-                            ? [Serenity.Criteria('Domain'), 'not like', '%' + d + '%']
-                            : [Serenity.Criteria('Domain'), 'like', '%' + d + '%'];
-                        combined = combined == null ? crit
-                            : (exclude ? Serenity.Criteria.and(combined, crit)
-                                       : Serenity.Criteria.or(combined, crit));
-                    }
+                    // Exclude => record matches NONE (AND of not-like). Balanced tree so a large
+                    // pasted domain list stays within the server's JSON depth limit.
+                    let crits = domains.map(d => exclude
+                        ? [Serenity.Criteria('Domain'), 'not like', '%' + d + '%']
+                        : [Serenity.Criteria('Domain'), 'like', '%' + d + '%']);
+                    let combined = GridBase.combineBalanced(crits,
+                        (a, b) => exclude ? Serenity.Criteria.and(a, b) : Serenity.Criteria.or(a, b));
                     h.request.Criteria = Serenity.Criteria.and(
                         h.request.Criteria,
                         Serenity.Criteria.paren(combined)
@@ -133,6 +130,25 @@
                 if (d && !seen[d]) { seen[d] = true; out.push(d); }
             }
             return out;
+        }
+
+        // Combine a list of criteria into a BALANCED (bushy) binary tree instead of a linear
+        // left-nested chain. A linear chain adds one JSON nesting level per value, so pasting ~60+
+        // values pushes the request past the server's JSON reader depth (Newtonsoft MaxDepth = 64)
+        // and the whole List POST fails before the handler runs. A balanced tree keeps depth at
+        // ~log2(n) (e.g. 500 values -> ~9 levels), so hundreds/thousands of pasted values apply
+        // fine. OR/AND are associative, so the rows matched are identical either way.
+        private static combineBalanced(
+            crits: any[], combine: (a: any, b: any) => any[]): any[] {
+            if (!crits || !crits.length) return null;
+            let level = crits.slice();
+            while (level.length > 1) {
+                let next: any[] = [];
+                for (let i = 0; i < level.length; i += 2)
+                    next.push(i + 1 < level.length ? combine(level[i], level[i + 1]) : level[i]);
+                level = next;
+            }
+            return level[0];
         }
 
         // Turns text (StringEditor) quick filters into multi-value paste boxes that behave like the
@@ -167,16 +183,13 @@
 
                     // "Contains" match so typing part of a value works (e.g. "Director" matches
                     // "Finance Director", "IT Director"). Include => matches ANY (OR of like).
-                    // Exclude => matches NONE (AND of not-like).
-                    let combined: any[] = null;
-                    for (let v of vals) {
-                        let crit: any[] = exclude
-                            ? [Serenity.Criteria(field), 'not like', '%' + v + '%']
-                            : [Serenity.Criteria(field), 'like', '%' + v + '%'];
-                        combined = combined == null ? crit
-                            : (exclude ? Serenity.Criteria.and(combined, crit)
-                                       : Serenity.Criteria.or(combined, crit));
-                    }
+                    // Exclude => matches NONE (AND of not-like). Balanced tree so 500+ pasted
+                    // values stay well under the server's JSON depth limit.
+                    let crits = vals.map(v => exclude
+                        ? [Serenity.Criteria(field), 'not like', '%' + v + '%']
+                        : [Serenity.Criteria(field), 'like', '%' + v + '%']);
+                    let combined = GridBase.combineBalanced(crits,
+                        (a, b) => exclude ? Serenity.Criteria.and(a, b) : Serenity.Criteria.or(a, b));
                     h.request.Criteria = Serenity.Criteria.and(
                         h.request.Criteria,
                         Serenity.Criteria.paren(combined)
@@ -270,15 +283,11 @@
                     if (!vals.length) { h.active = false; return; }
 
                     let exclude = (h.widget as any).dvExclude && (h.widget as any).dvExclude();
-                    let combined: any[] = null;
-                    for (let v of vals) {
-                        let crit: any[] = exclude
-                            ? [Serenity.Criteria(field), '!=', v]
-                            : [Serenity.Criteria(field), '=', v];
-                        combined = combined == null ? crit
-                            : (exclude ? Serenity.Criteria.and(combined, crit)
-                                       : Serenity.Criteria.or(combined, crit));
-                    }
+                    let crits = vals.map(v => exclude
+                        ? [Serenity.Criteria(field), '!=', v]
+                        : [Serenity.Criteria(field), '=', v]);
+                    let combined = GridBase.combineBalanced(crits,
+                        (a, b) => exclude ? Serenity.Criteria.and(a, b) : Serenity.Criteria.or(a, b));
                     h.request.Criteria = Serenity.Criteria.and(
                         h.request.Criteria,
                         Serenity.Criteria.paren(combined)
@@ -337,15 +346,11 @@
                     if (!strings.length) { h.active = false; return; }
 
                     let exclude = (h.widget as any).dvExclude && (h.widget as any).dvExclude();
-                    let combined: any[] = null;
-                    for (let s of strings) {
-                        let crit: any[] = exclude
-                            ? [Serenity.Criteria('CampaignId'), '!=', s]
-                            : [Serenity.Criteria('CampaignId'), '=', s];
-                        combined = combined == null ? crit
-                            : (exclude ? Serenity.Criteria.and(combined, crit)
-                                       : Serenity.Criteria.or(combined, crit));
-                    }
+                    let crits = strings.map(s => exclude
+                        ? [Serenity.Criteria('CampaignId'), '!=', s]
+                        : [Serenity.Criteria('CampaignId'), '=', s]);
+                    let combined = GridBase.combineBalanced(crits,
+                        (a, b) => exclude ? Serenity.Criteria.and(a, b) : Serenity.Criteria.or(a, b));
                     h.request.Criteria = Serenity.Criteria.and(
                         h.request.Criteria,
                         Serenity.Criteria.paren(combined)
@@ -454,10 +459,7 @@
             for (let field in likeGroups) {
                 let group = likeGroups[field];
                 if (group.length > 1) {
-                    let orCrit: any[] = group[0];
-                    for (let i = 1; i < group.length; i++) {
-                        orCrit = Serenity.Criteria.or(orCrit, group[i]);
-                    }
+                    let orCrit = GridBase.combineBalanced(group, (a, b) => Serenity.Criteria.or(a, b));
                     resultParts.push(Serenity.Criteria.paren(orCrit));
                 } else {
                     resultParts.push(group[0]);
@@ -466,12 +468,7 @@
 
             if (resultParts.length === 0) return criteria;
 
-            let combined = resultParts[0];
-            for (let i = 1; i < resultParts.length; i++) {
-                combined = Serenity.Criteria.and(combined, resultParts[i]);
-            }
-
-            return combined;
+            return GridBase.combineBalanced(resultParts, (a, b) => Serenity.Criteria.and(a, b));
         }
 
         private flattenCriteria(criteria: any[], op: string): any[][] {
