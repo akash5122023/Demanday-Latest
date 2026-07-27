@@ -161,7 +161,11 @@ namespace AdvanceCRM.EmailVerification {
                 .text('Bulk Template')
                 .appendTo(bulkRow)
                 .on('click', () => {
-                    window.location.href = Q.resolveUrl('~/EmailVerification/DownloadBulkTemplate');
+                    AdvanceCRM.Common.TransferProgress.download({
+                        url: '~/EmailVerification/DownloadBulkTemplate',
+                        title: 'Downloading bulk template',
+                        fileName: 'BulkVerificationTemplate.xlsx'
+                    });
                 });
             $('<button type="button" class="ev-btn"></button>')
                 .text('Trace Email')
@@ -169,6 +173,17 @@ namespace AdvanceCRM.EmailVerification {
                 .on('click', () => this.trace());
 
             this.resultBox = $('<div class="ev-result"></div>').appendTo(el);
+            // The results file is fetched through the progress panel, so a big CSV shows how far
+            // along it is. Delegated here because the link is re-rendered with every result.
+            this.resultBox.on('click', '.ev-download', e => {
+                e.preventDefault();
+                AdvanceCRM.Common.TransferProgress.download({
+                    url: String($(e.currentTarget).attr('data-url')),
+                    title: 'Downloading verification results',
+                    preparingText: 'Building the results file on the server…',
+                    fileName: 'BulkVerificationResults.csv'
+                });
+            });
             this.gridBox = $('<div class="ev-grid-box"></div>').appendTo(el);
         }
 
@@ -582,17 +597,31 @@ namespace AdvanceCRM.EmailVerification {
                     var fd = new FormData();
                     fd.append('file', fileInput.files[0]);
                     this.showBulkInfo('Uploading “' + fileInput.files[0].name + '” …');
-                    fetch(Q.resolveUrl('~/EmailVerification/BulkVerify'), { method: 'POST', body: fd })
-                        .then(r => r.json())
-                        .then((res: BulkVerificationResult) => {
+                    // A bulk list can be a large file, so it goes up through the progress panel
+                    // and the user can watch the percentage instead of guessing.
+                    AdvanceCRM.Common.TransferProgress.upload({
+                        url: '~/EmailVerification/BulkVerify',
+                        formData: fd,
+                        title: 'Uploading email list',
+                        processingText: 'Uploaded. Preparing the list on the server…',
+                        onSuccess: text => {
+                            var res: BulkVerificationResult;
+                            try {
+                                res = JSON.parse(text);
+                            }
+                            catch (e) {
+                                this.showError('Bulk upload failed: unexpected response from the server.');
+                                return;
+                            }
                             if (!res || !res.Success || !res.FileId) {
                                 this.showError(res && res.Message ? res.Message : 'Bulk upload failed.');
                                 return;
                             }
                             this.showBulkInfo('File accepted. Verifying…');
                             this.pollBulk(res.FileId);
-                        })
-                        .catch(err => this.showError('Bulk verification failed: ' + err));
+                        },
+                        onError: msg => this.showError('Bulk verification failed: ' + msg)
+                    });
                 }
                 if (fileInput.parentNode) document.body.removeChild(fileInput);
             };
@@ -643,7 +672,8 @@ namespace AdvanceCRM.EmailVerification {
             this.resultBox.removeClass('ev-error')
                 .html('<div class="ev-result-title">Bulk verification complete</div>' +
                     '<div>Your results are ready.</div>' + counted +
-                    '<div style="margin-top:10px"><a class="ev-download" href="' + link + '">Download results (CSV)</a></div>')
+                    '<div style="margin-top:10px"><a class="ev-download" href="#" data-url="' +
+                    Q.htmlEncode(link) + '">Download results (CSV)</a></div>')
                 .show();
         }
 

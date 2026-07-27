@@ -103,21 +103,21 @@ namespace AdvanceCRM.Demanday {
                     if (fileInput.files && fileInput.files.length > 0) {
                         const formData = new FormData();
                         formData.append('file', fileInput.files[0]);
-                        fetch('/Services/Demanday/DemandayTeleMarketingEnquiry/ImportExcel', {
-                            method: 'POST',
-                            body: formData
-                        }).then(r => r.text().then(msg => {
-                            if (r.ok) return msg;
-                            alert('Backend error:\n' + msg);
-                            throw new Error(msg || 'Failed to import.');
-                        })).then(msg => {
-                            alert(msg || 'Import completed successfully.');
-                            if (typeof (this as any).refresh === 'function')
-                                (this as any).refresh();
-                            else
-                                window.location.reload();
-                        }).catch(err => {
-                            alert('Excel import failed: ' + err.message);
+                        // Sent through the progress panel so the upload percentage is visible while a
+                        // large sheet goes up, and the user knows to wait for the server to import it.
+                        AdvanceCRM.Common.TransferProgress.upload({
+                            url: '/Services/Demanday/DemandayTeleMarketingEnquiry/ImportExcel',
+                            formData: formData,
+                            title: 'Importing from Excel',
+                            processingText: 'Uploaded. Importing rows on the server…',
+                            onSuccess: msg => {
+                                alert(msg || 'Import completed successfully.');
+                                if (typeof (this as any).refresh === 'function')
+                                    (this as any).refresh();
+                                else
+                                    window.location.reload();
+                            },
+                            onError: msg => alert('Excel import failed: ' + msg)
                         });
                     }
                     fileInput.value = '';
@@ -136,10 +136,12 @@ namespace AdvanceCRM.Demanday {
                     {
                         text: 'Download Template',
                         click: () => {
-                            Q.postToService({
-                                service: 'Demanday/DemandayTeleMarketingEnquiry/DownloadTemplate',
+                            // Downloaded through the progress panel, so the user sees it arriving.
+                            AdvanceCRM.Common.TransferProgress.download({
+                                url: '~/Services/Demanday/DemandayTeleMarketingEnquiry/DownloadTemplate',
                                 request: {},
-                                target: '_blank'
+                                title: 'Downloading import template',
+                                fileName: 'DemandayTeleMarketingEnquiryTemplate.xlsx'
                             });
                         }
                     },

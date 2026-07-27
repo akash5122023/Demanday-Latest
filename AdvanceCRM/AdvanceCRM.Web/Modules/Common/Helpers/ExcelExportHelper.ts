@@ -48,7 +48,15 @@
                         request.IncludeColumns.push(columnKey);
                         (request as any).ExportColumns.push(columnKey);
                     }
-                    Q.postToService({ service: options.service, request: request, target: '_blank' });
+                    // Posted through the progress panel instead of Q.postToService, so the user sees
+                    // the export being built and the download percentage instead of a silent wait.
+                    TransferProgress.download({
+                        url: '~/Services/' + options.service,
+                        request: request,
+                        title: 'Exporting to Excel',
+                        preparingText: 'Building the Excel file on the server…',
+                        fileName: 'export.xlsx'
+                    });
                 },
                 separator: options.separator
             };

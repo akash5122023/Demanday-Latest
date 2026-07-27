@@ -253,8 +253,85 @@ namespace AdvanceCRM.Administration.Repositories
                 result.Remove("*");
                 result.Remove("?");
 
+                result.RemoveWhere(IsRetiredModule);
+
                 return result;
             });
+        }
+
+        // Modules that this deployment no longer runs. Their permission keys are still declared on
+        // the rows, pages and services they belong to — nothing becomes public by removing them
+        // here — they are simply not offered in the permission editors any more, so an admin does
+        // not have to scroll past forty groups that mean nothing to this install.
+        //
+        // Removing a module from this set puts its whole permission group back in the list.
+        private static readonly HashSet<string> retiredPermissionModules =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "AMC",
+            "BizMail",
+            "Bom",
+            "Cashbook",
+            "Challan",
+            "CMS",
+            "DMS",
+            "Enquiry",
+            "EnquiryProducts",
+            "ExpenseManagement",
+            "Facebook",
+            "GrnTwo",
+            "Indent",
+            "IndentProducts",
+            "IndiaMART",
+            "Instamojo",
+            "Inventory",
+            "Invoice",
+            "Inward",
+            "Itinerary",
+            "JustDial",
+            "KnowlarityDetails",
+            "KnowlarityIVR",
+            "Outward",
+            "Products",
+            "Proforma",
+            "Purchase",
+            "PurchaseOrder",
+            "PurchaseReturn",
+            "Quotation",
+            "QuotationProducts",
+            "RawTelecall",
+            "RazorPay",
+            "RejectionOutward",
+            "Rorder",
+            "Sales",
+            "SalesReturn",
+            "StockTransfer",
+            "Sulekha",
+            "SulekhaDetails",
+            "Tasks",
+            "Telecall",
+            "TeleCalling",
+            "Ticket",
+            "TicketWebDetails",
+            "TradeIndia",
+            "Visit",
+            "WatiContacts",
+            "WebsiteEnquiry",
+            "Woocommerce"
+        };
+
+        /// <summary>
+        /// True when a permission key belongs to a retired module. Keys are "Module:Something",
+        /// so only the part before the first colon decides it.
+        /// </summary>
+        private static bool IsRetiredModule(string permissionKey)
+        {
+            if (string.IsNullOrEmpty(permissionKey))
+                return false;
+
+            var colon = permissionKey.IndexOf(':');
+            var module = colon < 0 ? permissionKey : permissionKey.Substring(0, colon);
+            return retiredPermissionModules.Contains(module);
         }
 
         public static IDictionary<string, HashSet<string>> GetImplicitPermissions(IMemoryCache memoryCache,

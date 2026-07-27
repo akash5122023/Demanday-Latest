@@ -30,13 +30,18 @@ namespace AdvanceCRM.Masters {
                         if (fileInput.files && fileInput.files.length > 0) {
                             let fd = new FormData();
                             fd.append('file', fileInput.files[0]);
-                            fetch('/Services/' + this.getService() + '/ImportExcel', { method: 'POST', body: fd })
-                                .then(r => r.text().then(msg => {
-                                    if (!r.ok) { alert('Import failed:\n' + msg); return; }
+                            // Sent through the progress panel so the upload percentage is visible.
+                            AdvanceCRM.Common.TransferProgress.upload({
+                                url: '/Services/' + this.getService() + '/ImportExcel',
+                                formData: fd,
+                                title: 'Importing from Excel',
+                                processingText: 'Uploaded. Importing rows on the server…',
+                                onSuccess: msg => {
                                     alert(msg || 'Import completed.');
                                     (this as any).refresh();
-                                }))
-                                .catch(err => alert('Import failed: ' + err));
+                                },
+                                onError: msg => alert('Import failed:\n' + msg)
+                            });
                         }
                         document.body.removeChild(fileInput);
                     };

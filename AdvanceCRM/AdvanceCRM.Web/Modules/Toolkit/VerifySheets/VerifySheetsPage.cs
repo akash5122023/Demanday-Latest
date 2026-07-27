@@ -247,15 +247,31 @@ namespace AdvanceCRM.Toolkit.Pages
         }
 
         // Registers a Campaign ID that the sheet references but the Master Account does not have yet,
-        // and returns its new key so the imported rows can point at it.
-        private static int CreateCampaign(SqlConnection sqlConn, int masterAccountId, string campaignText)
+        // and returns its key so the imported rows can point at it. The account's existing campaigns
+        // are re-checked inside the statement rather than trusted from the map that was read at the
+        // start of the import: a second import running at the same time may have added the same
+        // Campaign ID since, and one account must never end up holding it twice.
+        private static int CreateCampaign(SqlConnection sqlConn, int masterAccountId, string campaignText,
+            out bool created)
         {
-            using var cmd = NewCommand(sqlConn,
-                "INSERT INTO [dbo].[DemandayCampaignId] ([CampaignId], [DemandayMasterAccountId]) " +
-                "VALUES (@cid, @acc); SELECT CAST(SCOPE_IDENTITY() AS INT);");
+            using var cmd = NewCommand(sqlConn, @"
+SET @created = 0;
+DECLARE @id INT = (SELECT TOP 1 [Id] FROM [dbo].[DemandayCampaignId] WITH (UPDLOCK, HOLDLOCK)
+                   WHERE [DemandayMasterAccountId] = @acc AND LTRIM(RTRIM([CampaignId])) = @cid);
+IF @id IS NULL
+BEGIN
+    INSERT INTO [dbo].[DemandayCampaignId] ([CampaignId], [DemandayMasterAccountId]) VALUES (@cid, @acc);
+    SET @id = CAST(SCOPE_IDENTITY() AS INT);
+    SET @created = 1;
+END
+SELECT @id;");
             cmd.Parameters.AddWithValue("@cid", campaignText);
             cmd.Parameters.AddWithValue("@acc", masterAccountId);
-            return Convert.ToInt32(cmd.ExecuteScalar());
+            var createdParam = cmd.Parameters.Add("@created", SqlDbType.Bit);
+            createdParam.Direction = ParameterDirection.Output;
+            var id = Convert.ToInt32(cmd.ExecuteScalar());
+            created = createdParam.Value != DBNull.Value && Convert.ToBoolean(createdParam.Value);
+            return id;
         }
 
         // Highest Sr No currently in the table. New rows are numbered above it, so a freshly
@@ -617,9 +633,12 @@ namespace AdvanceCRM.Toolkit.Pages
                             if (!campaignMap.TryGetValue(campText, out var cid))
                             {
                                 // Campaign ID is new for this Master Account — create it, then use it.
-                                cid = CreateCampaign(sqlConn, masterAccountId, campText);
+                                // It may have appeared since the map was read, in which case the
+                                // existing one comes back and nothing is counted as created.
+                                cid = CreateCampaign(sqlConn, masterAccountId, campText, out var madeNew);
                                 campaignMap[campText] = cid;
-                                campaignsCreated++;
+                                if (madeNew)
+                                    campaignsCreated++;
                             }
                             campVal = cid;
                             campaignsMatched++;

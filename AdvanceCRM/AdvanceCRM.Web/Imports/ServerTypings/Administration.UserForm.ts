@@ -32,13 +32,6 @@
         EndTime: Serenity.MaskedEditor;
         Location: Serenity.StringEditor;
         Coordinates: Serenity.StringEditor;
-        Enquiry: BooleanSwitchEditor;
-        Quotation: BooleanSwitchEditor;
-        Tasks: BooleanSwitchEditor;
-        Contacts: BooleanSwitchEditor;
-        Purchase: BooleanSwitchEditor;
-        Sales: BooleanSwitchEditor;
-        Cms: BooleanSwitchEditor;
     }
 
     export class UserForm extends Serenity.PrefixedContext {
@@ -95,14 +88,7 @@
                     'StartTime', w3,
                     'EndTime', w3,
                     'Location', w1,
-                    'Coordinates', w1,
-                    'Enquiry', w7,
-                    'Quotation', w7,
-                    'Tasks', w7,
-                    'Contacts', w7,
-                    'Purchase', w7,
-                    'Sales', w7,
-                    'Cms', w7
+                    'Coordinates', w1
                 ]);
             }
         }

@@ -73,23 +73,10 @@
         public String Location { get; set; }
         public String Coordinates { get; set; }
 
-        [Tab("Additional Permission")]
-        [Category("View All Records")]
-        [BooleanSwitchEditor]
-        public Boolean Enquiry { get; set; }
-        [BooleanSwitchEditor]
-        public Boolean Quotation { get; set; }
-        [BooleanSwitchEditor]
-        public Boolean Tasks { get; set; }
-        [BooleanSwitchEditor]
-        public Boolean Contacts { get; set; }
-        [BooleanSwitchEditor]
-        public Boolean Purchase { get; set; }
-        [BooleanSwitchEditor]
-        public Boolean Sales { get; set; }
-        [BooleanSwitchEditor]
-        public Boolean Cms { get; set; }
-
+        // The "Additional Permission" tab ("View All Records" switches for Enquiry, Quotation,
+        // Tasks, Contacts, Purchase, Sales and CMS) was dropped from this form: those modules are
+        // no longer part of the deployment. The columns stay on UserRow, so existing values are
+        // untouched and the tab can be restored by putting these fields back.
 
         //[OneWay]
         //public string Source { get; set; }

@@ -13,6 +13,12 @@ namespace AdvanceCRM.Masters
     [ReadPermission("Masters:Read")]
     [ModifyPermission("Masters:Modify")]
     [LookupScript("Masters.DemandayCampaignId", Permission = "?")]
+    // A Campaign ID is only meaningful inside its Master Account — two accounts may legitimately
+    // run a campaign with the same number, but one account must never hold it twice, or every
+    // campaign-wise sheet (and the lookups above them) would show two identical entries.
+    // Backed by UX_DemandayCampaignId_Account_CampaignId so an import cannot slip past this either.
+    [UniqueConstraint(nameof(DemandayMasterAccountId), nameof(CampaignId),
+        ErrorMessage = "This Campaign ID already exists under the selected Master Account!")]
     public sealed class DemandayCampaignIdRow : Row<DemandayCampaignIdRow.RowFields>, IIdRow, INameRow
     {
         [DisplayName("Id"), Identity, IdProperty]

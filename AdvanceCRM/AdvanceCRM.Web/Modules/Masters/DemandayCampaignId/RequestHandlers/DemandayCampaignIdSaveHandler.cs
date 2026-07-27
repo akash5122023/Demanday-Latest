@@ -17,5 +17,15 @@ namespace AdvanceCRM.Masters
              : base(context)
         {
         }
+
+        // " 79580" and "79580" are the same campaign to a user, so the padding is stripped before
+        // the row's UniqueConstraint compares it — otherwise the duplicate check would let it in.
+        protected override void ValidateRequest()
+        {
+            if (Row.CampaignId != null)
+                Row.CampaignId = Row.CampaignId.Trim();
+
+            base.ValidateRequest();
+        }
     }
 }

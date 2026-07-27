@@ -294,7 +294,14 @@ namespace AdvanceCRM.Toolkit {
                         Q.notifyError('Please select a Campaign first.');
                         return;
                     }
-                    window.location.href = Q.resolveUrl('~/Toolkit/VerifySheets/ExportExcel?campaignId=' + campaignId);
+                    // Fetched through the progress panel rather than a plain navigation, so a big
+                    // export shows how far along the download is instead of looking frozen.
+                    AdvanceCRM.Common.TransferProgress.download({
+                        url: '~/Toolkit/VerifySheets/ExportExcel?campaignId=' + campaignId,
+                        title: 'Exporting Verify Sheets',
+                        preparingText: 'Building the sheets on the server…',
+                        fileName: 'VerifySheets.zip'
+                    });
                 });
 
             // Collapse / expand every section at once — the fast way past a tall sheet.
@@ -547,16 +554,23 @@ namespace AdvanceCRM.Toolkit {
                     fd.append('campaignId', String(campaignId != null ? campaignId : 0));
                     fd.append('masterAccountId', String(accountId != null ? accountId : 0));
                     fd.append('sheet', sheetKey);
-                    fetch(Q.resolveUrl('~/Toolkit/VerifySheets/ImportExcel'), { method: 'POST', body: fd })
-                        .then(r => r.text().then(msg => {
+                    // Sent through the progress panel so the user can watch the upload percentage
+                    // of a large sheet, then see that the server is still importing it.
+                    AdvanceCRM.Common.TransferProgress.upload({
+                        url: '~/Toolkit/VerifySheets/ImportExcel',
+                        formData: fd,
+                        title: 'Importing ' + (sheetDef ? sheetDef.title : sheetKey),
+                        processingText: 'Uploaded. Importing rows on the server…',
+                        onSuccess: msg => {
                             alert(msg || 'Import completed.');
                             // An import can create new Campaign IDs; the lookup is cached, so force a
                             // fresh fetch and the Campaign dropdowns pick them up without a page reload.
                             Q.reloadLookupAsync('Masters.DemandayCampaignId');
                             var sheet = this.sheetByKey(sheetKey);
                             if (sheet) this.loadSheet(sheet);
-                        }))
-                        .catch(err => alert('Upload failed: ' + err));
+                        },
+                        onError: msg => alert('Upload failed: ' + msg)
+                    });
                 }
                 if (fileInput.parentNode) document.body.removeChild(fileInput);
             };
