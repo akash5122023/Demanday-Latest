@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.Attendance.Forms
 {
     using Serenity;
@@ -29,8 +29,15 @@ namespace AdvanceCRM.Attendance.Forms
         [DateTimeEditor(IntervalMinutes = 1)]
         public DateTime PunchOut { get; set; }
         [OneThirdWidth]
-       
         public Double Distance { get; set; }
+        [OneThirdWidth]
+        [DateTimeEditor(IntervalMinutes = 1)]
+        public DateTime BreakStart { get; set; }
+        [OneThirdWidth]
+        [DateTimeEditor(IntervalMinutes = 1)]
+        public DateTime BreakEnd { get; set; }
+        [OneThirdWidth]
+        public Int32 BreakMinutes { get; set; }
 
         //public Int32 ApprovedBy { get; set; }
     }

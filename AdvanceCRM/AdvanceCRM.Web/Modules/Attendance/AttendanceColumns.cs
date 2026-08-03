@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.Attendance.Columns
 {
     using Serenity;
@@ -35,5 +35,8 @@ namespace AdvanceCRM.Attendance.Columns
         public TimeZone PunchOut { get; set; }
         
         public Double Distance { get; set; }
+        public DateTime BreakStart { get; set; }
+        public DateTime BreakEnd { get; set; }
+        public Int32 BreakMinutes { get; set; }
     }
 }

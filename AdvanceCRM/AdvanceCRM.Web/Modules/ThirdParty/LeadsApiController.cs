@@ -7,7 +7,6 @@ using System.Globalization;
 
 using Microsoft.Data.SqlClient;
 
-
 namespace AdvanceCRM.Modules.ThirdParty
 {
     [Route("api/Leads")]
@@ -28,11 +27,9 @@ namespace AdvanceCRM.Modules.ThirdParty
 
             using (var connection = _connections.NewFor<AttendanceRow>())
             {
-
-                const string query = @"SELECT TOP 1 PunchIn, PunchOut FROM Attendance
+                const string query = @"SELECT TOP 1 PunchIn, PunchOut, BreakStart, BreakEnd FROM Attendance
                          WHERE Name = @UserId AND CAST(DateNTime AS DATE) = @Date
                          ORDER BY DateNTime DESC";
-
 
                 connection.Open();
 
@@ -47,8 +44,20 @@ namespace AdvanceCRM.Modules.ThirdParty
                         if (reader.Read())
                         {
                             var punchIn = reader["PunchIn"] as DateTime?;
-                            if (punchIn != null)
-                                return "PunchedIn";
+                            var punchOut = reader["PunchOut"] as DateTime?;
+                            var breakStart = reader["BreakStart"] as DateTime?;
+                            var breakEnd = reader["BreakEnd"] as DateTime?;
+
+                            if (punchIn == null)
+                                return "NoPunch";
+
+                            if (punchOut != null && punchOut != punchIn)
+                                return "PunchedOut";
+
+                            if (breakStart != null && (breakEnd == null || breakStart > breakEnd))
+                                return "OnBreak";
+
+                            return "PunchedIn";
                         }
                     }
                 }
@@ -104,6 +113,123 @@ VALUES (@Name, @UserId, @Date, @Location, @Coordinates, @Punch, @Punch, 3)";
             }
         }
 
+        [HttpPost("StartBreak")]
+        public string StartBreak(int UserId)
+        {
+            try
+            {
+                if (UserId <= 0)
+                    return "Unable to determine the current user.";
+
+                var now = DateTime.Now;
+
+                using var connection = _connections.NewFor<AttendanceRow>();
+                connection.Open();
+
+                using (var checkCmd = connection.CreateCommand())
+                {
+                    checkCmd.CommandText = @"SELECT TOP 1 PunchIn, PunchOut, BreakStart, BreakEnd FROM Attendance
+                        WHERE Name = @UserId AND CAST(DateNTime AS DATE) = CAST(@Date AS DATE)
+                        ORDER BY DateNTime DESC";
+                    checkCmd.Parameters.Add(new SqlParameter("@UserId", UserId));
+                    checkCmd.Parameters.Add(new SqlParameter("@Date", now));
+
+                    using var reader = checkCmd.ExecuteReader();
+                    if (!reader.Read())
+                        return "You must punch in first before taking a break.";
+
+                    var punchIn = reader["PunchIn"] as DateTime?;
+                    var punchOut = reader["PunchOut"] as DateTime?;
+                    var breakStart = reader["BreakStart"] as DateTime?;
+                    var breakEnd = reader["BreakEnd"] as DateTime?;
+
+                    if (punchIn == null)
+                        return "You must punch in first before taking a break.";
+
+                    if (punchOut != null && punchOut != punchIn)
+                        return "You have already punched out for today.";
+
+                    if (breakStart != null && (breakEnd == null || breakStart > breakEnd))
+                        return "You are already on break.";
+                }
+
+                using (var updateCmd = connection.CreateCommand())
+                {
+                    updateCmd.CommandText = @"UPDATE Attendance SET BreakStart = @BreakStart
+                        WHERE Name = @UserId AND CAST(DateNTime AS DATE) = CAST(@Date AS DATE)";
+                    updateCmd.Parameters.Add(new SqlParameter("@BreakStart", SqlDbType.DateTime) { Value = now });
+                    updateCmd.Parameters.Add(new SqlParameter("@UserId", UserId));
+                    updateCmd.Parameters.Add(new SqlParameter("@Date", now));
+                    updateCmd.ExecuteNonQuery();
+                }
+
+                return "Break started at " + now.ToString("hh:mm tt", CultureInfo.CurrentUICulture) + ".";
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+        }
+
+        [HttpPost("EndBreak")]
+        public string EndBreak(int UserId)
+        {
+            try
+            {
+                if (UserId <= 0)
+                    return "Unable to determine the current user.";
+
+                var now = DateTime.Now;
+
+                using var connection = _connections.NewFor<AttendanceRow>();
+                connection.Open();
+
+                DateTime? breakStart = null;
+                int currentBreakMinutes = 0;
+
+                using (var checkCmd = connection.CreateCommand())
+                {
+                    checkCmd.CommandText = @"SELECT TOP 1 BreakStart, BreakEnd, BreakMinutes FROM Attendance
+                        WHERE Name = @UserId AND CAST(DateNTime AS DATE) = CAST(@Date AS DATE)
+                        ORDER BY DateNTime DESC";
+                    checkCmd.Parameters.Add(new SqlParameter("@UserId", UserId));
+                    checkCmd.Parameters.Add(new SqlParameter("@Date", now));
+
+                    using var reader = checkCmd.ExecuteReader();
+                    if (!reader.Read())
+                        return "Attendance record not found for today.";
+
+                    breakStart = reader["BreakStart"] as DateTime?;
+                    var breakEnd = reader["BreakEnd"] as DateTime?;
+                    if (reader["BreakMinutes"] != DBNull.Value && reader["BreakMinutes"] != null)
+                        currentBreakMinutes = Convert.ToInt32(reader["BreakMinutes"]);
+
+                    if (breakStart == null || (breakEnd != null && breakStart <= breakEnd))
+                        return "You are not currently on break.";
+                }
+
+                var elapsedMinutes = (int)Math.Max(1, Math.Round((now - breakStart.Value).TotalMinutes));
+                var newTotalBreakMinutes = currentBreakMinutes + elapsedMinutes;
+
+                using (var updateCmd = connection.CreateCommand())
+                {
+                    updateCmd.CommandText = @"UPDATE Attendance SET BreakEnd = @BreakEnd, BreakMinutes = @BreakMinutes
+                        WHERE Name = @UserId AND CAST(DateNTime AS DATE) = CAST(@Date AS DATE)";
+                    updateCmd.Parameters.Add(new SqlParameter("@BreakEnd", SqlDbType.DateTime) { Value = now });
+                    updateCmd.Parameters.Add(new SqlParameter("@BreakMinutes", newTotalBreakMinutes));
+                    updateCmd.Parameters.Add(new SqlParameter("@UserId", UserId));
+                    updateCmd.Parameters.Add(new SqlParameter("@Date", now));
+                    updateCmd.ExecuteNonQuery();
+                }
+
+                return "Break ended at " + now.ToString("hh:mm tt", CultureInfo.CurrentUICulture) + " (" + elapsedMinutes + " mins). Total break today: " + newTotalBreakMinutes + " mins.";
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+        }
+
         [HttpPost("PunchOut")]
         public string PunchOut(int UserId, string Coordinates = null)
         {
@@ -118,16 +244,38 @@ VALUES (@Name, @UserId, @Date, @Location, @Coordinates, @Punch, @Punch, 3)";
                 connection.Open();
 
                 DateTime punchInTime;
+                DateTime? breakStart = null;
+                DateTime? breakEnd = null;
+                int currentBreakMinutes = 0;
+
                 using (var cmd = connection.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT TOP 1 PunchIn FROM Attendance
+                    cmd.CommandText = @"SELECT TOP 1 PunchIn, BreakStart, BreakEnd, BreakMinutes FROM Attendance
                         WHERE Name = @UserId AND CAST(DateNTime AS DATE) = CAST(@Date AS DATE)
                         ORDER BY DateNTime DESC";
                     cmd.Parameters.Add(new SqlParameter("@UserId", UserId));
                     cmd.Parameters.Add(new SqlParameter("@Date", now));
-                    var obj = cmd.ExecuteScalar();
+
+                    using var reader = cmd.ExecuteReader();
+                    if (!reader.Read())
+                        return "Punch-in record not found for today.";
+
+                    var obj = reader["PunchIn"];
                     if (obj == null || obj == DBNull.Value || !DateTime.TryParse(obj.ToString(), out punchInTime))
                         return "Punch-in record not found for today.";
+
+                    breakStart = reader["BreakStart"] as DateTime?;
+                    breakEnd = reader["BreakEnd"] as DateTime?;
+                    if (reader["BreakMinutes"] != DBNull.Value && reader["BreakMinutes"] != null)
+                        currentBreakMinutes = Convert.ToInt32(reader["BreakMinutes"]);
+                }
+
+                // If currently on break when punching out, finalize the active break
+                if (breakStart != null && (breakEnd == null || breakStart > breakEnd))
+                {
+                    var elapsedMinutes = (int)Math.Max(1, Math.Round((now - breakStart.Value).TotalMinutes));
+                    currentBreakMinutes += elapsedMinutes;
+                    breakEnd = now;
                 }
 
                 var hoursDiff = (now - punchInTime).TotalHours;
@@ -135,10 +283,12 @@ VALUES (@Name, @UserId, @Date, @Location, @Coordinates, @Punch, @Punch, 3)";
 
                 using (var updateCmd = connection.CreateCommand())
                 {
-                    updateCmd.CommandText = @"UPDATE Attendance SET PunchOut = @PunchOut, Type = @Type
+                    updateCmd.CommandText = @"UPDATE Attendance SET PunchOut = @PunchOut, Type = @Type, BreakEnd = @BreakEnd, BreakMinutes = @BreakMinutes
                         WHERE Name = @UserId AND CAST(DateNTime AS DATE) = CAST(@Date AS DATE)";
                     updateCmd.Parameters.Add(new SqlParameter("@PunchOut", SqlDbType.DateTime) { Value = now });
                     updateCmd.Parameters.Add(new SqlParameter("@Type", type));
+                    updateCmd.Parameters.Add(new SqlParameter("@BreakEnd", (object)breakEnd ?? DBNull.Value));
+                    updateCmd.Parameters.Add(new SqlParameter("@BreakMinutes", currentBreakMinutes));
                     updateCmd.Parameters.Add(new SqlParameter("@UserId", UserId));
                     updateCmd.Parameters.Add(new SqlParameter("@Date", now));
                     updateCmd.ExecuteNonQuery();

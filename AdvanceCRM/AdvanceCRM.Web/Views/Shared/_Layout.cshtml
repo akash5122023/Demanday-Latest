@@ -1,4 +1,4 @@
-﻿@using System.Configuration;
+@using System.Configuration;
 @using System.Globalization;
 @using System.Xml;
 @using Microsoft.AspNetCore.Html;
@@ -215,11 +215,17 @@
 
         </li>*@
 
-                            <li class="d-flex justify-content-center align-items-center flex-column my-3" style="padding-top: 8px; padding-right: 8px;">
-                                <button class="btn btn-success mb-2 px-4 py-2" id="punchInButton" data-toggle="tooltip" data-placement="bottom" title="Punch In">
+                            <li class="d-flex justify-content-center align-items-center flex-row my-3" style="padding-top: 8px; padding-right: 8px; gap: 5px;">
+                                <button class="btn btn-success px-3 py-2" id="punchInButton" data-toggle="tooltip" data-placement="bottom" title="Punch In">
                                     <i class="fa fa-clock-o"></i> Punch In
                                 </button>
-                                <button class="btn btn-danger px-4 py-2" id="punchOutButton" data-toggle="tooltip" data-placement="bottom" title="Punch Out" style="display: none;">
+                                <button class="btn btn-warning px-3 py-2" id="startBreakButton" data-toggle="tooltip" data-placement="bottom" title="Start Break" style="display: none; color: #fff;">
+                                    <i class="fa fa-coffee"></i> Start Break
+                                </button>
+                                <button class="btn btn-info px-3 py-2" id="endBreakButton" data-toggle="tooltip" data-placement="bottom" title="End Break" style="display: none;">
+                                    <i class="fa fa-play"></i> End Break
+                                </button>
+                                <button class="btn btn-danger px-3 py-2" id="punchOutButton" data-toggle="tooltip" data-placement="bottom" title="Punch Out" style="display: none;">
                                     <i class="fa fa-clock-o"></i> Punch Out
                                 </button>
                             </li>
@@ -455,6 +461,8 @@
             document.addEventListener("DOMContentLoaded", function () {
                 var punchInButton = document.getElementById("punchInButton");
                 var punchOutButton = document.getElementById("punchOutButton");
+                var startBreakButton = document.getElementById("startBreakButton");
+                var endBreakButton = document.getElementById("endBreakButton");
                 var userId = @userIdValue;
 
                 if (!punchInButton || !punchOutButton || !userId) {
@@ -463,10 +471,23 @@
 
                 function setPunchButtonState(status) {
                     var normalized = (status || "").trim();
-                    var isPunchedIn = normalized === "PunchedIn";
 
-                    punchInButton.style.display = isPunchedIn ? "none" : "inline-block";
-                    punchOutButton.style.display = isPunchedIn ? "inline-block" : "none";
+                    punchInButton.style.display = "none";
+                    punchOutButton.style.display = "none";
+                    if (startBreakButton) startBreakButton.style.display = "none";
+                    if (endBreakButton) endBreakButton.style.display = "none";
+
+                    if (normalized === "NoPunch" || normalized === "PunchedOut") {
+                        punchInButton.style.display = "inline-block";
+                    } else if (normalized === "PunchedIn") {
+                        if (startBreakButton) startBreakButton.style.display = "inline-block";
+                        punchOutButton.style.display = "inline-block";
+                    } else if (normalized === "OnBreak") {
+                        if (endBreakButton) endBreakButton.style.display = "inline-block";
+                        punchOutButton.style.display = "inline-block";
+                    } else {
+                        punchInButton.style.display = "inline-block";
+                    }
                 }
 
                 function setButtonBusy(button, isBusy) {
@@ -531,6 +552,8 @@
                         complete: function () {
                             setButtonBusy(punchInButton, false);
                             setButtonBusy(punchOutButton, false);
+                            if (startBreakButton) setButtonBusy(startBreakButton, false);
+                            if (endBreakButton) setButtonBusy(endBreakButton, false);
                         }
                     });
                 }
@@ -566,6 +589,26 @@
                         maximumAge: 0
                     });
                 });
+
+                if (startBreakButton) {
+                    startBreakButton.addEventListener("click", function () {
+                        if (startBreakButton.disabled) {
+                            return;
+                        }
+                        var apiUrl = `/api/Leads/StartBreak?UserId=${userId}`;
+                        postPunchRequest(apiUrl, "OnBreak", startBreakButton, "Unable to start break right now.");
+                    });
+                }
+
+                if (endBreakButton) {
+                    endBreakButton.addEventListener("click", function () {
+                        if (endBreakButton.disabled) {
+                            return;
+                        }
+                        var apiUrl = `/api/Leads/EndBreak?UserId=${userId}`;
+                        postPunchRequest(apiUrl, "PunchedIn", endBreakButton, "Unable to end break right now.");
+                    });
+                }
 
                 window.CheckPunchStatus = function () {
                     fetch(`/api/Leads/CheckPunchStatus?UserId=${userId}`, {

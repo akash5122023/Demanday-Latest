@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.Attendance
 {
     using Serenity;
@@ -92,6 +92,27 @@ namespace AdvanceCRM.Attendance
         {
             get { return Fields.Distance[this]; }
             set { Fields.Distance[this] = value; }
+        }
+
+        [DisplayName("Break Start"), DateTimeEditor(IntervalMinutes = 1)]
+        public DateTime? BreakStart
+        {
+            get { return Fields.BreakStart[this]; }
+            set { Fields.BreakStart[this] = value; }
+        }
+
+        [DisplayName("Break End"), DateTimeEditor(IntervalMinutes = 1)]
+        public DateTime? BreakEnd
+        {
+            get { return Fields.BreakEnd[this]; }
+            set { Fields.BreakEnd[this] = value; }
+        }
+
+        [DisplayName("Break Minutes"), DefaultValue(0)]
+        public Int32? BreakMinutes
+        {
+            get { return Fields.BreakMinutes[this]; }
+            set { Fields.BreakMinutes[this] = value; }
         }
 
 
@@ -609,6 +630,9 @@ namespace AdvanceCRM.Attendance
             public DateTimeField PunchIn;
             public DateTimeField PunchOut;
             public DoubleField Distance;
+            public DateTimeField BreakStart;
+            public DateTimeField BreakEnd;
+            public Int32Field BreakMinutes;
 
             public StringField UserId;
 

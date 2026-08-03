@@ -8,6 +8,9 @@
         PunchIn: Serenity.DateTimeEditor;
         PunchOut: Serenity.DateTimeEditor;
         Distance: Serenity.DecimalEditor;
+        BreakStart: Serenity.DateTimeEditor;
+        BreakEnd: Serenity.DateTimeEditor;
+        BreakMinutes: Serenity.IntegerEditor;
     }
 
     export class AttendanceForm extends Serenity.PrefixedContext {
@@ -28,6 +31,7 @@
                 var w4 = s.TextAreaEditor;
                 var w5 = s.DateTimeEditor;
                 var w6 = s.DecimalEditor;
+                var w7 = s.IntegerEditor;
 
                 Q.initFormType(AttendanceForm, [
                     'Name', w0,
@@ -37,7 +41,10 @@
                     'Location', w4,
                     'PunchIn', w5,
                     'PunchOut', w5,
-                    'Distance', w6
+                    'Distance', w6,
+                    'BreakStart', w5,
+                    'BreakEnd', w5,
+                    'BreakMinutes', w7
                 ]);
             }
         }

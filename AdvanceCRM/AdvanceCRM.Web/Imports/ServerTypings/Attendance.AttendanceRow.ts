@@ -10,6 +10,9 @@
         PunchIn?: string;
         PunchOut?: string;
         Distance?: number;
+        BreakStart?: string;
+        BreakEnd?: string;
+        BreakMinutes?: number;
         UserId?: string;
         NameUsername?: string;
         NameDisplayName?: string;
@@ -103,6 +106,9 @@
             PunchIn = "PunchIn",
             PunchOut = "PunchOut",
             Distance = "Distance",
+            BreakStart = "BreakStart",
+            BreakEnd = "BreakEnd",
+            BreakMinutes = "BreakMinutes",
             UserId = "UserId",
             NameUsername = "NameUsername",
             NameDisplayName = "NameDisplayName",
