@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Web.Modules.Common.AppServices;
+using AdvanceCRM.Web.Modules.Common.AppServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
@@ -85,6 +85,25 @@ namespace AdvanceCRM.Demanday.Endpoints
             {
                 if (file == null || !file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
                     return Content("Please upload a valid .xlsx file.", "text/plain");
+
+                // Build a lookup of DisplayName / Username → display name string (same pattern as TALList).
+                // DemandayVerification.AgentName stores a plain text name, not a UserId FK.
+                // We validate that the name in the sheet belongs to a real system user, and store
+                // the display name (or username as fallback) so the grid shows a consistent value.
+                var userDisplayLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var u in uow.Connection.List<AdvanceCRM.Administration.UserRow>())
+                {
+                    var displayName = !string.IsNullOrWhiteSpace(u.DisplayName) ? u.DisplayName.Trim() : null;
+                    var username    = !string.IsNullOrWhiteSpace(u.Username)    ? u.Username.Trim()    : null;
+                    // Store resolved display name under both keys so either can be typed in the sheet.
+                    var resolvedName = displayName ?? username;
+                    if (resolvedName == null) continue;
+                    if (displayName != null && !userDisplayLookup.ContainsKey(displayName))
+                        userDisplayLookup[displayName] = resolvedName;
+                    if (username != null && !userDisplayLookup.ContainsKey(username))
+                        userDisplayLookup[username] = resolvedName;
+                }
+
                 int imported = 0, skipped = 0, failed = 0;
                 var errors = new List<string>();
                 using (var package = new ExcelPackage(file.OpenReadStream()))
@@ -96,11 +115,25 @@ namespace AdvanceCRM.Demanday.Endpoints
                     {
                         try
                         {
+                            // Resolve Agent Name: sheet may carry a DisplayName or Username.
+                            // Reject the row if the value is present but does not match any user.
+                            var agentNameRaw = ExcelImportHelper.GetText(ws, row, map, "AgentName", "Agent Name");
+                            string resolvedAgentName = null;
+                            if (!string.IsNullOrWhiteSpace(agentNameRaw))
+                            {
+                                if (!userDisplayLookup.TryGetValue(agentNameRaw.Trim(), out resolvedAgentName))
+                                {
+                                    failed++;
+                                    errors.Add($"Row {row}: Agent Name '{agentNameRaw}' not found in system users.");
+                                    continue;
+                                }
+                            }
+
                             var demandayverification = new DemandayVerificationRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
                                 SrNo = ExcelImportHelper.GetInt(ws, row, map, "SrNo", "Sr No"),
-                                AgentName = ExcelImportHelper.GetText(ws, row, map, "AgentName", "Agent Name"),
+                                AgentName = resolvedAgentName,
                                 CdqaComments = ExcelImportHelper.GetText(ws, row, map, "CdqaComments", "Cdqa Comments", "CDQA Comments"),
                                 CampaignId = ExcelImportHelper.GetInt(ws, row, map, "CampaignId", "Campaign Id"),
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),

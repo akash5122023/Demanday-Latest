@@ -1,4 +1,4 @@
-﻿using AdvanceCRM.Settings;
+using AdvanceCRM.Settings;
 using AdvanceCRM.ThirdParty;
 using AdvanceCRM.Attendance;
 using AdvanceCRM.Contacts;
@@ -539,11 +539,11 @@ namespace AdvanceCRM.Modules.ThirdParty
 
             using (var connection = _connections.NewFor<AttendanceRow>())
             {
-                string query = @"SELECT TOP 1 PunchIn, PunchOut FROM Attendance 
+                string query = @"SELECT TOP 1 PunchIn, PunchOut, BreakStart, BreakEnd FROM Attendance 
                          WHERE Name = @UserId AND CAST(DateNTime AS DATE) = @Date 
                          ORDER BY DateNTime DESC";
 
-                connection.Open(); // ✅ Ensure the connection is open before executing commands
+                connection.Open();
 
                 using (var command = connection.CreateCommand())
                 {
@@ -557,19 +557,25 @@ namespace AdvanceCRM.Modules.ThirdParty
                         {
                             var punchIn = reader["PunchIn"] as DateTime?;
                             var punchOut = reader["PunchOut"] as DateTime?;
+                            var breakStart = reader["BreakStart"] as DateTime?;
+                            var breakEnd = reader["BreakEnd"] as DateTime?;
 
-                            if (punchIn != null)
-                                return "PunchedIn";  // User punched in but not out
+                            if (punchIn == null)
+                                return "NoPunch";
 
-                            //if (punchIn != null && punchOut != null && punchOut != punchIn)
-                            //    return "PunchedOut";  // User punched in and out                            //if (punchIn != null && punchOut != null && punchOut != punchIn)
-                            //    return "PunchedOut";  // User punched in and out
+                            if (punchOut != null && punchOut != punchIn)
+                                return "PunchedOut";
+
+                            if (breakStart != null && (breakEnd == null || breakStart > breakEnd))
+                                return "OnBreak";
+
+                            return "PunchedIn";
                         }
                     }
                 }
             }
-            return "NoPunch";  // No record found
-        }
+            return "NoPunch";
+        }
 
         [HttpPost]
         public string PunchIn(int UserId, String Location, String Coordinates)

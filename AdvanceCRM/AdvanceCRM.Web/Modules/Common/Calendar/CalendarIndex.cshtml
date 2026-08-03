@@ -545,14 +545,14 @@
         <div class="live-banner-stats">
             <div class="banner-stat-item">
                 <span class="lbl">Check In</span>
-                <span class="val" id="bannerCheckIn">09:12</span>
-                <span class="sub">AM • @DateTime.Now.ToString("ddd, MMM d")</span>
+                <span class="val" id="bannerCheckIn">@(Model.TodayCheckIn == "-:-" ? "-:-" : Model.TodayCheckIn)</span>
+                <span class="sub" id="bannerCheckInSub">@(Model.TodayCheckIn == "-:-" ? "Not checked in" : "AM • " + DateTime.Now.ToString("ddd, MMM d"))</span>
             </div>
             <div class="banner-divider"></div>
             <div class="banner-stat-item">
                 <span class="lbl">Check Out</span>
-                <span class="val" id="bannerCheckOut">-:-</span>
-                <span class="sub">Not yet</span>
+                <span class="val" id="bannerCheckOut">@(string.IsNullOrEmpty(Model.TodayCheckOut) || Model.TodayCheckOut == "Not yet" ? "-:-" : Model.TodayCheckOut)</span>
+                <span class="sub" id="bannerCheckOutSub">@(string.IsNullOrEmpty(Model.TodayCheckOut) || Model.TodayCheckOut == "Not yet" ? "Not yet" : "Today")</span>
             </div>
             <div class="banner-divider"></div>
             <div class="banner-stat-item">
@@ -766,24 +766,7 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="sidebar-card">
-                <h4 class="sidebar-card-title">Quick Actions</h4>
-                <a href="javascript:;" onclick="Q.notifyInfo('Apply for leave dialog opened.');" class="btn-quick-action btn-action-leave">
-                    <div>
-                        <div style="font-weight: 700;">Apply for Leave</div>
-                        <div style="font-size: 11px;">Plan time off</div>
-                    </div>
-                    <i class="fa fa-external-link"></i>
-                </a>
-                <a href="javascript:;" onclick="Q.notifyInfo('Regularize attendance dialog opened.');" class="btn-quick-action btn-action-reg">
-                    <div>
-                        <div style="font-weight: 700;">Regularize Attendance</div>
-                        <div style="font-size: 11px;">Fix missing punches</div>
-                    </div>
-                    <i class="fa fa-external-link"></i>
-                </a>
-            </div>
+
 
             <!-- Needs Attention -->
             <div class="sidebar-card">
@@ -889,7 +872,7 @@
             if (bannerEndBreakBtn) bannerEndBreakBtn.style.display = "none";
             if (bannerPunchOutBtn) bannerPunchOutBtn.style.display = "none";
 
-            if (normalized === "NoPunch" || normalized === "PunchedOut") {
+            if (normalized === "NoPunch") {
                 if (bannerPunchInBtn) bannerPunchInBtn.style.display = "inline-block";
             } else if (normalized === "PunchedIn") {
                 if (bannerStartBreakBtn) bannerStartBreakBtn.style.display = "inline-block";
@@ -897,6 +880,8 @@
             } else if (normalized === "OnBreak") {
                 if (bannerEndBreakBtn) bannerEndBreakBtn.style.display = "inline-block";
                 if (bannerPunchOutBtn) bannerPunchOutBtn.style.display = "inline-block";
+            } else if (normalized === "PunchedOut") {
+                // User has already punched out for today. Hide/remove all action buttons from the banner.
             } else {
                 if (bannerPunchInBtn) bannerPunchInBtn.style.display = "inline-block";
             }
@@ -933,6 +918,29 @@
         window.addEventListener("attendance:punch-changed", function (e) {
             if (e.detail && e.detail.status) {
                 updateCalendarBannerButtons(e.detail.status);
+            }
+            // After any punch action (Check In, Check Out, Break), re-fetch today's
+            // attendance stats and update the banner in realtime without a page reload.
+            if (userId > 0) {
+                fetch(`/Services/Attendance/Attendance/GetTodayStatus?userId=${userId}`)
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(data) {
+                        if (!data) return;
+                        var ciEl   = document.getElementById('bannerCheckIn');
+                        var ciSub  = document.getElementById('bannerCheckInSub');
+                        var coEl   = document.getElementById('bannerCheckOut');
+                        var coSub  = document.getElementById('bannerCheckOutSub');
+                        var whEl   = document.getElementById('bannerWorkingHours');
+                        var btEl   = document.getElementById('bannerBreakTime');
+
+                        if (ciEl)  ciEl.innerText  = data.checkIn  || '-:-';
+                        if (ciSub) ciSub.innerText = data.checkIn  ? 'Today' : 'Not checked in';
+                        if (coEl)  coEl.innerText  = data.checkOut || '-:-';
+                        if (coSub) coSub.innerText = data.checkOut ? 'Today' : 'Not yet';
+                        if (whEl)  whEl.innerText  = data.workingHours  || '0h 00m';
+                        if (btEl)  btEl.innerText  = data.breakTime     || '0m';
+                    })
+                    .catch(function() { /* silent — banner keeps previous value */ });
             }
         });
 

@@ -477,7 +477,7 @@
                     if (startBreakButton) startBreakButton.style.display = "none";
                     if (endBreakButton) endBreakButton.style.display = "none";
 
-                    if (normalized === "NoPunch" || normalized === "PunchedOut") {
+                    if (normalized === "NoPunch") {
                         punchInButton.style.display = "inline-block";
                     } else if (normalized === "PunchedIn") {
                         if (startBreakButton) startBreakButton.style.display = "inline-block";
@@ -485,6 +485,8 @@
                     } else if (normalized === "OnBreak") {
                         if (endBreakButton) endBreakButton.style.display = "inline-block";
                         punchOutButton.style.display = "inline-block";
+                    } else if (normalized === "PunchedOut") {
+                        // User has already punched in and out for today; hide all punch buttons.
                     } else {
                         punchInButton.style.display = "inline-block";
                     }
@@ -512,6 +514,7 @@
                 function shouldRefreshAttendanceView() {
                     var path = (window.location.pathname || "").toLowerCase();
                     return path === "/" ||
+                        path.indexOf("/calendar") >= 0 ||
                         path.indexOf("/account/profile") >= 0 ||
                         path.indexOf("/reports/leaderboard") >= 0;
                 }

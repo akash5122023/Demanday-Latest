@@ -745,7 +745,10 @@ SELECT @id;");
                     batch.Columns.Add("DNCStatus", typeof(string));
                     batch.Columns.Add("Number", typeof(string));
 
-                    int maxSrNo = GetMaxSrNo(sqlConn, table);
+                    // Sr No is scoped to the selected Campaign — two campaigns may each have Sr No 1,
+                    // they are independent rows. Importing under a different campaign always inserts new
+                    // rows; re-importing under the same campaign updates existing ones.
+                    int maxSrNo = GetMaxSrNo(sqlConn, table, "CampaignId", campaignId);
                     CreateStaging(sqlConn, table, batch);
                     for (int row = 2; row <= rowCount; row++)
                     {
@@ -768,7 +771,9 @@ SELECT @id;");
                         if (batch.Rows.Count >= BulkBatchSize) FlushBatch(sqlConn, batch);
                     }
                     FlushBatch(sqlConn, batch);
-                    MergeStaging(sqlConn, table, batch, ref imported, ref updated);
+                    // scopeColumn = "CampaignId": same SrNo under different campaign → INSERT (new),
+                    // same SrNo under same campaign → UPDATE (existing).
+                    MergeStaging(sqlConn, table, batch, ref imported, ref updated, "CampaignId");
                 }
                 else
                 {

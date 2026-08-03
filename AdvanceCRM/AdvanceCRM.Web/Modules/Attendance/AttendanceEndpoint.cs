@@ -1,4 +1,4 @@
-﻿    
+    
 namespace AdvanceCRM.Attendance.Endpoints
 {
     using AdvanceCRM.Attendance.Repositories;
@@ -196,6 +196,80 @@ namespace AdvanceCRM.Attendance.Endpoints
             var bytes = new ReportRepository().Render(report);
             return ExcelContentResult.Create(bytes, "Enquiry_" +
                 DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xlsx");
+        }
+
+        // Called by the Attendance Calendar banner after any punch action (Check In / Check Out / Break)
+        // to update the live stat values without a full page reload.
+        [HttpGet, Authorize]
+        public IActionResult GetTodayStatus(int userId)
+        {
+            try
+            {
+                using var connection = _connections.NewByKey("Default");
+                var today = DateTime.Today;
+                var now   = DateTime.Now;
+
+                var rec = connection.TryFirst<MyRow>(q => q
+                    .SelectTableFields()
+                    .Where(MyRow.Fields.Name == userId & MyRow.Fields.PunchIn >= today));
+
+                if (rec == null || !rec.PunchIn.HasValue)
+                {
+                    return new JsonResult(new
+                    {
+                        checkIn      = (string)null,
+                        checkOut     = (string)null,
+                        workingHours = "0h 00m",
+                        breakTime    = "0m"
+                    });
+                }
+
+                var punchIn  = rec.PunchIn.Value;
+                var punchOut = rec.PunchOut;
+                int breakMins = rec.BreakMinutes ?? 0;
+
+                string checkInStr  = punchIn.ToString("hh:mm tt", System.Globalization.CultureInfo.InvariantCulture);
+                string checkOutStr = null;
+                string workingHoursStr;
+
+                double grossMins;
+                if (punchOut.HasValue && punchOut.Value != punchIn)
+                {
+                    checkOutStr = punchOut.Value.ToString("hh:mm tt", System.Globalization.CultureInfo.InvariantCulture);
+                    grossMins   = (punchOut.Value - punchIn).TotalMinutes;
+                }
+                else
+                {
+                    grossMins = (now - punchIn).TotalMinutes;
+                }
+
+                double netMins = Math.Max(0, grossMins - breakMins);
+                int wh = (int)(netMins / 60);
+                int wm = (int)(netMins % 60);
+                workingHoursStr = $"{wh}h {wm:D2}m";
+
+                string breakTimeStr = breakMins >= 60
+                    ? $"{breakMins / 60}h {breakMins % 60:D2}m"
+                    : $"{breakMins}m";
+
+                return new JsonResult(new
+                {
+                    checkIn      = checkInStr,
+                    checkOut     = checkOutStr,
+                    workingHours = workingHoursStr,
+                    breakTime    = breakTimeStr
+                });
+            }
+            catch
+            {
+                return new JsonResult(new
+                {
+                    checkIn      = (string)null,
+                    checkOut     = (string)null,
+                    workingHours = "0h 00m",
+                    breakTime    = "0m"
+                });
+            }
         }
     }
 }

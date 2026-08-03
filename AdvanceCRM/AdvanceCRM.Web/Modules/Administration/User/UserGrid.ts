@@ -1,4 +1,4 @@
-﻿namespace AdvanceCRM.Administration {
+namespace AdvanceCRM.Administration {
 
     import fld = UserRow.Fields;
     @Serenity.Decorators.registerClass()
@@ -12,12 +12,7 @@
 
         constructor(container: JQuery) {
             super(container);
-
-            //this.view.setGrouping(
-            //    [{
-            //        formatter: x => 'IsActive: ' + x.value + ' (' + x.count + ' items)',
-            //        getter: fld.IsActive
-            //    }])
+            this.element.find('.quick-filters-bar').toggle(false);
         }
 
        //protected getColumns(): Slick.Column[] {
