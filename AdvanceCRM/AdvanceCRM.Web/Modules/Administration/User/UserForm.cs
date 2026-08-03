@@ -1,4 +1,4 @@
-﻿namespace AdvanceCRM.Administration.Forms
+namespace AdvanceCRM.Administration.Forms
 {
     using Serenity.ComponentModel;
     using System;
@@ -30,6 +30,10 @@
         [PasswordEditor, OneWay, Required(true)]
         public string PasswordConfirm { get; set; }
         public Int32 BranchId { get; set; }
+        [HalfWidth]
+        public Masters.GenderMaster Gender { get; set; }
+        [HalfWidth, DateEditor]
+        public DateTime DateOfJoining { get; set; }
 
         [DisplayName("Active"), BooleanSwitchEditor]
         public Boolean IsActive { get; set; }

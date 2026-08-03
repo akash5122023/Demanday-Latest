@@ -55,8 +55,11 @@
         Sales?: boolean;
         Cms?: boolean;
         TeamsTeam?: string;
+        TeamsTeamName?: string;
         TeamsUserId?: number;
         TenantName?: string;
+        Gender?: Masters.GenderMaster;
+        DateOfJoining?: string;
         InsertUserId?: number;
         InsertDate?: string;
         UpdateUserId?: number;
@@ -133,8 +136,11 @@
             Sales = "Sales",
             Cms = "Cms",
             TeamsTeam = "TeamsTeam",
+            TeamsTeamName = "TeamsTeamName",
             TeamsUserId = "TeamsUserId",
             TenantName = "TenantName",
+            Gender = "Gender",
+            DateOfJoining = "DateOfJoining",
             InsertUserId = "InsertUserId",
             InsertDate = "InsertDate",
             UpdateUserId = "UpdateUserId",

@@ -1,487 +1,946 @@
-﻿@model AdvanceCRM.Common.Calendar.CalendarModel
+@model AdvanceCRM.Common.Calendar.CalendarModel
 
-@inject Serenity.ITextLocalizer Localizer
 @{
-    ViewData["Title"] = "Appointment Calendar";
+    ViewData["Title"] = "Attendance Calendar";
+    var user = Model.User;
+    var displayName = user?.DisplayName ?? "Employee";
+    var initials = string.Join("", displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => s[0])).ToUpper();
+    if (string.IsNullOrEmpty(initials)) { initials = "EM"; }
+    var empId = $"EMP{(user?.UserId ?? 1):D3}";
+    var dept = "Sales";
+    var designation = "Sales Executive";
+    var shift = "General (9:00 AM - 6:00 PM)";
 }
 
 @section Head {
-    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.min.css">
-    <link rel="stylesheet" href="~/Scripts/fullcalendar/fullcalendar.print.css" media="print">
-    <script src="~/Scripts/daterangepicker/moment.min.js"></script>
-    <script src="~/Scripts/fullcalendar/fullcalendar.min.js"></script>
     <style type="text/css">
-        .tab-content {
-            display: block;
+        .attendance-dashboard {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #1e293b;
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
         }
 
-            .tab-content > .tab-pane {
-                visibility: hidden;
-            }
-
-            .tab-content > .active {
-                visibility: visible;
-            }
-    </style>
-}
-
-@section ContentHeader {
-    <h1 style="text-align:center">
-        @ViewData["Title"]
-    </h1>
-}
-<div>
-    <table class="table">
-        <tr>
-            <td><h5><span style="background-color:#f2be54">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - TeleCalling</h5></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td><h5><span style="background-color:#cdd4ca">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - Enquiry</h5></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td><h5><span style="background-color:#87AEB4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - Quotation</h5></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td><h5><span style="background-color: #153e5c ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - Proforma</h5></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td><h5><span style="background-color:#FEFBD8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> - AMC</h5></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td>
-                <!-- Toggle Switch -->
-                <label class="switch">
-                    <input type="checkbox" id="toggleSwitch" checked>
-                    <span class="slider round"></span>
-                </label>
-            </td>
-            <td align="right">
-                <div class="input-group">
-                    <select class="filter" id="type_filter" multiple="multiple" style="width: 200px !important;">
-                        @foreach (var d in Model.Users)
-                        {
-                            <option value="@d">@d</option>
-                        }
-                    </select>
-                </div>
-            </td>
-        </tr>
-    </table>
-</div>
-
-<style>
-    /* Toggle Switch Styles */
-    .switch {
-        position: relative;
-        display: inline-block;
-        width: 50px;
-        height: 24px;
-    }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+        /* Profile Header Card */
+        .profile-header-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #4CAF50; /* Green when ON */
-        transition: .4s;
-        border-radius: 24px;
-    }
+        .profile-user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
 
-        .slider:before {
+        .avatar-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .user-meta-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+        }
+
+        .user-meta-sub {
+            font-size: 13px;
+            color: #64748b;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .user-meta-sub span {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .user-meta-sub span strong {
+            color: #334155;
+            margin-right: 3px;
+        }
+
+        /* Stat Pills */
+        .stat-pills-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            padding: 10px 18px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stat-pill .count {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .stat-pill .label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #000000 !important;
+        }
+
+        .pill-present { background: #dcfce7; color: #15803d; }
+        .pill-absent { background: #fee2e2; color: #b91c1c; }
+        .pill-late { background: #fef3c7; color: #b45309; }
+        .pill-leaves { background: #dbeafe; color: #1d4ed8; }
+        .pill-rate { background: #ede9fe; color: #6d28d9; }
+
+        /* Banner Card */
+        .live-banner-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+            border-radius: 16px;
+            padding: 22px 28px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(29, 78, 216, 0.25);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .live-banner-stats {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .banner-stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .banner-stat-item .lbl {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #93c5fd;
+            margin-bottom: 4px;
+        }
+
+        .banner-stat-item .val {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .banner-stat-item .sub {
+            font-size: 12px;
+            color: #cbd5e1;
+            margin-top: 4px;
+        }
+
+        .banner-divider {
+            width: 1px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .banner-action-area {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .btn-live-checkout {
+            background: #ef4444;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 10px 28px;
+            border-radius: 24px;
+            border: none;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-live-checkout:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* Calendar Card */
+        .calendar-main-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            position: relative;
+        }
+
+        .calendar-nav-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .calendar-title-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-nav-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none !important;
+        }
+
+        .btn-nav-arrow:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .calendar-month-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .calendar-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .month-select-dropdown {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: #334155;
+            background: #ffffff;
+        }
+
+        /* Grid */
+        .calendar-grid-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 8px;
+        }
+
+        .calendar-grid-table th {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            padding-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .day-cell {
+            height: 85px;
+            border-radius: 14px;
+            vertical-align: top;
+            padding: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .day-cell:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            z-index: 2;
+        }
+
+        .day-number {
+            font-size: 15px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .day-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
             position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Cell Types */
+        .cell-present { background: #dcfce7; border: 1px solid #bbf7d0; }
+        .cell-present .day-dot { background: #16a34a; }
+
+        .cell-late { background: #fef3c7; border: 1px solid #fde68a; }
+        .cell-late .day-dot { background: #d97706; }
+
+        .cell-absent { background: #fee2e2; border: 1px solid #fca5a5; }
+        .cell-absent .day-dot { background: #dc2626; }
+
+        .cell-leave { background: #dbeafe; border: 1px solid #bfdbfe; }
+        .cell-leave .day-dot { background: #2563eb; }
+
+        .cell-weekend { background: #f1f5f9; border: 1px solid #e2e8f0; opacity: 0.8; }
+        .cell-weekend .day-dot { background: #94a3b8; }
+
+        .cell-none { background: #ffffff; border: 1px solid #f1f5f9; }
+
+        /* Legend */
+        .calendar-legend-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
         }
 
-    input:checked + .slider {
-        background-color: #4CAF50;
-    }
-
-    input:not(:checked) + .slider {
-        background-color: #ccc;
-    }
-
-    input:checked + .slider:before {
-        transform: translateX(26px);
-    }
-</style>
-
-<div class="row">
-    <div class="col-md-0"></div>
-    <div class="col-md-12">
-        <div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
-                <li class="active"><a href="#tab_1" data-toggle="tab">My Calendar</a></li>
-                <li><a href="#tab_2" data-toggle="tab">Team Calendar</a></li>
-            </ul>
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="tab_1">
-                    <div id="calendar"></div>
-                </div><!-- /.tab-pane -->
-                <div role="tabpanel" class="tab-pane" id="tab_2">
-                    <div id="teamCalendar"></div>
-                </div><!-- /.tab-pane -->
-            </div><!-- /.tab-content -->
-        </div><!-- nav-tabs-custom -->
-    </div><!-- /.col -->
-    <div class="col-md-0"></div>
-</div><!-- /.row -->
-
-<script>
-    var isInitialised = false;
-    var teamEvents = [
-        @foreach (var d in Model.TeleCalling)
-        {
-            if (d.RepresentativeId.Value.ToString().Trim() != Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    title: '@Model.Contacts.Where(x => x.Id == d.TeleCallingContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
-                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
-                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Services/TeleCalling#edit/'+ @d.TeleCallingId + '"',
-                    backgroundColor: "#f2be54",
-                    borderColor: "#f2be54",
-                    textColor: "black",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
+        /* Popup Detail Modal */
+        .day-detail-popup {
+            position: absolute;
+            width: 250px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e2e8f0;
+            padding: 0;
+            z-index: 100;
+            display: none;
+            animation: fadeIn 0.2s ease-in-out;
         }
-        @foreach (var d in Model.Enquiry)
-        {
-            if (d.RepresentativeId.Value.ToString().Trim() != Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    title: '@Model.Contacts.Where(x => x.Id == d.EnquiryContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
-                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
-                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Enquiry#edit/'+ @d.EnquiryId + '"',
-                    backgroundColor: "#cdd4ca",
-                    borderColor: "#cdd4ca",
-                    textColor: "Black",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
+
+        .popup-header {
+            padding: 12px 16px;
+            background: #fef3c7;
+            border-top-left-radius: 13px;
+            border-top-right-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        @foreach (var d in Model.Quotation)
-        {
-            if (d.RepresentativeId.Value.ToString().Trim() != Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    title: '@Model.Contacts.Where(x => x.Id == d.QuotationContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
-                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
-                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Quotation#edit/'+ @d.QuotationId + '"',
-                    backgroundColor: "#87AEB4",
-                    borderColor: "#87AEB4",
-                    textColor: "Black",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
+
+        .popup-header .date-lbl {
+            font-size: 14px;
+            font-weight: 700;
+            color: #92400e;
         }
-        @foreach (var d in Model.Proforma)
-        {
-            if (d.RepresentativeId.Value.ToString().Trim() != Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    title: '@Model.Contacts.Where(x => x.Id == d.InvoiceContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
-                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
-                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Proforma#edit/'+ @d.InvoiceId + '"',
-                    backgroundColor: "#153e5c",
-                    borderColor: "#153e5c",
-                    textColor: "White",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
+
+        .popup-header .badge-status {
+            background: #ffffff;
+            color: #92400e;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
         }
-        @foreach (var d in Model.AMC)
-                {
-                    if (d.AssignedTo.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-                    {
-                    <text>
-                    {
-                        @{
-                            var visitdetails = "";
 
-                            if(d.VisitDetails.IsNullOrEmpty() == false)
-                            {
-                                visitdetails = d.VisitDetails;
-                            }
-                        }
-
-                        title: '@Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault().Name\n @visitdetails.Replace("\n",", ")',
-                        start: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.ToString("HH:mm")',
-                        end: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.AddMinutes(60).ToString("HH:mm")',
-                        allDay: false,
-                        url: 'javascript: location.href = "/Services/AMC#edit/'+ @d.AMCId + '"',
-                        backgroundColor: "#FEFBD8",
-                        borderColor: "#FEFBD8",
-                        textColor: "Black"
-                    },
-                    </text>
-                    }
-                }
-
-    ];
-
-    var myEvents = [
-        @foreach (var d in Model.TeleCalling)
-        {
-            if (d.RepresentativeId.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    title: '@Model.Contacts.Where(x => x.Id == d.TeleCallingContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
-                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
-                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Services/TeleCalling#edit/'+ @d.TeleCallingId + '"',
-                    backgroundColor: "#f2be54",
-                    borderColor: "#f2be54",
-                    textColor: "black",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
+        .popup-body {
+            padding: 12px 16px;
         }
-        @foreach (var d in Model.Enquiry)
-        {
-            if (d.RepresentativeId.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    title: '@Model.Contacts.Where(x => x.Id == d.EnquiryContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
-                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
-                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Enquiry#edit/'+ @d.EnquiryId + '"',
-                    backgroundColor: "#cdd4ca",
-                    borderColor: "#cdd4ca",
-                    textColor: "Black",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
+
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 4px 0;
+            color: #475569;
         }
-        @foreach (var d in Model.Quotation)
-        {
-            if (d.RepresentativeId.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    title: '@Model.Contacts.Where(x => x.Id == d.QuotationContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
-                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
-                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Quotation#edit/'+ @d.QuotationId + '"',
-                    backgroundColor: "#87AEB4",
-                    borderColor: "#87AEB4",
-                    textColor: "Black",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
+
+        .popup-row .val {
+            font-weight: 700;
+            color: #0f172a;
         }
-        @*@foreach (var d in Model.Proforma)
-        {
-            if (d.RepresentativeId.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    title: '@Model.Contacts.Where(x => x.Id == d.InvoiceContactsId.Value).FirstOrDefault().Name\n @d.Details.Replace("\n",", ")',
-                    start: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.ToString("HH:mm")',
-                    end: '@d.AppointmentDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.AppointmentDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Proforma#edit/'+ @d.InvoiceId + '"',
-                    backgroundColor: "#153e5c",
-                    borderColor: "#153e5c",
-                    textColor: "White",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
-        }*@
-        @*@foreach (var d in Model.AMC)
-        {
-            if (d.AssignedTo.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-            {
-                <text>
-                {
-                    //title: '@Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault().Name\n @d.VisitDetails.Replace("\n",", ")',
-                    title: '@Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault()?.Name\n @(d.VisitDetails?.Replace("\n", ", ") ?? "")',
 
-                    start: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.ToString("HH:mm")',
-                    end: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.AddMinutes(60).ToString("HH:mm")',
-                    allDay: false,
-                    url: 'javascript: location.href = "/Services/AMC#edit/'+ @d.AMCId + '"',
-                    backgroundColor: "#FEFBD8",
-                    borderColor: "#FEFBD8",
-                    textColor: "Black",
-                    status: '@d.Status' // Add status field
-                },
-                </text>
-            }
-        }*@
-@foreach (var d in Model.AMC)
-{
-    if (d.AssignedTo.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-    {
-        // Get the contact name, or use an empty string if not found
-        var contact = Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault();
-        var contactName = contact != null ? contact.Name : ""; // If contact is null, set an empty string
+        /* Sidebar Cards */
+        .sidebar-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 20px;
+        }
 
-        // Replace \n with ", " in VisitDetails, or use an empty string if VisitDetails is null
-        var visitDetails = d.VisitDetails != null ? d.VisitDetails.Replace("\n", ", ") : "";
+        .sidebar-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        <text>
-        {
-            title: '@contactName\n @visitDetails',
-            start: '@d.VisitDate.Value.ToString("yyyy-MM-dd")' + 'T' + '@d.VisitDate.Value.ToString("HH:mm")',
-            end: '@d.VisitDate.Value.ToString("yyyy-MM-dd")' + 'T' + '@d.VisitDate.Value.AddMinutes(60).ToString("HH:mm")',
-            allDay: false,
-            url: 'javascript: location.href = "/Services/AMC#edit/' + @d.AMCId + '"',
-            backgroundColor: "#FEFBD8",
-            borderColor: "#FEFBD8",
-            textColor: "Black",
-            status: '@d.Status' // Add status field
-        },
-        </text>
-    }
+        .summary-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .summary-row .label-with-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-row .val-bold {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #16a34a;
+            border-radius: 3px;
+        }
+
+        .btn-quick-action {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            text-decoration: none !important;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action-leave {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            color: #0284c7;
+        }
+
+        .btn-action-leave:hover { background: #e0f2fe; }
+
+        .btn-action-reg {
+            background: #fffbebfb;
+            border: 1px solid #fef3c7;
+            color: #d97706;
+        }
+
+        .btn-action-reg:hover { background: #fef3c7; }
+
+        .attention-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .attention-item:last-child { border-bottom: none; }
+    </style>
 }
 
-                @*@foreach (var d in Model.AMC)
-          {
-        if (d.AssignedTo.HasValue && d.AssignedTo.Value.ToString().Trim() == Serenity.AuthorizationExtensions.GetIdentifier(Context.User).Trim())
-        {
-        <text>
-        {
-            title: '@Model.Contacts.Where(x => x.Id == d.AMCContactsId.Value).FirstOrDefault()?.Name',
-            start: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.ToString("HH:mm")',
-            end: '@d.VisitDate.Value.ToString("yyyy-MM-dd")'+'T'+'@d.VisitDate.Value.AddMinutes(60).ToString("HH:mm")',
-            allDay: false,
-            url: 'javascript: location.href = "/Services/AMC#edit/'+ @d.AMCId + '"',
-            backgroundColor: "#FEFBD8",
-            borderColor: "#FEFBD8",
-            textColor: "Black",
-            status: '@d.Status' // Add status field
-        },
-        </text>
-         }
-       }*@
+<div class="attendance-dashboard">
+    <!-- Top User Profile Header Pill Card -->
+    <div class="profile-header-card">
+        <div class="profile-user-info">
+            <div class="avatar-circle">@initials</div>
+            <div>
+                <h2 class="user-meta-name">@displayName</h2>
+                <div class="user-meta-sub">
+                    <span><strong>Dept:</strong> @Model.DepartmentName</span> •
+                    <span><strong>Shift:</strong> @shift</span>
+                </div>
+            </div>
+        </div>
 
-    ];
+        <div class="stat-pills-container">
+            <div class="stat-pill pill-present">
+                <div class="count">@Model.PresentCount</div>
+                <div class="label">Present</div>
+            </div>
+            <div class="stat-pill pill-absent">
+                <div class="count">@Model.AbsentCount</div>
+                <div class="label">Absent</div>
+            </div>
+            <div class="stat-pill pill-late">
+                <div class="count">@Model.LateCount</div>
+                <div class="label">Late</div>
+            </div>
+            <div class="stat-pill pill-leaves">
+                <div class="count">@Model.LeaveCount</div>
+                <div class="label">Leaves</div>
+            </div>
+            <div class="stat-pill pill-rate">
+                <div class="count">@Model.AttendancePercentage%</div>
+                <div class="label">Attendance%</div>
+            </div>
+        </div>
+    </div>
 
-    $(function () {
-        // Filter events to show only Open Appointments on initial load
-        var filteredMyEvents = myEvents.filter(function(event) {
-            return event.status === 'Open';
-        });
-        var filteredTeamEvents = teamEvents.filter(function(event) {
-            return event.status === 'Open';
-        });
+    <!-- Live Banner Card -->
+    <div class="live-banner-card">
+        <div class="live-banner-stats">
+            <div class="banner-stat-item">
+                <span class="lbl">Check In</span>
+                <span class="val" id="bannerCheckIn">09:12</span>
+                <span class="sub">AM • @DateTime.Now.ToString("ddd, MMM d")</span>
+            </div>
+            <div class="banner-divider"></div>
+            <div class="banner-stat-item">
+                <span class="lbl">Check Out</span>
+                <span class="val" id="bannerCheckOut">-:-</span>
+                <span class="sub">Not yet</span>
+            </div>
+            <div class="banner-divider"></div>
+            <div class="banner-stat-item">
+                <span class="lbl">• Working Hours</span>
+                <span class="val" id="bannerWorkingHours">@Model.TotalWorkingHours</span>
+                <span class="sub">Live • since check-in</span>
+            </div>
+            <div class="banner-divider"></div>
+            <div class="banner-stat-item">
+                <span class="lbl">• Break Time</span>
+                <span class="val" id="bannerBreakTime">@Model.TotalBreakHours</span>
+                <span class="sub">Accumulated today</span>
+            </div>
+        </div>
 
-        $("#type_filter").select2({
-            placeholder: "Filter Users",
-            allowClear: true
-        });
+        <div class="banner-action-area">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
+                <button class="btn-live-checkout" id="bannerPunchInBtn" style="background: #16a34a; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4); display: none;">
+                    <i class="fa fa-clock-o"></i> Check In (Punch In)
+                </button>
+                <button class="btn-live-checkout" id="bannerStartBreakBtn" style="background: #d97706; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4); display: none;">
+                    <i class="fa fa-coffee"></i> Start Break
+                </button>
+                <button class="btn-live-checkout" id="bannerEndBreakBtn" style="background: #0284c7; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4); display: none;">
+                    <i class="fa fa-play"></i> End Break
+                </button>
+                <button class="btn-live-checkout" id="bannerPunchOutBtn" style="background: #ef4444; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4); display: none;">
+                    <i class="fa fa-clock-o"></i> Check Out (Punch Out)
+                </button>
+            </div>
+            <span style="font-size: 11px; color: #93c5fd; margin-top: 4px;">General Shift (9:00 AM - 6:00 PM)</span>
+        </div>
+    </div>
 
-        $('.filter').on('change', function () {
-            $('#teamCalendar').fullCalendar('rerenderEvents');
-        });
-        /* initialize the calendar
-         -----------------------------------------------------------------*/
+    <!-- Main Section (Calendar + Sidebar) -->
+    <div class="row">
+        <!-- Calendar Grid -->
+        <div class="col-md-8">
+            <div class="calendar-main-card">
+                <!-- Nav Bar -->
+                <div class="calendar-nav-bar">
+                    <div class="calendar-title-nav">
+                        @{
+                            var prevDate = new DateTime(Model.Year, Model.Month, 1).AddMonths(-1);
+                            var nextDate = new DateTime(Model.Year, Model.Month, 1).AddMonths(1);
+                        }
+                        <a href="~/Calendar?year=@prevDate.Year&month=@prevDate.Month&userId=@Model.TargetUserId" class="btn-nav-arrow"><i class="fa fa-chevron-left"></i></a>
+                        <h3 class="calendar-month-title">@Model.MonthName</h3>
+                        <a href="~/Calendar?year=@nextDate.Year&month=@nextDate.Month&userId=@Model.TargetUserId" class="btn-nav-arrow"><i class="fa fa-chevron-right"></i></a>
+                    </div>
 
+                    <div class="calendar-controls-right">
+                        @if (Model.UserList != null && Model.UserList.Any())
+                        {
+                            <select class="month-select-dropdown" style="margin-right: 8px;" onchange="location = this.value;">
+                                @foreach (var u in Model.UserList)
+                                {
+                                    string uUrl = Url.Content($"~/Calendar?year={Model.Year}&month={Model.Month}&userId={u.UserId}");
+                                    string uName = string.IsNullOrWhiteSpace(u.DisplayName) ? u.Username : u.DisplayName;
+                                    <option value="@uUrl" selected="@(u.UserId == Model.TargetUserId)">@uName</option>
+                                }
+                            </select>
+                        }
+                        <select class="month-select-dropdown" onchange="location = this.value;">
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                var mDate = new DateTime(Model.Year, m, 1);
+                                string optUrl = Url.Content($"~/Calendar?year={Model.Year}&month={m}&userId={Model.TargetUserId}");
+                                <option value="@optUrl" selected="@(m == Model.Month)">@mDate.ToString("MMMM yyyy")</option>
+                            }
+                        </select>
+                    </div>
+                </div>
 
-        // Initialize the calendar with filtered events
-        $('#calendar').fullCalendar({
-            header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'month,agendaWeek,agendaDay'
-            },
-            buttonText: {
-                today: 'today',
-                month: 'month',
-                week: 'week',
-                day: 'day',
-                list: 'list'
-            },
-            events: filteredMyEvents, // Show only Open Appointments initially
-            editable: false
-        });
+                <!-- Calendar Grid -->
+                <table class="calendar-grid-table">
+                    <thead>
+                        <tr>
+                            <th>SUN</th>
+                            <th>MON</th>
+                            <th>TUE</th>
+                            <th>WED</th>
+                            <th>THU</th>
+                            <th>FRI</th>
+                            <th>SAT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var firstDayOfMonth = new DateTime(Model.Year, Model.Month, 1);
+                            int startDayOfWeek = (int)firstDayOfMonth.DayOfWeek; // 0 = Sun
+                            int daysInMonth = DateTime.DaysInMonth(Model.Year, Model.Month);
+                            int dayCounter = 1;
+                            int totalCells = (int)Math.Ceiling((startDayOfWeek + daysInMonth) / 7.0) * 7;
+                        }
 
+                        @for (int cell = 0; cell < totalCells; cell++)
+                        {
+                            if (cell % 7 == 0)
+                            {
+                                @:<tr class="grid-row">
+                            }
 
-        $('#teamCalendar').fullCalendar({
-            header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'month,agendaWeek,agendaDay'
-            },
-            buttonText: {
-                today: 'today',
-                month: 'month',
-                week: 'week',
-                day: 'day',
-                list: 'list'
-            },
-            eventRender: function (event, element, view) {
+                            if (cell < startDayOfWeek || dayCounter > daysInMonth)
+                            {
+                                <td class="day-cell cell-none"></td>
+                            }
+                            else
+                            {
+                                var detail = Model.DayDetails.ContainsKey(dayCounter) ? Model.DayDetails[dayCounter] : null;
+                                var cellClass = detail != null ? $"cell-{detail.StatusCssClass}" : "cell-none";
 
-                var show_type = true;
-                var types = $('#type_filter').val();
+                                <td class="day-cell @cellClass" 
+                                    data-day="@dayCounter"
+                                    data-date="@(detail?.DateFormatted ?? "")"
+                                    data-status="@(detail?.Status ?? "")"
+                                    data-checkin="@(detail?.CheckIn ?? "--")"
+                                    data-checkout="@(detail?.CheckOut ?? "--")"
+                                    data-breaktime="@(detail?.BreakTime ?? "0m")"
+                                    data-workinghours="@(detail?.WorkingHours ?? "--")"
+                                    data-lateby="@(detail?.LateBy ?? "--")"
+                                    data-earlyexit="@(detail?.EarlyExit ?? "--")"
+                                    onclick="showDayDetail(this, event)">
+                                    <span class="day-number">@dayCounter</span>
+                                    <span class="day-dot"></span>
+                                </td>
+                                dayCounter++;
+                            }
 
-                if (types && types.length > 0) {
-                    if (types[0] == "all") {
-                        show_type = true;
-                    } else {
-                        show_type = types.indexOf(event.type) >= 0;
+                            if (cell % 7 == 6)
+                            {
+                                @:</tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Legend Bar -->
+                <div class="calendar-legend-bar">
+                    <div class="legend-item"><span class="legend-dot" style="background: #16a34a;"></span> Present</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #d97706;"></span> Late</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #dc2626;"></span> Absent</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #2563eb;"></span> Leave</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #94a3b8;"></span> Weekend</div>
+                </div>
+
+                <!-- Floating Day Detail Popup -->
+                <div id="dayDetailPopup" class="day-detail-popup">
+                    <div class="popup-header" id="popupHeader">
+                        <span class="date-lbl" id="popupDate">July 9, 2026</span>
+                        <span class="badge-status" id="popupStatus">Late</span>
+                        <span style="cursor: pointer; font-weight: bold; margin-left: 8px;" onclick="closeDayPopup()">&times;</span>
+                    </div>
+                    <div class="popup-body">
+                        <div class="popup-row"><span>Check In</span><span class="val" id="popupCheckIn">09:35 AM</span></div>
+                        <div class="popup-row"><span>Check Out</span><span class="val" id="popupCheckOut">06:00 PM</span></div>
+                        <div class="popup-row"><span>Break Time</span><span class="val" id="popupBreakTime">1h 00m</span></div>
+                        <div class="popup-row"><span>Working Hours</span><span class="val" id="popupWorkingHours">8h 25m</span></div>
+                        <div class="popup-row"><span>Late By</span><span class="val" id="popupLateBy">35 min</span></div>
+                        <div class="popup-row"><span>Early Exit</span><span class="val" id="popupEarlyExit">--</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Monthly Summary Card -->
+            <div class="sidebar-card">
+                <h4 class="sidebar-card-title"><i class="fa fa-line-chart" style="color: #2563eb;"></i> @Model.MonthName Summary</h4>
+                <div class="summary-list">
+                    <div class="summary-row">
+                        <span class="label-with-icon"><i class="fa fa-calendar-o" style="color: #64748b;"></i> Working Days</span>
+                        <span class="val-bold">@Model.WorkingDaysCount</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label-with-icon"><i class="fa fa-check-circle" style="color: #16a34a;"></i> Days Present</span>
+                        <span class="val-bold" style="color: #16a34a;">@Model.PresentCount</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label-with-icon"><i class="fa fa-times-circle" style="color: #dc2626;"></i> Days Absent</span>
+                        <span class="val-bold" style="color: #dc2626;">@Model.AbsentCount</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label-with-icon"><i class="fa fa-warning" style="color: #d97706;"></i> Days Late</span>
+                        <span class="val-bold" style="color: #d97706;">@Model.LateCount</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label-with-icon"><i class="fa fa-clock-o" style="color: #64748b;"></i> Total Hours</span>
+                        <span class="val-bold">@Model.TotalWorkingHours</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label-with-icon"><i class="fa fa-coffee" style="color: #d97706;"></i> Total Break Time</span>
+                        <span class="val-bold">@Model.TotalBreakHours</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label-with-icon"><i class="fa fa-bar-chart" style="color: #64748b;"></i> Avg Hours/Day</span>
+                        <span class="val-bold">@Model.AvgWorkingHours</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label-with-icon"><i class="fa fa-umbrella" style="color: #2563eb;"></i> Leaves Taken</span>
+                        <span class="val-bold">@Model.LeaveCount</span>
+                    </div>
+                    <div class="summary-row" style="margin-top: 8px;">
+                        <span class="label-with-icon"><i class="fa fa-bullseye" style="color: #16a34a;"></i> Attendance Rate</span>
+                        <span class="val-bold" style="color: #16a34a;">@Model.AttendancePercentage%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: @(Model.AttendancePercentage)%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="sidebar-card">
+                <h4 class="sidebar-card-title">Quick Actions</h4>
+                <a href="javascript:;" onclick="Q.notifyInfo('Apply for leave dialog opened.');" class="btn-quick-action btn-action-leave">
+                    <div>
+                        <div style="font-weight: 700;">Apply for Leave</div>
+                        <div style="font-size: 11px;">Plan time off</div>
+                    </div>
+                    <i class="fa fa-external-link"></i>
+                </a>
+                <a href="javascript:;" onclick="Q.notifyInfo('Regularize attendance dialog opened.');" class="btn-quick-action btn-action-reg">
+                    <div>
+                        <div style="font-weight: 700;">Regularize Attendance</div>
+                        <div style="font-size: 11px;">Fix missing punches</div>
+                    </div>
+                    <i class="fa fa-external-link"></i>
+                </a>
+            </div>
+
+            <!-- Needs Attention -->
+            <div class="sidebar-card">
+                <h4 class="sidebar-card-title" style="font-size: 13px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Needs Attention</h4>
+                <div>
+                    @if (Model.NeedsAttentionList != null && Model.NeedsAttentionList.Any())
+                    {
+                        foreach (var item in Model.NeedsAttentionList.Take(5))
+                        {
+                            <div class="attention-item">
+                                @if (item.Severity == "error")
+                                {
+                                    <i class="fa fa-times-circle-o" style="color: #dc2626; font-size: 14px;"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-exclamation-circle" style="color: #d97706; font-size: 14px;"></i>
+                                }
+                                <span style="font-weight: 700; color: #334155;">@item.DateText</span>
+                                <span style="color: #64748b;">@item.Title</span>
+                            </div>
+                        }
                     }
-                }
+                    else
+                    {
+                        <div style="font-size: 12px; color: #94a3b8;">No pending alerts.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script type="text/javascript">
+    function showDayDetail(cell, event) {
+        event.stopPropagation();
+        var date = cell.getAttribute('data-date');
+        var status = cell.getAttribute('data-status');
+        var checkin = cell.getAttribute('data-checkin');
+        var checkout = cell.getAttribute('data-checkout');
+        var breaktime = cell.getAttribute('data-breaktime');
+        var workinghours = cell.getAttribute('data-workinghours');
+        var lateby = cell.getAttribute('data-lateby');
+        var earlyexit = cell.getAttribute('data-earlyexit');
 
-                return show_type;
+        if (!status || status === "None") return;
 
-            },
-            events: filteredTeamEvents, // Show only Open Appointments initially
-            editable: false
+        document.getElementById('popupDate').innerText = date;
+        document.getElementById('popupStatus').innerText = status;
+        document.getElementById('popupCheckIn').innerText = checkin;
+        document.getElementById('popupCheckOut').innerText = checkout;
+        document.getElementById('popupBreakTime').innerText = breaktime;
+        document.getElementById('popupWorkingHours').innerText = workinghours;
+        document.getElementById('popupLateBy').innerText = lateby;
+        document.getElementById('popupEarlyExit').innerText = earlyexit;
+
+        var header = document.getElementById('popupHeader');
+        if (status === "Late") {
+            header.style.background = "#fef3c7";
+            header.querySelector('.date-lbl').style.color = "#92400e";
+        } else if (status === "Present") {
+            header.style.background = "#dcfce7";
+            header.querySelector('.date-lbl').style.color = "#14532d";
+        } else if (status === "Absent") {
+            header.style.background = "#fee2e2";
+            header.querySelector('.date-lbl').style.color = "#7f1d1d";
+        } else {
+            header.style.background = "#e2e8f0";
+            header.querySelector('.date-lbl').style.color = "#334155";
+        }
+
+        var popup = document.getElementById('dayDetailPopup');
+        popup.style.display = 'block';
+
+        var rect = cell.getBoundingClientRect();
+        var parentRect = cell.closest('.calendar-main-card').getBoundingClientRect();
+        popup.style.top = (rect.top - parentRect.top - 10) + 'px';
+        popup.style.left = (rect.left - parentRect.left + cell.offsetWidth / 2 - 125) + 'px';
+    }
+
+    function closeDayPopup() {
+        document.getElementById('dayDetailPopup').style.display = 'none';
+    }
+
+    document.addEventListener('click', function (e) {
+        var popup = document.getElementById('dayDetailPopup');
+        if (popup && !popup.contains(e.target) && !e.target.classList.contains('day-cell')) {
+            popup.style.display = 'none';
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var bannerPunchInBtn = document.getElementById("bannerPunchInBtn");
+        var bannerStartBreakBtn = document.getElementById("bannerStartBreakBtn");
+        var bannerEndBreakBtn = document.getElementById("bannerEndBreakBtn");
+        var bannerPunchOutBtn = document.getElementById("bannerPunchOutBtn");
+        var userId = @(Model.User?.UserId ?? 0);
+
+        function updateCalendarBannerButtons(status) {
+            var normalized = (status || "").trim();
+            if (bannerPunchInBtn) bannerPunchInBtn.style.display = "none";
+            if (bannerStartBreakBtn) bannerStartBreakBtn.style.display = "none";
+            if (bannerEndBreakBtn) bannerEndBreakBtn.style.display = "none";
+            if (bannerPunchOutBtn) bannerPunchOutBtn.style.display = "none";
+
+            if (normalized === "NoPunch" || normalized === "PunchedOut") {
+                if (bannerPunchInBtn) bannerPunchInBtn.style.display = "inline-block";
+            } else if (normalized === "PunchedIn") {
+                if (bannerStartBreakBtn) bannerStartBreakBtn.style.display = "inline-block";
+                if (bannerPunchOutBtn) bannerPunchOutBtn.style.display = "inline-block";
+            } else if (normalized === "OnBreak") {
+                if (bannerEndBreakBtn) bannerEndBreakBtn.style.display = "inline-block";
+                if (bannerPunchOutBtn) bannerPunchOutBtn.style.display = "inline-block";
+            } else {
+                if (bannerPunchInBtn) bannerPunchInBtn.style.display = "inline-block";
+            }
+        }
+
+        if (bannerPunchInBtn) {
+            bannerPunchInBtn.addEventListener("click", function () {
+                var headerBtn = document.getElementById("punchInButton");
+                if (headerBtn) headerBtn.click();
+            });
+        }
+
+        if (bannerStartBreakBtn) {
+            bannerStartBreakBtn.addEventListener("click", function () {
+                var headerBtn = document.getElementById("startBreakButton");
+                if (headerBtn) headerBtn.click();
+            });
+        }
+
+        if (bannerEndBreakBtn) {
+            bannerEndBreakBtn.addEventListener("click", function () {
+                var headerBtn = document.getElementById("endBreakButton");
+                if (headerBtn) headerBtn.click();
+            });
+        }
+
+        if (bannerPunchOutBtn) {
+            bannerPunchOutBtn.addEventListener("click", function () {
+                var headerBtn = document.getElementById("punchOutButton");
+                if (headerBtn) headerBtn.click();
+            });
+        }
+
+        window.addEventListener("attendance:punch-changed", function (e) {
+            if (e.detail && e.detail.status) {
+                updateCalendarBannerButtons(e.detail.status);
+            }
         });
 
-        // Toggle switch functionality
-        $('#toggleSwitch').change(function() {
-            var showOpen = $(this).is(':checked');
-            var updatedMyEvents = myEvents.filter(function(event) {
-                return showOpen ? event.status === 'Open' : event.status === 'Closed';
-            });
-            var updatedTeamEvents = teamEvents.filter(function(event) {
-                return showOpen ? event.status === 'Open' : event.status === 'Closed';
-            });
-
-            $('#calendar').fullCalendar('removeEvents');
-            $('#calendar').fullCalendar('addEventSource', updatedMyEvents);
-
-            $('#teamCalendar').fullCalendar('removeEvents');
-            $('#teamCalendar').fullCalendar('addEventSource', updatedTeamEvents);
-        });
+        if (userId > 0) {
+            fetch(`/api/Leads/CheckPunchStatus?UserId=${userId}`)
+                .then(function (r) { return r.text(); })
+                .then(function (status) { updateCalendarBannerButtons(status); })
+                .catch(function () { updateCalendarBannerButtons("NoPunch"); });
+        }
     });
 </script>

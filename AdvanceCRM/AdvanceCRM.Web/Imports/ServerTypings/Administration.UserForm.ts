@@ -11,6 +11,8 @@
         Password: Serenity.PasswordEditor;
         PasswordConfirm: Serenity.PasswordEditor;
         BranchId: Serenity.LookupEditor;
+        Gender: Serenity.EnumEditor;
+        DateOfJoining: Serenity.DateEditor;
         IsActive: BooleanSwitchEditor;
         Host: Serenity.StringEditor;
         Port: Serenity.IntegerEditor;
@@ -52,9 +54,11 @@
                 var w4 = s.BooleanEditor;
                 var w5 = s.ImageUploadEditor;
                 var w6 = s.PasswordEditor;
-                var w7 = BooleanSwitchEditor;
-                var w8 = s.IntegerEditor;
-                var w9 = HierarchyEditor;
+                var w7 = s.EnumEditor;
+                var w8 = s.DateEditor;
+                var w9 = BooleanSwitchEditor;
+                var w10 = s.IntegerEditor;
+                var w11 = HierarchyEditor;
 
                 Q.initFormType(UserForm, [
                     'CompanyId', w0,
@@ -68,21 +72,23 @@
                     'Password', w6,
                     'PasswordConfirm', w6,
                     'BranchId', w0,
-                    'IsActive', w7,
+                    'Gender', w7,
+                    'DateOfJoining', w8,
+                    'IsActive', w9,
                     'Host', w1,
-                    'Port', w8,
+                    'Port', w10,
                     'SSL', w4,
                     'EmailId', w1,
                     'EmailPassword', w6,
-                    'UpperLevel', w9,
-                    'UpperLevel2', w9,
-                    'UpperLevel3', w9,
-                    'UpperLevel4', w9,
-                    'UpperLevel5', w9,
+                    'UpperLevel', w11,
+                    'UpperLevel2', w11,
+                    'UpperLevel3', w11,
+                    'UpperLevel4', w11,
+                    'UpperLevel5', w11,
                     'MCSMTPServer', w1,
-                    'MCSMTPPort', w8,
+                    'MCSMTPPort', w10,
                     'MCIMAPServer', w1,
-                    'MCIMAPPort', w8,
+                    'MCIMAPPort', w10,
                     'MCUsername', w1,
                     'MCPassword', w6,
                     'StartTime', w3,

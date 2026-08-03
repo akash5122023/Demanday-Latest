@@ -1,228 +1,290 @@
-﻿namespace AdvanceCRM.Common.Calendar
+namespace AdvanceCRM.Common.Calendar
 {
     using AdvanceCRM.Administration;
-    using AdvanceCRM.Web.Helpers;
-    using AdvanceCRM.Contacts;
-    using AdvanceCRM.Enquiry;
-    using AdvanceCRM.Quotation;
-    using AdvanceCRM.Sales;
-    using AdvanceCRM.Services;
+    using AdvanceCRM.Attendance;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.Logging;
     using Serenity;
     using Serenity.Data;
-    using Serenity.Web;
+    using Serenity.Services;
     using System;
     using System.Collections.Generic;
-    using Serenity.Services;
+    using System.Globalization;
+    using System.Linq;
 
     public class CalendarController : Controller
     {
         private readonly ISqlConnections _connections;
-        private readonly IMemoryCache _cache;
-        private readonly ILogger<CalendarController> _logger;
         private readonly IRequestContext Context;
 
-        public CalendarController(ISqlConnections connections,IRequestContext context, IMemoryCache cache, ILogger<CalendarController> logger)
+        public CalendarController(ISqlConnections connections, IRequestContext context)
         {
-            _connections = connections;
-            _cache = cache;
-            _logger = logger;
+            _connections = connections ?? throw new ArgumentNullException(nameof(connections));
             Context = context ?? throw new ArgumentNullException(nameof(context));
-
         }
 
         [Route("Calendar")]
         [Authorize]
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(int? year, int? month, int? userId)
         {
-            var cacheKey = "AppointmentCalendarModel:" + UserRow.Fields.GenerationKey;
-            var cachedModel = _cache.GetOrCreate(cacheKey, entry =>
+            var now = DateTime.Now;
+            int targetYear = year.HasValue && year.Value >= 2000 && year.Value <= 2100 ? year.Value : now.Year;
+            int targetMonth = month.HasValue && month.Value >= 1 && month.Value <= 12 ? month.Value : now.Month;
+
+            var model = new CalendarModel
+            {
+                Year = targetYear,
+                Month = targetMonth,
+                MonthName = new DateTime(targetYear, targetMonth, 1).ToString("MMMM yyyy", CultureInfo.InvariantCulture),
+                TodayCheckIn = "-:-",
+                TodayCheckOut = "Not yet",
+                TodayWorkingHours = "0h 00m",
+                TodayBreakTime = "0m"
+            };
+
+            var userIdString = Context.User.GetIdentifier();
+            if (!int.TryParse(userIdString, out int loggedInUserId))
+            {
+                loggedInUserId = 0;
+            }
+
+            using (var connection = _connections.NewFor<AttendanceRow>())
+            {
+                connection.Open();
+
+                var u = UserRow.Fields;
+
+                // 1. Fetch User List for Admin/User selection dropdown
+                var userList = connection.List<UserRow>(q => q
+                    .SelectTableFields()
+                    .Select(u.TeamsTeamName)
+                    .Where(u.IsActive == 1)
+                    .OrderBy(u.DisplayName));
+
+                model.UserList = userList;
+
+                int targetUserId = (userId.HasValue && userId.Value > 0) ? userId.Value : loggedInUserId;
+                model.TargetUserId = targetUserId;
+
+                // 2. Fetch Selected User Info
+                var targetUserRow = userList.FirstOrDefault(x => x.UserId == targetUserId);
+                if (targetUserRow == null)
                 {
-                    var model = new CalendarModel();
-                    using (var connection = _connections.NewFor<UserRow>())
+                    targetUserRow = connection.TryFirst<UserRow>(q => q
+                        .SelectTableFields()
+                        .Select(u.TeamsTeamName)
+                        .Where(u.UserId == targetUserId));
+                }
+
+                model.User = targetUserRow;
+
+                string dept = "Sales";
+                if (targetUserRow != null && !string.IsNullOrWhiteSpace(targetUserRow.TeamsTeamName))
+                {
+                    dept = targetUserRow.TeamsTeamName;
+                }
+                model.DepartmentName = dept;
+
+                // 3. Fetch Attendance Records for Target User for target Month & Year
+                var startDate = new DateTime(targetYear, targetMonth, 1);
+                var endDate = startDate.AddMonths(1).AddDays(-1);
+
+                var a = AttendanceRow.Fields;
+                var records = connection.List<AttendanceRow>(q => q
+                    .SelectTableFields()
+                    .Where(a.Name == targetUserId & a.DateNTime >= startDate & a.DateNTime <= endDate)
+                    .OrderBy(a.DateNTime));
+
+                model.AttendanceRecords = records;
+
+                // Parse user shift start time (default 09:00 AM)
+                TimeSpan shiftStart = new TimeSpan(9, 0, 0);
+                if (!string.IsNullOrWhiteSpace(targetUserRow?.StartTime))
+                {
+                    if (TimeSpan.TryParse(targetUserRow.StartTime, out var parsedShift))
                     {
-                        var od = UserRow.Fields;
-
-                        // Getting hierarchy list
-                        List<UserRow> Users1 = connection.List<UserRow>(uq => uq
-                            .SelectTableFields()
-                            .Select(od.UserId)
-                            .Select(od.Username)
-                            .Where(od.UpperLevel == Context.User.GetIdentifier()));
-
-                        List<UserRow> Users2 = connection.List<UserRow>(uq => uq
-                            .SelectTableFields()
-                            .Select(od.UserId)
-                            .Select(od.Username)
-                            .Where(od.UpperLevel2 == Context.User.GetIdentifier()));
-
-                        List<UserRow> Users3 = connection.List<UserRow>(uq => uq
-                            .SelectTableFields()
-                            .Select(od.UserId)
-                            .Select(od.Username)
-                            .Where(od.UpperLevel3 == Context.User.GetIdentifier()));
-
-                        List<UserRow> Users4 = connection.List<UserRow>(uq => uq
-                            .SelectTableFields()
-                            .Select(od.UserId)
-                            .Select(od.Username)
-                            .Where(od.UpperLevel4 == Context.User.GetIdentifier()));
-
-                        List<UserRow> Users5 = connection.List<UserRow>(uq => uq
-                            .SelectTableFields()
-                            .Select(od.UserId)
-                            .Select(od.Username)
-                            .Where(od.UpperLevel5 == Context.User.GetIdentifier()));
-
-                        var str1 = ""; var str2 = ""; var str3 = ""; var str4 = ""; var str5 = "";
-
-                        model.Users = new List<string>();
-                        int i = 0;
-                        foreach (var item in Users1)
-                        {
-                            if (i == 0)
-                                str1 = "AssignedId = " + item.UserId.Value;
-                            else
-                                str1 = str1 + " OR AssignedId = " + item.UserId.Value;
-
-                            i++;
-                            if (!model.Users.Contains(item.Username))
-                                model.Users.Add(item.Username);
-                        }
-
-                        foreach (var item in Users2)
-                        {
-                            if (i == 0)
-                                str2 = "AssignedId = " + item.UserId.Value;
-                            else
-                                str2 = str2 + " OR AssignedId = " + item.UserId.Value;
-
-                            i++;
-                            if (!model.Users.Contains(item.Username))
-                                model.Users.Add(item.Username);
-                        }
-
-                        foreach (var item in Users3)
-                        {
-                            if (i == 0)
-                                str3 = "AssignedId = " + item.UserId.Value;
-                            else
-                                str3 = str3 + " OR AssignedId = " + item.UserId.Value;
-
-                            i++;
-                            if (!model.Users.Contains(item.Username))
-                                model.Users.Add(item.Username);
-                        }
-
-                        foreach (var item in Users4)
-                        {
-                            if (i == 0)
-                                str4 = "AssignedId = " + item.UserId.Value;
-                            else
-                                str4 = str4 + " OR AssignedId = " + item.UserId.Value;
-
-                            i++;
-                            if (!model.Users.Contains(item.Username))
-                                model.Users.Add(item.Username);
-                        }
-
-                        foreach (var item in Users5)
-                        {
-                            if (i == 0)
-                                str5 = "AssignedId = " + item.UserId.Value;
-                            else
-                                str5 = str5 + " OR AssignedId = " + item.UserId.Value;
-
-                            i++;
-                            if (!model.Users.Contains(item.Username))
-                                model.Users.Add(item.Username);
-                        }
-
-                        string fstr = str1 + str2 + str3 + str4 + str5;
-
-                        if (!string.IsNullOrWhiteSpace(fstr))
-                        {
-                            fstr = " OR " + fstr;
-                        }
-
-                        var c = ContactsRow.Fields;
-                        model.Contacts = connection.List<ContactsRow>(q => q
-                            .SelectTableFields()
-                            .Select(c.Id)
-                            .Select(c.Name));
-
-                        string temp_str = "AssignedId = " + Context.User.GetIdentifier().ToString() + fstr;
-                        temp_str = temp_str.Replace("AssignedId", "RepresentativeId");
-
-                        var e = EnquiryAppointmentsRow.Fields;
-                        model.Enquiry = connection.List<EnquiryAppointmentsRow>(q => q
-                            .SelectTableFields()
-                            .Select(e.EnquiryContactsId)
-                            .Select(e.AppointmentDate)
-                            .Select(e.RepresentativeId)
-                            .Select(e.Details)
-                            .Select(e.RepresentativeDisplayName)
-                            .Where(e.Status == 1 || e.Status == 2) // Include closed
-                            .Where(e.AppointmentDate.IsNotNull())
-                            .Where(new Criteria("(" + temp_str + ")")));
-
-                        var qt = QuotationAppointmentsRow.Fields;
-                        model.Quotation = connection.List<QuotationAppointmentsRow>(q => q
-                            .SelectTableFields()
-                            .Select(qt.QuotationContactsId)
-                            .Select(qt.AppointmentDate)
-                            .Select(qt.RepresentativeId)
-                            .Select(qt.Details)
-                            .Select(qt.RepresentativeDisplayName)
-                            .Where(qt.Status == 1 || qt.Status == 2) // Include closed
-                            .Where(qt.AppointmentDate.IsNotNull())
-                            .Where(new Criteria("(" + temp_str + ")")));
-
-                        var p = InvoiceAppointmentsRow.Fields;
-                        model.Proforma = connection.List<InvoiceAppointmentsRow>(q => q
-                            .SelectTableFields()
-                            .Select(p.InvoiceContactsId)
-                            .Select(p.AppointmentDate)
-                            .Select(p.RepresentativeId)
-                            .Select(p.Details)
-                            .Select(p.RepresentativeDisplayName)
-                            .Where(p.Status == 1 || p.Status == 2) // Include closed
-                            .Where(p.AppointmentDate.IsNotNull())
-                            .Where(new Criteria("(" + temp_str + ")")));
-
-                        var t = TeleCallingAppointmentsRow.Fields;
-                        model.TeleCalling = connection.List<TeleCallingAppointmentsRow>(q => q
-                            .SelectTableFields()
-                            .Select(t.TeleCallingContactsId)
-                            .Select(t.AppointmentDate)
-                            .Select(t.RepresentativeId)
-                            .Select(t.Details)
-                            .Select(t.RepresentativeDisplayName)
-                            .Where(t.Status == 1 || t.Status == 2) // Include closed
-                            .Where(t.AppointmentDate.IsNotNull())
-                            .Where(new Criteria("(" + temp_str + ")")));
-
-                        temp_str = temp_str.Replace("RepresentativeId", "AssignedTo");
-                        var a = AMCVisitPlannerRow.Fields;
-                        model.AMC = connection.List<AMCVisitPlannerRow>(q => q
-                            .SelectTableFields()
-                            .Select(a.AMCContactsId)
-                            .Select(a.VisitDate)
-                            .Select(a.AssignedTo)
-                            .Select(a.VisitDetails)
-                            .Select(a.AssignedToDisplayName)
-                            .Where(a.Status == 1 || a.Status == 2) // Include closed
-                            .Where(a.VisitDate.IsNotNull())
-                            .Where(new Criteria("(" + temp_str + ")")));
+                        shiftStart = parsedShift;
                     }
-                    return model;
-                });
+                }
 
-            return View(MVC.Views.Common.Calendar.CalendarIndex, cachedModel);
+                int daysInMonth = DateTime.DaysInMonth(targetYear, targetMonth);
+                double totalWorkingMinutesAcc = 0;
+                double totalBreakMinutesAcc = 0;
+
+                for (int day = 1; day <= daysInMonth; day++)
+                {
+                    var currentDate = new DateTime(targetYear, targetMonth, day);
+                    bool isWeekend = currentDate.DayOfWeek == DayOfWeek.Saturday || currentDate.DayOfWeek == DayOfWeek.Sunday;
+                    bool isPastOrToday = currentDate.Date <= now.Date;
+                    bool isToday = currentDate.Date == now.Date;
+
+                    var dayRecord = records.FirstOrDefault(r => r.DateNTime.HasValue && r.DateNTime.Value.Date == currentDate);
+
+                    var dayDetail = new AttendanceDayDetail
+                    {
+                        Day = day,
+                        Date = currentDate,
+                        DateFormatted = currentDate.ToString("MMMM d, yyyy", CultureInfo.InvariantCulture),
+                        IsToday = isToday
+                    };
+
+                    if (isWeekend)
+                    {
+                        dayDetail.Status = "Weekend";
+                        dayDetail.StatusCssClass = "weekend";
+                        dayDetail.CheckIn = "--";
+                        dayDetail.CheckOut = "--";
+                        dayDetail.BreakTime = "0m";
+                        dayDetail.WorkingHours = "--";
+                        dayDetail.LateBy = "--";
+                        dayDetail.EarlyExit = "--";
+                    }
+                    else
+                    {
+                        model.WorkingDaysCount++;
+
+                        if (dayRecord != null && dayRecord.PunchIn.HasValue)
+                        {
+                            var punchIn = dayRecord.PunchIn.Value;
+                            var punchOut = dayRecord.PunchOut;
+                            int breakMins = dayRecord.BreakMinutes ?? 0;
+                            totalBreakMinutesAcc += breakMins;
+
+                            dayDetail.CheckIn = punchIn.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+                            dayDetail.BreakTime = breakMins >= 60
+                                ? $"{(breakMins / 60)}h {(breakMins % 60):D2}m"
+                                : $"{breakMins}m";
+
+                            if (punchOut.HasValue && punchOut.Value != punchIn)
+                            {
+                                dayDetail.CheckOut = punchOut.Value.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+                                double grossMinutes = (punchOut.Value - punchIn).TotalMinutes;
+                                double netMinutes = Math.Max(0, grossMinutes - breakMins);
+                                totalWorkingMinutesAcc += netMinutes;
+
+                                int hrs = (int)(netMinutes / 60);
+                                int mins = (int)(netMinutes % 60);
+                                dayDetail.WorkingHours = $"{hrs}h {mins:D2}m";
+                            }
+                            else
+                            {
+                                dayDetail.CheckOut = isToday ? "Not yet" : "--";
+                                double grossMinutes = (now - punchIn).TotalMinutes;
+                                double netMinutes = Math.Max(0, grossMinutes - breakMins);
+                                totalWorkingMinutesAcc += netMinutes;
+
+                                int hrs = (int)(netMinutes / 60);
+                                int mins = (int)(netMinutes % 60);
+                                dayDetail.WorkingHours = isToday ? $"{hrs}h {mins:D2}m" : "--";
+                            }
+
+                            // Check Late Arrival
+                            if (punchIn.TimeOfDay > shiftStart.Add(TimeSpan.FromMinutes(15)))
+                            {
+                                int lateMins = (int)(punchIn.TimeOfDay - shiftStart).TotalMinutes;
+                                dayDetail.Status = "Late";
+                                dayDetail.StatusCssClass = "late";
+                                dayDetail.LateBy = $"{lateMins} min";
+                                model.LateCount++;
+                                model.PresentCount++;
+                            }
+                            else
+                            {
+                                dayDetail.Status = "Present";
+                                dayDetail.StatusCssClass = "present";
+                                dayDetail.LateBy = "--";
+                                model.PresentCount++;
+                            }
+
+                            dayDetail.EarlyExit = "--";
+                        }
+                        else if (isPastOrToday && !isToday)
+                        {
+                            dayDetail.Status = "Absent";
+                            dayDetail.StatusCssClass = "absent";
+                            dayDetail.CheckIn = "--";
+                            dayDetail.CheckOut = "--";
+                            dayDetail.BreakTime = "0m";
+                            dayDetail.WorkingHours = "--";
+                            dayDetail.LateBy = "--";
+                            dayDetail.EarlyExit = "--";
+                            model.AbsentCount++;
+
+                            model.NeedsAttentionList.Add(new NeedsAttentionItem
+                            {
+                                DateText = currentDate.ToString("MMM d", CultureInfo.InvariantCulture),
+                                Title = "Absent - no record",
+                                Severity = "error"
+                            });
+                        }
+                        else if (isToday)
+                        {
+                            dayDetail.Status = "No Record";
+                            dayDetail.StatusCssClass = "absent";
+                            dayDetail.CheckIn = "--";
+                            dayDetail.CheckOut = "--";
+                            dayDetail.BreakTime = "0m";
+                            dayDetail.WorkingHours = "--";
+                            dayDetail.LateBy = "--";
+                            dayDetail.EarlyExit = "--";
+
+                            model.NeedsAttentionList.Add(new NeedsAttentionItem
+                            {
+                                DateText = currentDate.ToString("MMM d", CultureInfo.InvariantCulture),
+                                Title = "Missing check-in",
+                                Severity = "warning"
+                            });
+                        }
+                        else
+                        {
+                            dayDetail.Status = "None";
+                            dayDetail.StatusCssClass = "none";
+                            dayDetail.CheckIn = "--";
+                            dayDetail.CheckOut = "--";
+                            dayDetail.BreakTime = "0m";
+                            dayDetail.WorkingHours = "--";
+                            dayDetail.LateBy = "--";
+                            dayDetail.EarlyExit = "--";
+                        }
+                    }
+
+                    if (isToday)
+                    {
+                        model.TodayCheckIn = dayDetail.CheckIn;
+                        model.TodayCheckOut = dayDetail.CheckOut;
+                        model.TodayWorkingHours = dayDetail.WorkingHours;
+                        model.TodayBreakTime = dayDetail.BreakTime;
+                    }
+
+                    model.DayDetails[day] = dayDetail;
+                }
+
+                // Overall Totals
+                int totalHours = (int)(totalWorkingMinutesAcc / 60);
+                int totalMins = (int)(totalWorkingMinutesAcc % 60);
+                model.TotalWorkingHours = $"{totalHours}h {totalMins:D2}m";
+
+                if (model.PresentCount > 0)
+                {
+                    double avgMins = totalWorkingMinutesAcc / model.PresentCount;
+                    model.AvgWorkingHours = $"{(int)(avgMins / 60)}h {(int)(avgMins % 60):D2}m";
+                }
+                else
+                {
+                    model.AvgWorkingHours = "0h 00m";
+                }
+
+                int totalBreakHours = (int)(totalBreakMinutesAcc / 60);
+                int totalBreakMins = (int)(totalBreakMinutesAcc % 60);
+                model.TotalBreakHours = $"{totalBreakHours}h {totalBreakMins:D2}m";
+
+                model.AttendancePercentage = model.WorkingDaysCount > 0
+                    ? Math.Round(((double)model.PresentCount / model.WorkingDaysCount) * 100, 1)
+                    : 100.0;
+            }
+
+            return View(MVC.Views.Common.Calendar.CalendarIndex, model);
         }
     }
 }

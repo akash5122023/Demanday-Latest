@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.Administration
 {
     using AdvanceCRM.Scripts;
@@ -41,6 +41,13 @@ namespace AdvanceCRM.Administration
         {
             get { return Fields.TeamsId[this]; }
             set { Fields.TeamsId[this] = value; }
+        }
+
+        [DisplayName("Team"), Expression("jTeams.[Team]"), QuickSearch, MinSelectLevel(SelectLevel.List), LookupInclude]
+        public String TeamsTeamName
+        {
+            get { return Fields.TeamsTeamName[this]; }
+            set { Fields.TeamsTeamName[this] = value; }
         }
 
         [DisplayName("Tenant"), ForeignKey("[dbo].[Tenants]", "TenantId"), LeftJoin("jTenant"), TextualField("TenantName"), LookupInclude]
@@ -119,6 +126,24 @@ namespace AdvanceCRM.Administration
         [LookupEditor(typeof(BranchRow), CascadeFrom = "CompanyId", CascadeValue = "CompanyId")]
         public Int32? BranchId { get { return Fields.BranchId[this]; } set { Fields.BranchId[this] = value; } }
         #endregion BranchId
+
+        #region Gender
+        [DisplayName("Gender"), LookupInclude]
+        public Masters.GenderMaster? Gender
+        {
+            get { return (Masters.GenderMaster?)Fields.Gender[this]; }
+            set { Fields.Gender[this] = (Int32?)value; }
+        }
+        #endregion
+
+        #region DateOfJoining
+        [DisplayName("Date Of Joining"), DateEditor, LookupInclude]
+        public DateTime? DateOfJoining
+        {
+            get { return Fields.DateOfJoining[this]; }
+            set { Fields.DateOfJoining[this] = value; }
+        }
+        #endregion
 
         [DisplayName("User Image"), Size(100)]
         [ImageUploadEditor(FilenameFormat = "UserImage/~", CopyToHistory = true)]
@@ -487,8 +512,12 @@ namespace AdvanceCRM.Administration
             public BooleanField Cms;
 
             public StringField TeamsTeam;
+            public StringField TeamsTeamName;
             public Int32Field TeamsUserId;
             public StringField TenantName;
+
+            public Int32Field Gender;
+            public DateTimeField DateOfJoining;
 
             public RowFields()
                 : base("Users")

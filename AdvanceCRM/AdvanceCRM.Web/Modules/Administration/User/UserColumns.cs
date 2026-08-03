@@ -1,8 +1,9 @@
-﻿
+
 namespace AdvanceCRM.Administration.Columns
 {
     using Serenity.ComponentModel;
     using System;
+    using System.ComponentModel;
 
     [ColumnsScript("Administration.User")]
     [BasedOnRow(typeof(UserRow))]
@@ -19,12 +20,16 @@ namespace AdvanceCRM.Administration.Columns
         [Width(250)]
         public String Email { get; set; }
         [Width(120), QuickFilter]
-        public String Branch { get; set; }
+        public String Branch { get; set; }        
+        [Width(100), QuickFilter]
+        public Masters.GenderMaster Gender { get; set; }
+        [Width(120), QuickFilter]
+        public DateTime DateOfJoining { get; set; }
         [Width(120), QuickFilter]
         public String TenantName { get; set; }
         [Width(200)]
         public String Url { get; set; }
-        [Width(80)]
+        [Width(120), QuickFilter, DisplayName("Team")]
         public String TeamsTeam { get; set; }
         [Width(80)]
         public Boolean IsActive { get; set; }

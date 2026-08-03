@@ -1,20 +1,73 @@
-﻿namespace AdvanceCRM.Common.Calendar
+namespace AdvanceCRM.Common.Calendar
 {
+    using System;
     using System.Collections.Generic;
-    using AdvanceCRM.Contacts;
-    using AdvanceCRM.Enquiry;
-    using AdvanceCRM.Quotation;
-    using AdvanceCRM.Sales;
-    using AdvanceCRM.Services;
+    using AdvanceCRM.Administration;
+    using AdvanceCRM.Attendance;
+
+    public class AttendanceDayDetail
+    {
+        public int Day { get; set; }
+        public DateTime Date { get; set; }
+        public string DateFormatted { get; set; } // e.g. "July 9, 2026"
+        public string Status { get; set; } // "Present", "Late", "Absent", "Leave", "Weekend", "None"
+        public string StatusCssClass { get; set; } // "present", "late", "absent", "leave", "weekend"
+        public string CheckIn { get; set; } // e.g. "09:35 AM" or "--"
+        public string CheckOut { get; set; } // e.g. "06:00 PM" or "Not yet" or "--"
+        public string BreakTime { get; set; } // e.g. "1h 00m" or "0m"
+        public string WorkingHours { get; set; } // e.g. "8h 25m" or "--"
+        public string LateBy { get; set; } // e.g. "35 min" or "--"
+        public string EarlyExit { get; set; } // e.g. "--" or "15 min"
+        public bool IsToday { get; set; }
+    }
+
+    public class NeedsAttentionItem
+    {
+        public string DateText { get; set; } // e.g. "Jul 14"
+        public string Title { get; set; } // e.g. "Absent - no record"
+        public string Severity { get; set; } // "error", "warning"
+    }
 
     public class CalendarModel
     {
-        public List<EnquiryAppointmentsRow> Enquiry { get; set; }
-        public List<QuotationAppointmentsRow> Quotation { get; set; }
-        public List<InvoiceAppointmentsRow> Proforma { get; set; }
-        public List<TeleCallingAppointmentsRow> TeleCalling { get; set; }
-        public List<AMCVisitPlannerRow> AMC { get; set; }
-        public List<ContactsRow> Contacts { get; set; }
-        public List<string> Users { get; set; }
+        public UserRow User { get; set; }
+        public string DepartmentName { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public string MonthName { get; set; }
+
+        // Monthly Stats
+        public int WorkingDaysCount { get; set; }
+        public int PresentCount { get; set; }
+        public int AbsentCount { get; set; }
+        public int LateCount { get; set; }
+        public int LeaveCount { get; set; }
+        public double AttendancePercentage { get; set; }
+
+        public string TotalWorkingHours { get; set; }
+        public string AvgWorkingHours { get; set; }
+        public string TotalBreakHours { get; set; }
+
+        // Live Banner
+        public string TodayCheckIn { get; set; }
+        public string TodayCheckOut { get; set; }
+        public string TodayWorkingHours { get; set; }
+        public string TodayBreakTime { get; set; }
+        public string TodayPunchStatus { get; set; }
+
+        public Dictionary<int, AttendanceDayDetail> DayDetails { get; set; }
+        public List<NeedsAttentionItem> NeedsAttentionList { get; set; }
+        public List<AttendanceRow> AttendanceRecords { get; set; }
+
+        public int TargetUserId { get; set; }
+        public List<UserRow> UserList { get; set; }
+
+        public CalendarModel()
+        {
+            UserList = new List<UserRow>();
+            DayDetails = new Dictionary<int, AttendanceDayDetail>();
+            NeedsAttentionList = new List<NeedsAttentionItem>();
+            AttendanceRecords = new List<AttendanceRow>();
+        }
     }
 }
