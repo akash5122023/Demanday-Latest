@@ -10,18 +10,22 @@ namespace AdvanceCRM.EBBCheck.Forms
     {
         [Category("EBB Check")]
         [HalfWidth]
+        [ReadOnly(true)]
         public String FirstName { get; set; }
         [HalfWidth]
+        [ReadOnly(true)]
         public String Email { get; set; }
         [HalfWidth, DateTimeEditor]
+        [ReadOnly(true)]
         public DateTime Date { get; set; }
         // Editable only by the Quality team – disabled on the client for others
         // (see EBBCheckDialog.ts) and enforced on the server (EBBCheckSaveHandler).
-        [FullWidth]
+        [HalfWidth]
         public EbbStatus Status { get; set; }
-        // "Created By" – auto-stamped, read-only.
+        // "Created By" – auto-stamped on create and kept read-only afterwards.
         [Category("Representatives")]
         [HalfWidth]
+        [ReadOnly(true)]
         public Int32 OwnerId { get; set; }
     }
 }

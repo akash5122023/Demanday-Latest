@@ -11,6 +11,12 @@
             super(container);
         }
 
+        protected getSlickOptions() {
+            let opt = super.getSlickOptions();
+            opt.enableTextSelectionOnCells = true;
+            return opt;
+        }
+
         // Shared filter experience for every Demanday & Toolkit grid: multi-value paste text filters
         // with Include/Exclude, master-backed dropdowns (Country / Job Level / Job Function /
         // Sub Industry / Employee Size), the Domain paste box, and the Master Account -> Campaign Id

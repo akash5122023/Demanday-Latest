@@ -53,7 +53,7 @@ using Serenity.Navigation;
 //[assembly: NavigationLink(1107, "CEO Dashboards/Target Setting", typeof(TargetSettingController), icon: "fa-bullseye text-red", Permission = "Premium:Target", Title = "Target Setting")]
 
 [assembly: NavigationMenu(1000, "Demanday EMail", icon: "fa-gift", Title = "Products")]
-[assembly: NavigationLink(1451, "Demanday/Demanday Enquiry", typeof(DemandayEnquiryController), icon: "fa-sms", Permission = "DemandayEnquiry:Read", Title = "Enquiry")]
+[assembly: NavigationLink(1451, "Demanday/Enquiry", typeof(DemandayEnquiryController), icon: "fa-sms", Permission = "DemandayEnquiry:Read", Title = "Enquiry")]
 [assembly: NavigationLink(1452, "Demanday/TeamLeader", typeof(DemandayTeamLeaderController), icon: "fa-mail-bulk", Permission = "DemandayTeamLeader:Read", Title = "Team Leader")]
 [assembly: NavigationLink(1453, "Demanday/Email Team", typeof(EmailTeamController), icon: "fa-users", Permission = "EmailTeam:Read", Title = "Email Team")]
 [assembly: NavigationLink(1454, "Demanday/Quality", typeof(DemandayQualityController), icon: "fa-mail-bulk", Permission = "DemandayQuality:Read", Title = "Quality")]
@@ -96,8 +96,8 @@ using Serenity.Navigation;
 [assembly: NavigationLink(1504, "Toolkit/Client Supression", typeof(ClientSupressionController), icon: "fa-file-text-o", Permission = "ClientSupression:Read", Title = "Client Supression")]
 [assembly: NavigationLink(1506, "Toolkit/Open Campaign", typeof(OpenCampaignController), icon: "fa-list-alt", Permission = "OpenCampaign:Read", Title = "Open Campaign")]
 [assembly: NavigationLink(1507, "Toolkit/Tal Campaign", typeof(TalCampaignController), icon: "fa-file-text-o", Permission = "TalCampaign:Read", Title = "Tal Campaign")]
-[assembly: NavigationLink(1508, "Toolkit/Demanday Competitor", typeof(DemandayCompetitorController), icon: "fa-file-text-o", Permission = "DemandayCompetitor:Read", Title = "Demanday Competitor")]
-[assembly: NavigationLink(1509, "Toolkit/Demanday Specs", typeof(DemandaySpecsController), icon: "icon-docs", Permission = "DemandaySpecs:Read", Title = "Demanday Specs")]
+[assembly: NavigationLink(1508, "Toolkit/Competitor", typeof(DemandayCompetitorController), icon: "fa-file-text-o", Permission = "DemandayCompetitor:Read", Title = "Competitor")]
+[assembly: NavigationLink(1509, "Toolkit/Specification", typeof(DemandaySpecsController), icon: "icon-docs", Permission = "DemandaySpecs:Read", Title = "Specification")]
 //[assembly: NavigationLink(1505, "Toolkit/Sales Return", typeof(SalesReturnController), icon: "fa-reply-all", Permission = "SalesReturn:Read", Title = "Sales Return")]
 
 //[assembly: NavigationMenu(1531, "DNCContact", icon: "fa-cart-plus", Title = "Purchase")]

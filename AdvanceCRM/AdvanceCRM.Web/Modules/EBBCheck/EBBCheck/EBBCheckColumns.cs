@@ -13,6 +13,7 @@ namespace AdvanceCRM.EBBCheck.Columns
         [EditLink]
         public String FirstName { get; set; }
         public String Email { get; set; }
+        [EnumEditor]
         public EbbStatus Status { get; set; }
         [DisplayName("User Name")]
         public String UserName { get; set; }
