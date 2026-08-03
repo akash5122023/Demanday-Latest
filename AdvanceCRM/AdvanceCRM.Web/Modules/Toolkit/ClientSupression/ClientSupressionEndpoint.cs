@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Serenity;
@@ -20,7 +20,7 @@ using MyRow = AdvanceCRM.Toolkit.ClientSupressionRow;
 namespace AdvanceCRM.Toolkit.Endpoints
 {
     [Route("Services/Toolkit/ClientSupression/[action]")]
-    [ConnectionKey(typeof(MyRow)), ServiceAuthorize(typeof(MyRow))]
+    [ConnectionKey(typeof(MyRow))]
     public class ClientSupressionController : ServiceEndpoint
     {
         private readonly ISqlConnections _connections;
@@ -42,6 +42,15 @@ namespace AdvanceCRM.Toolkit.Endpoints
                 Path.Combine(env.ContentRootPath, "Templates", "ClientSupression_Template.xlsx"),
                 "ClientSupression",
                 SupressionTemplateInitializer.ClientSupressionHeaders);
+        }
+
+        private void CheckReadPermission()
+        {
+            if (!Authorization.HasPermission("ClientSupression:Read") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets:EmailSuppression") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets:ClientSuppression"))
+                throw new ValidationError("Access denied");
         }
 
         [HttpPost, AuthorizeCreate(typeof(MyRow))]
@@ -69,6 +78,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public RetrieveResponse<MyRow> Retrieve(IDbConnection connection, RetrieveRequest request,
             [FromServices] IClientSupressionRetrieveHandler handler)
         {
+            CheckReadPermission();
             return handler.Retrieve(connection, request);
         }
 
@@ -76,13 +86,16 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
             [FromServices] IClientSupressionListHandler handler)
         {
+            CheckReadPermission();
             return handler.List(connection, request);
         }
 
+        [HttpPost]
         public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
             [FromServices] IClientSupressionListHandler handler,
             [FromServices] IExcelExporter exporter)
         {
+            CheckReadPermission();
             var data = List(connection, request, handler).Entities;
             var bytes = exporter.Export(data, typeof(Columns.ClientSupressionColumns), request.ExportColumns);
             return ExcelContentResult.Create(bytes, "ClientSupressionList_" +

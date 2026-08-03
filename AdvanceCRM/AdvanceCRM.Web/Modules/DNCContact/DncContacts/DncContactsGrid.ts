@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.DNCContact {
 
     @Serenity.Decorators.registerClass()
@@ -12,6 +12,33 @@ namespace AdvanceCRM.DNCContact {
 
         constructor(container: JQuery) {
             super(container);
+        }
+
+        protected getQuickFilters() {
+            var filters = super.getQuickFilters();
+            var fld = DncContactsRow.Fields;
+
+            filters.push({
+                type: Serenity.LookupEditor,
+                options: {
+                    lookupKey: "Masters.DemandayMasterAccount"
+                },
+                field: fld.MasterAccountId,
+                title: 'Master Account'
+            });
+
+            filters.push({
+                type: Serenity.LookupEditor,
+                options: {
+                    lookupKey: "Masters.DemandayCampaignId",
+                    cascadeFrom: fld.MasterAccountId,
+                    cascadeField: "DemandayMasterAccountId"
+                },
+                field: fld.CampaignId,
+                title: 'Campaign'
+            });
+
+            return this.orderQuickFilters(filters);
         }
     }
 }

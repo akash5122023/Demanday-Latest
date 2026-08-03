@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Serenity;
@@ -20,7 +20,7 @@ using MyRow = AdvanceCRM.Toolkit.TalCampaignRow;
 namespace AdvanceCRM.Toolkit.Endpoints
 {
     [Route("Services/Toolkit/TalCampaign/[action]")]
-    [ConnectionKey(typeof(MyRow)), ServiceAuthorize(typeof(MyRow))]
+    [ConnectionKey(typeof(MyRow))]
     public class TalCampaignController : ServiceEndpoint
     {
         private readonly ISqlConnections _connections;
@@ -36,6 +36,14 @@ namespace AdvanceCRM.Toolkit.Endpoints
             _configuration = configuration;
             _env = env;
             UploadHelper.Configure(configuration, env);
+        }
+
+        private void CheckReadPermission()
+        {
+            if (!Authorization.HasPermission("TalCampaign:Read") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets:TalCampaign"))
+                throw new ValidationError("Access denied");
         }
 
         [HttpPost, AuthorizeCreate(typeof(MyRow))]
@@ -63,6 +71,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public RetrieveResponse<MyRow> Retrieve(IDbConnection connection, RetrieveRequest request,
             [FromServices] ITalCampaignRetrieveHandler handler)
         {
+            CheckReadPermission();
             return handler.Retrieve(connection, request);
         }
 
@@ -70,13 +79,16 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
             [FromServices] ITalCampaignListHandler handler)
         {
+            CheckReadPermission();
             return handler.List(connection, request);
         }
 
+        [HttpPost]
         public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
             [FromServices] ITalCampaignListHandler handler,
             [FromServices] IExcelExporter exporter)
         {
+            CheckReadPermission();
             var data = List(connection, request, handler).Entities;
             var bytes = exporter.Export(data, typeof(Columns.TalCampaignColumns), request.ExportColumns);
             return ExcelContentResult.Create(bytes, "TalCampaignList_" +

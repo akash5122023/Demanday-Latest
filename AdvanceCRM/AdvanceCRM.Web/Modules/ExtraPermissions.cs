@@ -1,4 +1,4 @@
-﻿[assembly: Serenity.ComponentModel.RegisterPermissionKey("Sales:Change Branch")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Sales:Change Branch")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Sales:Re-open Sales")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Challan:Change Branch")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Challan:Re-open Challan")]
@@ -89,6 +89,14 @@
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:Export")]
 // Toolkit sub-modules: Import permissions
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Import")]
+// Toolkit sub-modules permissions inside VerifySheets
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Specification")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:EmailSuppression")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Competitor")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:TalList")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:MasterSuppression")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:OpenCampaign")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:DNCContact")]
 // Toolkit sub-modules: Export permissions (Import keys already registered above)
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("TalCampaign:Export")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("ClientSupression:Export")]
@@ -97,3 +105,5 @@
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("MasterSupression:Export")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("OpenCampaign:Export")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("OpenCampaign:Import")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("DNCContacts:Import")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("DNCContacts:Export")]

@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Data;
 using Serenity.Services;
 using System;
@@ -16,6 +16,18 @@ namespace AdvanceCRM.Toolkit
         public MasterSupressionRetrieveHandler(IRequestContext context)
              : base(context)
         {
+        }
+
+        protected override void ValidatePermissions()
+        {
+            if (Permissions.HasPermission("MasterSupression:Read") ||
+                Permissions.HasPermission("Toolkit:VerifySheets") ||
+                Permissions.HasPermission("Toolkit:VerifySheets:MasterSuppression"))
+            {
+                return;
+            }
+
+            base.ValidatePermissions();
         }
     }
 }

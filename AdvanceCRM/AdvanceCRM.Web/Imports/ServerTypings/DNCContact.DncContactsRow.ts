@@ -1,6 +1,7 @@
 ﻿namespace AdvanceCRM.DNCContact {
     export interface DncContactsRow {
         Id?: number;
+        SrNo?: number;
         FirstName?: string;
         LastName?: string;
         Email?: string;
@@ -29,6 +30,7 @@
 
         export declare const enum Fields {
             Id = "Id",
+            SrNo = "SrNo",
             FirstName = "FirstName",
             LastName = "LastName",
             Email = "Email",

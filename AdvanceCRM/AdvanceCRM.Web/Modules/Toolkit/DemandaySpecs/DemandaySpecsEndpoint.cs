@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Serenity;
@@ -21,7 +21,7 @@ using MyRow = AdvanceCRM.Toolkit.DemandaySpecsRow;
 namespace AdvanceCRM.Toolkit.Endpoints
 {
     [Route("Services/Toolkit/DemandaySpecs/[action]")]
-    [ConnectionKey(typeof(MyRow)), ServiceAuthorize(typeof(MyRow))]
+    [ConnectionKey(typeof(MyRow))]
     public class DemandaySpecsController : ServiceEndpoint
     {
         private readonly ISqlConnections _connections;
@@ -41,6 +41,14 @@ namespace AdvanceCRM.Toolkit.Endpoints
             // Ensure template file exists and is valid
             string templatePath = Path.Combine(env.ContentRootPath, "Templates", "DemandaySpecs_Template.xlsx");
             DemandaySpecsTemplateInitializer.EnsureTemplateExists(templatePath);
+        }
+
+        private void CheckReadPermission()
+        {
+            if (!Authorization.HasPermission("DemandaySpecs:Read") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets:Specification"))
+                throw new ValidationError("Access denied");
         }
 
         [HttpPost, AuthorizeCreate(typeof(MyRow))]
@@ -68,6 +76,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public RetrieveResponse<MyRow> Retrieve(IDbConnection connection, RetrieveRequest request,
             [FromServices] IDemandaySpecsRetrieveHandler handler)
         {
+            CheckReadPermission();
             return handler.Retrieve(connection, request);
         }
 
@@ -75,13 +84,16 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
             [FromServices] IDemandaySpecsListHandler handler)
         {
+            CheckReadPermission();
             return handler.List(connection, request);
         }
 
+        [HttpPost]
         public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
             [FromServices] IDemandaySpecsListHandler handler,
             [FromServices] IExcelExporter exporter)
         {
+            CheckReadPermission();
             var data = List(connection, request, handler).Entities;
             var bytes = exporter.Export(data, typeof(Columns.DemandaySpecsColumns), request.ExportColumns);
             return ExcelContentResult.Create(bytes, "DemandaySpecsList_" +

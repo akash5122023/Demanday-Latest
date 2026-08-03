@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Data;
 using Serenity.Services;
 using System;
@@ -16,6 +16,19 @@ namespace AdvanceCRM.Toolkit
         public ClientSupressionRetrieveHandler(IRequestContext context)
              : base(context)
         {
+        }
+
+        protected override void ValidatePermissions()
+        {
+            if (Permissions.HasPermission("ClientSupression:Read") ||
+                Permissions.HasPermission("Toolkit:VerifySheets") ||
+                Permissions.HasPermission("Toolkit:VerifySheets:EmailSuppression") ||
+                Permissions.HasPermission("Toolkit:VerifySheets:ClientSuppression"))
+            {
+                return;
+            }
+
+            base.ValidatePermissions();
         }
     }
 }

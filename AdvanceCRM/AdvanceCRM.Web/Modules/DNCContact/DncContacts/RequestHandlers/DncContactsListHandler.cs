@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Data;
 using Serenity.Services;
 using System;
@@ -16,6 +16,18 @@ namespace AdvanceCRM.DNCContact
         public DncContactsListHandler(IRequestContext context)
              : base(context)
         {
+        }
+
+        protected override void ValidatePermissions()
+        {
+            if (Permissions.HasPermission("DNCContacts:Read") ||
+                Permissions.HasPermission("Toolkit:VerifySheets") ||
+                Permissions.HasPermission("Toolkit:VerifySheets:DNCContact"))
+            {
+                return;
+            }
+
+            base.ValidatePermissions();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Serenity;
@@ -20,7 +20,7 @@ using MyRow = AdvanceCRM.Toolkit.DemandayCompetitorRow;
 namespace AdvanceCRM.Toolkit.Endpoints
 {
     [Route("Services/Toolkit/DemandayCompetitor/[action]")]
-    [ConnectionKey(typeof(MyRow)), ServiceAuthorize(typeof(MyRow))]
+    [ConnectionKey(typeof(MyRow))]
     public class DemandayCompetitorController : ServiceEndpoint
     {
         private readonly IConfiguration _configuration;
@@ -33,6 +33,15 @@ namespace AdvanceCRM.Toolkit.Endpoints
             _configuration = configuration;
             _env = env;
             UploadHelper.Configure(configuration, env);
+        }
+
+        private void CheckReadPermission()
+        {
+            if (!Authorization.HasPermission("DemandayCompetitor:Read") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets:Competitor") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets:DemandayCompetitor"))
+                throw new ValidationError("Access denied");
         }
 
         [HttpPost, AuthorizeCreate(typeof(MyRow))]
@@ -60,6 +69,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public RetrieveResponse<MyRow> Retrieve(IDbConnection connection, RetrieveRequest request,
             [FromServices] IDemandayCompetitorRetrieveHandler handler)
         {
+            CheckReadPermission();
             return handler.Retrieve(connection, request);
         }
 
@@ -67,13 +77,16 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
             [FromServices] IDemandayCompetitorListHandler handler)
         {
+            CheckReadPermission();
             return handler.List(connection, request);
         }
 
+        [HttpPost]
         public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
             [FromServices] IDemandayCompetitorListHandler handler,
             [FromServices] IExcelExporter exporter)
         {
+            CheckReadPermission();
             var data = List(connection, request, handler).Entities;
             var bytes = exporter.Export(data, typeof(Columns.DemandayCompetitorColumns), request.ExportColumns);
             return ExcelContentResult.Create(bytes, "DemandayCompetitorList_" +

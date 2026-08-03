@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -12,9 +12,12 @@ namespace AdvanceCRM.DNCContact.Forms
     [BasedOnRow(typeof(DncContactsRow), CheckNames = true)]
     public class DncContactsForm
     {
+        [HalfWidth, DisplayName("Sr No")]
+        public Int32 SrNo { get; set; }
         [HalfWidth]
         public Int32 MasterAccountId { get; set; }
         [HalfWidth]
+        [LookupEditor(typeof(Masters.DemandayCampaignIdRow), CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
         public Int32 CampaignId { get; set; }
         [HalfWidth]
         public String FirstName { get; set; }
@@ -26,7 +29,5 @@ namespace AdvanceCRM.DNCContact.Forms
         public String DncStatus { get; set; }
         [HalfWidth]
         public String Number { get; set; }
-        
-        
     }
 }

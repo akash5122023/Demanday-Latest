@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using Serenity.Data.Mapping;
@@ -60,6 +60,7 @@ namespace AdvanceCRM.DNCContact
         }
 
         [DisplayName("Campaign"), ForeignKey("[dbo].[DemandayCampaignId]", "Id"), LeftJoin("jCampaign"), TextualField("CampaignCampaignId")]
+        [LookupEditor(typeof(Masters.DemandayCampaignIdRow), InplaceAdd = true)]
         public Int32? CampaignId
         {
             get => fields.CampaignId[this];
@@ -67,6 +68,7 @@ namespace AdvanceCRM.DNCContact
         }
 
         [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LeftJoin("jMasterAccount"), TextualField("MasterAccountAccountNumber")]
+        [LookupEditor(typeof(Masters.DemandayMasterAccountRow), InplaceAdd = true)]
         public Int32? MasterAccountId
         {
             get => fields.MasterAccountId[this];
@@ -94,6 +96,13 @@ namespace AdvanceCRM.DNCContact
             set => fields.MasterAccountAccountNumber[this] = value;
         }
 
+        [DisplayName("Sr No"), QuickSearch]
+        public Int32? SrNo
+        {
+            get => fields.SrNo[this];
+            set => fields.SrNo[this] = value;
+        }
+
         public DncContactsRow()
             : base()
         {
@@ -107,6 +116,7 @@ namespace AdvanceCRM.DNCContact
         public class RowFields : RowFieldsBase
         {
             public Int32Field Id;
+            public Int32Field SrNo;
             public StringField FirstName;
             public StringField LastName;
             public StringField Email;

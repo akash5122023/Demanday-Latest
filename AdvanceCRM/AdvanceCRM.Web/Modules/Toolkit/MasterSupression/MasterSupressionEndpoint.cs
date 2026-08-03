@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Serenity;
@@ -20,7 +20,7 @@ using MyRow = AdvanceCRM.Toolkit.MasterSupressionRow;
 namespace AdvanceCRM.Toolkit.Endpoints
 {
     [Route("Services/Toolkit/MasterSupression/[action]")]
-    [ConnectionKey(typeof(MyRow)), ServiceAuthorize(typeof(MyRow))]
+    [ConnectionKey(typeof(MyRow))]
     public class MasterSupressionController : ServiceEndpoint
     {
         private readonly ISqlConnections _connections;
@@ -42,6 +42,14 @@ namespace AdvanceCRM.Toolkit.Endpoints
                 Path.Combine(env.ContentRootPath, "Templates", "MasterSupression_Template.xlsx"),
                 "MasterSupression",
                 SupressionTemplateInitializer.MasterSupressionHeaders);
+        }
+
+        private void CheckReadPermission()
+        {
+            if (!Authorization.HasPermission("MasterSupression:Read") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets:MasterSuppression"))
+                throw new ValidationError("Access denied");
         }
 
         [HttpPost, AuthorizeCreate(typeof(MyRow))]
@@ -69,6 +77,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public RetrieveResponse<MyRow> Retrieve(IDbConnection connection, RetrieveRequest request,
             [FromServices] IMasterSupressionRetrieveHandler handler)
         {
+            CheckReadPermission();
             return handler.Retrieve(connection, request);
         }
 
@@ -76,13 +85,16 @@ namespace AdvanceCRM.Toolkit.Endpoints
         public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
             [FromServices] IMasterSupressionListHandler handler)
         {
+            CheckReadPermission();
             return handler.List(connection, request);
         }
 
+        [HttpPost]
         public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
             [FromServices] IMasterSupressionListHandler handler,
             [FromServices] IExcelExporter exporter)
         {
+            CheckReadPermission();
             var data = List(connection, request, handler).Entities;
             var bytes = exporter.Export(data, typeof(Columns.MasterSupressionColumns), request.ExportColumns);
             return ExcelContentResult.Create(bytes, "MasterSupressionList_" +

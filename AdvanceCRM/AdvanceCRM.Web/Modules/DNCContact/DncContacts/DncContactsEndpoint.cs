@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Serenity;
 using Serenity.Data;
 using Serenity.Reporting;
 using Serenity.Services;
 using Serenity.Web;
+using AdvanceCRM.Web.Helpers;
 using System;
 using System.Data;
 using System.Globalization;
@@ -12,9 +13,17 @@ using MyRow = AdvanceCRM.DNCContact.DncContactsRow;
 namespace AdvanceCRM.DNCContact.Endpoints
 {
     [Route("Services/DNCContact/DncContacts/[action]")]
-    [ConnectionKey(typeof(MyRow)), ServiceAuthorize(typeof(MyRow))]
+    [ConnectionKey(typeof(MyRow))]
     public class DncContactsController : ServiceEndpoint
     {
+        private void CheckReadPermission()
+        {
+            if (!Authorization.HasPermission("DNCContacts:Read") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets") &&
+                !Authorization.HasPermission("Toolkit:VerifySheets:DNCContact"))
+                throw new ValidationError("Access denied");
+        }
+
         [HttpPost, AuthorizeCreate(typeof(MyRow))]
         public SaveResponse Create(IUnitOfWork uow, SaveRequest<MyRow> request,
             [FromServices] IDncContactsSaveHandler handler)
@@ -40,6 +49,7 @@ namespace AdvanceCRM.DNCContact.Endpoints
         public RetrieveResponse<MyRow> Retrieve(IDbConnection connection, RetrieveRequest request,
             [FromServices] IDncContactsRetrieveHandler handler)
         {
+            CheckReadPermission();
             return handler.Retrieve(connection, request);
         }
 
@@ -47,13 +57,16 @@ namespace AdvanceCRM.DNCContact.Endpoints
         public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
             [FromServices] IDncContactsListHandler handler)
         {
+            CheckReadPermission();
             return handler.List(connection, request);
         }
 
+        [HttpPost]
         public FileContentResult ListExcel(IDbConnection connection, ListRequest request,
             [FromServices] IDncContactsListHandler handler,
             [FromServices] IExcelExporter exporter)
         {
+            CheckReadPermission();
             var data = List(connection, request, handler).Entities;
             var bytes = exporter.Export(data, typeof(Columns.DncContactsColumns), request.ExportColumns);
             return ExcelContentResult.Create(bytes, "DncContactsList_" +

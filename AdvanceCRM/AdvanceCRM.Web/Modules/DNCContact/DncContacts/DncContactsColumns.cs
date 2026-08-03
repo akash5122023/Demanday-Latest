@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -14,6 +14,8 @@ namespace AdvanceCRM.DNCContact.Columns
     {
         [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
+        [EditLink, DisplayName("Sr No"), AlignRight]
+        public Int32? SrNo { get; set; }
         [EditLink]
         public String FirstName { get; set; }
         public String LastName { get; set; }

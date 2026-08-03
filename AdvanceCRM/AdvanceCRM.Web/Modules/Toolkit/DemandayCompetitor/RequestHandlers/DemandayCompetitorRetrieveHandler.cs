@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Data;
 using Serenity.Services;
 using System;
@@ -16,6 +16,19 @@ namespace AdvanceCRM.Toolkit
         public DemandayCompetitorRetrieveHandler(IRequestContext context)
              : base(context)
         {
+        }
+
+        protected override void ValidatePermissions()
+        {
+            if (Permissions.HasPermission("DemandayCompetitor:Read") ||
+                Permissions.HasPermission("Toolkit:VerifySheets") ||
+                Permissions.HasPermission("Toolkit:VerifySheets:Competitor") ||
+                Permissions.HasPermission("Toolkit:VerifySheets:DemandayCompetitor"))
+            {
+                return;
+            }
+
+            base.ValidatePermissions();
         }
     }
 }

@@ -27,6 +27,17 @@ namespace AdvanceCRM.Toolkit.Pages
         }
 
         // Exports each Tool Kit sub-module as its own .xlsx (named {accountId}_{campaignId}_{module}.xlsx),
+        private static bool HasSubmodulePermission(string subModulePermissionKey, string directPermissionKey, string altSubModuleKey = null)
+        {
+            if (Authorization.HasPermission(subModulePermissionKey))
+                return true;
+            if (!string.IsNullOrEmpty(altSubModuleKey) && Authorization.HasPermission(altSubModuleKey))
+                return true;
+            if (!string.IsNullOrEmpty(directPermissionKey) && Authorization.HasPermission(directPermissionKey))
+                return true;
+            return false;
+        }
+
         // all filtered by the selected Campaign, bundled together into a single .zip download.
         [Route("Toolkit/VerifySheets/ExportExcel")]
         public FileContentResult ExportExcel([FromServices] ISqlConnections connections, int campaignId)
@@ -52,6 +63,8 @@ namespace AdvanceCRM.Toolkit.Pages
                 .Where(MasterSupressionRow.Fields.MasterAccountId == masterAccountId));
             var openCampaign = connection.List<OpenCampaignRow>(q => q.SelectTableFields()
                 .Where(OpenCampaignRow.Fields.CampaignId == campaignId));
+            var dncContacts = connection.List<DNCContact.DncContactsRow>(q => q.SelectTableFields()
+                .Where(DNCContact.DncContactsRow.Fields.CampaignId == campaignId));
 
             // Resolve TAL "Agent" (a user id) to a display name.
             var userNames = connection.List<UserRow>()
@@ -70,43 +83,68 @@ namespace AdvanceCRM.Toolkit.Pages
 
             // One separate .xlsx per module, named {accountId}_{campaignId}_{module}.xlsx.
             // A single HTTP response can carry one file, so they are bundled into a .zip.
-            var modules = new List<(string Name, string[] Headers, IEnumerable<object[]> Rows)>
+            // Only export modules that the current user has permission to access.
+            var modules = new List<(string Name, string[] Headers, IEnumerable<object[]> Rows)>();
+
+            if (HasSubmodulePermission("Toolkit:VerifySheets:Specification", "DemandaySpecs:Read"))
             {
-                ("Specification",
+                modules.Add(("Specification",
                     new[] { "Sr No", "Order ID", "Job Title", "Job Level", "Job Function", "Industry",
                         "Company Employee Size", "Annual Revenue", "Exclude Company", "Address", "City", "State",
                         "Zip Code", "Country", "Comments", "Additional Notes" },
                     specs.Select(r => new object[] { r.SrNo, r.OrderId, r.JobTitle, r.JobLevel, r.JobFunction,
                         r.Industry, r.CompanyEmployeeSize, r.AnnualRevenue, r.ExcludeCompany, r.Address, r.City, r.State,
-                        r.ZipCode, r.Country, r.Comments, r.AdditionalNotes })),
+                        r.ZipCode, r.Country, r.Comments, r.AdditionalNotes })));
+            }
 
-                ("EmailSuppression",
+            if (HasSubmodulePermission("Toolkit:VerifySheets:EmailSuppression", "ClientSupression:Read"))
+            {
+                modules.Add(("EmailSuppression",
                     new[] { "Sr No", "Company Name", "First Name", "Last Name", "Email", "Domain" },
-                    emailSupp.Select(r => new object[] { r.SrNo, r.CompanyName, r.FirstName, r.LastName, r.Email, r.Domain })),
+                    emailSupp.Select(r => new object[] { r.SrNo, r.CompanyName, r.FirstName, r.LastName, r.Email, r.Domain })));
+            }
 
-                ("CompetitorList",
+            if (HasSubmodulePermission("Toolkit:VerifySheets:Competitor", "DemandayCompetitor:Read"))
+            {
+                modules.Add(("CompetitorList",
                     new[] { "Sr No", "Company Name", "Domain", "Email", "CPC" },
-                    competitors.Select(r => new object[] { r.SrNo, r.CompanyName, r.Domain, r.Email, r.Cpc })),
+                    competitors.Select(r => new object[] { r.SrNo, r.CompanyName, r.Domain, r.Email, r.Cpc })));
+            }
 
-                ("TALList",
+            if (HasSubmodulePermission("TalCampaign:Read", "Toolkit:VerifySheets:TalList"))
+            {
+                modules.Add(("TALList",
                     new[] { "Sr No", "Company Name", "Domain", "Agent", "Reason", "CPC" },
                     tal.Select(r => new object[] { r.SrNo, r.CompanyName, r.Domain,
                         r.AgentsName != null && userNames.ContainsKey(r.AgentsName.Value) ? userNames[r.AgentsName.Value] : null,
-                        r.Reason, r.Cpc })),
+                        r.Reason, r.Cpc })));
+            }
 
-                ("MasterSuppression",
+            if (HasSubmodulePermission("Toolkit:VerifySheets:MasterSuppression", "MasterSupression:Read"))
+            {
+                modules.Add(("MasterSuppression",
                     new[] { "Sr No", "Campaign ID", "Company Name", "First Name", "Last Name", "Email", "Domain", "Date" },
                     masterSupp.Select(r => new object[] { r.SrNo,
                         r.CampaignId != null && campaignTexts.ContainsKey(r.CampaignId.Value) ? campaignTexts[r.CampaignId.Value] : null,
                         r.CompanyName, r.FirstName, r.LastName, r.Email, r.Domain,
-                        r.Date?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) })),
+                        r.Date?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) })));
+            }
 
-                ("OpenCampaign",
+            if (HasSubmodulePermission("Toolkit:VerifySheets:OpenCampaign", "OpenCampaign:Read"))
+            {
+                modules.Add(("OpenCampaign",
                     new[] { "Sr No", "Domain", "Demanday User", "Time Stamp" },
                     openCampaign.Select(r => new object[] { r.SrNo, r.Domain,
                         r.DemandayUserId != null && userNames.ContainsKey(r.DemandayUserId.Value) ? userNames[r.DemandayUserId.Value] : null,
-                        r.TimeStamp })),
-            };
+                        r.TimeStamp })));
+            }
+
+            if (HasSubmodulePermission("Toolkit:VerifySheets:DNCContact", "DNCContacts:Read"))
+            {
+                modules.Add(("DNCContact",
+                    new[] { "Sr No", "First Name", "Last Name", "Email", "DNC Status", "Number" },
+                    dncContacts.Select(r => new object[] { r.SrNo, r.FirstName, r.LastName, r.Email, r.DncStatus, r.Number })));
+            }
 
             using var zipStream = new System.IO.MemoryStream();
             using (var zip = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create, true))
@@ -406,10 +444,20 @@ SELECT @id;");
                 if (masterAccountId <= 0)
                     return Content("Please select a Master Account first.", "text/plain");
             }
-            else if (campaignId <= 0)
-            {
-                return Content("Please select a Campaign first.", "text/plain");
-            }
+            if (sheet == "Specification" && !HasSubmodulePermission("Toolkit:VerifySheets:Specification", "DemandaySpecs:Read"))
+                return Content("Access denied for sheet: " + sheet, "text/plain");
+            if (sheet == "EmailSuppression" && !HasSubmodulePermission("Toolkit:VerifySheets:EmailSuppression", "ClientSupression:Read"))
+                return Content("Access denied for sheet: " + sheet, "text/plain");
+            if (sheet == "CompetitorList" && !HasSubmodulePermission("Toolkit:VerifySheets:Competitor", "DemandayCompetitor:Read"))
+                return Content("Access denied for sheet: " + sheet, "text/plain");
+            if (sheet == "TALList" && !HasSubmodulePermission("Toolkit:VerifySheets:TAL", "TalCampaign:Read", "Toolkit:VerifySheets:TalList"))
+                return Content("Access denied for sheet: " + sheet, "text/plain");
+            if (sheet == "MasterSuppression" && !HasSubmodulePermission("Toolkit:VerifySheets:MasterSuppression", "MasterSupression:Read"))
+                return Content("Access denied for sheet: " + sheet, "text/plain");
+            if (sheet == "OpenCampaign" && !HasSubmodulePermission("Toolkit:VerifySheets:OpenCampaign", "OpenCampaign:Read"))
+                return Content("Access denied for sheet: " + sheet, "text/plain");
+            if (sheet == "DNCContact" && !HasSubmodulePermission("Toolkit:VerifySheets:DNCContact", "DNCContacts:Read"))
+                return Content("Access denied for sheet: " + sheet, "text/plain");
 
             int imported = 0, updated = 0, skipped = 0, campaignsCreated = 0, campaignsMatched = 0;
             bool campaignHeaderFound = false, dateHeaderFound = false;
@@ -680,6 +728,43 @@ SELECT @id;");
                             BulkSrNo(ws, row, map, ref maxSrNo, seen),
                             campaignId,
                             Clip(domain, 100));
+                        if (batch.Rows.Count >= BulkBatchSize) FlushBatch(sqlConn, batch);
+                    }
+                    FlushBatch(sqlConn, batch);
+                    MergeStaging(sqlConn, table, batch, ref imported, ref updated);
+                }
+                else if (sheet == "DNCContact")
+                {
+                    const string table = "[dbo].[DNCContacts]";
+                    batch.Columns.Add("SrNo", typeof(int));
+                    batch.Columns.Add("CampaignId", typeof(int));
+                    batch.Columns.Add("MasterAccountId", typeof(int));
+                    batch.Columns.Add("FirstName", typeof(string));
+                    batch.Columns.Add("LastName", typeof(string));
+                    batch.Columns.Add("Email", typeof(string));
+                    batch.Columns.Add("DNCStatus", typeof(string));
+                    batch.Columns.Add("Number", typeof(string));
+
+                    int maxSrNo = GetMaxSrNo(sqlConn, table);
+                    CreateStaging(sqlConn, table, batch);
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        var hasSrNo = ExcelImportHelper.GetInt(ws, row, map, "SrNo", "Sr No") != null;
+                        var email = ExcelImportHelper.GetText(ws, row, map, "Email");
+                        var firstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name");
+                        var lastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name");
+                        var number = ExcelImportHelper.GetText(ws, row, map, "Number");
+                        if (!hasSrNo && string.IsNullOrWhiteSpace(email) && string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(number)) { skipped++; continue; }
+
+                        batch.Rows.Add(
+                            BulkSrNo(ws, row, map, ref maxSrNo, seen),
+                            campaignId,
+                            masterAccountId > 0 ? (object)masterAccountId : DBNull.Value,
+                            Clip(firstName, 100),
+                            Clip(lastName, 100),
+                            Clip(email, 200),
+                            Clip(ExcelImportHelper.GetText(ws, row, map, "DncStatus", "DNC Status", "Status"), 50),
+                            Clip(number, 50));
                         if (batch.Rows.Count >= BulkBatchSize) FlushBatch(sqlConn, batch);
                     }
                     FlushBatch(sqlConn, batch);

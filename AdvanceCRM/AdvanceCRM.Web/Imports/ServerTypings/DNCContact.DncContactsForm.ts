@@ -1,7 +1,8 @@
 ﻿namespace AdvanceCRM.DNCContact {
     export interface DncContactsForm {
-        MasterAccountId: Serenity.IntegerEditor;
-        CampaignId: Serenity.IntegerEditor;
+        SrNo: Serenity.IntegerEditor;
+        MasterAccountId: Serenity.LookupEditor;
+        CampaignId: Serenity.LookupEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
         Email: Serenity.StringEditor;
@@ -21,16 +22,18 @@
 
                 var s = Serenity;
                 var w0 = s.IntegerEditor;
-                var w1 = s.StringEditor;
+                var w1 = s.LookupEditor;
+                var w2 = s.StringEditor;
 
                 Q.initFormType(DncContactsForm, [
-                    'MasterAccountId', w0,
-                    'CampaignId', w0,
-                    'FirstName', w1,
-                    'LastName', w1,
-                    'Email', w1,
-                    'DncStatus', w1,
-                    'Number', w1
+                    'SrNo', w0,
+                    'MasterAccountId', w1,
+                    'CampaignId', w1,
+                    'FirstName', w2,
+                    'LastName', w2,
+                    'Email', w2,
+                    'DncStatus', w2,
+                    'Number', w2
                 ]);
             }
         }

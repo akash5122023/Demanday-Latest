@@ -24,6 +24,19 @@ namespace AdvanceCRM.Toolkit {
         includeColumns?: string[];
         /** Open Campaign gets a lightweight inline "type a domain + Add" box above its table. */
         quickAddDomain?: boolean;
+        permission?: string;
+        permissionAlt?: string;
+        directPermission?: string;
+    }
+
+    function canViewSheet(s: VsSheet): boolean {
+        if (s.permission && Q.Authorization.hasPermission(s.permission))
+            return true;
+        if (s.permissionAlt && Q.Authorization.hasPermission(s.permissionAlt))
+            return true;
+        if (s.directPermission && Q.Authorization.hasPermission(s.directPermission))
+            return true;
+        return false;
     }
 
     function vsEscape(value: any): string {
@@ -78,7 +91,7 @@ namespace AdvanceCRM.Toolkit {
     /**
      * Verify Sheets page: pick a Campaign and view its data pulled from every Tool Kit
      * sub-module (Specification, Email Suppression, Competitor, TAL, Master Suppression,
-     * Open Campaign) each in its own section.
+     * Open Campaign, DNC Contact) each in its own section.
      */
     export class VerifySheetsPage {
 
@@ -118,7 +131,7 @@ namespace AdvanceCRM.Toolkit {
 
         constructor(element: JQuery) {
             this.element = element;
-            this.sheets = this.getSheets();
+            this.sheets = this.getSheets().filter(s => canViewSheet(s));
             this.sheets.forEach(s => this.visible[s.key] = true);
             this.render();
         }
@@ -129,6 +142,8 @@ namespace AdvanceCRM.Toolkit {
                     key: 'Specification', title: 'Specification',
                     list: DemandaySpecsService.List,
                     newDialog: () => new DemandaySpecsDialog(),
+                    permission: 'Toolkit:VerifySheets:Specification',
+                    directPermission: 'DemandaySpecs:Read',
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
                         { field: 'OrderId', title: 'Order ID' },
@@ -152,6 +167,8 @@ namespace AdvanceCRM.Toolkit {
                     key: 'EmailSuppression', title: 'Email Suppression',
                     list: ClientSupressionService.List,
                     newDialog: () => new ClientSupressionDialog(),
+                    permission: 'Toolkit:VerifySheets:EmailSuppression',
+                    directPermission: 'ClientSupression:Read',
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
                         { field: 'CompanyName', title: 'Company Name' },
@@ -164,7 +181,10 @@ namespace AdvanceCRM.Toolkit {
                     key: 'CompetitorList', title: 'Competitor List',
                     list: DemandayCompetitorService.List,
                     newDialog: () => new DemandayCompetitorDialog(),
-                    columns: [                        { field: 'SrNo', title: 'Sr No' },
+                    permission: 'Toolkit:VerifySheets:Competitor',
+                    directPermission: 'DemandayCompetitor:Read',
+                    columns: [
+                        { field: 'SrNo', title: 'Sr No' },
                         { field: 'CompanyName', title: 'Company Name' },
                         { field: 'Domain', title: 'Domain' },
                         { field: 'Email', title: 'Email' },
@@ -175,6 +195,8 @@ namespace AdvanceCRM.Toolkit {
                     key: 'TALList', title: 'TAL List',
                     list: TalCampaignService.List,
                     newDialog: () => new TalCampaignDialog(),
+                    permissionAlt: 'Toolkit:VerifySheets:TalList',
+                    directPermission: 'TalCampaign:Read',
                     includeColumns: ['AgentDisplayName'],
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
@@ -189,6 +211,8 @@ namespace AdvanceCRM.Toolkit {
                     key: 'MasterSuppression', title: 'Master Suppression',
                     list: MasterSupressionService.List,
                     newDialog: () => new MasterSupressionDialog(),
+                    permission: 'Toolkit:VerifySheets:MasterSuppression',
+                    directPermission: 'MasterSupression:Read',
                     scope: 'account',
                     // CampaignId / CampaignCampaignId / Date drive this sheet's own Campaign + Date filter.
                     includeColumns: ['CampaignId', 'CampaignCampaignId', 'Date'],
@@ -207,6 +231,8 @@ namespace AdvanceCRM.Toolkit {
                     key: 'OpenCampaign', title: 'Open Campaign',
                     list: OpenCampaignService.List,
                     newDialog: () => new OpenCampaignDialog(),
+                    permission: 'Toolkit:VerifySheets:OpenCampaign',
+                    directPermission: 'OpenCampaign:Read',
                     quickAddDomain: true,
                     includeColumns: ['DemandayUserDisplayName', 'CampaignIdValue'],
                     columns: [
@@ -215,6 +241,21 @@ namespace AdvanceCRM.Toolkit {
                         { field: 'DemandayUserDisplayName', title: 'Demanday User' },
                         { field: 'CampaignIdValue', title: 'Campaign ID' },
                         { field: 'TimeStamp', title: 'Time Stamp' }
+                    ]
+                },
+                {
+                    key: 'DNCContact', title: 'DNC Contact',
+                    list: DNCContact.DncContactsService.List,
+                    newDialog: () => new DNCContact.DncContactsDialog(),
+                    permission: 'Toolkit:VerifySheets:DNCContact',
+                    directPermission: 'DNCContacts:Read',
+                    columns: [
+                        { field: 'SrNo', title: 'Sr No' },
+                        { field: 'FirstName', title: 'First Name' },
+                        { field: 'LastName', title: 'Last Name' },
+                        { field: 'Email', title: 'Email' },
+                        { field: 'DncStatus', title: 'DNC Status' },
+                        { field: 'Number', title: 'Number' }
                     ]
                 }
             ];
