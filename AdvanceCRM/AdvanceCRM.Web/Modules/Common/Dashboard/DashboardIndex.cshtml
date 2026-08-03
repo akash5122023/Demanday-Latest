@@ -1,4 +1,4 @@
-﻿@using System.Net;
+@using System.Net;
 @using System.Net.Mail;
 @using System.Net;
 @using System.Net.Mail;
@@ -84,144 +84,595 @@
     }
 </style>
 
-<!-- Small boxes (Stat box) -->
 
 
-
+<!-- Premium Dashboard Slider Component Styles (Light Theme) -->
+<style>
+    .slider-wrapper {
+        position: relative;
+        margin-bottom: 25px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px 22px 16px 22px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
+        border: 1px solid #edf2f7;
+        transition: all 0.3s ease;
+    }
+    .slider-wrapper:hover {
+        box-shadow: 0 14px 35px rgba(0,0,0,0.07);
+    }
+    .slider-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    .slider-header-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .slider-icon-pill {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .slider-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.2px;
+    }
+    .slider-controls {
+        display: flex;
+        gap: 8px;
+    }
+    .slider-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #475569;
+        font-size: 13px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
+    }
+    .slider-btn:hover {
+        background: #2563eb;
+        color: #ffffff;
+        border-color: #2563eb;
+        box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+        transform: translateY(-2px);
+    }
+    .slider-btn:active {
+        transform: translateY(0);
+    }
+    .slider-track {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding: 4px 2px 10px 2px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        scroll-snap-type: x mandatory;
+    }
+    .slider-track::-webkit-scrollbar {
+        display: none;
+    }
+    .slider-card-item {
+        flex: 0 0 calc(50% - 8px);
+        min-width: calc(50% - 8px);
+        max-width: calc(50% - 8px);
+        scroll-snap-align: start;
+    }
+    .dash-stat-card {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 140px;
+    }
+    .dash-stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 22px rgba(0,0,0,0.09);
+    }
+    .dash-stat-card .inner {
+        padding: 16px 18px;
+        position: relative;
+        z-index: 2;
+    }
+    .dash-stat-card .card-num {
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1;
+        margin: 0 0 6px 0;
+        letter-spacing: -1px;
+    }
+    .dash-stat-card .card-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.75);
+        backdrop-filter: blur(4px);
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .dash-stat-card .card-label {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .dash-stat-card .card-icon {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+    .dash-stat-card:hover .card-icon {
+        transform: scale(1.1) rotate(-5deg);
+        background: #ffffff;
+    }
+    .dash-stat-card .card-footer {
+        background: rgba(255, 255, 255, 0.55);
+        padding: 8px 16px;
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        z-index: 2;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .dash-stat-card .card-footer:hover {
+        background: rgba(255, 255, 255, 0.9);
+    }
+    .dash-stat-card .card-footer i {
+        transition: transform 0.2s ease;
+    }
+    .dash-stat-card .card-footer:hover i {
+        transform: translateX(4px);
+    }
+    .slider-dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 8px;
+    }
+    .slider-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #cbd5e1;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .slider-dot.active {
+        width: 22px;
+        border-radius: 10px;
+        background: #2563eb;
+    }
+</style>
 
 <div class="row">
-    <div class="col-lg-2 col-xs-6">
-        <!-- small box -->
-        <div class="small-box" style="background-color: #007BFF; color: white;">
-            <div class="inner">
-                <h3>@Model.OpenEnq</h3>
-                <h4>@Model.EnqAmt</h4>
-                <p>Open Enquiries</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-envelope"></i>
-            </div>
-            <a href="/Enquiry?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
-        </div>
-    </div><!-- ./col -->
-
-    <div class="col-lg-2 col-xs-6">
-        <!-- small box -->
-        <div class="small-box" style="background-color: #28A745; color: white;">
-            <div class="inner">
-                <h3>@Model.OpenQuot</h3>
-                <h4>@Model.QuotAmt</h4>
-                <p>Open Quotations</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-file-text"></i>
-            </div>
-            <a href="/Quotation?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
-        </div>
-    </div><!-- ./col -->
-
-    <div class="col-lg-2 col-xs-6">
-        <!-- small box -->
-        <div class="small-box" style="background-color: #17A2B8; color: white;">
-            <div class="inner">
-                <h3>@Model.CustomerCount</h3>
-                <h4>All</h4>
-                <p>Contacts</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-address-book"></i>
-            </div>
-            <a href="/Contacts" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
-        </div>
-    </div><!-- ./col -->
-    <div class="col-lg-2 col-xs-6">
-
-        <!-- small box -->
-        <div class="small-box" style="background-color: #DC3545; color: white;">
-            <div class="inner">
-                <h3>@Model.OpenTasks</h3>
-                <h4>All</h4>
-                <p>Open Tasks</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-tasks"></i>
-            </div>
-            <a href="/Tasks?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
-        </div>
-    </div><!-- ./col -->
-
-    @if (@Model.OpenCMS > 0)
-    {
-        <div class="col-lg-2 col-xs-6">
-            <!-- small box -->
-            <div class="small-box" style="background-color: #6610F2; color: white;">
-                <div class="inner">
-                    <h3>@Model.OpenCMS</h3>
-                    <h4>All</h4>
-                    <p>Open CMS</p>
+    <!-- Email Team Slider Component (Light Color Cards) -->
+    <div class="col-md-6 col-xs-12">
+        <div class="slider-wrapper">
+            <div class="slider-header">
+                <div class="slider-header-title">
+                    <div class="slider-icon-pill" style="background: rgba(14,165,233,0.12); color: #0284c7;">
+                        <i class="fa fa-envelope"></i>
+                    </div>
+                    <h3>Email Team Dashboard</h3>
                 </div>
-                <div class="icon">
-                    <i class="fa fa-cogs"></i>
+                <div class="slider-controls">
+                    <button type="button" class="slider-btn" onclick="scrollDashboardSlider('etSliderTrack', -1)" title="Previous"><i class="fa fa-chevron-left"></i></button>
+                    <button type="button" class="slider-btn" onclick="scrollDashboardSlider('etSliderTrack', 1)" title="Next"><i class="fa fa-chevron-right"></i></button>
                 </div>
-                <a href="/Services/CMS?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
             </div>
-        </div><!-- ./col -->
+            <div class="slider-track" id="etSliderTrack" onscroll="updateSliderDots('etSliderTrack', 'etDots')">
+                <!-- Card 1: Enquiry (Light Blue) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border: 1px solid #7dd3fc; color: #0369a1;">
+                        <div class="card-icon" style="color: #0284c7;"><i class="fa fa-envelope"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #0369a1;">@Model.EtEnquiryCount</h3>
+                            <span class="card-badge" style="color: #0369a1;">All Records</span>
+                            <p class="card-label" style="color: #0369a1;">Enquiry</p>
+                        </div>
+                        <a href="/Demanday/DemandayEnquiry" class="card-footer" style="color: #0369a1;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Card 2: Teamleader (Light Green) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #86efac; color: #15803d;">
+                        <div class="card-icon" style="color: #15803d;"><i class="fa fa-users"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #15803d;">@Model.EtTeamLeaderCount</h3>
+                            <span class="card-badge" style="color: #15803d;">All Records</span>
+                            <p class="card-label" style="color: #15803d;">Teamleader</p>
+                        </div>
+                        <a href="/Demanday/DemandayTeamLeader" class="card-footer" style="color: #15803d;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Card 3: Quality (Light Cyan Teal) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); border: 1px solid #5eead4; color: #0f766e;">
+                        <div class="card-icon" style="color: #0f766e;"><i class="fa fa-check-square-o"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #0f766e;">@Model.EtQualityCount</h3>
+                            <span class="card-badge" style="color: #0f766e;">All Records</span>
+                            <p class="card-label" style="color: #0f766e;">Quality</p>
+                        </div>
+                        <a href="/Demanday/DemandayQuality" class="card-footer" style="color: #0f766e;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Card 4: MIS (Light Amber Gold) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fcd34d; color: #b45309;">
+                        <div class="card-icon" style="color: #b45309;"><i class="fa fa-bar-chart"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #b45309;">@Model.EtMisCount</h3>
+                            <span class="card-badge" style="color: #b45309;">All Records</span>
+                            <p class="card-label" style="color: #b45309;">MIS</p>
+                        </div>
+                        <a href="/Demanday/DemandayMis" class="card-footer" style="color: #b45309;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Card 5: ET Contact (Light Soft Purple) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); border: 1px solid #c084fc; color: #6b21a8;">
+                        <div class="card-icon" style="color: #6b21a8;"><i class="fa fa-address-card-o"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #6b21a8;">@Model.EtContactCount</h3>
+                            <span class="card-badge" style="color: #6b21a8;">All Records</span>
+                            <p class="card-label" style="color: #6b21a8;">ET Contact</p>
+                        </div>
+                        <a href="/Demanday/DemandayContacts" class="card-footer" style="color: #6b21a8;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-dots" id="etDots">
+                <span class="slider-dot active" onclick="jumpToSlide('etSliderTrack', 0)"></span>
+                <span class="slider-dot" onclick="jumpToSlide('etSliderTrack', 1)"></span>
+                <span class="slider-dot" onclick="jumpToSlide('etSliderTrack', 2)"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TeleMarketing Team Slider Component (Light Color Cards) -->
+    <div class="col-md-6 col-xs-12">
+        <div class="slider-wrapper">
+            <div class="slider-header">
+                <div class="slider-header-title">
+                    <div class="slider-icon-pill" style="background: rgba(16,185,129,0.12); color: #059669;">
+                        <i class="fa fa-phone"></i>
+                    </div>
+                    <h3>TeleMarketing Team Dashboard</h3>
+                </div>
+                <div class="slider-controls">
+                    <button type="button" class="slider-btn" onclick="scrollDashboardSlider('tmSliderTrack', -1)" title="Previous"><i class="fa fa-chevron-left"></i></button>
+                    <button type="button" class="slider-btn" onclick="scrollDashboardSlider('tmSliderTrack', 1)" title="Next"><i class="fa fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="slider-track" id="tmSliderTrack" onscroll="updateSliderDots('tmSliderTrack', 'tmDots')">
+                <!-- Card 1: TM Enquiry (Light Royal Blue) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #93c5fd; color: #1d4ed8;">
+                        <div class="card-icon" style="color: #1d4ed8;"><i class="fa fa-phone-square"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #1d4ed8;">@Model.TmEnquiryCount</h3>
+                            <span class="card-badge" style="color: #1d4ed8;">All Records</span>
+                            <p class="card-label" style="color: #1d4ed8;">TM Enquiry</p>
+                        </div>
+                        <a href="/Demanday/DemandayTeleMarketingEnquiry" class="card-footer" style="color: #1d4ed8;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Card 2: TM Teamleader (Light Mint Green) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%); border: 1px solid #6ee7b7; color: #047857;">
+                        <div class="card-icon" style="color: #047857;"><i class="fa fa-user-circle-o"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #047857;">@Model.TmTeamLeaderCount</h3>
+                            <span class="card-badge" style="color: #047857;">All Records</span>
+                            <p class="card-label" style="color: #047857;">TM Teamleader</p>
+                        </div>
+                        <a href="/Demanday/DemandayTeleMarketingTeamLeader" class="card-footer" style="color: #047857;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Card 3: TM Quality (Light Coral Orange) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); border: 1px solid #fdba74; color: #c2410c;">
+                        <div class="card-icon" style="color: #c2410c;"><i class="fa fa-shield"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #c2410c;">@Model.TmQualityCount</h3>
+                            <span class="card-badge" style="color: #c2410c;">All Records</span>
+                            <p class="card-label" style="color: #c2410c;">TM Quality</p>
+                        </div>
+                        <a href="/Demanday/DemandayTeleMarketingQualilty" class="card-footer" style="color: #c2410c;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Card 4: TM MIS (Light Violet Purple) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #fae8ff 0%, #f5d0fe 100%); border: 1px solid #f0abfc; color: #7e22ce;">
+                        <div class="card-icon" style="color: #7e22ce;"><i class="fa fa-pie-chart"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #7e22ce;">@Model.TmMisCount</h3>
+                            <span class="card-badge" style="color: #7e22ce;">All Records</span>
+                            <p class="card-label" style="color: #7e22ce;">TM MIS</p>
+                        </div>
+                        <a href="/Demanday/DemandayTeleMarketingMIS" class="card-footer" style="color: #7e22ce;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Card 5: TM Contact (Light Rose Pink) -->
+                <div class="slider-card-item">
+                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%); border: 1px solid #fda4af; color: #be185d;">
+                        <div class="card-icon" style="color: #be185d;"><i class="fa fa-vcard-o"></i></div>
+                        <div class="inner">
+                            <h3 class="card-num" style="color: #be185d;">@Model.TmContactCount</h3>
+                            <span class="card-badge" style="color: #be185d;">All Records</span>
+                            <p class="card-label" style="color: #be185d;">TM Contact</p>
+                        </div>
+                        <a href="/Demanday/DemandayTeleMarketingContacts" class="card-footer" style="color: #be185d;">
+                            <span>More info</span>
+                            <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="slider-dots" id="tmDots">
+                <span class="slider-dot active" onclick="jumpToSlide('tmSliderTrack', 0)"></span>
+                <span class="slider-dot" onclick="jumpToSlide('tmSliderTrack', 1)"></span>
+                <span class="slider-dot" onclick="jumpToSlide('tmSliderTrack', 2)"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Campaign Performance Chart Card (12-Month Qualified & Disqualified Trend) -->
+<div class="row" style="margin-top: 5px;">
+    <div class="col-xs-12">
+        <div style="background: #ffffff; border-radius: 16px; padding: 24px 28px 20px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #edf2f7; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;">
+                <div>
+                    <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px;">Campaign Performance</h3>
+                    <p style="margin: 0; font-size: 13px; color: #64748b; font-weight: 400;">Lead conversion funnel over the last 12 months</p>
+                </div>
+            </div>
+
+            <div style="position: relative; width: 100%; height: 340px;">
+                <canvas id="campaignPerformanceChart"></canvas>
+            </div>
+
+            <!-- Chart Custom Legend -->
+            <div style="display: flex; justify-content: center; gap: 24px; margin-top: 15px; font-size: 13px; font-weight: 600;">
+                <div style="display: flex; align-items: center; gap: 8px; color: #1e3a8a;">
+                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #1e3a8a; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #1e3a8a;"></span>
+                    <span>Qualified</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; color: #06b6d4;">
+                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #06b6d4; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #06b6d4;"></span>
+                    <span>Disqualified</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript">
+    function scrollDashboardSlider(trackId, direction) {
+        var track = document.getElementById(trackId);
+        if (track) {
+            var scrollAmount = track.clientWidth;
+            track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
     }
 
-    @if (Model.OpenAMC > 0)
-    {
-        <div class="col-lg-2 col-xs-6">
-            <!-- small box -->
-            <div class="small-box" style="background-color: #FFC107; color: white;">
-                <div class="inner">
-                    <h3>@Model.OpenAMC</h3>
-                    <h4>All</h4>
-                    <p>AMC Visits</p>
-                </div>
-                <div class="icon">
-                    <i class="fa fa-calendar"></i>
-                </div>
-                <a href="/Services/AMC?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
-            </div>
-        </div><!-- ./col -->
+    function jumpToSlide(trackId, index) {
+        var track = document.getElementById(trackId);
+        if (track) {
+            var scrollAmount = track.clientWidth * index;
+            track.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+        }
     }
 
-    @if (@Model.OpenPi > 0)
-    {
-        <div class="col-lg-2 col-xs-6">
-            <!-- small box -->
-            <div class="small-box" style="background-color: #6F42C1; color: white;">
-                <div class="inner">
-                    <h3>@Model.OpenPi</h3>
-                    <h4>@Model.PIAmt</h4>
-                    <p>Open PI</p>
-                </div>
-                <div class="icon">
-                    <i class="fa fa-file"></i>
-                </div>
-                <a href="/Proforma?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
-            </div>
-        </div><!-- ./col -->
+    function updateSliderDots(trackId, dotsId) {
+        var track = document.getElementById(trackId);
+        var dots = document.getElementById(dotsId);
+        if (track && dots) {
+            var pageIndex = Math.round(track.scrollLeft / track.clientWidth);
+            var dotElements = dots.getElementsByClassName('slider-dot');
+            for (var i = 0; i < dotElements.length; i++) {
+                if (i === pageIndex) {
+                    dotElements[i].classList.add('active');
+                } else {
+                    dotElements[i].classList.remove('active');
+                }
+            }
+        }
     }
 
-    @if (Model.Opensale > 0)
-    {
-        <div class="col-lg-2 col-xs-6">
-            <!-- small box -->
-            <div class="small-box" style="background-color: #E83E8C; color: white;">
-                <div class="inner">
-                    <h3>@Model.Opensale</h3>
-                    <h4>@Model.SaleAmt</h4>
-                    <p>Open Sales</p>
-                </div>
-                <div class="icon">
-                    <i class="fa fa-bar-chart"></i>
-                </div>
-                <a href="/Sales?Open" class="small-box-footer" style="color: white;">More info <i class="fa fa-arrow-circle-right"></i></a>
-            </div>
-        </div><!-- ./col -->
-    }
-</div><!-- /.row -->
+    // Initialize Campaign Performance Chart
+    (function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            var rawData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.QualityPerformanceChartData ?? new System.Collections.Generic.List<AdvanceCRM.Common.QualityChartDataPoint>()));
+            
+            var labels = rawData.map(function(x) { return x.MonthName; });
+            var qualifiedData = rawData.map(function(x) { return x.QualifiedCount; });
+            var disqualifiedData = rawData.map(function(x) { return x.DisqualifiedCount; });
+
+            var ctx = document.getElementById('campaignPerformanceChart');
+            if (ctx && typeof Chart !== 'undefined') {
+                var chartCtx = ctx.getContext('2d');
+
+                var gradientQualified = chartCtx.createLinearGradient(0, 0, 0, 300);
+                gradientQualified.addColorStop(0, 'rgba(30, 58, 138, 0.22)');
+                gradientQualified.addColorStop(1, 'rgba(30, 58, 138, 0.0)');
+
+                var gradientDisqualified = chartCtx.createLinearGradient(0, 0, 0, 300);
+                gradientDisqualified.addColorStop(0, 'rgba(6, 182, 212, 0.18)');
+                gradientDisqualified.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
+
+                new Chart(chartCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Qualified',
+                                data: qualifiedData,
+                                borderColor: '#1e3a8a',
+                                backgroundColor: gradientQualified,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#1e3a8a',
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                                borderWidth: 3
+                            },
+                            {
+                                label: 'Disqualified',
+                                data: disqualifiedData,
+                                borderColor: '#06b6d4',
+                                backgroundColor: gradientDisqualified,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#06b6d4',
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                                borderWidth: 3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#ffffff',
+                                titleColor: '#0f172a',
+                                bodyColor: '#334155',
+                                borderColor: '#e2e8f0',
+                                borderWidth: 1,
+                                padding: 12,
+                                boxPadding: 6,
+                                usePointStyle: true,
+                                titleFont: { size: 14, weight: 'bold' },
+                                bodyFont: { size: 13, weight: '600' },
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ' : ' + context.parsed.y;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#64748b',
+                                    font: { size: 12, weight: '500' }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: '#f1f5f9'
+                                },
+                                ticks: {
+                                    color: '#64748b',
+                                    font: { size: 12, weight: '500' },
+                                    precision: 0
+                                },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    })();
+</script>
+
 <!-- Main row -->
 <div class="row">
     <!-- Left col -->

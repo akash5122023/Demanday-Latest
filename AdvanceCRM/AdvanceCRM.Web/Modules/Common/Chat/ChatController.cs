@@ -178,6 +178,9 @@ namespace AdvanceCRM.Common.Pages
                 .Select(u.UserImage)
                 .Select(u.IsActive)
                 .Where(u.UserId != me & u.IsActive == 1))
+                .Where(x => x.UserId.HasValue)
+                .GroupBy(x => x.UserId.Value)
+                .Select(g => g.First())
                 .ToList();
 
             var unread = connection.List<ChatMessageRow>(q => q
@@ -186,8 +189,9 @@ namespace AdvanceCRM.Common.Pages
                 .Where(new Criteria("IsRead = 0")));
 
             var unreadBySender = unread
-                .GroupBy(x => x.SenderId)
-                .ToDictionary(g => g.Key.Value, g => g.Count());
+                .Where(x => x.SenderId.HasValue)
+                .GroupBy(x => x.SenderId.Value)
+                .ToDictionary(g => g.Key, g => g.Count());
 
             // Non-admins never see chat-disabled users. Admins see everyone, with a flag to toggle access.
             var list = users
@@ -201,6 +205,8 @@ namespace AdvanceCRM.Common.Pages
                     unread = unreadBySender.TryGetValue(x.UserId.Value, out var c) ? c : 0,
                     chatEnabled = !disabled.Contains(x.UserId.Value)
                 })
+                .GroupBy(x => x.userId)
+                .Select(g => g.First())
                 .OrderByDescending(x => x.unread)
                 .ThenByDescending(x => x.online)
                 .ThenBy(x => x.name)
@@ -636,7 +642,7 @@ namespace AdvanceCRM.Common.Pages
                 return new JsonResult(new { success = false, error = "Group not found." });
 
             var members = connection.Query<MemberRow>(
-                @"SELECT us.UserId, ISNULL(NULLIF(us.DisplayName, ''), us.Username) AS Name, us.UserImage
+                @"SELECT DISTINCT us.UserId, ISNULL(NULLIF(us.DisplayName, ''), us.Username) AS Name, us.UserImage
                   FROM ChatGroupMember m
                   INNER JOIN Users us ON us.UserId = m.UserId
                   WHERE m.GroupId = @g

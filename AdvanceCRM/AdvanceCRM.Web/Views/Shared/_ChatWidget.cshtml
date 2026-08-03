@@ -429,7 +429,10 @@
             });
         }
 
-        var items = state.contacts.filter(function (c) {
+        var seenUserIds = {};
+        var items = (state.contacts || []).filter(function (c) {
+            if (!c || !c.userId || seenUserIds[c.userId]) return false;
+            seenUserIds[c.userId] = true;
             // Default shows online users; toggle ON shows offline users.
             if (state.showOffline ? c.online : !c.online) return false;
             return filterMatch(c.name);

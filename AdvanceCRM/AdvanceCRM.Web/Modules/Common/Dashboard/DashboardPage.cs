@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.Common.Pages
 {
     using Serenity;
@@ -25,6 +25,7 @@ namespace AdvanceCRM.Common.Pages
     using AdvanceCRM.Services;
     using AdvanceCRM.Purchase;
     using AdvanceCRM.Sales;
+    using AdvanceCRM.Demanday;
     using System.Collections.Generic;
     using AdvanceCRM.Accounting;
     using AdvanceCRM.Common.Calendar;
@@ -96,6 +97,86 @@ namespace AdvanceCRM.Common.Pages
                         model.OpenAMC = connection.Count<AMCVisitPlannerRow>(a.Status == 1 && a.AssignedTo == user.UserId);
                         model.Opensale = connection.Count<SalesRow>(sale.Status == 1 && sale.AssignedId == user.UserId);
                         model.OpenPi = connection.Count<InvoiceRow>(invo.Status == 1 && invo.AssignedId == user.UserId);
+
+                        try
+                        {
+                            model.EtEnquiryCount = connection.Count<DemandayEnquiryRow>();
+                            model.EtTeamLeaderCount = connection.Count<DemandayTeamLeaderRow>();
+                            model.EtQualityCount = connection.Count<DemandayQualityRow>();
+                            model.EtMisCount = connection.Count<DemandayMisRow>();
+                            model.EtContactCount = connection.Count<DemandayContactsRow>();
+
+                            model.TmEnquiryCount = connection.Count<DemandayTeleMarketingEnquiryRow>();
+                            model.TmTeamLeaderCount = connection.Count<DemandayTeleMarketingTeamLeaderRow>();
+                            model.TmQualityCount = connection.Count<DemandayTeleMarketingQualiltyRow>();
+                            model.TmMisCount = connection.Count<DemandayTeleMarketingMISRow>();
+                            model.TmContactCount = connection.Count<DemandayTeleMarketingContactsRow>();
+
+                            // Calculate 12-month Campaign Performance data for Email Quality & TM Quality
+                            model.QualityPerformanceChartData = new List<QualityChartDataPoint>();
+                            DateTime now = DateTime.Now;
+                            for (int i = 11; i >= 0; i--)
+                            {
+                                DateTime mDate = new DateTime(now.Year, now.Month, 1).AddMonths(-i);
+                                model.QualityPerformanceChartData.Add(new QualityChartDataPoint
+                                {
+                                    MonthName = mDate.ToString("MMM"),
+                                    Year = mDate.Year,
+                                    Month = mDate.Month,
+                                    QualifiedCount = 0,
+                                    DisqualifiedCount = 0
+                                });
+                            }
+
+                            // Email Quality rows
+                            var eqRows = connection.List<DemandayQualityRow>(q => q
+                                .Select(DemandayQualityRow.Fields.QaStatus)
+                                .Select(DemandayQualityRow.Fields.Date)
+                                .Select(DemandayQualityRow.Fields.DateAudited)
+                                .Select(DemandayQualityRow.Fields.CallDate)
+                            );
+                            foreach (var row in eqRows)
+                            {
+                                string status = row.QaStatus;
+                                if (string.IsNullOrEmpty(status)) continue;
+                                DateTime? rDate = row.Date ?? row.DateAudited ?? row.CallDate;
+                                if (!rDate.HasValue) continue;
+
+                                var dp = model.QualityPerformanceChartData.FirstOrDefault(x => x.Year == rDate.Value.Year && x.Month == rDate.Value.Month);
+                                if (dp != null)
+                                {
+                                    if (status.Equals("Qualified", StringComparison.Ordinal))
+                                        dp.QualifiedCount++;
+                                    else if (status.Equals("Disqualified", StringComparison.Ordinal))
+                                        dp.DisqualifiedCount++;
+                                }
+                            }
+
+                            // TeleMarketing Quality rows
+                            var tmqRows = connection.List<DemandayTeleMarketingQualiltyRow>(q => q
+                                .Select(DemandayTeleMarketingQualiltyRow.Fields.QaStatus)
+                                .Select(DemandayTeleMarketingQualiltyRow.Fields.Date)
+                                .Select(DemandayTeleMarketingQualiltyRow.Fields.DateAudited)
+                                .Select(DemandayTeleMarketingQualiltyRow.Fields.CallDate)
+                            );
+                            foreach (var row in tmqRows)
+                            {
+                                string status = row.QaStatus;
+                                if (string.IsNullOrEmpty(status)) continue;
+                                DateTime? rDate = row.Date ?? row.DateAudited ?? row.CallDate;
+                                if (!rDate.HasValue) continue;
+
+                                var dp = model.QualityPerformanceChartData.FirstOrDefault(x => x.Year == rDate.Value.Year && x.Month == rDate.Value.Month);
+                                if (dp != null)
+                                {
+                                    if (status.Equals("Qualified", StringComparison.Ordinal))
+                                        dp.QualifiedCount++;
+                                    else if (status.Equals("Disqualified", StringComparison.Ordinal))
+                                        dp.DisqualifiedCount++;
+                                }
+                            }
+                        }
+                        catch { }
 
                         model.Customer = connection.List<ContactsRow>(f => f
                          .SelectTableFields()

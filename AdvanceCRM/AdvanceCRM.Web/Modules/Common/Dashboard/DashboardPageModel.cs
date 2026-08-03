@@ -1,4 +1,4 @@
-﻿
+
 namespace AdvanceCRM.Common
 {
     using Administration;
@@ -82,5 +82,30 @@ namespace AdvanceCRM.Common
         public int CountOfAniversaryWishes { get; set; }
         public int CountOfIncorporationWishes { get; set; }
         public Boolean StockData { get; set; }
+
+        // Email Team counts
+        public int EtEnquiryCount { get; set; }
+        public int EtTeamLeaderCount { get; set; }
+        public int EtQualityCount { get; set; }
+        public int EtMisCount { get; set; }
+        public int EtContactCount { get; set; }
+
+        // TeleMarketing Team counts
+        public int TmEnquiryCount { get; set; }
+        public int TmTeamLeaderCount { get; set; }
+        public int TmQualityCount { get; set; }
+        public int TmMisCount { get; set; }
+        public int TmContactCount { get; set; }
+
+        public List<QualityChartDataPoint> QualityPerformanceChartData { get; set; }
+    }
+
+    public class QualityChartDataPoint
+    {
+        public string MonthName { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public int QualifiedCount { get; set; }
+        public int DisqualifiedCount { get; set; }
     }
 }
