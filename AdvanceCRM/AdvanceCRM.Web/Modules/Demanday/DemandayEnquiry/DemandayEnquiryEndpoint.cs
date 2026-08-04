@@ -97,6 +97,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     Title = enquiry.Title,
                     Email = enquiry.Email,
                     WorkPhone = enquiry.WorkPhone,
+                    MasterAccountId = enquiry.MasterAccountId,
                     CampaignId = enquiry.CampaignId,
                     AlternativeNumber = enquiry.AlternativeNumber,
                     Street = enquiry.Street,
@@ -125,7 +126,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                 teamLeaderConn.Insert(teamLeader);
 
                 enquiryConn.DeleteById<DemandayEnquiryRow>(id);
-                response.Id = id;
+                response.Id = teamLeader.Id ?? 0;
             }
             response.Status = "Enquiry successfully moved to Team Leader!";
 
@@ -207,6 +208,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var demandayenquiry = new DemandayEnquiryRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
+                                MasterAccountId = ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
                                 LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),

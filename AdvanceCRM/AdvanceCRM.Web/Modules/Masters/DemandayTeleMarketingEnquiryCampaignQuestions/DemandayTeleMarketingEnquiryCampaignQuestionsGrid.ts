@@ -13,5 +13,29 @@ namespace AdvanceCRM.Masters {
         constructor(container: JQuery) {
             super(container);
         }
+
+        protected addButtonsToToolbar(): void {
+            super.addButtonsToToolbar();
+
+            this.toolbar.prependButton({
+                title: 'Download Template',
+                cssClass: 'export-excel-button',
+                onClick: () => {
+                    window.location.href = DemandayTeleMarketingEnquiryCampaignQuestionsService.baseUrl + '/DownloadTemplate';
+                }
+            });
+
+            this.toolbar.prependButton({
+                title: 'Import Questions & Answers from Excel',
+                cssClass: 'import-button',
+                onClick: () => {
+                    let dialog = new ExcelImportQuestionsAnswersDialog();
+                    dialog.dialogOpen();
+                    dialog.element.closest(".ui-dialog").on("dialogclose", () => {
+                        this.refresh();
+                    });
+                }
+            });
+        }
     }
 }

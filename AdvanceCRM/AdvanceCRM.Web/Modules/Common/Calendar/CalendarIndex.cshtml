@@ -866,25 +866,11 @@
         var userId = @(Model.User?.UserId ?? 0);
 
         function updateCalendarBannerButtons(status) {
-            var normalized = (status || "").trim();
+            // All buttons hidden - they are already in navbar
             if (bannerPunchInBtn) bannerPunchInBtn.style.display = "none";
             if (bannerStartBreakBtn) bannerStartBreakBtn.style.display = "none";
             if (bannerEndBreakBtn) bannerEndBreakBtn.style.display = "none";
             if (bannerPunchOutBtn) bannerPunchOutBtn.style.display = "none";
-
-            if (normalized === "NoPunch") {
-                if (bannerPunchInBtn) bannerPunchInBtn.style.display = "inline-block";
-            } else if (normalized === "PunchedIn") {
-                if (bannerStartBreakBtn) bannerStartBreakBtn.style.display = "inline-block";
-                if (bannerPunchOutBtn) bannerPunchOutBtn.style.display = "inline-block";
-            } else if (normalized === "OnBreak") {
-                if (bannerEndBreakBtn) bannerEndBreakBtn.style.display = "inline-block";
-                if (bannerPunchOutBtn) bannerPunchOutBtn.style.display = "inline-block";
-            } else if (normalized === "PunchedOut") {
-                // User has already punched out for today. Hide/remove all action buttons from the banner.
-            } else {
-                if (bannerPunchInBtn) bannerPunchInBtn.style.display = "inline-block";
-            }
         }
 
         if (bannerPunchInBtn) {

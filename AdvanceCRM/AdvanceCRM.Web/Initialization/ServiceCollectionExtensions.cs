@@ -19,5 +19,13 @@ namespace AdvanceCRM
 
             return services;
         }
+
+        public static IServiceCollection AddSyncHandlers(this IServiceCollection services)
+        {
+            // Register TMEnquirySyncHandler for auto-sync functionality
+            services.AddTransient<Demanday.ITMEnquirySyncHandler, Demanday.TMEnquirySyncHandler>();
+
+            return services;
+        }
     }
 }

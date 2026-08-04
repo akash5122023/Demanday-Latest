@@ -100,6 +100,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var demandaytelemarketingmis = new DemandayTeleMarketingMISRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
+                                MasterAccountId = ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
@@ -225,6 +226,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     FirstName = demandaytelemarketingmis.FirstName,
                     LastName = demandaytelemarketingmis.LastName,
                     Title = demandaytelemarketingmis.Title,
+                    MasterAccountId = demandaytelemarketingmis.MasterAccountId,
                     Email = demandaytelemarketingmis.Email,
                     WorkPhone = demandaytelemarketingmis.WorkPhone,
                     AlternativeNumber = demandaytelemarketingmis.AlternativeNumber,

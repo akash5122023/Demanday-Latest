@@ -231,6 +231,14 @@ public String EmailFormat
             set => fields.Md5[this] = value;
         }
 
+        [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LookupInclude]
+        [LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
+        public Int32? MasterAccountId
+        {
+            get => fields.MasterAccountId[this];
+            set => fields.MasterAccountId[this] = value;
+        }
+
         [DisplayName("Campaign Id"), Size(15)]
         public String CampaignId
         {
@@ -603,6 +611,7 @@ public String EmailFormat
             public StringField OwnerUrl;
             public StringField OwnerPlan;
             public StringField EmailFormat;
+            public Int32Field MasterAccountId;
             public StringField CampaignId;
         }
     }

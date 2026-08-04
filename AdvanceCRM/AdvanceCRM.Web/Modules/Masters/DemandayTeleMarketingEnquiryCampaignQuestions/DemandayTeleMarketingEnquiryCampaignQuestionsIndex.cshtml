@@ -3,12 +3,35 @@
     ViewData["Title"] = Localizer.Get("Db.Masters.DemandayTeleMarketingEnquiryCampaignQuestions.EntityPlural");
 }
 
+<div id="ToolbarDiv" style="margin-bottom: 10px;">
+    <button id="btnDownloadTemplate" class="btn btn-default" style="margin-right: 5px;">
+        <span class="glyphicon glyphicon-download"></span> Download Template
+    </button>
+    <button id="btnImportExcel" class="btn btn-default">
+        <span class="glyphicon glyphicon-upload"></span> Import Questions & Answers from Excel
+    </button>
+</div>
+
 <div id="GridDiv"></div>
 
 <script type="text/javascript">
     jQuery(function () {
-        new AdvanceCRM.Masters.DemandayTeleMarketingEnquiryCampaignQuestionsGrid($('#GridDiv'), {}).init();
+        var grid = new AdvanceCRM.Masters.DemandayTeleMarketingEnquiryCampaignQuestionsGrid($('#GridDiv'), {}).init();
 
         Q.initFullHeightGridPage($('#GridDiv'));
+
+        // Download Template Button
+        $('#btnDownloadTemplate').on('click', function () {
+            window.location.href = '/Services/Masters/DemandayTeleMarketingEnquiryCampaignQuestions/DownloadTemplate';
+        });
+
+        // Import Excel Button
+        $('#btnImportExcel').on('click', function () {
+            let dialog = new AdvanceCRM.Masters.ExcelImportQuestionsAnswersDialog();
+            dialog.dialogOpen();
+            dialog.element.closest(".ui-dialog").on("dialogclose", function () {
+                grid.refresh();
+            });
+        });
     });
 </script>

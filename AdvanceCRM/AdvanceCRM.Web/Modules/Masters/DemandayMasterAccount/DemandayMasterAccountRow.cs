@@ -9,7 +9,7 @@ using System.IO;
 namespace AdvanceCRM.Masters
 {
     [ConnectionKey("Default"), Module("Masters"), TableName("[dbo].[DemandayMasterAccount]")]
-    [DisplayName("Demanday Master Account"), InstanceName("Demanday Master Account")]
+    [DisplayName("Master Account"), InstanceName("Master Account")]
     [ReadPermission("Masters:Read")]
     [ModifyPermission("Masters:Modify")]
     [LookupScript("Masters.DemandayMasterAccount", Permission = "?")]

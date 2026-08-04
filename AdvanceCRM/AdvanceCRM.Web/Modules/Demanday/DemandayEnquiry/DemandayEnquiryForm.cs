@@ -40,8 +40,13 @@ namespace AdvanceCRM.Demanday.Forms
         //    public Int32 OwnerId { get; set; }
         [Category("Campaign Information")]
         [HalfWidth]
-        [LookupEditor("Masters.DemandayCampaignIdByText")]
+        [LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
+        public Int32? MasterAccountId { get; set; }
+
+        [HalfWidth]
+        [LookupEditor("Masters.DemandayCampaignIdByText", CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
         public string CampaignId { get; set; }
+
         [Category("Contact Information")]
         [HalfWidth]
         public string FirstName { get; set; }

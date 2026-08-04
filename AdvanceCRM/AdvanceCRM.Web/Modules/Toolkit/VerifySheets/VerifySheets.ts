@@ -257,6 +257,22 @@ namespace AdvanceCRM.Toolkit {
                         { field: 'DncStatus', title: 'DNC Status' },
                         { field: 'Number', title: 'Number' }
                     ]
+                },
+                {
+                    key: 'TMEnquiry', title: 'TM Enquiry',
+                    list: Toolkit.ToolkitTMEnquiryService.List,
+                    newDialog: () => new Toolkit.ToolkitTMEnquiryDialog(),
+                    permission: 'Toolkit:VerifySheets:ToolkitTMEnquiry',
+                    directPermission: 'ToolkitTMEnquiry:Read',
+                    columns: [
+                        { field: 'SrNo', title: 'Sr No' },
+                        { field: 'FirstName', title: 'First Name' },
+                        { field: 'LastName', title: 'Last Name' },
+                        { field: 'Email', title: 'Email' },
+                        { field: 'CompanyName', title: 'Company Name' },
+                        { field: 'CampaignId', title: 'Campaign ID' },
+                        { field: 'Timestamp', title: 'Timestamp' }
+                    ]
                 }
             ];
         }

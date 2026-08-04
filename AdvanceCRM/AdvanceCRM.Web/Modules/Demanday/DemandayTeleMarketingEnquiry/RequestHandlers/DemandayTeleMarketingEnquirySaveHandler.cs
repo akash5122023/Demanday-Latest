@@ -1,4 +1,5 @@
 using Serenity;
+using Serenity.Data;
 using Serenity.Services;
 using System;
 using MyRequest = Serenity.Services.SaveRequest<AdvanceCRM.Demanday.DemandayTeleMarketingEnquiryRow>;
@@ -11,9 +12,12 @@ namespace AdvanceCRM.Demanday
 
     public class DemandayTeleMarketingEnquirySaveHandler : SaveRequestHandler<MyRow, MyRequest, MyResponse>, IDemandayTeleMarketingEnquirySaveHandler
     {
-        public DemandayTeleMarketingEnquirySaveHandler(IRequestContext context)
+        private readonly ITMEnquirySyncHandler tmEnquirySyncHandler;
+
+        public DemandayTeleMarketingEnquirySaveHandler(IRequestContext context, ITMEnquirySyncHandler tmEnquirySyncHandler)
              : base(context)
         {
+            this.tmEnquirySyncHandler = tmEnquirySyncHandler;
         }
 
         protected override void BeforeSave()
@@ -23,6 +27,26 @@ namespace AdvanceCRM.Demanday
             // For Create only
             if (IsCreate)
                 Row.OwnerId = int.Parse(User.GetIdentifier());
+        }
+
+        protected override void AfterSave()
+        {
+            base.AfterSave();
+
+            // Auto-sync to TMEnquiry table
+            try
+            {
+                using (var uow = new UnitOfWork(Connection))
+                {
+                    tmEnquirySyncHandler.SyncToTMEnquiry(uow, Row);
+                    uow.Commit();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log but don't throw - sync failure shouldn't fail the main operation
+                System.Diagnostics.Debug.WriteLine($"TMEnquiry sync error: {ex.Message}");
+            }
         }
     }
 }

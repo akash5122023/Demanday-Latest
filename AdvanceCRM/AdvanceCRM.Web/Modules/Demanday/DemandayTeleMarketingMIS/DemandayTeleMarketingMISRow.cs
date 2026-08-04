@@ -40,6 +40,13 @@ namespace AdvanceCRM.Demanday
             set => fields.TlName[this] = value;
         }
 
+        [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LookupInclude]
+        public Int32? MasterAccountId
+        {
+            get => fields.MasterAccountId[this];
+            set => fields.MasterAccountId[this] = value;
+        }
+
         [DisplayName("Campaign Id"), Size(100)]
         public String CampaignId
         {
@@ -688,6 +695,7 @@ namespace AdvanceCRM.Demanday
             public Int32Field Id;
             public StringField AgentsName;
             public StringField TlName;
+            public Int32Field MasterAccountId;
             public StringField CampaignId;
             public StringField CompanyName;
             public StringField FirstName;

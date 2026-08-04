@@ -7,13 +7,15 @@
         export declare function Delete(request: Serenity.DeleteRequest, onSuccess?: (response: Serenity.DeleteResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function Retrieve(request: Serenity.RetrieveRequest, onSuccess?: (response: Serenity.RetrieveResponse<DemandayTeleMarketingEnquiryCampaignQuestionsRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function List(request: Serenity.ListRequest, onSuccess?: (response: Serenity.ListResponse<DemandayTeleMarketingEnquiryCampaignQuestionsRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
+        export declare function ExcelImportQuestionsWithAnswers(request: ExcelImportRequest, onSuccess?: (response: ExcelImportResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
 
         export declare const enum Methods {
             Create = "Masters/DemandayTeleMarketingEnquiryCampaignQuestions/Create",
             Update = "Masters/DemandayTeleMarketingEnquiryCampaignQuestions/Update",
             Delete = "Masters/DemandayTeleMarketingEnquiryCampaignQuestions/Delete",
             Retrieve = "Masters/DemandayTeleMarketingEnquiryCampaignQuestions/Retrieve",
-            List = "Masters/DemandayTeleMarketingEnquiryCampaignQuestions/List"
+            List = "Masters/DemandayTeleMarketingEnquiryCampaignQuestions/List",
+            ExcelImportQuestionsWithAnswers = "Masters/DemandayTeleMarketingEnquiryCampaignQuestions/ExcelImportQuestionsWithAnswers"
         }
 
         [
@@ -21,7 +23,8 @@
             'Update', 
             'Delete', 
             'Retrieve', 
-            'List'
+            'List', 
+            'ExcelImportQuestionsWithAnswers'
         ].forEach(x => {
             (<any>DemandayTeleMarketingEnquiryCampaignQuestionsService)[x] = function (r, s, o) {
                 return Q.serviceRequest(baseUrl + '/' + x, r, s, o);

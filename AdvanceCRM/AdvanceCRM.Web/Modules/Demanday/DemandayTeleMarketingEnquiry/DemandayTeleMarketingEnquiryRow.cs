@@ -264,6 +264,13 @@ public String EmailFormat
     set => fields.EmailFormat[this] = value;
 }
 
+        [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LookupInclude]
+        public Int32? MasterAccountId
+        {
+            get => fields.MasterAccountId[this];
+            set => fields.MasterAccountId[this] = value;
+        }
+
         [DisplayName("Campaign Id"), Size(50)]
         public String CampaignId
         {
@@ -625,6 +632,7 @@ public String EmailFormat
             public StringField OwnerUrl;
             public StringField OwnerPlan;
             public StringField EmailFormat;
+            public Int32Field MasterAccountId;
             public StringField CampaignId;
             public RowListField<DemandayTeleMarketingEnquiryQADetailsRow> QADetails;
         }

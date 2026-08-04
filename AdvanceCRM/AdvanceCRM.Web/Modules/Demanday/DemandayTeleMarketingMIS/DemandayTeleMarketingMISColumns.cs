@@ -17,6 +17,7 @@ namespace AdvanceCRM.Demanday.Columns
         //[EditLink]
         //public String AgentsName { get; set; }
         //public String TlName { get; set; }
+        public Int32? MasterAccountId { get; set; }
         public String CampaignId { get; set; }
         public String Slot { get; set; }
         [QuickFilter]

@@ -107,3 +107,10 @@
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("OpenCampaign:Import")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("DNCContacts:Import")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("DNCContacts:Export")]
+
+// TM Enquiry module (VerifySheet)
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("TMEnquiry:Read")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("TMEnquiry:Insert")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("TMEnquiry:Update")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("TMEnquiry:Delete")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:TMEnquiry")]

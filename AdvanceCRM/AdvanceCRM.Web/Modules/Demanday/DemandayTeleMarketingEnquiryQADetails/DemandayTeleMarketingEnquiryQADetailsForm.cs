@@ -18,5 +18,8 @@ namespace AdvanceCRM.Demanday.Forms
 
         [LookupEditor(typeof(Masters.DemandayTeleMarketingEnquiryQuestionAnswersRow), CascadeFrom = "QuestionId", CascadeField = "QuestionId")]
         public Int32 AnswerId { get; set; }
+
+        [TextAreaEditor(Rows = 4)]
+        public String AnswerText { get; set; }
     }
 }

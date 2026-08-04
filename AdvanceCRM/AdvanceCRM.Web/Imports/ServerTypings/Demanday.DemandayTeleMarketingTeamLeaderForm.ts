@@ -1,6 +1,7 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayTeleMarketingTeamLeaderForm {
-        CampaignId: Serenity.StringEditor;
+        MasterAccountId: Serenity.LookupEditor;
+        CampaignId: Serenity.LookupEditor;
         Slot: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
@@ -49,49 +50,50 @@
                 DemandayTeleMarketingTeamLeaderForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.StringEditor;
-                var w1 = s.DateTimeEditor;
-                var w2 = s.ImageUploadEditor;
-                var w3 = DemandayTeleMarketingEnquiryQADetailsEditor;
-                var w4 = s.LookupEditor;
+                var w0 = s.LookupEditor;
+                var w1 = s.StringEditor;
+                var w2 = s.DateTimeEditor;
+                var w3 = s.ImageUploadEditor;
+                var w4 = DemandayTeleMarketingEnquiryQADetailsEditor;
 
                 Q.initFormType(DemandayTeleMarketingTeamLeaderForm, [
+                    'MasterAccountId', w0,
                     'CampaignId', w0,
-                    'Slot', w0,
-                    'FirstName', w0,
-                    'LastName', w0,
-                    'Title', w0,
-                    'Email', w0,
-                    'WorkPhone', w0,
-                    'AlternativeNumber', w0,
-                    'CompanyName', w0,
-                    'Industry', w0,
-                    'Revenue', w0,
-                    'CompanyEmployeeSize', w0,
-                    'ZoomInfoIndustry', w0,
-                    'SubIndustry', w0,
-                    'ZoomInfoEmployeeSize', w0,
-                    'Asset', w0,
-                    'CallStatus', w0,
-                    'Street', w0,
-                    'City', w0,
-                    'State', w0,
-                    'ZipCode', w0,
-                    'Country', w0,
-                    'ProfileLink', w0,
-                    'CompanyLink', w0,
-                    'RevenueLink', w0,
-                    'AddressLink', w0,
-                    'Link', w0,
-                    'EmailFormat', w0,
-                    'Tenurity', w0,
-                    'Code', w0,
-                    'Md5', w0,
-                    'Date', w1,
-                    'AdditionalNotes', w0,
-                    'Attachments', w2,
-                    'QADetails', w3,
-                    'OwnerId', w4
+                    'Slot', w1,
+                    'FirstName', w1,
+                    'LastName', w1,
+                    'Title', w1,
+                    'Email', w1,
+                    'WorkPhone', w1,
+                    'AlternativeNumber', w1,
+                    'CompanyName', w1,
+                    'Industry', w1,
+                    'Revenue', w1,
+                    'CompanyEmployeeSize', w1,
+                    'ZoomInfoIndustry', w1,
+                    'SubIndustry', w1,
+                    'ZoomInfoEmployeeSize', w1,
+                    'Asset', w1,
+                    'CallStatus', w1,
+                    'Street', w1,
+                    'City', w1,
+                    'State', w1,
+                    'ZipCode', w1,
+                    'Country', w1,
+                    'ProfileLink', w1,
+                    'CompanyLink', w1,
+                    'RevenueLink', w1,
+                    'AddressLink', w1,
+                    'Link', w1,
+                    'EmailFormat', w1,
+                    'Tenurity', w1,
+                    'Code', w1,
+                    'Md5', w1,
+                    'Date', w2,
+                    'AdditionalNotes', w1,
+                    'Attachments', w3,
+                    'QADetails', w4,
+                    'OwnerId', w0
                 ]);
             }
         }

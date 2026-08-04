@@ -73,6 +73,7 @@
         OwnerUrl?: string;
         OwnerPlan?: string;
         EmailFormat?: string;
+        MasterAccountId?: number;
         CampaignId?: string;
         QADetails?: DemandayTeleMarketingEnquiryQADetailsRow[];
     }
@@ -165,6 +166,7 @@
             OwnerUrl = "OwnerUrl",
             OwnerPlan = "OwnerPlan",
             EmailFormat = "EmailFormat",
+            MasterAccountId = "MasterAccountId",
             CampaignId = "CampaignId",
             QADetails = "QADetails"
         }

@@ -199,6 +199,14 @@ namespace AdvanceCRM.Demanday
             set => fields.Md5[this] = value;
         }
 
+        [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LookupInclude]
+        [LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
+        public Int32? MasterAccountId
+        {
+            get => fields.MasterAccountId[this];
+            set => fields.MasterAccountId[this] = value;
+        }
+
         [DisplayName("Campaign Id"), Size(15)]
         public String CampaignId
         {
@@ -565,6 +573,7 @@ namespace AdvanceCRM.Demanday
             public Int32Field OwnerTenantId;
             public StringField OwnerUrl;
             public StringField OwnerPlan;
+            public Int32Field MasterAccountId;
             public StringField CampaignId;
         }
     }

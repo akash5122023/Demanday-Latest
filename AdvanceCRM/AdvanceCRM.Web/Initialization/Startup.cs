@@ -252,6 +252,7 @@ namespace AdvanceCRM
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             });
             services.AddRepositories();
+            services.AddSyncHandlers();
             services.AddServiceHandlers();
             services.AddDynamicScripts();
             services.AddCssBundling();

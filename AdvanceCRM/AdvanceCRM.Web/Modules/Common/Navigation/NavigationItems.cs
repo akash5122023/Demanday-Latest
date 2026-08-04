@@ -99,6 +99,7 @@ using Serenity.Navigation;
 [assembly: NavigationLink(1508, "Toolkit/Competitor", typeof(DemandayCompetitorController), icon: "fa-file-text-o", Permission = "DemandayCompetitor:Read", Title = "Competitor")]
 [assembly: NavigationLink(1509, "Toolkit/Specification", typeof(DemandaySpecsController), icon: "icon-docs", Permission = "DemandaySpecs:Read", Title = "Specification")]
 [assembly: NavigationLink(1510, "Toolkit/DNC Contact", typeof(DncContactsController), icon: "fa-ban", Permission = "DNCContacts:Read", Title = "DNC Contact")]
+[assembly: NavigationLink(1511, "Toolkit/TM Enquiry", typeof(ToolkitTMEnquiryController), icon: "fa-phone", Permission = "ToolkitTMEnquiry:Read", Title = "TM Enquiry")]
 //[assembly: NavigationLink(1452, "Purchase/Purchase", typeof(PurchaseController), icon: "icon-basket-loaded", Permission = "Purchase:Read", Title = "Purchase")]
 //[assembly: NavigationLink(1453, "Purchase/Purchase Return", typeof(PurchaseReturnController), icon: "fa-reply-all", Permission = "PurchaseReturn:Read", Title = "Purchase Return")]
 //[assembly: NavigationLink(1454, "Purchase/GrnTwo", typeof(GrnTwoController), icon: "fa-truck", Permission = "GrnTwo:Read", Title = "GRN")]

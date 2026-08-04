@@ -100,6 +100,7 @@
         OwnerPlan?: string;
         EmailFormat?: string;
         Attachments?: string;
+        MasterAccountId?: number;
         CampaignId?: string;
     }
 
@@ -218,6 +219,7 @@
             OwnerPlan = "OwnerPlan",
             EmailFormat = "EmailFormat",
             Attachments = "Attachments",
+            MasterAccountId = "MasterAccountId",
             CampaignId = "CampaignId"
         }
     }

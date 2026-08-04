@@ -1493,9 +1493,23 @@ namespace MVC
                 public const string TalCampaignIndex = "~/Modules/Toolkit/TalCampaign/TalCampaignIndex.cshtml";
             }
 
+            public static class TMEnquiry
+            {
+                public const string ToolkitTMEnquiryIndex = "~/Modules/Toolkit/TMEnquiry/ToolkitTMEnquiryIndex.cshtml";
+            }
+
             public static class VerifySheets
             {
                 public const string VerifySheetsIndex = "~/Modules/Toolkit/VerifySheets/VerifySheetsIndex.cshtml";
+            }
+
+        }
+
+        public static class VerifySheet
+        {
+            public static class TMEnquiry
+            {
+                public const string TMEnquiryIndex = "~/Modules/VerifySheet/TMEnquiry/TMEnquiryIndex.cshtml";
             }
 
         }

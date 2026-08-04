@@ -17,7 +17,6 @@ namespace AdvanceCRM.Demanday.Columns
         //[EditLink]
         //public String AgentsName { get; set; }
         //public String TlName { get; set; }
-        //public String CampaignId { get; set; }
         //public String CompanyName { get; set; }
         //public String FirstName { get; set; }
         //public String LastName { get; set; }
@@ -73,6 +72,7 @@ namespace AdvanceCRM.Demanday.Columns
         public string Domain { get; set; }
         public string JobLevel { get; set; }
         public string JobFunctionRole { get; set; }
+        public Int32? MasterAccountId { get; set; }
         public string CampaignId { get; set; }
         public string Street { get; set; }
         public string City { get; set; }

@@ -13,6 +13,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using MyRow = AdvanceCRM.Demanday.DemandayQualityRow;
+using AdvanceCRM.EmailTeam;
 
 namespace AdvanceCRM.Demanday.Endpoints
 {
@@ -104,6 +105,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                     FirstName = demandayquality.FirstName,
                     LastName = demandayquality.LastName,
                     Title = demandayquality.Title,
+                    MasterAccountId = demandayquality.MasterAccountId,
                     Email = demandayquality.Email,
                     WorkPhone = demandayquality.WorkPhone,
                     AlternativeNumber = demandayquality.AlternativeNumber,
@@ -132,6 +134,17 @@ namespace AdvanceCRM.Demanday.Endpoints
                 };
                 demandaymisConn.Insert(demandayMIS);
 
+                // Delete dependent EmailTeam records first (FK constraint)
+                var cmd = demandayqualityConn.CreateCommand();
+                cmd.CommandText = "DELETE FROM [dbo].[EmailTeam] WHERE [DemandayQualityId] = @id";
+                cmd.CommandTimeout = 300; // 5 minutes
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                cmd.ExecuteNonQuery();
+
+                // Then delete the Quality record
                 demandayqualityConn.DeleteById<DemandayQualityRow>(id);
                 response.Id = demandayMIS.Id ?? 0;
             }
@@ -230,6 +243,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var demandayquality = new DemandayQualityRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
+                                MasterAccountId = ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
