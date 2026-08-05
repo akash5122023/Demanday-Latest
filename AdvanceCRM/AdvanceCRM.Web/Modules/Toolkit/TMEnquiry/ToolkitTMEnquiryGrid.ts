@@ -27,6 +27,19 @@ namespace AdvanceCRM.Toolkit {
                 title: 'Master Account'
             });
 
+            // Campaign list narrows to the campaigns of the selected Master Account,
+            // same as every other Tool Kit module.
+            filters.push({
+                type: Serenity.LookupEditor,
+                options: {
+                    lookupKey: "Masters.DemandayCampaignId",
+                    cascadeFrom: fld.MasterAccountId,
+                    cascadeField: "DemandayMasterAccountId"
+                },
+                field: fld.CampaignId,
+                title: 'Campaign'
+            });
+
             return this.orderQuickFilters(filters);
         }
     }

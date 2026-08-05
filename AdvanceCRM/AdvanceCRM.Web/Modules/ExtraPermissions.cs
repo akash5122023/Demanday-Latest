@@ -97,6 +97,9 @@
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:MasterSuppression")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:OpenCampaign")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:DNCContact")]
+// Gates the Tool Kit TM Enquiry sheet (Toolkit.ToolkitTMEnquiry). Distinct from the older
+// "Toolkit:VerifySheets:TMEnquiry" below, which belongs to the separate VerifySheet.TMEnquiry module.
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:ToolkitTMEnquiry")]
 // Toolkit sub-modules: Export permissions (Import keys already registered above)
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("TalCampaign:Export")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("ClientSupression:Export")]

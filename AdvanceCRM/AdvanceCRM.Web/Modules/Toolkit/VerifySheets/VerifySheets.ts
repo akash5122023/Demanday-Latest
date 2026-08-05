@@ -24,6 +24,14 @@ namespace AdvanceCRM.Toolkit {
         includeColumns?: string[];
         /** Open Campaign gets a lightweight inline "type a domain + Add" box above its table. */
         quickAddDomain?: boolean;
+        /**
+         * Read-only sheets get no upload icon in the Verify Sheets menu. TM Enquiry is filled
+         * by the TM Enquiry module's own save (it mirrors every record automatically), so
+         * importing into it would create rows with nothing behind them.
+         */
+        exportOnly?: boolean;
+        /** Row property carrying the record id; defaults to 'Id' where the row has one. */
+        idField?: string;
         permission?: string;
         permissionAlt?: string;
         directPermission?: string;
@@ -264,13 +272,20 @@ namespace AdvanceCRM.Toolkit {
                     newDialog: () => new Toolkit.ToolkitTMEnquiryDialog(),
                     permission: 'Toolkit:VerifySheets:ToolkitTMEnquiry',
                     directPermission: 'ToolkitTMEnquiry:Read',
+                    // Mirrored automatically from the TM Enquiry module — export only.
+                    exportOnly: true,
+                    // This row's key is SrNo, not Id, so the Sr No cell needs to be told where
+                    // to read the record id from.
+                    idField: 'SrNo',
+                    // CampaignCampaignId is the joined text of the campaign the row points at.
+                    includeColumns: ['CampaignCampaignId'],
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
                         { field: 'FirstName', title: 'First Name' },
                         { field: 'LastName', title: 'Last Name' },
                         { field: 'Email', title: 'Email' },
                         { field: 'CompanyName', title: 'Company Name' },
-                        { field: 'CampaignId', title: 'Campaign ID' },
+                        { field: 'CampaignCampaignId', title: 'Campaign ID' },
                         { field: 'Timestamp', title: 'Timestamp' }
                     ]
                 }
@@ -301,7 +316,7 @@ namespace AdvanceCRM.Toolkit {
                 var lbl = $('<label class="vs-verify-label"></label>').appendTo(item);
                 $('<input type="checkbox" checked>').attr('data-key', s.key).appendTo(lbl);
                 $('<span></span>').text(' ' + s.title).appendTo(lbl);
-                if (canImport) {
+                if (canImport && !s.exportOnly) {
                     $('<button type="button" class="vs-item-upload"><i class="fa fa-upload"></i></button>')
                         .attr('title', 'Import Excel into ' + s.title)
                         .appendTo(item)
@@ -882,11 +897,12 @@ namespace AdvanceCRM.Toolkit {
                 html += '<tr>';
                 sheet.columns.forEach(c => {
                     // Sr No opens the record's own dialog; needs the row Id to load it.
-                    if (c.field === 'SrNo' && row['Id'] != null) {
+                    var rowId = row[sheet.idField || 'Id'];
+                    if (c.field === 'SrNo' && rowId != null) {
                         html += '<td><a href="#" class="vs-edit-link" data-key="' + sheet.key +
-                            '" data-id="' + row['Id'] + '">' + vsEscape(row['SrNo']) + '</a></td>';
+                            '" data-id="' + rowId + '">' + vsEscape(row['SrNo']) + '</a></td>';
                     }
-                    else if (c.field === 'TimeStamp') {
+                    else if (c.field === 'TimeStamp' || c.field === 'Timestamp') {
                         html += '<td>' + vsEscape(vsFormatTimeStamp(row[c.field])) + '</td>';
                     }
                     else if (c.field === 'Date') {

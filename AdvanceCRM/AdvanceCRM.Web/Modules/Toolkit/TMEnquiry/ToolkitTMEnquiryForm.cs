@@ -16,7 +16,8 @@ namespace AdvanceCRM.Toolkit.Forms
         [HalfWidth]
         public Int32 MasterAccountId { get; set; }
         [HalfWidth]
-        public String CampaignId { get; set; }
+        [LookupEditor(typeof(Masters.DemandayCampaignIdRow), CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
+        public Int32 CampaignId { get; set; }
         [HalfWidth]
         public String FirstName { get; set; }
         [HalfWidth]

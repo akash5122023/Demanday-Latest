@@ -39,27 +39,42 @@ namespace AdvanceCRM.Demanday
                 var connection = uow.Connection;
                 var toolkitTMEnquiryRow = new ToolkitTMEnquiryRow();
 
-                // Check if ToolkitTMEnquiry record exists
-                var toolkitTMEnquiryFields = ToolkitTMEnquiryRow.Fields;
+                // Check if ToolkitTMEnquiry record exists.
+                // Only SrNo is selected - TryFirst does not select any field on its own,
+                // and selecting the whole row would also pull in the joined expression fields.
+                var fld = ToolkitTMEnquiryRow.Fields;
                 LogToFile(logPath, $"[QUERY] Looking for existing record...");
 
-                var existing = connection.TryFirst<ToolkitTMEnquiryRow>(
-                    q => q.Where(toolkitTMEnquiryFields.DemandayTeleMarketingEnquiryId == (int)row.Id.Value));
+                var existing = connection.TryFirst<ToolkitTMEnquiryRow>(q => q
+                    .Select(fld.SrNo)
+                    .Where(fld.DemandayTeleMarketingEnquiryId == row.Id.Value));
+
+                // On update the request row only carries the fields the client actually sent,
+                // so copy a field only when it was assigned - otherwise a partial save would
+                // wipe the existing ToolkitTMEnquiry values with nulls.
+                var src = MyRow.Fields;
+                if (row.IsAssigned(src.MasterAccountId))
+                    toolkitTMEnquiryRow.MasterAccountId = row.MasterAccountId;
+                // TM Enquiry stores the campaign's text value; ToolkitTMEnquiry keys on
+                // DemandayCampaignId.Id like every other Tool Kit module, so resolve it here.
+                if (row.IsAssigned(src.CampaignId))
+                    toolkitTMEnquiryRow.CampaignId = ResolveCampaignId(connection, row.MasterAccountId, row.CampaignId);
+                if (row.IsAssigned(src.FirstName))
+                    toolkitTMEnquiryRow.FirstName = row.FirstName;
+                if (row.IsAssigned(src.LastName))
+                    toolkitTMEnquiryRow.LastName = row.LastName;
+                if (row.IsAssigned(src.Email))
+                    toolkitTMEnquiryRow.Email = row.Email;
+                if (row.IsAssigned(src.CompanyName))
+                    toolkitTMEnquiryRow.CompanyName = row.CompanyName;
 
                 if (existing != null)
                 {
                     LogToFile(logPath, $"[UPDATE] Found existing record SrNo={existing.SrNo}, updating...");
 
-                    // Update existing record
                     toolkitTMEnquiryRow.SrNo = existing.SrNo;
-                    toolkitTMEnquiryRow.MasterAccountId = row.MasterAccountId;
-                    toolkitTMEnquiryRow.CampaignId = row.CampaignId;
-                    toolkitTMEnquiryRow.FirstName = row.FirstName;
-                    toolkitTMEnquiryRow.LastName = row.LastName;
-                    toolkitTMEnquiryRow.Email = row.Email;
-                    toolkitTMEnquiryRow.CompanyName = row.CompanyName;
-                    toolkitTMEnquiryRow.Timestamp = DateTime.Now;
-                    toolkitTMEnquiryRow.DemandayTeleMarketingEnquiryId = row.Id;
+                    if (row.IsAssigned(src.Date))
+                        toolkitTMEnquiryRow.Timestamp = row.Date ?? DateTime.Now;
                     toolkitTMEnquiryRow.UpdatedOn = DateTime.Now;
                     toolkitTMEnquiryRow.UpdatedBy = "SYNC";
 
@@ -71,20 +86,14 @@ namespace AdvanceCRM.Demanday
                     LogToFile(logPath, $"[INSERT] Creating new record...");
 
                     // Create new record - let database defaults handle CreatedOn
-                    toolkitTMEnquiryRow.MasterAccountId = row.MasterAccountId;
-                    toolkitTMEnquiryRow.CampaignId = row.CampaignId;
-                    toolkitTMEnquiryRow.FirstName = row.FirstName;
-                    toolkitTMEnquiryRow.LastName = row.LastName;
-                    toolkitTMEnquiryRow.Email = row.Email;
-                    toolkitTMEnquiryRow.CompanyName = row.CompanyName;
-                    toolkitTMEnquiryRow.Timestamp = DateTime.Now;
+                    toolkitTMEnquiryRow.Timestamp = row.Date ?? DateTime.Now;
                     toolkitTMEnquiryRow.DemandayTeleMarketingEnquiryId = row.Id;
                     toolkitTMEnquiryRow.CreatedBy = "SYNC";
                     // Don't set CreatedOn - let database DEFAULT handle it
 
                     LogToFile(logPath, $"[INSERT_CALL] About to call connection.Insert()...");
                     connection.Insert(toolkitTMEnquiryRow);
-                    LogToFile(logPath, $"[INSERT_DONE] Insert completed successfully, SrNo={toolkitTMEnquiryRow.SrNo}");
+                    LogToFile(logPath, $"[INSERT_DONE] Insert completed successfully");
                 }
 
                 LogToFile(logPath, $"[END_SUCCESS] Sync completed successfully");
@@ -96,6 +105,26 @@ namespace AdvanceCRM.Demanday
 
                 System.Diagnostics.Debug.WriteLine($"Error syncing ToolkitTMEnquiry: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Maps a Campaign ID text ("79580") to its DemandayCampaignId key. Scoped to the
+        /// enquiry's Master Account - the same Campaign ID text may exist under more than one
+        /// account, and a synced row must never point at another account's campaign.
+        /// Returns null when the text is blank or has no match, which just leaves the column empty.
+        /// </summary>
+        private static int? ResolveCampaignId(IDbConnection connection, int? masterAccountId, string campaignText)
+        {
+            if (masterAccountId == null || string.IsNullOrWhiteSpace(campaignText))
+                return null;
+
+            var fld = Masters.DemandayCampaignIdRow.Fields;
+            var match = connection.TryFirst<Masters.DemandayCampaignIdRow>(q => q
+                .Select(fld.Id)
+                .Where(fld.DemandayMasterAccountId == masterAccountId.Value &
+                       fld.CampaignId == campaignText.Trim()));
+
+            return match?.Id;
         }
 
         private void LogToFile(string path, string message)

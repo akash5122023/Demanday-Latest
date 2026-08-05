@@ -2,7 +2,7 @@
     export interface ToolkitTMEnquiryForm {
         SrNo: Serenity.IntegerEditor;
         MasterAccountId: Serenity.LookupEditor;
-        CampaignId: Serenity.StringEditor;
+        CampaignId: Serenity.LookupEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
         Email: Serenity.StringEditor;
@@ -30,7 +30,7 @@
                 Q.initFormType(ToolkitTMEnquiryForm, [
                     'SrNo', w0,
                     'MasterAccountId', w1,
-                    'CampaignId', w2,
+                    'CampaignId', w1,
                     'FirstName', w2,
                     'LastName', w2,
                     'Email', w2,

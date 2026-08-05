@@ -2,7 +2,7 @@
     export interface ToolkitTMEnquiryRow {
         SrNo?: number;
         MasterAccountId?: number;
-        CampaignId?: string;
+        CampaignId?: number;
         FirstName?: string;
         LastName?: string;
         Email?: string;
@@ -10,6 +10,8 @@
         Timestamp?: string;
         DemandayTeleMarketingEnquiryId?: number;
         MasterAccountAccountNumber?: string;
+        CampaignCampaignId?: string;
+        CampaignDemandayMasterAccountId?: number;
         TMEnquiryFirstName?: string;
         CreatedOn?: string;
         CreatedBy?: string;
@@ -42,6 +44,8 @@
             Timestamp = "Timestamp",
             DemandayTeleMarketingEnquiryId = "DemandayTeleMarketingEnquiryId",
             MasterAccountAccountNumber = "MasterAccountAccountNumber",
+            CampaignCampaignId = "CampaignCampaignId",
+            CampaignDemandayMasterAccountId = "CampaignDemandayMasterAccountId",
             TMEnquiryFirstName = "TMEnquiryFirstName",
             CreatedOn = "CreatedOn",
             CreatedBy = "CreatedBy",

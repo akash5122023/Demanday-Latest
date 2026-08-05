@@ -18,7 +18,8 @@ namespace AdvanceCRM.Toolkit.Columns
         public String LastName { get; set; }
         public String Email { get; set; }
         public String CompanyName { get; set; }
-        public String CampaignId { get; set; }
+        [DisplayName("Campaign ID")]
+        public String CampaignCampaignId { get; set; }
         public String MasterAccountAccountNumber { get; set; }
         public String TMEnquiryFirstName { get; set; }
         public DateTime? Timestamp { get; set; }

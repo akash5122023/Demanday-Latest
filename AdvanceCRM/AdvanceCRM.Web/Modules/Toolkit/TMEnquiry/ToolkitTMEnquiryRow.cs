@@ -32,8 +32,9 @@ namespace AdvanceCRM.Toolkit
             set => fields.MasterAccountId[this] = value;
         }
 
-        [DisplayName("Campaign Id"), Size(50), QuickSearch]
-        public String CampaignId
+        [DisplayName("Campaign"), ForeignKey("[dbo].[DemandayCampaignId]", "Id"), LeftJoin("jCampaign"), TextualField("CampaignCampaignId")]
+        [LookupEditor(typeof(DemandayCampaignIdRow), InplaceAdd = true)]
+        public Int32? CampaignId
         {
             get => fields.CampaignId[this];
             set => fields.CampaignId[this] = value;
@@ -89,6 +90,21 @@ namespace AdvanceCRM.Toolkit
             set => fields.MasterAccountAccountNumber[this] = value;
         }
 
+        [DisplayName("Campaign Id"), Expression("jCampaign.[CampaignId]"), QuickSearch]
+        public String CampaignCampaignId
+        {
+            get => fields.CampaignCampaignId[this];
+            set => fields.CampaignCampaignId[this] = value;
+        }
+
+        // Lets the Campaign quick filter cascade from the selected Master Account.
+        [DisplayName("Campaign Demanday Master Account Id"), Expression("jCampaign.[DemandayMasterAccountId]")]
+        public Int32? CampaignDemandayMasterAccountId
+        {
+            get => fields.CampaignDemandayMasterAccountId[this];
+            set => fields.CampaignDemandayMasterAccountId[this] = value;
+        }
+
         [DisplayName("TM Enquiry First Name"), Expression("jTMEnquiry.[FirstName]"), QuickSearch]
         public String TMEnquiryFirstName
         {
@@ -138,7 +154,7 @@ namespace AdvanceCRM.Toolkit
         {
             public Int32Field SrNo;
             public Int32Field MasterAccountId;
-            public StringField CampaignId;
+            public Int32Field CampaignId;
             public StringField FirstName;
             public StringField LastName;
             public StringField Email;
@@ -146,6 +162,8 @@ namespace AdvanceCRM.Toolkit
             public DateTimeField Timestamp;
             public Int32Field DemandayTeleMarketingEnquiryId;
             public StringField MasterAccountAccountNumber;
+            public StringField CampaignCampaignId;
+            public Int32Field CampaignDemandayMasterAccountId;
             public StringField TMEnquiryFirstName;
             public DateTimeField CreatedOn;
             public StringField CreatedBy;

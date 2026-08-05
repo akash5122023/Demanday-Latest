@@ -65,6 +65,8 @@ namespace AdvanceCRM.Toolkit.Pages
                 .Where(OpenCampaignRow.Fields.CampaignId == campaignId));
             var dncContacts = connection.List<DNCContact.DncContactsRow>(q => q.SelectTableFields()
                 .Where(DNCContact.DncContactsRow.Fields.CampaignId == campaignId));
+            var tmEnquiry = connection.List<ToolkitTMEnquiryRow>(q => q.SelectTableFields()
+                .Where(ToolkitTMEnquiryRow.Fields.CampaignId == campaignId));
 
             // Resolve TAL "Agent" (a user id) to a display name.
             var userNames = connection.List<UserRow>()
@@ -144,6 +146,17 @@ namespace AdvanceCRM.Toolkit.Pages
                 modules.Add(("DNCContact",
                     new[] { "Sr No", "First Name", "Last Name", "Email", "DNC Status", "Number" },
                     dncContacts.Select(r => new object[] { r.SrNo, r.FirstName, r.LastName, r.Email, r.DncStatus, r.Number })));
+            }
+
+            // TM Enquiry mirrors the TM Enquiry module and is export-only — there is no import
+            // branch for it below, so a sheet leaving here can never be pushed back in.
+            if (HasSubmodulePermission("Toolkit:VerifySheets:ToolkitTMEnquiry", "ToolkitTMEnquiry:Read"))
+            {
+                modules.Add(("TMEnquiry",
+                    new[] { "Sr No", "First Name", "Last Name", "Email", "Company Name", "Campaign ID", "Timestamp" },
+                    tmEnquiry.Select(r => new object[] { r.SrNo, r.FirstName, r.LastName, r.Email, r.CompanyName,
+                        r.CampaignId != null && campaignTexts.ContainsKey(r.CampaignId.Value) ? campaignTexts[r.CampaignId.Value] : null,
+                        r.Timestamp?.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) })));
             }
 
             using var zipStream = new System.IO.MemoryStream();
@@ -437,6 +450,12 @@ SELECT @id;");
         {
             if (file == null || !file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
                 return Content("Please upload a valid .xlsx file.", "text/plain");
+
+            // TM Enquiry is a mirror of the TM Enquiry module — every row is written by that
+            // module's own save. Importing here would create rows with no enquiry behind them,
+            // so the sheet is export-only (the UI hides its upload icon; this is the backstop).
+            if (sheet == "TMEnquiry")
+                return Content("TM Enquiry is filled automatically from the TM Enquiry module and cannot be imported here. Use Export to Excel instead.", "text/plain");
 
             bool accountScoped = sheet == "MasterSuppression";
             if (accountScoped)

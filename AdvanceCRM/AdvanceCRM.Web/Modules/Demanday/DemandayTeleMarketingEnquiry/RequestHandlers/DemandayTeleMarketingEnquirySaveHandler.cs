@@ -36,11 +36,7 @@ namespace AdvanceCRM.Demanday
             // Auto-sync to TMEnquiry table
             try
             {
-                using (var uow = new UnitOfWork(Connection))
-                {
-                    tmEnquirySyncHandler.SyncToTMEnquiry(uow, Row);
-                    uow.Commit();
-                }
+                tmEnquirySyncHandler.SyncToTMEnquiry(UnitOfWork, Row);
             }
             catch (Exception ex)
             {
