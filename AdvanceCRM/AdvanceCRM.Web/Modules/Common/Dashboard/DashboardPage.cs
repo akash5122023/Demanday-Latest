@@ -48,6 +48,143 @@ namespace AdvanceCRM.Common.Pages
             Context = context ?? throw new ArgumentNullException(nameof(context));
 
         }
+        /// <summary>
+        /// Turns one MIS module's rows into the dashboard tiles + trend, worked out once for
+        /// every time window the user can pick. All four are sent to the page together so
+        /// switching between Daily and Yearly costs nothing.
+        /// </summary>
+        /// <param name="rows">QA Status, Comments, effective date and Master Account, per MIS record.</param>
+        /// <param name="accountNames">Master Account key to Account Number.</param>
+        private static MisDashboardStats BuildMisStats(
+            IEnumerable<(string QaStatus, string Comments, DateTime? Date, int? MasterAccountId)> rows,
+            IDictionary<int, string> accountNames)
+        {
+            // Materialised once - every window walks the same list.
+            var list = rows.ToList();
+            var today = DateTime.Today;
+            var stats = new MisDashboardStats();
+
+            var firstDay = today.AddDays(-29);
+            stats.Periods.Add(BuildPeriod(list, accountNames, "daily", "Daily", "Last 30 days", 30,
+                d => (d.Date - firstDay).Days,
+                i => firstDay.AddDays(i).ToString("dd MMM")));
+
+            var firstWeek = StartOfWeek(today).AddDays(-77);
+            stats.Periods.Add(BuildPeriod(list, accountNames, "weekly", "Weekly", "Last 12 weeks", 12,
+                d => (StartOfWeek(d) - firstWeek).Days / 7,
+                i => firstWeek.AddDays(i * 7).ToString("dd MMM")));
+
+            var firstMonth = new DateTime(today.Year, today.Month, 1).AddMonths(-11);
+            stats.Periods.Add(BuildPeriod(list, accountNames, "monthly", "Monthly", "Last 12 months", 12,
+                d => (d.Year * 12 + d.Month) - (firstMonth.Year * 12 + firstMonth.Month),
+                i => firstMonth.AddMonths(i).ToString("MMM yy")));
+
+            var firstYear = today.Year - 4;
+            stats.Periods.Add(BuildPeriod(list, accountNames, "yearly", "Yearly", "Last 5 years", 5,
+                d => d.Year - firstYear,
+                i => (firstYear + i).ToString()));
+
+            // How much of the whole module each window covers - the Total Leads tile's percentage.
+            if (list.Count > 0)
+            {
+                foreach (var period in stats.Periods)
+                    period.ShareOfAll = Math.Round(period.TotalLeads * 100m / list.Count, 1);
+            }
+
+            return stats;
+        }
+
+        /// <summary>
+        /// Fills one time window: <paramref name="bucketOf"/> places a row's date on the axis and
+        /// <paramref name="labelOf"/> names each bucket. Only rows landing inside the window count,
+        /// so the tiles and the chart always describe the same set of records.
+        /// </summary>
+        private static MisPeriodStats BuildPeriod(
+            IEnumerable<(string QaStatus, string Comments, DateTime? Date, int? MasterAccountId)> rows,
+            IDictionary<int, string> accountNames,
+            string key, string title, string rangeLabel, int bucketCount,
+            Func<DateTime, int> bucketOf, Func<int, string> labelOf)
+        {
+            var period = new MisPeriodStats { Key = key, Title = title, RangeLabel = rangeLabel };
+            for (int i = 0; i < bucketCount; i++)
+                period.ChartData.Add(new QualityChartDataPoint { Label = labelOf(i) });
+
+            // Keyed by Master Account; -1 collects rows that carry no account at all, so the
+            // report's Grand Totals still add up to the tiles above it.
+            var byAccount = new Dictionary<int, MisAccountRow>();
+
+            foreach (var row in rows)
+            {
+                // An undated MIS row cannot be placed in any window, so it is left out of all of them.
+                if (!row.Date.HasValue)
+                    continue;
+
+                var idx = bucketOf(row.Date.Value);
+                if (idx < 0 || idx >= bucketCount)
+                    continue;
+
+                period.TotalLeads++;
+
+                var accountKey = row.MasterAccountId ?? -1;
+                if (!byAccount.TryGetValue(accountKey, out var account))
+                {
+                    account = new MisAccountRow
+                    {
+                        AccountNumber = accountKey >= 0 && accountNames.TryGetValue(accountKey, out var name)
+                            && !string.IsNullOrWhiteSpace(name) ? name : "(No account)"
+                    };
+                    byAccount[accountKey] = account;
+                }
+                account.GrandTotal++;
+
+                if (string.Equals(row.QaStatus, "Qualified", StringComparison.Ordinal))
+                {
+                    period.QualifiedLeads++;
+                    period.ChartData[idx].QualifiedCount++;
+                    account.Qualified++;
+                }
+                else if (string.Equals(row.QaStatus, "Disqualified", StringComparison.Ordinal))
+                {
+                    period.DisqualifiedLeads++;
+                    period.ChartData[idx].DisqualifiedCount++;
+                    account.Disqualified++;
+                }
+
+                // "EBB" is matched case-sensitively on purpose - a comment reading "ebb" is not
+                // the marker. This runs here rather than in SQL because the database collation is
+                // case-insensitive and a LIKE would count both spellings.
+                if (!string.IsNullOrEmpty(row.Comments) &&
+                    row.Comments.Contains("EBB", StringComparison.Ordinal))
+                    period.EbbCount++;
+            }
+
+            if (period.TotalLeads > 0)
+            {
+                period.QualifiedRate = Math.Round(period.QualifiedLeads * 100m / period.TotalLeads, 1);
+                period.EbbRatio = Math.Round(period.EbbCount * 100m / period.TotalLeads, 1);
+            }
+
+            foreach (var account in byAccount.Values)
+            {
+                if (account.GrandTotal > 0)
+                    account.QualifiedRate = Math.Round(account.Qualified * 100m / account.GrandTotal, 1);
+            }
+
+            period.Accounts = byAccount.Values
+                .OrderByDescending(a => a.GrandTotal)
+                .ThenBy(a => a.AccountNumber, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            return period;
+        }
+
+        /// <summary>Monday of the week the given date falls in.</summary>
+        private static DateTime StartOfWeek(DateTime date)
+        {
+            var offset = ((int)date.DayOfWeek + 6) % 7;
+            return date.Date.AddDays(-offset);
+        }
+
         [Authorize, HttpGet, Route("~/")]
         public IActionResult Index()
         {
@@ -100,81 +237,40 @@ namespace AdvanceCRM.Common.Pages
 
                         try
                         {
-                            model.EtEnquiryCount = connection.Count<DemandayEnquiryRow>();
-                            model.EtTeamLeaderCount = connection.Count<DemandayTeamLeaderRow>();
-                            model.EtQualityCount = connection.Count<DemandayQualityRow>();
-                            model.EtMisCount = connection.Count<DemandayMisRow>();
-                            model.EtContactCount = connection.Count<DemandayContactsRow>();
+                            // Campaign Performance is MIS-only: each team's tiles, its trend and its
+                            // Account Wise Report are built from that team's MIS module, nothing else.
+                            // MIS stores only the account key, so its number is looked up here.
+                            var accFields = Masters.DemandayMasterAccountRow.Fields;
+                            var accountNames = connection.List<Masters.DemandayMasterAccountRow>(q => q
+                                    .Select(accFields.Id)
+                                    .Select(accFields.AccountNumber))
+                                .Where(a => a.Id != null)
+                                .GroupBy(a => a.Id.Value)
+                                .ToDictionary(g => g.Key, g => g.First().AccountNumber);
 
-                            model.TmEnquiryCount = connection.Count<DemandayTeleMarketingEnquiryRow>();
-                            model.TmTeamLeaderCount = connection.Count<DemandayTeleMarketingTeamLeaderRow>();
-                            model.TmQualityCount = connection.Count<DemandayTeleMarketingQualiltyRow>();
-                            model.TmMisCount = connection.Count<DemandayTeleMarketingMISRow>();
-                            model.TmContactCount = connection.Count<DemandayTeleMarketingContactsRow>();
-
-                            // Calculate 12-month Campaign Performance data for Email Quality & TM Quality
-                            model.QualityPerformanceChartData = new List<QualityChartDataPoint>();
-                            DateTime now = DateTime.Now;
-                            for (int i = 11; i >= 0; i--)
-                            {
-                                DateTime mDate = new DateTime(now.Year, now.Month, 1).AddMonths(-i);
-                                model.QualityPerformanceChartData.Add(new QualityChartDataPoint
-                                {
-                                    MonthName = mDate.ToString("MMM"),
-                                    Year = mDate.Year,
-                                    Month = mDate.Month,
-                                    QualifiedCount = 0,
-                                    DisqualifiedCount = 0
-                                });
-                            }
-
-                            // Email Quality rows
-                            var eqRows = connection.List<DemandayQualityRow>(q => q
-                                .Select(DemandayQualityRow.Fields.QaStatus)
-                                .Select(DemandayQualityRow.Fields.Date)
-                                .Select(DemandayQualityRow.Fields.DateAudited)
-                                .Select(DemandayQualityRow.Fields.CallDate)
+                            var etMis = connection.List<DemandayMisRow>(q => q
+                                .Select(DemandayMisRow.Fields.QaStatus)
+                                .Select(DemandayMisRow.Fields.Comments)
+                                .Select(DemandayMisRow.Fields.MasterAccountId)
+                                .Select(DemandayMisRow.Fields.Date)
+                                .Select(DemandayMisRow.Fields.DateAudited)
+                                .Select(DemandayMisRow.Fields.CallDate)
                             );
-                            foreach (var row in eqRows)
-                            {
-                                string status = row.QaStatus;
-                                if (string.IsNullOrEmpty(status)) continue;
-                                DateTime? rDate = row.Date ?? row.DateAudited ?? row.CallDate;
-                                if (!rDate.HasValue) continue;
+                            model.EmailTeamMis = BuildMisStats(etMis.Select(r =>
+                                (r.QaStatus, r.Comments, r.Date ?? r.DateAudited ?? r.CallDate, r.MasterAccountId)),
+                                accountNames);
 
-                                var dp = model.QualityPerformanceChartData.FirstOrDefault(x => x.Year == rDate.Value.Year && x.Month == rDate.Value.Month);
-                                if (dp != null)
-                                {
-                                    if (status.Equals("Qualified", StringComparison.Ordinal))
-                                        dp.QualifiedCount++;
-                                    else if (status.Equals("Disqualified", StringComparison.Ordinal))
-                                        dp.DisqualifiedCount++;
-                                }
-                            }
-
-                            // TeleMarketing Quality rows
-                            var tmqRows = connection.List<DemandayTeleMarketingQualiltyRow>(q => q
-                                .Select(DemandayTeleMarketingQualiltyRow.Fields.QaStatus)
-                                .Select(DemandayTeleMarketingQualiltyRow.Fields.Date)
-                                .Select(DemandayTeleMarketingQualiltyRow.Fields.DateAudited)
-                                .Select(DemandayTeleMarketingQualiltyRow.Fields.CallDate)
+                            var tmMis = connection.List<DemandayTeleMarketingMISRow>(q => q
+                                .Select(DemandayTeleMarketingMISRow.Fields.QaStatus)
+                                .Select(DemandayTeleMarketingMISRow.Fields.Comments)
+                                .Select(DemandayTeleMarketingMISRow.Fields.MasterAccountId)
+                                .Select(DemandayTeleMarketingMISRow.Fields.Date)
+                                .Select(DemandayTeleMarketingMISRow.Fields.DateAudited)
+                                .Select(DemandayTeleMarketingMISRow.Fields.CallDate)
                             );
-                            foreach (var row in tmqRows)
-                            {
-                                string status = row.QaStatus;
-                                if (string.IsNullOrEmpty(status)) continue;
-                                DateTime? rDate = row.Date ?? row.DateAudited ?? row.CallDate;
-                                if (!rDate.HasValue) continue;
-
-                                var dp = model.QualityPerformanceChartData.FirstOrDefault(x => x.Year == rDate.Value.Year && x.Month == rDate.Value.Month);
-                                if (dp != null)
-                                {
-                                    if (status.Equals("Qualified", StringComparison.Ordinal))
-                                        dp.QualifiedCount++;
-                                    else if (status.Equals("Disqualified", StringComparison.Ordinal))
-                                        dp.DisqualifiedCount++;
-                                }
-                            }
+                            model.TeleMarketingMis = BuildMisStats(tmMis.Select(r =>
+                                (r.QaStatus, r.Comments, r.Date ?? r.DateAudited ?? r.CallDate, r.MasterAccountId)),
+                                accountNames);
                         }
                         catch { }
 

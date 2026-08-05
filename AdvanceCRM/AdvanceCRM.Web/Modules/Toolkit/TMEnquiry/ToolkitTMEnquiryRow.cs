@@ -75,12 +75,14 @@ namespace AdvanceCRM.Toolkit
             set => fields.Timestamp[this] = value;
         }
 
-        [DisplayName("TM Enquiry"), ForeignKey("[dbo].[DemandayTeleMarketingEnquiry]", "Id"), LeftJoin("jTMEnquiry"), TextualField("TMEnquiryFirstName")]
-        [LookupEditor(typeof(Demanday.DemandayTeleMarketingEnquiryRow), InplaceAdd = true)]
-        public Int32? DemandayTeleMarketingEnquiryId
+        // The row is created when a TM Enquiry is moved to Team Leader; that move deletes the
+        // enquiry, so the link points at the Team Leader record it became.
+        [DisplayName("Team Leader"), ForeignKey("[dbo].[DemandayTeleMarketingTeamLeader]", "Id"), LeftJoin("jTeamLeader"), TextualField("TeamLeaderFirstName")]
+        [LookupEditor(typeof(Demanday.DemandayTeleMarketingTeamLeaderRow))]
+        public Int32? TeamLeaderId
         {
-            get => fields.DemandayTeleMarketingEnquiryId[this];
-            set => fields.DemandayTeleMarketingEnquiryId[this] = value;
+            get => fields.TeamLeaderId[this];
+            set => fields.TeamLeaderId[this] = value;
         }
 
         [DisplayName("Master Account Number"), Expression("jMasterAccount.[AccountNumber]"), QuickSearch]
@@ -105,11 +107,11 @@ namespace AdvanceCRM.Toolkit
             set => fields.CampaignDemandayMasterAccountId[this] = value;
         }
 
-        [DisplayName("TM Enquiry First Name"), Expression("jTMEnquiry.[FirstName]"), QuickSearch]
-        public String TMEnquiryFirstName
+        [DisplayName("Team Leader First Name"), Expression("jTeamLeader.[FirstName]"), QuickSearch]
+        public String TeamLeaderFirstName
         {
-            get => fields.TMEnquiryFirstName[this];
-            set => fields.TMEnquiryFirstName[this] = value;
+            get => fields.TeamLeaderFirstName[this];
+            set => fields.TeamLeaderFirstName[this] = value;
         }
 
         [DisplayName("Created On")]
@@ -160,11 +162,11 @@ namespace AdvanceCRM.Toolkit
             public StringField Email;
             public StringField CompanyName;
             public DateTimeField Timestamp;
-            public Int32Field DemandayTeleMarketingEnquiryId;
+            public Int32Field TeamLeaderId;
             public StringField MasterAccountAccountNumber;
             public StringField CampaignCampaignId;
             public Int32Field CampaignDemandayMasterAccountId;
-            public StringField TMEnquiryFirstName;
+            public StringField TeamLeaderFirstName;
             public DateTimeField CreatedOn;
             public StringField CreatedBy;
             public DateTimeField UpdatedOn;

@@ -86,489 +86,476 @@
 
 
 
-<!-- Premium Dashboard Slider Component Styles (Light Theme) -->
+
+<!--
+    MIS dashboards: one block per team, each built purely from that team's MIS module.
+    Tiles = Total Leads / Qualified Leads (QA Status) / EBB Ratio (Comments carrying "EBB"),
+    then the 12-month Qualified vs Disqualified trend.
+-->
+@{
+    var etMisStats = Model.EmailTeamMis ?? new AdvanceCRM.Common.MisDashboardStats();
+    var tmMisStats = Model.TeleMarketingMis ?? new AdvanceCRM.Common.MisDashboardStats();
+
+    // The window the page opens on; the others are one click away, no round trip.
+    const string misDefaultPeriod = "monthly";
+
+    var misTeams = new[]
+    {
+        new { Key = "et", Title = "Email Team MIS", Icon = "fa-envelope", Stats = etMisStats,
+              Module = "/Demanday/DemandayMis" },
+        new { Key = "tm", Title = "TeleMarketing Team MIS", Icon = "fa-phone", Stats = tmMisStats,
+              Module = "/Demanday/DemandayTeleMarketingMIS" }
+    };
+
+    // Serialized here rather than inline in the script tag: a nested object initializer
+    // written directly inside an Html.Raw(...) expression trips up the Razor parser.
+    var misChartJson = Newtonsoft.Json.JsonConvert.SerializeObject(new[]
+    {
+        new { key = "et", periods = etMisStats.Periods },
+        new { key = "tm", periods = tmMisStats.Periods }
+    });
+}
+
+<!--
+    Both teams live in one horizontal slider: every slide is a full-width panel, so each
+    chart is laid out at its real size even while off-screen (a hidden canvas would render
+    at zero width). Sliding is a transform on the track, nothing is re-fetched.
+-->
+<div class="mis-slider">
+    <div class="mis-slider-track" id="misSliderTrack">
+@foreach (var team in misTeams)
+{
+    var periods = team.Stats.Periods;
+    // Falls back to an empty window if the MIS query failed, so the page still renders.
+    var s = periods.FirstOrDefault(p => p.Key == misDefaultPeriod)
+            ?? periods.FirstOrDefault()
+            ?? new AdvanceCRM.Common.MisPeriodStats { Key = "", Title = "", RangeLabel = "No data" };
+    <div class="mis-slide">
+    <div class="row" style="margin-top: 5px;">
+        <div class="col-xs-12">
+            <div style="display: flex; align-items: center; gap: 10px; margin: 4px 0 14px 4px; flex-wrap: wrap;">
+                <span style="width: 30px; height: 30px; border-radius: 9px; background: #eff6ff; color: #1e3a8a; display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="fa @team.Icon"></i>
+                </span>
+                <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px;">@team.Title Dashboard</h3>
+
+                <!-- Time window: Daily / Weekly / Monthly / Yearly -->
+                <div class="mis-period-switch" style="margin-left: auto;">
+                    @foreach (var p in periods)
+                    {
+                        var periodClass = p.Key == s.Key ? "mis-period-btn active" : "mis-period-btn";
+                        <button type="button" class="@periodClass"
+                                data-team="@team.Key" data-period="@p.Key" title="@p.RangeLabel">@p.Title</button>
+                    }
+                </div>
+
+                <!-- Slide to the other team -->
+                <div class="mis-slide-nav">
+                    <button type="button" class="mis-slide-btn" data-mis-slide="-1" title="Previous team"><i class="fa fa-chevron-left"></i></button>
+                    <button type="button" class="mis-slide-btn" data-mis-slide="1" title="Next team"><i class="fa fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Head-line tiles. The big figure is the count; the pill beside it is that count
+             as a percentage, so both readings are on screen at once. -->
+        <div class="col-md-4 col-xs-12">
+            <div class="mis-tile">
+                <div class="mis-tile-head">
+                    <span class="mis-tile-label">Total Leads</span>
+                    <span class="mis-tile-icon" style="background: #eef2ff; color: #4338ca;"><i class="fa fa-bullseye"></i></span>
+                </div>
+                <div class="mis-tile-figure">
+                    <span class="mis-tile-value" data-mis="total" data-team="@team.Key">@s.TotalLeads.ToString("N0")</span>
+                    <span class="mis-tile-pct" data-mis="totalPct" data-team="@team.Key" title="Share of every record in this MIS module">@s.ShareOfAll.ToString("0.#")%</span>
+                </div>
+                <span class="mis-tile-badge" data-mis="totalBadge" data-team="@team.Key">@s.RangeLabel</span>
+            </div>
+        </div>
+        <div class="col-md-4 col-xs-12">
+            <div class="mis-tile">
+                <div class="mis-tile-head">
+                    <span class="mis-tile-label">Qualified Leads</span>
+                    <span class="mis-tile-icon" style="background: #ecfdf5; color: #047857;"><i class="fa fa-check-circle"></i></span>
+                </div>
+                <div class="mis-tile-figure">
+                    <span class="mis-tile-value" data-mis="qualified" data-team="@team.Key">@s.QualifiedLeads.ToString("N0")</span>
+                    <span class="mis-tile-pct" data-mis="qualifiedPct" data-team="@team.Key" title="Qualified as a share of Total Leads">@s.QualifiedRate.ToString("0.#")%</span>
+                </div>
+                <span class="mis-tile-badge" data-mis="qualifiedBadge" data-team="@team.Key">@s.DisqualifiedLeads.ToString("N0") disqualified</span>
+            </div>
+        </div>
+        <div class="col-md-4 col-xs-12">
+            <div class="mis-tile">
+                <div class="mis-tile-head">
+                    <span class="mis-tile-label">EBB Ratio</span>
+                    <span class="mis-tile-icon" style="background: #eff6ff; color: #1d4ed8;"><i class="fa fa-envelope-o"></i></span>
+                </div>
+                <div class="mis-tile-figure">
+                    <span class="mis-tile-value" data-mis="ebb" data-team="@team.Key">@s.EbbCount.ToString("N0")</span>
+                    <span class="mis-tile-pct" data-mis="ebbPct" data-team="@team.Key" title="EBB as a share of Total Leads">@s.EbbRatio.ToString("0.#")%</span>
+                </div>
+                <span class="mis-tile-badge" data-mis="ebbBadge" data-team="@team.Key">Comments containing &ldquo;EBB&rdquo;</span>
+            </div>
+        </div>
+
+        <!-- Qualified / Disqualified trend for the selected window -->
+        <div class="col-xs-12">
+            <div style="background: #ffffff; border-radius: 16px; padding: 24px 28px 20px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #edf2f7; margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;">
+                    <div>
+                        <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px;">Campaign Performance</h3>
+                        <p style="margin: 0; font-size: 13px; color: #64748b; font-weight: 400;" data-mis="range" data-team="@team.Key" data-mis-title="@team.Title">@team.Title &ndash; lead conversion funnel over the @s.RangeLabel.ToLowerInvariant()</p>
+                    </div>
+                    <a href="@team.Module" style="font-size: 13px; font-weight: 600; color: #1e3a8a; text-decoration: none;">Open module <i class="fa fa-arrow-circle-right"></i></a>
+                </div>
+
+                <div style="position: relative; width: 100%; height: 340px;">
+                    <canvas id="campaignPerformanceChart_@team.Key"></canvas>
+                </div>
+
+                <!-- Chart Custom Legend -->
+                <div style="display: flex; justify-content: center; gap: 24px; margin-top: 15px; font-size: 13px; font-weight: 600;">
+                    <div style="display: flex; align-items: center; gap: 8px; color: #1e3a8a;">
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background: #1e3a8a; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #1e3a8a;"></span>
+                        <span>Qualified</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; color: #06b6d4;">
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background: #06b6d4; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #06b6d4;"></span>
+                        <span>Disqualified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Wise Report: the same window, split by Master Account -->
+        <div class="col-xs-12">
+            <div style="background: #ffffff; border-radius: 16px; padding: 24px 28px 18px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #edf2f7; margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 18px;">
+                    <span style="width: 38px; height: 38px; border-radius: 11px; background: #ecfdf5; color: #059669; display: inline-flex; align-items: center; justify-content: center; font-size: 17px;">
+                        <i class="fa fa-trophy"></i>
+                    </span>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px;">Account Wise Report</h3>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="mis-acc-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 46px;"></th>
+                                <th>Account ID</th>
+                                <th class="num">Disqualified</th>
+                                <th class="num">Qualified</th>
+                                <th class="num">Grand Total</th>
+                                <th class="num" style="width: 92px;">Qualified %</th>
+                            </tr>
+                        </thead>
+                        <tbody data-mis="accounts" data-team="@team.Key">
+                            <tr><td colspan="6" class="mis-acc-empty">Loading&hellip;</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mis-acc-foot">
+                    <a href="#" data-mis="accountsToggle" data-team="@team.Key" style="display: none;"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+}
+    </div>
+</div>
+
+<div class="mis-slider-dots">
+    @for (var i = 0; i < misTeams.Length; i++)
+    {
+        var dotClass = i == 0 ? "mis-slider-dot active" : "mis-slider-dot";
+        <span class="@dotClass" data-mis-dot="@i" title="@misTeams[i].Title"></span>
+    }
+</div>
+
 <style>
-    .slider-wrapper {
-        position: relative;
-        margin-bottom: 25px;
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 20px 22px 16px 22px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
-        border: 1px solid #edf2f7;
-        transition: all 0.3s ease;
+    .mis-tile {
+        background: #ffffff; border: 1px solid #edf2f7; border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04); padding: 18px 20px; margin-bottom: 20px;
+        min-height: 118px;
     }
-    .slider-wrapper:hover {
-        box-shadow: 0 14px 35px rgba(0,0,0,0.07);
+    .mis-tile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .mis-tile-label { font-size: 13px; font-weight: 600; color: #64748b; }
+    .mis-tile-icon {
+        width: 34px; height: 34px; border-radius: 10px; flex: 0 0 34px;
+        display: inline-flex; align-items: center; justify-content: center; font-size: 15px;
     }
-    .slider-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #f1f5f9;
+    /* Count and its percentage sit on one baseline so the tile reads as a single figure. */
+    .mis-tile-figure {
+        display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+        margin: 6px 0 8px 0;
     }
-    .slider-header-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    .mis-tile-value {
+        font-size: 30px; font-weight: 700; color: #0f172a; letter-spacing: -0.6px;
+        line-height: 1.2;
     }
-    .slider-icon-pill {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    .mis-tile-pct {
+        font-size: 14px; font-weight: 700; color: #1e3a8a;
+        background: #eff6ff; border: 1px solid #dbeafe; border-radius: 20px; padding: 2px 11px;
     }
-    .slider-header h3 {
-        margin: 0;
-        font-size: 16px;
-        font-weight: 700;
-        color: #0f172a;
-        letter-spacing: -0.2px;
+    .mis-tile-badge {
+        display: inline-block; font-size: 11px; font-weight: 600; color: #047857;
+        background: #ecfdf5; border-radius: 20px; padding: 3px 10px;
     }
-    .slider-controls {
-        display: flex;
-        gap: 8px;
+
+    /* Daily / Weekly / Monthly / Yearly segmented control */
+    .mis-period-switch {
+        display: inline-flex; background: #f1f5f9; border-radius: 10px; padding: 3px; gap: 2px;
     }
-    .slider-btn {
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        color: #475569;
-        font-size: 13px;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        outline: none;
+    .mis-period-btn {
+        border: none; background: transparent; color: #64748b; cursor: pointer;
+        font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 8px;
+        transition: background .15s ease, color .15s ease;
     }
-    .slider-btn:hover {
-        background: #2563eb;
-        color: #ffffff;
-        border-color: #2563eb;
-        box-shadow: 0 4px 14px rgba(37,99,235,0.35);
-        transform: translateY(-2px);
+    .mis-period-btn:hover { color: #1e3a8a; }
+    .mis-period-btn.active {
+        background: #ffffff; color: #1e3a8a; box-shadow: 0 1px 3px rgba(15,23,42,.12);
     }
-    .slider-btn:active {
-        transform: translateY(0);
+
+    /* One team per slide. The row's -15px margins overhang into the hidden overflow,
+       but that strip is only column padding, so nothing visible is clipped. */
+    .mis-slider { overflow: hidden; }
+    .mis-slider-track {
+        display: flex; align-items: flex-start;
+        transition: transform .35s cubic-bezier(.4, 0, .2, 1);
     }
-    .slider-track {
-        display: flex;
-        gap: 16px;
-        overflow-x: auto;
-        scroll-behavior: smooth;
-        padding: 4px 2px 10px 2px;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-        scroll-snap-type: x mandatory;
+    .mis-slide { flex: 0 0 100%; max-width: 100%; }
+
+    .mis-slide-nav { display: inline-flex; gap: 6px; }
+    .mis-slide-btn {
+        width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+        border: 1px solid #e2e8f0; background: #ffffff; color: #475569;
+        display: inline-flex; align-items: center; justify-content: center;
+        transition: background .15s ease, color .15s ease, border-color .15s ease;
     }
-    .slider-track::-webkit-scrollbar {
-        display: none;
+    .mis-slide-btn:hover { background: #eff6ff; color: #1e3a8a; border-color: #bfdbfe; }
+
+    .mis-slider-dots {
+        display: flex; justify-content: center; gap: 6px; margin: -8px 0 22px 0;
     }
-    .slider-card-item {
-        flex: 0 0 calc(50% - 8px);
-        min-width: calc(50% - 8px);
-        max-width: calc(50% - 8px);
-        scroll-snap-align: start;
+    .mis-slider-dot {
+        width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1;
+        cursor: pointer; transition: all .3s ease;
     }
-    .dash-stat-card {
-        position: relative;
-        border-radius: 14px;
-        overflow: hidden;
-        margin-bottom: 0;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 140px;
+    .mis-slider-dot.active { width: 22px; border-radius: 10px; background: #2563eb; }
+
+    /* Account Wise Report */
+    .mis-acc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .mis-acc-table thead th {
+        text-align: left; font-size: 12px; font-weight: 600; color: #94a3b8;
+        padding: 0 12px 10px 12px; white-space: nowrap; border-bottom: 1px solid #f1f5f9;
     }
-    .dash-stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 22px rgba(0,0,0,0.09);
+    .mis-acc-table th.num, .mis-acc-table td.num { text-align: right; }
+    .mis-acc-table tbody td {
+        padding: 14px 12px; border-bottom: 1px solid #f6f8fb; color: #0f172a; white-space: nowrap;
     }
-    .dash-stat-card .inner {
-        padding: 16px 18px;
-        position: relative;
-        z-index: 2;
+    .mis-acc-table tbody tr:last-child td { border-bottom: none; }
+    .mis-acc-table tbody tr:hover { background: #fafbfe; }
+    .mis-acc-rank {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 34px; height: 26px; padding: 0 8px; border-radius: 8px;
+        background: #eff6ff; color: #1e3a8a; font-size: 12px; font-weight: 700;
     }
-    .dash-stat-card .card-num {
-        font-size: 30px;
-        font-weight: 800;
-        line-height: 1;
-        margin: 0 0 6px 0;
-        letter-spacing: -1px;
+    .mis-acc-name { font-weight: 700; color: #0f172a; }
+    .mis-acc-num { font-size: 17px; font-weight: 700; color: #0f172a; }
+    .mis-acc-pct {
+        display: inline-block; font-size: 11px; font-weight: 700; color: #047857;
+        background: #ecfdf5; border-radius: 20px; padding: 4px 10px;
     }
-    .dash-stat-card .card-badge {
-        display: inline-block;
-        background: rgba(255,255,255,0.75);
-        backdrop-filter: blur(4px);
-        padding: 2px 8px;
-        border-radius: 20px;
-        font-size: 10px;
-        font-weight: 700;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .dash-stat-card .card-label {
-        font-size: 14px;
-        font-weight: 700;
-        margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .dash-stat-card .card-icon {
-        position: absolute;
-        top: 12px;
-        right: 14px;
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.75);
-        backdrop-filter: blur(6px);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        z-index: 1;
-        transition: all 0.3s ease;
-    }
-    .dash-stat-card:hover .card-icon {
-        transform: scale(1.1) rotate(-5deg);
-        background: #ffffff;
-    }
-    .dash-stat-card .card-footer {
-        background: rgba(255, 255, 255, 0.55);
-        padding: 8px 16px;
-        font-size: 12px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        z-index: 2;
-        border-top: 1px solid rgba(0,0,0,0.05);
-    }
-    .dash-stat-card .card-footer:hover {
-        background: rgba(255, 255, 255, 0.9);
-    }
-    .dash-stat-card .card-footer i {
-        transition: transform 0.2s ease;
-    }
-    .dash-stat-card .card-footer:hover i {
-        transform: translateX(4px);
-    }
-    .slider-dots {
-        display: flex;
-        justify-content: center;
-        gap: 6px;
-        margin-top: 8px;
-    }
-    .slider-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #cbd5e1;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-    .slider-dot.active {
-        width: 22px;
-        border-radius: 10px;
-        background: #2563eb;
-    }
+    .mis-acc-empty { text-align: center; color: #94a3b8; padding: 22px 0 !important; }
+    .mis-acc-foot { text-align: center; padding-top: 14px; }
+    .mis-acc-foot a { color: #1e3a8a; font-size: 13px; font-weight: 600; text-decoration: none; }
+    .mis-acc-foot a:hover { text-decoration: underline; }
 </style>
-
-<div class="row">
-    <!-- Email Team Slider Component (Light Color Cards) -->
-    <div class="col-md-6 col-xs-12">
-        <div class="slider-wrapper">
-            <div class="slider-header">
-                <div class="slider-header-title">
-                    <div class="slider-icon-pill" style="background: rgba(14,165,233,0.12); color: #0284c7;">
-                        <i class="fa fa-envelope"></i>
-                    </div>
-                    <h3>Email Team Dashboard</h3>
-                </div>
-                <div class="slider-controls">
-                    <button type="button" class="slider-btn" onclick="scrollDashboardSlider('etSliderTrack', -1)" title="Previous"><i class="fa fa-chevron-left"></i></button>
-                    <button type="button" class="slider-btn" onclick="scrollDashboardSlider('etSliderTrack', 1)" title="Next"><i class="fa fa-chevron-right"></i></button>
-                </div>
-            </div>
-            <div class="slider-track" id="etSliderTrack" onscroll="updateSliderDots('etSliderTrack', 'etDots')">
-                <!-- Card 1: Enquiry (Light Blue) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border: 1px solid #7dd3fc; color: #0369a1;">
-                        <div class="card-icon" style="color: #0284c7;"><i class="fa fa-envelope"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #0369a1;">@Model.EtEnquiryCount</h3>
-                            <span class="card-badge" style="color: #0369a1;">All Records</span>
-                            <p class="card-label" style="color: #0369a1;">Enquiry</p>
-                        </div>
-                        <a href="/Demanday/DemandayEnquiry" class="card-footer" style="color: #0369a1;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Card 2: Teamleader (Light Green) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #86efac; color: #15803d;">
-                        <div class="card-icon" style="color: #15803d;"><i class="fa fa-users"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #15803d;">@Model.EtTeamLeaderCount</h3>
-                            <span class="card-badge" style="color: #15803d;">All Records</span>
-                            <p class="card-label" style="color: #15803d;">Teamleader</p>
-                        </div>
-                        <a href="/Demanday/DemandayTeamLeader" class="card-footer" style="color: #15803d;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Card 3: Quality (Light Cyan Teal) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); border: 1px solid #5eead4; color: #0f766e;">
-                        <div class="card-icon" style="color: #0f766e;"><i class="fa fa-check-square-o"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #0f766e;">@Model.EtQualityCount</h3>
-                            <span class="card-badge" style="color: #0f766e;">All Records</span>
-                            <p class="card-label" style="color: #0f766e;">Quality</p>
-                        </div>
-                        <a href="/Demanday/DemandayQuality" class="card-footer" style="color: #0f766e;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Card 4: MIS (Light Amber Gold) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fcd34d; color: #b45309;">
-                        <div class="card-icon" style="color: #b45309;"><i class="fa fa-bar-chart"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #b45309;">@Model.EtMisCount</h3>
-                            <span class="card-badge" style="color: #b45309;">All Records</span>
-                            <p class="card-label" style="color: #b45309;">MIS</p>
-                        </div>
-                        <a href="/Demanday/DemandayMis" class="card-footer" style="color: #b45309;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Card 5: ET Contact (Light Soft Purple) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); border: 1px solid #c084fc; color: #6b21a8;">
-                        <div class="card-icon" style="color: #6b21a8;"><i class="fa fa-address-card-o"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #6b21a8;">@Model.EtContactCount</h3>
-                            <span class="card-badge" style="color: #6b21a8;">All Records</span>
-                            <p class="card-label" style="color: #6b21a8;">ET Contact</p>
-                        </div>
-                        <a href="/Demanday/DemandayContacts" class="card-footer" style="color: #6b21a8;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="slider-dots" id="etDots">
-                <span class="slider-dot active" onclick="jumpToSlide('etSliderTrack', 0)"></span>
-                <span class="slider-dot" onclick="jumpToSlide('etSliderTrack', 1)"></span>
-                <span class="slider-dot" onclick="jumpToSlide('etSliderTrack', 2)"></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- TeleMarketing Team Slider Component (Light Color Cards) -->
-    <div class="col-md-6 col-xs-12">
-        <div class="slider-wrapper">
-            <div class="slider-header">
-                <div class="slider-header-title">
-                    <div class="slider-icon-pill" style="background: rgba(16,185,129,0.12); color: #059669;">
-                        <i class="fa fa-phone"></i>
-                    </div>
-                    <h3>TeleMarketing Team Dashboard</h3>
-                </div>
-                <div class="slider-controls">
-                    <button type="button" class="slider-btn" onclick="scrollDashboardSlider('tmSliderTrack', -1)" title="Previous"><i class="fa fa-chevron-left"></i></button>
-                    <button type="button" class="slider-btn" onclick="scrollDashboardSlider('tmSliderTrack', 1)" title="Next"><i class="fa fa-chevron-right"></i></button>
-                </div>
-            </div>
-            <div class="slider-track" id="tmSliderTrack" onscroll="updateSliderDots('tmSliderTrack', 'tmDots')">
-                <!-- Card 1: TM Enquiry (Light Royal Blue) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #93c5fd; color: #1d4ed8;">
-                        <div class="card-icon" style="color: #1d4ed8;"><i class="fa fa-phone-square"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #1d4ed8;">@Model.TmEnquiryCount</h3>
-                            <span class="card-badge" style="color: #1d4ed8;">All Records</span>
-                            <p class="card-label" style="color: #1d4ed8;">TM Enquiry</p>
-                        </div>
-                        <a href="/Demanday/DemandayTeleMarketingEnquiry" class="card-footer" style="color: #1d4ed8;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Card 2: TM Teamleader (Light Mint Green) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%); border: 1px solid #6ee7b7; color: #047857;">
-                        <div class="card-icon" style="color: #047857;"><i class="fa fa-user-circle-o"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #047857;">@Model.TmTeamLeaderCount</h3>
-                            <span class="card-badge" style="color: #047857;">All Records</span>
-                            <p class="card-label" style="color: #047857;">TM Teamleader</p>
-                        </div>
-                        <a href="/Demanday/DemandayTeleMarketingTeamLeader" class="card-footer" style="color: #047857;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Card 3: TM Quality (Light Coral Orange) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); border: 1px solid #fdba74; color: #c2410c;">
-                        <div class="card-icon" style="color: #c2410c;"><i class="fa fa-shield"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #c2410c;">@Model.TmQualityCount</h3>
-                            <span class="card-badge" style="color: #c2410c;">All Records</span>
-                            <p class="card-label" style="color: #c2410c;">TM Quality</p>
-                        </div>
-                        <a href="/Demanday/DemandayTeleMarketingQualilty" class="card-footer" style="color: #c2410c;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Card 4: TM MIS (Light Violet Purple) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #fae8ff 0%, #f5d0fe 100%); border: 1px solid #f0abfc; color: #7e22ce;">
-                        <div class="card-icon" style="color: #7e22ce;"><i class="fa fa-pie-chart"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #7e22ce;">@Model.TmMisCount</h3>
-                            <span class="card-badge" style="color: #7e22ce;">All Records</span>
-                            <p class="card-label" style="color: #7e22ce;">TM MIS</p>
-                        </div>
-                        <a href="/Demanday/DemandayTeleMarketingMIS" class="card-footer" style="color: #7e22ce;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Card 5: TM Contact (Light Rose Pink) -->
-                <div class="slider-card-item">
-                    <div class="dash-stat-card" style="background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%); border: 1px solid #fda4af; color: #be185d;">
-                        <div class="card-icon" style="color: #be185d;"><i class="fa fa-vcard-o"></i></div>
-                        <div class="inner">
-                            <h3 class="card-num" style="color: #be185d;">@Model.TmContactCount</h3>
-                            <span class="card-badge" style="color: #be185d;">All Records</span>
-                            <p class="card-label" style="color: #be185d;">TM Contact</p>
-                        </div>
-                        <a href="/Demanday/DemandayTeleMarketingContacts" class="card-footer" style="color: #be185d;">
-                            <span>More info</span>
-                            <i class="fa fa-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="slider-dots" id="tmDots">
-                <span class="slider-dot active" onclick="jumpToSlide('tmSliderTrack', 0)"></span>
-                <span class="slider-dot" onclick="jumpToSlide('tmSliderTrack', 1)"></span>
-                <span class="slider-dot" onclick="jumpToSlide('tmSliderTrack', 2)"></span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Campaign Performance Chart Card (12-Month Qualified & Disqualified Trend) -->
-<div class="row" style="margin-top: 5px;">
-    <div class="col-xs-12">
-        <div style="background: #ffffff; border-radius: 16px; padding: 24px 28px 20px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #edf2f7; margin-bottom: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px;">
-                <div>
-                    <h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px;">Campaign Performance</h3>
-                    <p style="margin: 0; font-size: 13px; color: #64748b; font-weight: 400;">Lead conversion funnel over the last 12 months</p>
-                </div>
-            </div>
-
-            <div style="position: relative; width: 100%; height: 340px;">
-                <canvas id="campaignPerformanceChart"></canvas>
-            </div>
-
-            <!-- Chart Custom Legend -->
-            <div style="display: flex; justify-content: center; gap: 24px; margin-top: 15px; font-size: 13px; font-weight: 600;">
-                <div style="display: flex; align-items: center; gap: 8px; color: #1e3a8a;">
-                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #1e3a8a; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #1e3a8a;"></span>
-                    <span>Qualified</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; color: #06b6d4;">
-                    <span style="width: 12px; height: 12px; border-radius: 50%; background: #06b6d4; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #06b6d4;"></span>
-                    <span>Disqualified</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="text/javascript">
-    function scrollDashboardSlider(trackId, direction) {
-        var track = document.getElementById(trackId);
-        if (track) {
-            var scrollAmount = track.clientWidth;
-            track.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
-        }
-    }
+    // One Campaign Performance chart per team (Email Team MIS, TeleMarketing Team MIS).
+    // Every time window is already on the page, so the Daily/Weekly/Monthly/Yearly buttons
+    // just re-point the tiles and the chart - no request to the server.
+    (function () {
+        var MIS_DEFAULT_PERIOD = '@misDefaultPeriod';
 
-    function jumpToSlide(trackId, index) {
-        var track = document.getElementById(trackId);
-        if (track) {
-            var scrollAmount = track.clientWidth * index;
-            track.scrollTo({ left: scrollAmount, behavior: 'smooth' });
-        }
-    }
+        document.addEventListener('DOMContentLoaded', function () {
+            var misCharts = @Html.Raw(misChartJson);
+            var chartByTeam = {};
+            var periodsByTeam = {};
 
-    function updateSliderDots(trackId, dotsId) {
-        var track = document.getElementById(trackId);
-        var dots = document.getElementById(dotsId);
-        if (track && dots) {
-            var pageIndex = Math.round(track.scrollLeft / track.clientWidth);
-            var dotElements = dots.getElementsByClassName('slider-dot');
-            for (var i = 0; i < dotElements.length; i++) {
-                if (i === pageIndex) {
-                    dotElements[i].classList.add('active');
-                } else {
-                    dotElements[i].classList.remove('active');
+            // Account Wise Report state: which window each team is showing, and whether its
+            // table is expanded past the preview.
+            var ACCOUNT_PREVIEW = 5;
+            var currentPeriod = {};
+            var accountsExpanded = {};
+
+            function num(v) { return (v || 0).toLocaleString(); }
+
+            function esc(v) {
+                return String(v == null ? '' : v)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            function setText(teamKey, name, text) {
+                var el = document.querySelector('[data-mis="' + name + '"][data-team="' + teamKey + '"]');
+                if (el) el.textContent = text;
+            }
+
+            function renderAccounts(teamKey, p) {
+                var body = document.querySelector('[data-mis="accounts"][data-team="' + teamKey + '"]');
+                var toggle = document.querySelector('[data-mis="accountsToggle"][data-team="' + teamKey + '"]');
+                if (!body) return;
+
+                var accounts = p.Accounts || [];
+                if (!accounts.length) {
+                    body.innerHTML = '<tr><td colspan="6" class="mis-acc-empty">No MIS records for ' +
+                        esc(p.RangeLabel.toLowerCase()) + '.</td></tr>';
+                    if (toggle) toggle.style.display = 'none';
+                    return;
+                }
+
+                var expanded = !!accountsExpanded[teamKey];
+                var shown = expanded ? accounts : accounts.slice(0, ACCOUNT_PREVIEW);
+
+                var html = '';
+                for (var i = 0; i < shown.length; i++) {
+                    var a = shown[i];
+                    html += '<tr>' +
+                        '<td><span class="mis-acc-rank">#' + (i + 1) + '</span></td>' +
+                        '<td class="mis-acc-name">' + esc(a.AccountNumber) + '</td>' +
+                        '<td class="num mis-acc-num">' + num(a.Disqualified) + '</td>' +
+                        '<td class="num mis-acc-num">' + num(a.Qualified) + '</td>' +
+                        '<td class="num mis-acc-num">' + num(a.GrandTotal) + '</td>' +
+                        '<td class="num"><span class="mis-acc-pct">' + a.QualifiedRate + '%</span></td>' +
+                        '</tr>';
+                }
+                body.innerHTML = html;
+
+                if (toggle) {
+                    if (accounts.length > ACCOUNT_PREVIEW) {
+                        toggle.style.display = '';
+                        toggle.textContent = expanded
+                            ? 'Show top ' + ACCOUNT_PREVIEW
+                            : 'View full leaderboard (' + accounts.length + ' accounts)';
+                    } else {
+                        toggle.style.display = 'none';
+                    }
                 }
             }
-        }
-    }
 
-    // Initialize Campaign Performance Chart
-    (function () {
-        document.addEventListener('DOMContentLoaded', function () {
-            var rawData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.QualityPerformanceChartData ?? new System.Collections.Generic.List<AdvanceCRM.Common.QualityChartDataPoint>()));
-            
-            var labels = rawData.map(function(x) { return x.MonthName; });
+            function applyPeriod(teamKey, periodKey) {
+                var periods = periodsByTeam[teamKey] || [];
+                var p = null;
+                for (var i = 0; i < periods.length; i++) {
+                    if (periods[i].Key === periodKey) { p = periods[i]; break; }
+                }
+                if (!p) return;
+                currentPeriod[teamKey] = p;
+
+                setText(teamKey, 'total', num(p.TotalLeads));
+                setText(teamKey, 'totalPct', p.ShareOfAll + '%');
+                setText(teamKey, 'totalBadge', p.RangeLabel);
+                setText(teamKey, 'qualified', num(p.QualifiedLeads));
+                setText(teamKey, 'qualifiedPct', p.QualifiedRate + '%');
+                setText(teamKey, 'qualifiedBadge', num(p.DisqualifiedLeads) + ' disqualified');
+                setText(teamKey, 'ebb', num(p.EbbCount));
+                setText(teamKey, 'ebbPct', p.EbbRatio + '%');
+                setText(teamKey, 'ebbBadge', 'Comments containing “EBB”');
+
+                var rangeEl = document.querySelector('[data-mis="range"][data-team="' + teamKey + '"]');
+                if (rangeEl) {
+                    rangeEl.textContent = rangeEl.getAttribute('data-mis-title') +
+                        ' – lead conversion funnel over the ' + p.RangeLabel.toLowerCase();
+                }
+
+                var chart = chartByTeam[teamKey];
+                if (chart) {
+                    var points = p.ChartData || [];
+                    chart.data.labels = points.map(function (x) { return x.Label; });
+                    chart.data.datasets[0].data = points.map(function (x) { return x.QualifiedCount; });
+                    chart.data.datasets[1].data = points.map(function (x) { return x.DisqualifiedCount; });
+                    chart.update();
+                }
+
+                var buttons = document.querySelectorAll('.mis-period-btn[data-team="' + teamKey + '"]');
+                for (var b = 0; b < buttons.length; b++)
+                    buttons[b].classList.toggle('active', buttons[b].getAttribute('data-period') === periodKey);
+
+                // A new window means a different set of accounts, so start back at the preview.
+                accountsExpanded[teamKey] = false;
+                renderAccounts(teamKey, p);
+            }
+
+            // ---- Team slider: one team on screen at a time, wrapping at both ends ----
+            var slideIndex = 0;
+            var slideTrack = document.getElementById('misSliderTrack');
+            var slideCount = slideTrack ? slideTrack.children.length : 0;
+
+            function goToSlide(index) {
+                if (!slideTrack || slideCount === 0) return;
+                slideIndex = ((index % slideCount) + slideCount) % slideCount;
+                slideTrack.style.transform = 'translateX(-' + (slideIndex * 100) + '%)';
+
+                var dots = document.querySelectorAll('[data-mis-dot]');
+                for (var d = 0; d < dots.length; d++)
+                    dots[d].classList.toggle('active', Number(dots[d].getAttribute('data-mis-dot')) === slideIndex);
+            }
+
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest) return;
+
+                var periodBtn = e.target.closest('.mis-period-btn');
+                if (periodBtn) {
+                    e.preventDefault();
+                    applyPeriod(periodBtn.getAttribute('data-team'), periodBtn.getAttribute('data-period'));
+                    return;
+                }
+
+                var slideBtn = e.target.closest('.mis-slide-btn');
+                if (slideBtn) {
+                    e.preventDefault();
+                    goToSlide(slideIndex + Number(slideBtn.getAttribute('data-mis-slide')));
+                    return;
+                }
+
+                var dot = e.target.closest('[data-mis-dot]');
+                if (dot) {
+                    e.preventDefault();
+                    goToSlide(Number(dot.getAttribute('data-mis-dot')));
+                    return;
+                }
+
+                var accToggle = e.target.closest('[data-mis="accountsToggle"]');
+                if (accToggle) {
+                    e.preventDefault();
+                    var t = accToggle.getAttribute('data-team');
+                    accountsExpanded[t] = !accountsExpanded[t];
+                    if (currentPeriod[t]) renderAccounts(t, currentPeriod[t]);
+                }
+            });
+
+            misCharts.forEach(function (team) {
+            periodsByTeam[team.key] = team.periods || [];
+
+            var initial = null;
+            for (var i = 0; i < periodsByTeam[team.key].length; i++) {
+                if (periodsByTeam[team.key][i].Key === MIS_DEFAULT_PERIOD) { initial = periodsByTeam[team.key][i]; break; }
+            }
+            if (!initial) initial = periodsByTeam[team.key][0];
+
+            var rawData = (initial && initial.ChartData) || [];
+
+            var labels = rawData.map(function(x) { return x.Label; });
             var qualifiedData = rawData.map(function(x) { return x.QualifiedCount; });
             var disqualifiedData = rawData.map(function(x) { return x.DisqualifiedCount; });
 
-            var ctx = document.getElementById('campaignPerformanceChart');
+            var ctx = document.getElementById('campaignPerformanceChart_' + team.key);
             if (ctx && typeof Chart !== 'undefined') {
                 var chartCtx = ctx.getContext('2d');
 
@@ -580,7 +567,7 @@
                 gradientDisqualified.addColorStop(0, 'rgba(6, 182, 212, 0.18)');
                 gradientDisqualified.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
 
-                new Chart(chartCtx, {
+                chartByTeam[team.key] = new Chart(chartCtx, {
                     type: 'line',
                     data: {
                         labels: labels,
@@ -669,6 +656,13 @@
                     }
                 });
             }
+
+            // Fills the tiles and the Account Wise Report for the window the page opens on.
+            // Done through applyPeriod so the initial view and every later switch share one path.
+            if (initial) applyPeriod(team.key, initial.Key);
+            });
+
+            goToSlide(0);
         });
     })();
 </script>

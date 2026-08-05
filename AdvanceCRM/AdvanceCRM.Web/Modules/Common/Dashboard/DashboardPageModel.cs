@@ -83,28 +83,69 @@ namespace AdvanceCRM.Common
         public int CountOfIncorporationWishes { get; set; }
         public Boolean StockData { get; set; }
 
-        // Email Team counts
-        public int EtEnquiryCount { get; set; }
-        public int EtTeamLeaderCount { get; set; }
-        public int EtQualityCount { get; set; }
-        public int EtMisCount { get; set; }
-        public int EtContactCount { get; set; }
+        // The dashboard is driven by the MIS modules only - one block per team.
+        public MisDashboardStats EmailTeamMis { get; set; } = new MisDashboardStats();
+        public MisDashboardStats TeleMarketingMis { get; set; } = new MisDashboardStats();
+    }
 
-        // TeleMarketing Team counts
-        public int TmEnquiryCount { get; set; }
-        public int TmTeamLeaderCount { get; set; }
-        public int TmQualityCount { get; set; }
-        public int TmMisCount { get; set; }
-        public int TmContactCount { get; set; }
+    /// <summary>
+    /// One team's MIS figures, worked out once per time window (Daily / Weekly / Monthly /
+    /// Yearly) so the dashboard can switch between them without going back to the server.
+    /// Everything here comes from that team's MIS module.
+    /// </summary>
+    public class MisDashboardStats
+    {
+        public List<MisPeriodStats> Periods { get; set; } = new List<MisPeriodStats>();
+    }
 
-        public List<QualityChartDataPoint> QualityPerformanceChartData { get; set; }
+    /// <summary>The tiles and the trend for one time window.</summary>
+    public class MisPeriodStats
+    {
+        /// <summary>daily | weekly | monthly | yearly.</summary>
+        public string Key { get; set; }
+        /// <summary>Button caption, e.g. "Monthly".</summary>
+        public string Title { get; set; }
+        /// <summary>What the window covers, e.g. "Last 12 months".</summary>
+        public string RangeLabel { get; set; }
+
+        /// <summary>MIS rows dated inside this window.</summary>
+        public int TotalLeads { get; set; }
+        /// <summary>Rows whose QA Status is exactly "Qualified".</summary>
+        public int QualifiedLeads { get; set; }
+        /// <summary>Rows whose QA Status is exactly "Disqualified".</summary>
+        public int DisqualifiedLeads { get; set; }
+        /// <summary>Rows whose Comments carry "EBB" (matched case-sensitively).</summary>
+        public int EbbCount { get; set; }
+        /// <summary>Qualified rows as a percentage of the window's rows.</summary>
+        public decimal QualifiedRate { get; set; }
+        /// <summary>EBB rows as a percentage of the window's rows.</summary>
+        public decimal EbbRatio { get; set; }
+        /// <summary>This window's rows as a percentage of every row in the MIS module.</summary>
+        public decimal ShareOfAll { get; set; }
+
+        public List<QualityChartDataPoint> ChartData { get; set; } = new List<QualityChartDataPoint>();
+
+        /// <summary>Per Master Account breakdown for this window, biggest Grand Total first.</summary>
+        public List<MisAccountRow> Accounts { get; set; } = new List<MisAccountRow>();
+    }
+
+    /// <summary>One Master Account's line in the Account Wise Report.</summary>
+    public class MisAccountRow
+    {
+        /// <summary>The account's Account Number, or a placeholder when the MIS row has none.</summary>
+        public string AccountNumber { get; set; }
+        public int Qualified { get; set; }
+        public int Disqualified { get; set; }
+        /// <summary>Every MIS row for this account in the window, whatever its QA Status.</summary>
+        public int GrandTotal { get; set; }
+        /// <summary>Qualified as a percentage of this account's Grand Total.</summary>
+        public decimal QualifiedRate { get; set; }
     }
 
     public class QualityChartDataPoint
     {
-        public string MonthName { get; set; }
-        public int Year { get; set; }
-        public int Month { get; set; }
+        /// <summary>X-axis caption for the bucket: a day, a week start, a month or a year.</summary>
+        public string Label { get; set; }
         public int QualifiedCount { get; set; }
         public int DisqualifiedCount { get; set; }
     }

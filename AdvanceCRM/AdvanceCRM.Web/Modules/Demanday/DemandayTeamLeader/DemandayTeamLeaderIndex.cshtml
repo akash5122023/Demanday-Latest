@@ -4,6 +4,7 @@
 }
 
 <partial name="~/Modules/Common/_GridFilterPanel.cshtml" />
+<partial name="~/Modules/Common/_GridSummaryBar.cshtml" />
 
 <div id="GridDiv"></div>
 
@@ -11,5 +12,14 @@
     jQuery(function () {
         var grid = new AdvanceCRM.Demanday.DemandayTeamLeaderGrid($('#GridDiv'), {}).init();
         window.attachGridFilterPanel(grid);
+        // Added after the filter panel so the summary lands above the whole grid layout.
+        window.attachGridSummaryBar(grid, {
+            title: 'Team Leader',
+            mode: 'table',
+            url: 'Demanday/DemandayTeamLeader/AccountCampaignSummary',
+            accountField: 'MasterAccountId',
+            campaignField: 'CampaignId',
+            storageKey: 'etTeamLeader'
+        });
     });
 </script>

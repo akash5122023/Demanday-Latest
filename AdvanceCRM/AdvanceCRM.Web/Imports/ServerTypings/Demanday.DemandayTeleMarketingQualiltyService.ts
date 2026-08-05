@@ -6,6 +6,7 @@
         export declare function Update(request: Serenity.SaveRequest<DemandayTeleMarketingQualiltyRow>, onSuccess?: (response: Serenity.SaveResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function Delete(request: Serenity.DeleteRequest, onSuccess?: (response: Serenity.DeleteResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function Retrieve(request: Serenity.RetrieveRequest, onSuccess?: (response: Serenity.RetrieveResponse<DemandayTeleMarketingQualiltyRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
+        export declare function QaStatusSummary(request: Serenity.ServiceRequest, onSuccess?: (response: QaStatusSummaryResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function List(request: Serenity.ListRequest, onSuccess?: (response: Serenity.ListResponse<DemandayTeleMarketingQualiltyRow>) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function MoveToTeleMarketingMIS(request: MoveToTeleMarketingMISRequest, onSuccess?: (response: StandardResponse) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
         export declare function ImportExcel(request: Serenity.ServiceRequest, onSuccess?: (response: Microsoft.AspNetCore.Mvc.IActionResult) => void, opt?: Q.ServiceOptions<any>): JQueryXHR;
@@ -15,6 +16,7 @@
             Update = "Demanday/DemandayTeleMarketingQualilty/Update",
             Delete = "Demanday/DemandayTeleMarketingQualilty/Delete",
             Retrieve = "Demanday/DemandayTeleMarketingQualilty/Retrieve",
+            QaStatusSummary = "Demanday/DemandayTeleMarketingQualilty/QaStatusSummary",
             List = "Demanday/DemandayTeleMarketingQualilty/List",
             MoveToTeleMarketingMIS = "Demanday/DemandayTeleMarketingQualilty/MoveToTeleMarketingMIS",
             ImportExcel = "Demanday/DemandayTeleMarketingQualilty/ImportExcel"
@@ -25,6 +27,7 @@
             'Update', 
             'Delete', 
             'Retrieve', 
+            'QaStatusSummary', 
             'List', 
             'MoveToTeleMarketingMIS', 
             'ImportExcel'

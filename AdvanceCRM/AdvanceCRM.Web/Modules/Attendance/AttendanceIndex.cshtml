@@ -3,12 +3,15 @@
      ViewData["Title"] = Localizer.Get("Db.Attendance.Attendance.EntityPlural");
 }
 
+<partial name="~/Modules/Common/_GridFilterPanel.cshtml" />
+
 <div id="GridDiv"></div>
 
 <script type="text/javascript">
     jQuery(function () {
-        new AdvanceCRM.Attendance.AttendanceGrid($('#GridDiv'), {}).init();
-
-        Q.initFullHeightGridPage($('#GridDiv'));
+        var grid = new AdvanceCRM.Attendance.AttendanceGrid($('#GridDiv'), {}).init();
+        // Moves the quick-filter bar into the shared side panel and sets the page height itself,
+        // so Q.initFullHeightGridPage must not be called separately here.
+        window.attachGridFilterPanel(grid);
     });
 </script>

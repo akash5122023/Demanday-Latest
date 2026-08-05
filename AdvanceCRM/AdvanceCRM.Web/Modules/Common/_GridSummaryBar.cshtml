@@ -1,0 +1,305 @@
+@*
+    Shared collapsible summary bar that sits above a Serenity grid.
+
+    Include once per grid page and call, after the grid is init'd:
+
+        window.attachGridSummaryBar(grid, {
+            title: 'Quality',
+            mode: 'chips',                                        // status count chips
+            url: 'Demanday/DemandayQuality/QaStatusSummary',
+            field: 'QaStatus',
+            storageKey: 'etQuality'
+        });
+
+        window.attachGridSummaryBar(grid, {
+            title: 'Team Leader',
+            mode: 'table',                                        // account / campaign counts
+            url: 'Demanday/DemandayTeamLeader/AccountCampaignSummary',
+            accountField: 'MasterAccountId',
+            campaignField: 'CampaignId',
+            storageKey: 'etTeamLeader'
+        });
+
+    Both modes share the same header (title, live record count, collapse state) and both let
+    the user click a row/chip to narrow the grid.
+*@
+<style type="text/css">
+    .dv-sum {
+        background: #ffffff; border: 1px solid #e7e9f0; border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
+        padding: 14px 18px; margin-bottom: 12px;
+    }
+    .dv-sum-head {
+        display: flex; align-items: center; gap: 12px; cursor: pointer;
+        -webkit-user-select: none; user-select: none;
+    }
+    .dv-sum-heading { display: flex; flex-direction: column; gap: 2px; }
+    .dv-sum-title { font-size: 18px; font-weight: 800; color: #1d4ed8; letter-spacing: -0.3px; }
+    .dv-sum-sub { font-size: 12px; color: #94a3b8; font-weight: 500; }
+    .dv-sum-caret {
+        margin-left: auto; color: #94a3b8; font-size: 13px; transition: transform .15s ease;
+    }
+    .dv-sum.dv-sum-collapsed .dv-sum-caret { transform: rotate(-90deg); }
+    .dv-sum.dv-sum-collapsed .dv-sum-body { display: none; }
+    .dv-sum.dv-sum-collapsed .dv-sum-foot { display: none; }
+
+    /* ---- chips mode ---- */
+    .dv-sum-body { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+    /* Chips share the bar's full width evenly, and wrap on narrow screens. */
+    .dv-sum-chip {
+        flex: 1 1 150px; min-width: 150px;
+        border: 1px solid #e5e7eb; border-radius: 10px;
+        background: #f8fafc; padding: 12px 16px; cursor: pointer;
+        transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    .dv-sum-chip:hover { box-shadow: 0 2px 8px rgba(17,24,39,.08); }
+    .dv-sum-chip.active { border-width: 2px; padding: 11px 15px; }
+    .dv-sum-chip .l {
+        display: block; font-size: 11px; font-weight: 700; letter-spacing: .6px;
+        text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; white-space: nowrap;
+    }
+    .dv-sum-chip .n { display: block; font-size: 26px; font-weight: 800; line-height: 1; color: #0f172a; }
+
+    /* Status colours. Anything unrecognised keeps the neutral slate look above. */
+    .dv-sum-chip.st-all { background: #ffffff; border-color: #bfdbfe; }
+    .dv-sum-chip.st-all .n { color: #0f172a; }
+    .dv-sum-chip.st-qualified { background: #f0fdf4; border-color: #bbf7d0; }
+    .dv-sum-chip.st-qualified .l { color: #15803d; }
+    .dv-sum-chip.st-qualified .n { color: #15803d; }
+    .dv-sum-chip.st-disqualified { background: #fef2f2; border-color: #fecaca; }
+    .dv-sum-chip.st-disqualified .l { color: #b91c1c; }
+    .dv-sum-chip.st-disqualified .n { color: #dc2626; }
+    .dv-sum-chip.st-pending { background: #fefce8; border-color: #fde68a; }
+    .dv-sum-chip.st-pending .l { color: #a16207; }
+    .dv-sum-chip.st-pending .n { color: #a16207; }
+    .dv-sum-chip.st-tbd { background: #f8fafc; border-color: #e2e8f0; }
+    .dv-sum-chip.st-tbd .l { color: #64748b; }
+    .dv-sum-chip.st-tbd .n { color: #475569; }
+
+    /* ---- table mode ---- */
+    .dv-sum-body.dv-sum-tablewrap { display: block; overflow-x: auto; }
+    .dv-sum-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .dv-sum-table thead th {
+        text-align: left; font-size: 12px; font-weight: 700; color: #94a3b8;
+        padding: 0 12px 10px 12px; white-space: nowrap; border-bottom: 1px solid #f1f5f9;
+    }
+    .dv-sum-table th.num, .dv-sum-table td.num { text-align: right; }
+    .dv-sum-table tbody td {
+        padding: 11px 12px; border-bottom: 1px solid #f6f8fb; color: #0f172a; white-space: nowrap;
+    }
+    .dv-sum-table tbody tr { cursor: pointer; }
+    .dv-sum-table tbody tr:hover { background: #f5f9ff; }
+    .dv-sum-table tbody tr.active { background: #eff6ff; }
+    .dv-sum-table tbody tr:last-child td { border-bottom: none; }
+    .dv-sum-no {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 30px; height: 24px; padding: 0 7px; border-radius: 7px;
+        background: #eff6ff; color: #1e3a8a; font-size: 12px; font-weight: 700;
+    }
+    .dv-sum-strong { font-weight: 700; }
+    .dv-sum-count { font-size: 16px; font-weight: 800; color: #0f172a; }
+    .dv-sum-empty { text-align: center; color: #94a3b8; padding: 20px 0 !important; }
+    .dv-sum-foot { text-align: center; padding-top: 12px; }
+    .dv-sum-foot a { color: #1e3a8a; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
+    .dv-sum-foot a:hover { text-decoration: underline; }
+</style>
+
+<script type="text/javascript">
+window.attachGridSummaryBar = function (grid, options) {
+    if (!grid || !grid.element || !grid.element.length) return;
+    options = options || {};
+
+    var mode = options.mode || 'chips';
+    var previewRows = options.previewRows || 8;
+    var stateKey = 'dvSumCollapsed:' + (options.storageKey || options.title || mode);
+
+    function esc(v) {
+        return String(v == null ? '' : v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function num(v) { return (v || 0).toLocaleString(); }
+
+    // ---- Shell ----
+    var $panel = $(
+        '<div class="dv-sum">' +
+            '<div class="dv-sum-head">' +
+                '<span class="dv-sum-heading">' +
+                    '<span class="dv-sum-title"></span>' +
+                    '<span class="dv-sum-sub">&nbsp;</span>' +
+                '</span>' +
+                '<i class="fa fa-chevron-down dv-sum-caret"></i>' +
+            '</div>' +
+            '<div class="dv-sum-body' + (mode === 'table' ? ' dv-sum-tablewrap' : '') + '"></div>' +
+            '<div class="dv-sum-foot"><a style="display:none;"></a></div>' +
+        '</div>'
+    );
+    $panel.find('.dv-sum-title').text(options.title || '');
+
+    // Sits above whatever wrapper the grid ended up in (e.g. the filter panel layout),
+    // so the bar stays above the module title however the page is composed.
+    var $anchor = grid.element.closest('.dv-flt-layout');
+    if (!$anchor.length) $anchor = grid.element;
+    $anchor.before($panel);
+
+    var $body = $panel.find('.dv-sum-body');
+    var $more = $panel.find('.dv-sum-foot a');
+    var expanded = false;
+    var selected = null;          // chips mode: status text; table mode: row index
+    var lastData = null;
+
+    // Collapsed state is remembered per module, so the page opens the way it was left.
+    try {
+        if (window.localStorage && localStorage.getItem(stateKey) === '1')
+            $panel.addClass('dv-sum-collapsed');
+    } catch (e) { }
+
+    $panel.on('click', '.dv-sum-head', function () {
+        var collapsed = $panel.toggleClass('dv-sum-collapsed').hasClass('dv-sum-collapsed');
+        try {
+            if (window.localStorage) localStorage.setItem(stateKey, collapsed ? '1' : '0');
+        } catch (e) { }
+    });
+
+    // "N records" tracks what the grid is actually showing right now.
+    function updateRecordCount() {
+        var n = 0;
+        try {
+            var pi = grid.view.getPagingInfo && grid.view.getPagingInfo();
+            n = (pi && pi.totalCount != null) ? pi.totalCount : (grid.view.getLength() || 0);
+        } catch (e) { }
+        $panel.find('.dv-sum-sub').text(num(n) + ' records');
+    }
+
+    // ---- chips mode ----
+    function statusClass(status) {
+        var k = String(status || '').toLowerCase().replace(/[^a-z]/g, '');
+        if (k === 'qualified') return 'st-qualified';
+        if (k === 'disqualified') return 'st-disqualified';
+        if (k === 'pending') return 'st-pending';
+        if (k === 'tbd') return 'st-tbd';
+        return '';
+    }
+
+    function renderChips(data) {
+        var items = (data && data.Items) || [];
+        var html = '<div class="dv-sum-chip st-all' + (selected === null ? ' active' : '') + '" data-status="">' +
+            '<span class="l">All</span><span class="n">' + num(data && data.Total) + '</span></div>';
+
+        for (var i = 0; i < items.length; i++) {
+            var it = items[i];
+            html += '<div class="dv-sum-chip ' + statusClass(it.Status) +
+                (selected === it.Status ? ' active' : '') +
+                '" data-status="' + esc(it.Status) + '">' +
+                '<span class="l">' + esc(it.Status) + '</span>' +
+                '<span class="n">' + num(it.Count) + '</span></div>';
+        }
+        $body.html(html);
+        $more.hide();
+    }
+
+    $body.on('click', '.dv-sum-chip', function () {
+        var status = $(this).attr('data-status');
+        selected = status ? status : null;   // the ALL chip carries an empty status
+
+        grid.setEquality(options.field || 'QaStatus', selected);
+        grid.refresh();
+
+        $body.find('.dv-sum-chip').removeClass('active');
+        $(this).addClass('active');
+    });
+
+    // ---- table mode ----
+    function renderTable(data) {
+        var items = (data && data.Items) || [];
+        if (!items.length) {
+            $body.html('<div class="dv-sum-empty">No records yet.</div>');
+            $more.hide();
+            return;
+        }
+
+        var shown = expanded ? items : items.slice(0, previewRows);
+        var html = '<table class="dv-sum-table"><thead><tr>' +
+            '<th style="width: 60px;">No</th>' +
+            '<th>Account Number</th>' +
+            '<th>Campaign ID</th>' +
+            '<th class="num" style="width: 110px;">Count</th>' +
+            '</tr></thead><tbody>';
+
+        for (var i = 0; i < shown.length; i++) {
+            var it = shown[i];
+            html += '<tr data-index="' + i + '"' + (selected === i ? ' class="active"' : '') + '>' +
+                '<td><span class="dv-sum-no">' + (i + 1) + '</span></td>' +
+                '<td class="dv-sum-strong">' + esc(it.AccountNumber) + '</td>' +
+                '<td>' + esc(it.CampaignId) + '</td>' +
+                '<td class="num"><span class="dv-sum-count">' + num(it.Count) + '</span></td>' +
+                '</tr>';
+        }
+        html += '</tbody></table>';
+        $body.html(html);
+
+        if (items.length > previewRows) {
+            $more.show().text(expanded
+                ? 'Show top ' + previewRows
+                : 'Show all ' + items.length + ' rows');
+        } else {
+            $more.hide();
+        }
+    }
+
+    $body.on('click', '.dv-sum-table tbody tr', function () {
+        var index = Number($(this).attr('data-index'));
+        var items = (lastData && lastData.Items) || [];
+        var it = items[index];
+        if (!it) return;
+
+        // Clicking the same row again clears the filter, so there is always a way back.
+        if (selected === index) {
+            selected = null;
+            grid.setEquality(options.accountField || 'MasterAccountId', null);
+            grid.setEquality(options.campaignField || 'CampaignId', null);
+        }
+        else {
+            selected = index;
+            grid.setEquality(options.accountField || 'MasterAccountId', it.MasterAccountId);
+            grid.setEquality(options.campaignField || 'CampaignId', it.CampaignId);
+        }
+        grid.refresh();
+
+        $body.find('tbody tr').removeClass('active');
+        if (selected !== null) $(this).addClass('active');
+    });
+
+    $more.on('click', function (e) {
+        e.preventDefault();
+        expanded = !expanded;
+        renderTable(lastData);
+    });
+
+    // ---- Loading ----
+    function render(data) {
+        lastData = data;
+        if (mode === 'table') renderTable(data);
+        else renderChips(data);
+    }
+
+    var loadTimer = null;
+    function load() {
+        Q.serviceRequest(options.url, {}, function (response) { render(response); },
+            { blockUI: false, onError: function () { $panel.hide(); } });
+    }
+
+    // Recounted whenever the grid reloads, so editing or deleting a record updates the bar
+    // without a page refresh. Debounced because a single user action can fire this twice.
+    function loadSoon() {
+        if (loadTimer) clearTimeout(loadTimer);
+        loadTimer = setTimeout(load, 400);
+    }
+    if (grid.view && grid.view.onDataChanged) {
+        grid.view.onDataChanged.subscribe(updateRecordCount);
+        grid.view.onDataChanged.subscribe(loadSoon);
+    }
+
+    updateRecordCount();
+    load();
+};
+</script>

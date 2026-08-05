@@ -54,6 +54,15 @@ namespace AdvanceCRM.Demanday.Endpoints
             return handler.Retrieve(connection, request);
         }
 
+        // Feeds the QA Status summary bar above the grid. Counts the whole module, not the
+        // grid's current page or filter - the bar describes the module, the grid shows the view.
+        [HttpPost]
+        public QaStatusSummaryResponse QaStatusSummary(IDbConnection connection)
+        {
+            return Demanday.QaStatusSummary.Build(connection,
+                MyRow.Fields.TableName, MyRow.Fields.QaStatus.Name);
+        }
+
         [HttpPost]
         public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
             [FromServices] IDemandayQualityListHandler handler)

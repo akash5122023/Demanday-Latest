@@ -8,7 +8,7 @@
         Email: Serenity.StringEditor;
         CompanyName: Serenity.StringEditor;
         Timestamp: Serenity.DateEditor;
-        DemandayTeleMarketingEnquiryId: Serenity.LookupEditor;
+        TeamLeaderId: Serenity.LookupEditor;
     }
 
     export class ToolkitTMEnquiryForm extends Serenity.PrefixedContext {
@@ -36,7 +36,7 @@
                     'Email', w2,
                     'CompanyName', w2,
                     'Timestamp', w3,
-                    'DemandayTeleMarketingEnquiryId', w1
+                    'TeamLeaderId', w1
                 ]);
             }
         }

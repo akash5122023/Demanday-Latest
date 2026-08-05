@@ -21,7 +21,8 @@ namespace AdvanceCRM.Toolkit.Columns
         [DisplayName("Campaign ID")]
         public String CampaignCampaignId { get; set; }
         public String MasterAccountAccountNumber { get; set; }
-        public String TMEnquiryFirstName { get; set; }
+        [DisplayName("Team Leader")]
+        public String TeamLeaderFirstName { get; set; }
         public DateTime? Timestamp { get; set; }
     }
 }

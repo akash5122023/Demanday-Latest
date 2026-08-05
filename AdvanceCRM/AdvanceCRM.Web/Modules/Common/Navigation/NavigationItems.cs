@@ -33,8 +33,8 @@ using AdvanceCRM.Toolkit.Pages;
 using Serenity.Navigation;
 
 //[assembly: NavigationLink(900, "My Profile", url: "~/Account/Profile", permission: "", icon: "fa-user-circle")]
-//[assembly: NavigationLink(1000, "Dashboard", url: "~/", permission: "", icon: "fa-tachometer")]
-//[assembly: NavigationLink(1000, "Dashboard/My Dashboard", url: "~/", permission: "", icon: "fa-home text-orange")]
+[assembly: NavigationLink(1000, "Dashboard", url: "~/", permission: "", icon: "fa-tachometer")]
+[assembly: NavigationLink(1000, "Dashboard/My Dashboard", url: "~/", permission: "", icon: "fa-home text-orange")]
 //[assembly: NavigationLink(1001, "Dashboard/Team Dashboard", url: "~/TeamDashboard", permission: "", icon: "fa-users text-green")]
 //[assembly: NavigationLink(6001, "Dashboard/DSR Dashboard", url: "~/DSR", permission: "", icon: "fa-line-chart text-red")]
 //[assembly: NavigationLink(6002, "Dashboard/Accounts Dashboard", url: "~/Accounts", permission: "Contacts:Read", icon: "fa-calculator text-yellow")]

@@ -237,6 +237,7 @@ namespace MVC
         public static class Common
         {
             public const string _GridFilterPanel = "~/Modules/Common/_GridFilterPanel.cshtml";
+            public const string _GridSummaryBar = "~/Modules/Common/_GridSummaryBar.cshtml";
             public static class Activation
             {
                 public const string ActivationIndex = "~/Modules/Common/Activation/ActivationIndex.cshtml";

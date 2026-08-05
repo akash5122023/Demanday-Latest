@@ -4,6 +4,7 @@
 }
 
 <partial name="~/Modules/Common/_GridFilterPanel.cshtml" />
+<partial name="~/Modules/Common/_GridSummaryBar.cshtml" />
 
 <div id="GridDiv"></div>
 
@@ -11,5 +12,13 @@
     jQuery(function () {
         var grid = new AdvanceCRM.Demanday.DemandayTeleMarketingQualiltyGrid($('#GridDiv'), {}).init();
         window.attachGridFilterPanel(grid);
+        // Added after the filter panel so the summary lands above the whole grid layout.
+        window.attachGridSummaryBar(grid, {
+            title: 'TM Quality',
+            mode: 'chips',
+            url: 'Demanday/DemandayTeleMarketingQualilty/QaStatusSummary',
+            field: 'QaStatus',
+            storageKey: 'tmQuality'
+        });
     });
 </script>

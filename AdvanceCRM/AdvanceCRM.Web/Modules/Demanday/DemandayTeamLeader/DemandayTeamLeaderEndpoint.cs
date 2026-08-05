@@ -54,6 +54,17 @@ namespace AdvanceCRM.Demanday.Endpoints
             return handler.Retrieve(connection, request);
         }
 
+        // Feeds the Account / Campaign summary bar above the grid. Counts the whole module,
+        // not the grid's current page or filter.
+        [HttpPost]
+        public AccountCampaignSummaryResponse AccountCampaignSummary(IDbConnection connection)
+        {
+            return Demanday.AccountCampaignSummary.Build(connection,
+                MyRow.Fields.TableName,
+                MyRow.Fields.MasterAccountId.Name,
+                MyRow.Fields.CampaignId.Name);
+        }
+
         [HttpPost]
         public ListResponse<MyRow> List(IDbConnection connection, ListRequest request,
             [FromServices] IDemandayTeamLeaderListHandler handler)

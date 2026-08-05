@@ -8,11 +8,11 @@
         Email?: string;
         CompanyName?: string;
         Timestamp?: string;
-        DemandayTeleMarketingEnquiryId?: number;
+        TeamLeaderId?: number;
         MasterAccountAccountNumber?: string;
         CampaignCampaignId?: string;
         CampaignDemandayMasterAccountId?: number;
-        TMEnquiryFirstName?: string;
+        TeamLeaderFirstName?: string;
         CreatedOn?: string;
         CreatedBy?: string;
         UpdatedOn?: string;
@@ -42,11 +42,11 @@
             Email = "Email",
             CompanyName = "CompanyName",
             Timestamp = "Timestamp",
-            DemandayTeleMarketingEnquiryId = "DemandayTeleMarketingEnquiryId",
+            TeamLeaderId = "TeamLeaderId",
             MasterAccountAccountNumber = "MasterAccountAccountNumber",
             CampaignCampaignId = "CampaignCampaignId",
             CampaignDemandayMasterAccountId = "CampaignDemandayMasterAccountId",
-            TMEnquiryFirstName = "TMEnquiryFirstName",
+            TeamLeaderFirstName = "TeamLeaderFirstName",
             CreatedOn = "CreatedOn",
             CreatedBy = "CreatedBy",
             UpdatedOn = "UpdatedOn",

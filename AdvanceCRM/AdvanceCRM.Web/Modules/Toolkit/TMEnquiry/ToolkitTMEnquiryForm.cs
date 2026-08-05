@@ -29,6 +29,6 @@ namespace AdvanceCRM.Toolkit.Forms
         [HalfWidth]
         public DateTime? Timestamp { get; set; }
         [HalfWidth]
-        public Int32 DemandayTeleMarketingEnquiryId { get; set; }
+        public Int32 TeamLeaderId { get; set; }
     }
 }
