@@ -67,6 +67,7 @@
         OwnerUrl?: string;
         OwnerPlan?: string;
         MasterAccountId?: number;
+        MasterAccountNo?: string;
         CampaignId?: string;
     }
 
@@ -152,6 +153,7 @@
             OwnerUrl = "OwnerUrl",
             OwnerPlan = "OwnerPlan",
             MasterAccountId = "MasterAccountId",
+            MasterAccountNo = "MasterAccountNo",
             CampaignId = "CampaignId"
         }
     }

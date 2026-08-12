@@ -55,24 +55,40 @@
                 CompanyEmployeeSize: 'Masters.DemandayEmployeeSizeMaster'
             });
 
-            // Master Account + Campaign cascade for grids that store CampaignId as a string (Demanday
-            // style). Toolkit grids have their own int-FK MasterAccountId cascade, so we skip those.
-            if (has('CampaignId') && !has('MasterAccountId'))
+            // Master Account + Campaign cascade for every grid that has a CampaignId column.
+            // Grids that add their own pair (Toolkit, where CampaignId is an int FK) push theirs
+            // after this runs and orderQuickFilters keeps the later one, so nothing is doubled.
+            if (has('CampaignId'))
                 this.addMasterAccountAndCampaignFilters(filters);
 
             return this.orderQuickFilters(filters);
         }
 
         // Fixed display order for the filter panel (fields not present are simply skipped; anything
-        // not listed keeps its original order at the end).
+        // not listed keeps its original order at the end). One filter per field: where a subclass
+        // pushed its own after calling super.getQuickFilters(), the later one wins, so a grid that
+        // tailors a field replaces the generic filter rather than showing two of them.
         protected orderQuickFilters(filters: Serenity.QuickFilter<Serenity.Widget<any>, any>[]) {
             const order = ['MasterAccountId', 'CampaignId', 'Date', 'Country', 'Title',
                 'JobLevel', 'JobFunctionRole', 'Domain', 'CompanyEmployeeSize', 'Industry', 'SubIndustry'];
+
+            let seen: { [field: string]: boolean } = {};
+            let unique: Serenity.QuickFilter<Serenity.Widget<any>, any>[] = [];
+            for (let i = filters.length - 1; i >= 0; i--) {
+                let f = filters[i];
+                if (!f) continue;
+                if (f.field) {
+                    if (seen[f.field]) continue;
+                    seen[f.field] = true;
+                }
+                unique.unshift(f);
+            }
+
             let ordered: Serenity.QuickFilter<Serenity.Widget<any>, any>[] = [];
             for (let fld of order)
-                for (let f of filters)
+                for (let f of unique)
                     if (f.field === fld && ordered.indexOf(f) < 0) ordered.push(f);
-            for (let f of filters)
+            for (let f of unique)
                 if (ordered.indexOf(f) < 0) ordered.push(f);
             return ordered;
         }
@@ -304,7 +320,6 @@
         }
 
         // Adds a "Master Account" dropdown that cascades a "Campaign Id" dropdown (only its campaigns).
-        // Filtering is on the grid's CampaignId string column; Master Account is a pure cascade driver.
         protected addMasterAccountAndCampaignFilters(
             filters: Serenity.QuickFilter<Serenity.Widget<any>, any>[]) {
 
@@ -313,6 +328,9 @@
                 if (filters[i].field === 'CampaignId') { filters.splice(i, 1); break; }
             }
 
+            let items = this.getPropertyItems() || [];
+            let hasAccountColumn = items.some(i => i && i.name === 'MasterAccountId');
+
             filters.push({
                 field: 'MasterAccountId',
                 type: Serenity.LookupEditor,
@@ -320,7 +338,18 @@
                 options: { lookupKey: 'Masters.DemandayMasterAccount' } as any,
                 handler: (h) => {
                     let v = (h.widget as any).value;
-                    h.active = v != null && ('' + v).length > 0;
+                    if (v == null || !('' + v).length) { h.active = false; return; }
+
+                    // Where the grid carries the account itself, picking an account narrows the
+                    // rows. On grids that only store CampaignId it stays a pure cascade driver,
+                    // limiting the Campaign Id list below without filtering on its own.
+                    if (hasAccountColumn) {
+                        h.request.Criteria = Serenity.Criteria.and(
+                            h.request.Criteria,
+                            [Serenity.Criteria('MasterAccountId'), '=', v]
+                        );
+                    }
+                    h.active = true;
                 }
             });
 

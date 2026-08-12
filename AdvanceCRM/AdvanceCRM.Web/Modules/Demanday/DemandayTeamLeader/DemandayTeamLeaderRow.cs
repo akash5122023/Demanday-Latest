@@ -232,12 +232,21 @@ namespace AdvanceCRM.Demanday
             set => fields.Attachments[this] = value;
         }
 
-        [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LookupInclude]
+        [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LeftJoin("jMasterAccount"), LookupInclude]
         [LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
         public Int32? MasterAccountId
         {
             get => fields.MasterAccountId[this];
             set => fields.MasterAccountId[this] = value;
+        }
+
+        // The readable Account Number behind MasterAccountId, joined in so exports and the
+        // Excel import template can carry the account itself rather than its internal id.
+        [DisplayName("Master Account No"), Expression("jMasterAccount.[AccountNumber]")]
+        public String MasterAccountNo
+        {
+            get => fields.MasterAccountNo[this];
+            set => fields.MasterAccountNo[this] = value;
         }
 
         [DisplayName("Campaign Id"), Size(15)]
@@ -829,6 +838,7 @@ namespace AdvanceCRM.Demanday
             public StringField OwnerPlan;
             public StringField Attachments;
             public Int32Field MasterAccountId;
+            public StringField MasterAccountNo;
             public StringField CampaignId;
         }
     }

@@ -38,6 +38,43 @@ namespace AdvanceCRM.Toolkit.Pages
             return false;
         }
 
+        /// <summary>
+        /// Whether the user may upload into one sheet. Import is granted per sheet, the same way
+        /// every module has its own &lt;Module&gt;:Import - so a role can be given Master Suppression
+        /// imports without being handed every other sheet with it. Three keys open a sheet: the
+        /// blanket "Toolkit:VerifySheets:Import" (kept so existing roles are unaffected), the
+        /// sheet's own key, or the sub-module's own Import key. Reading a sheet is a separate
+        /// permission and is still checked on its own.
+        /// </summary>
+        private static bool CanImportSheet(string sheet)
+        {
+            if (Authorization.HasPermission("Toolkit:VerifySheets:Import"))
+                return true;
+
+            string sheetKey, moduleKey;
+            switch (sheet)
+            {
+                case "Specification":
+                    sheetKey = "Toolkit:VerifySheets:Specification:Import"; moduleKey = "DemandaySpecs:Import"; break;
+                case "EmailSuppression":
+                    sheetKey = "Toolkit:VerifySheets:EmailSuppression:Import"; moduleKey = "ClientSupression:Import"; break;
+                case "CompetitorList":
+                    sheetKey = "Toolkit:VerifySheets:Competitor:Import"; moduleKey = "DemandayCompetitor:Import"; break;
+                case "TALList":
+                    sheetKey = "Toolkit:VerifySheets:TalList:Import"; moduleKey = "TalCampaign:Import"; break;
+                case "MasterSuppression":
+                    sheetKey = "Toolkit:VerifySheets:MasterSuppression:Import"; moduleKey = "MasterSupression:Import"; break;
+                case "OpenCampaign":
+                    sheetKey = "Toolkit:VerifySheets:OpenCampaign:Import"; moduleKey = "OpenCampaign:Import"; break;
+                case "DNCContact":
+                    sheetKey = "Toolkit:VerifySheets:DNCContact:Import"; moduleKey = "DNCContacts:Import"; break;
+                default:
+                    return false;   // unknown sheet - nothing grants an import into it
+            }
+
+            return Authorization.HasPermission(sheetKey) || Authorization.HasPermission(moduleKey);
+        }
+
         // all filtered by the selected Campaign, bundled together into a single .zip download.
         [Route("Toolkit/VerifySheets/ExportExcel")]
         public FileContentResult ExportExcel([FromServices] ISqlConnections connections, int campaignId)
@@ -477,6 +514,11 @@ SELECT @id;");
                 return Content("Access denied for sheet: " + sheet, "text/plain");
             if (sheet == "DNCContact" && !HasSubmodulePermission("Toolkit:VerifySheets:DNCContact", "DNCContacts:Read"))
                 return Content("Access denied for sheet: " + sheet, "text/plain");
+
+            // Seeing a sheet is not the same as being allowed to write a whole file into it, so
+            // the sheet's own Import permission is checked on top of the Read checks above.
+            if (!CanImportSheet(sheet))
+                return Content("You do not have permission to import into sheet: " + sheet, "text/plain");
 
             int imported = 0, updated = 0, skipped = 0, campaignsCreated = 0, campaignsMatched = 0;
             bool campaignHeaderFound = false, dateHeaderFound = false;

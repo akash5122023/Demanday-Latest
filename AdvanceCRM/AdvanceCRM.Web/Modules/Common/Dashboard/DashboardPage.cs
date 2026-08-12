@@ -29,6 +29,7 @@ namespace AdvanceCRM.Common.Pages
     using System.Collections.Generic;
     using AdvanceCRM.Accounting;
     using AdvanceCRM.Common.Calendar;
+    using System.Globalization;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Logging;
     using Microsoft.AspNetCore.Authorization;
@@ -113,6 +114,21 @@ namespace AdvanceCRM.Common.Pages
             // report's Grand Totals still add up to the tiles above it.
             var byAccount = new Dictionary<int, MisAccountRow>();
 
+            // Why records were disqualified, keyed by the reason as written. Reasons are matched
+            // case-insensitively and trimmed, so "EBB" and "ebb " land on one line instead of two.
+            var byReason = new Dictionary<string, MisReasonCount>(StringComparer.OrdinalIgnoreCase);
+
+            // Seed the list before counting anything: the standard reasons, plus every reason the
+            // module has ever used - scanned across all rows, not just this window's. Every line
+            // therefore appears in every window, showing 0 where the window has none of them.
+            foreach (var known in KnownDisqualifiedReasons)
+                ReasonLine(byReason, known);
+            foreach (var row in rows)
+            {
+                if (IsDisqualified(row.QaStatus))
+                    ReasonLine(byReason, ReasonOf(row.Comments));
+            }
+
             foreach (var row in rows)
             {
                 // An undated MIS row cannot be placed in any window, so it is left out of all of them.
@@ -137,32 +153,34 @@ namespace AdvanceCRM.Common.Pages
                 }
                 account.GrandTotal++;
 
-                if (string.Equals(row.QaStatus, "Qualified", StringComparison.Ordinal))
+                if (IsQualified(row.QaStatus))
                 {
                     period.QualifiedLeads++;
                     period.ChartData[idx].QualifiedCount++;
                     account.Qualified++;
                 }
-                else if (string.Equals(row.QaStatus, "Disqualified", StringComparison.Ordinal))
+                else if (IsDisqualified(row.QaStatus))
                 {
                     period.DisqualifiedLeads++;
                     period.ChartData[idx].DisqualifiedCount++;
                     account.Disqualified++;
-                }
 
-                // "EBB" is matched case-sensitively on purpose - a comment reading "ebb" is not
-                // the marker. This runs here rather than in SQL because the database collation is
-                // case-insensitive and a LIKE would count both spellings.
-                if (!string.IsNullOrEmpty(row.Comments) &&
-                    row.Comments.Contains("EBB", StringComparison.Ordinal))
-                    period.EbbCount++;
+                    // The Comment names the reason ("EBB", "Same Duplicate", "Invalid ICP", ...),
+                    // so the tile's breakdown is simply these grouped.
+                    ReasonLine(byReason, ReasonOf(row.Comments)).Count++;
+                }
             }
 
             if (period.TotalLeads > 0)
             {
                 period.QualifiedRate = Math.Round(period.QualifiedLeads * 100m / period.TotalLeads, 1);
-                period.EbbRatio = Math.Round(period.EbbCount * 100m / period.TotalLeads, 1);
+                period.DisqualifiedRate = Math.Round(period.DisqualifiedLeads * 100m / period.TotalLeads, 1);
             }
+
+            period.DisqualifiedReasons = byReason.Values
+                .OrderByDescending(r => r.Count)
+                .ThenBy(r => r.Reason, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             foreach (var account in byAccount.Values)
             {
@@ -178,11 +196,209 @@ namespace AdvanceCRM.Common.Pages
             return period;
         }
 
+        /// <summary>
+        /// Disqualification reasons the tile always lists, even when nothing in the window carries
+        /// them. A reason sitting at 0 is itself an answer ("nothing was suppressed this month"),
+        /// which a list built only from the window's own records would quietly hide. Any other
+        /// text typed into Comments is added to these from the data.
+        /// </summary>
+        private static readonly string[] KnownDisqualifiedReasons =
+        {
+            "EBB", "Invalid ICP", "Suppression", "Invalid number", "Tenurity", "Same Duplicate"
+        };
+
+        /// <summary>
+        /// QA Status is free text and carries the audit's outcome. "Qualified" is the only pass;
+        /// a blank one means the record has not been audited yet and belongs to neither side.
+        /// </summary>
+        private static bool IsQualified(string qaStatus)
+        {
+            return !string.IsNullOrWhiteSpace(qaStatus) &&
+                   string.Equals(qaStatus.Trim(), "Qualified", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Everything audited but not qualified is a disqualification - the status is written as
+        /// the reason itself ("Same Duplicate", "Invalid ICP", "EBB", ...), not as the single word
+        /// "Disqualified", so matching that one word would count almost none of them.
+        /// </summary>
+        private static bool IsDisqualified(string qaStatus)
+        {
+            return !string.IsNullOrWhiteSpace(qaStatus) && !IsQualified(qaStatus);
+        }
+
+        /// <summary>
+        /// What a disqualified record is counted under: its Comment, which is where the reason is
+        /// written ("EBB", "Same Duplicate", "Invalid ICP", ...). The QA Status only decides
+        /// whether the record is disqualified at all, not what it is counted under.
+        /// </summary>
+        private static string ReasonOf(string comments)
+        {
+            return string.IsNullOrWhiteSpace(comments) ? "(No comment)" : comments.Trim();
+        }
+
+        /// <summary>The line for one reason, created at zero the first time it is asked for.</summary>
+        private static MisReasonCount ReasonLine(Dictionary<string, MisReasonCount> byReason, string reason)
+        {
+            if (!byReason.TryGetValue(reason, out var entry))
+                byReason[reason] = entry = new MisReasonCount { Reason = reason };
+            return entry;
+        }
+
         /// <summary>Monday of the week the given date falls in.</summary>
         private static DateTime StartOfWeek(DateTime date)
         {
             var offset = ((int)date.DayOfWeek + 6) % 7;
             return date.Date.AddDays(-offset);
+        }
+
+        /// <summary>Master Account key to Account Number, for the Account Wise Report.</summary>
+        private static IDictionary<int, string> ReadMisAccountNames(IDbConnection connection)
+        {
+            var accFields = Masters.DemandayMasterAccountRow.Fields;
+            return connection.List<Masters.DemandayMasterAccountRow>(q => q
+                    .Select(accFields.Id)
+                    .Select(accFields.AccountNumber))
+                .Where(a => a.Id != null)
+                .GroupBy(a => a.Id.Value)
+                .ToDictionary(g => g.Key, g => g.First().AccountNumber);
+        }
+
+        /// <summary>
+        /// One team's MIS rows in the shape the stats builders work with. Both the page load and
+        /// the date filter read them through here, so they always agree on which columns count
+        /// and which date stands in when the primary one is missing.
+        /// </summary>
+        /// <param name="team">et = Email Team MIS, tm = TeleMarketing Team MIS.</param>
+        private static List<(string QaStatus, string Comments, DateTime? Date, int? MasterAccountId)> ReadMisRows(
+            IDbConnection connection, string team)
+        {
+            if (string.Equals(team, "tm", StringComparison.OrdinalIgnoreCase))
+            {
+                var tf = DemandayTeleMarketingMISRow.Fields;
+                return connection.List<DemandayTeleMarketingMISRow>(q => q
+                        .Select(tf.QaStatus)
+                        .Select(tf.Comments)
+                        .Select(tf.MasterAccountId)
+                        .Select(tf.Date)
+                        .Select(tf.DateAudited)
+                        .Select(tf.CallDate))
+                    .Select(r => (
+                        QaStatus: r.QaStatus,
+                        Comments: r.Comments,
+                        Date: r.Date ?? r.DateAudited ?? r.CallDate,
+                        MasterAccountId: r.MasterAccountId))
+                    .ToList();
+            }
+
+            var ef = DemandayMisRow.Fields;
+            return connection.List<DemandayMisRow>(q => q
+                    .Select(ef.QaStatus)
+                    .Select(ef.Comments)
+                    .Select(ef.MasterAccountId)
+                    .Select(ef.Date)
+                    .Select(ef.DateAudited)
+                    .Select(ef.CallDate))
+                .Select(r => (
+                    QaStatus: r.QaStatus,
+                    Comments: r.Comments,
+                    Date: r.Date ?? r.DateAudited ?? r.CallDate,
+                    MasterAccountId: r.MasterAccountId))
+                .ToList();
+        }
+
+        /// <summary>
+        /// The window the user picked with the date filter. Rows are cut to the range first, so
+        /// the tiles only ever count dates the user actually asked for; the bucket width then
+        /// follows the span - days for up to a month, then weeks, months and years - to keep the
+        /// trend readable instead of degenerating into hundreds of one-day columns.
+        /// </summary>
+        private static MisPeriodStats BuildCustomPeriod(
+            IEnumerable<(string QaStatus, string Comments, DateTime? Date, int? MasterAccountId)> rows,
+            IDictionary<int, string> accountNames, DateTime from, DateTime to)
+        {
+            from = from.Date;
+            to = to.Date;
+
+            var inRange = rows
+                .Where(r => r.Date.HasValue && r.Date.Value.Date >= from && r.Date.Value.Date <= to)
+                .ToList();
+
+            var rangeLabel = from.ToString("dd MMM yyyy") + " - " + to.ToString("dd MMM yyyy");
+            var days = (to - from).Days + 1;
+
+            if (days <= 31)
+            {
+                return BuildPeriod(inRange, accountNames, "custom", "Custom", rangeLabel, days,
+                    d => (d.Date - from).Days,
+                    i => from.AddDays(i).ToString("dd MMM"));
+            }
+
+            if (days <= 182)
+            {
+                var firstWeek = StartOfWeek(from);
+                var weeks = ((StartOfWeek(to) - firstWeek).Days / 7) + 1;
+                return BuildPeriod(inRange, accountNames, "custom", "Custom", rangeLabel, weeks,
+                    d => (StartOfWeek(d) - firstWeek).Days / 7,
+                    i => firstWeek.AddDays(i * 7).ToString("dd MMM"));
+            }
+
+            if (days <= 1827)
+            {
+                var firstMonth = new DateTime(from.Year, from.Month, 1);
+                var months = ((to.Year * 12 + to.Month) - (firstMonth.Year * 12 + firstMonth.Month)) + 1;
+                return BuildPeriod(inRange, accountNames, "custom", "Custom", rangeLabel, months,
+                    d => (d.Year * 12 + d.Month) - (firstMonth.Year * 12 + firstMonth.Month),
+                    i => firstMonth.AddMonths(i).ToString("MMM yy"));
+            }
+
+            var years = (to.Year - from.Year) + 1;
+            return BuildPeriod(inRange, accountNames, "custom", "Custom", rangeLabel, years,
+                d => d.Year - from.Year,
+                i => (from.Year + i).ToString());
+        }
+
+        /// <summary>
+        /// Backs the Campaign Performance date filter: the same tiles, trend and Account Wise
+        /// Report as the Daily/Weekly/Monthly/Yearly buttons, but for a range the user chose.
+        /// Returns a single MisPeriodStats, shaped exactly like the ones baked into the page.
+        /// </summary>
+        [Authorize, HttpGet, Route("~/Dashboard/MisData")]
+        public JsonResult MisData(string team, string StartDate, string EndDate)
+        {
+            // The picker sends MM/DD/YYYY; anything unparseable falls back to the last 12 months,
+            // which is the window the page opens on.
+            var culture = new CultureInfo("en-US");
+            if (!DateTime.TryParse(StartDate, culture, DateTimeStyles.None, out var from))
+                from = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-11);
+            if (!DateTime.TryParse(EndDate, culture, DateTimeStyles.None, out var to))
+                to = DateTime.Today;
+
+            if (to < from)
+                (from, to) = (to, from);
+
+            try
+            {
+                using (var connection = _connections.NewFor<DemandayMisRow>())
+                {
+                    var accountNames = ReadMisAccountNames(connection);
+                    var allRows = ReadMisRows(connection, team);
+
+                    var period = BuildCustomPeriod(allRows, accountNames, from, to);
+
+                    // Same reading as the built-in windows: how much of the whole module this
+                    // range covers, shown on the Total Leads tile.
+                    if (allRows.Count > 0)
+                        period.ShareOfAll = Math.Round(period.TotalLeads * 100m / allRows.Count, 1);
+
+                    return Json(new { Success = true, Period = period });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Dashboard MIS date filter failed for team {Team}", team);
+                return Json(new { Success = false, Error = "Could not load MIS data for the selected dates." });
+            }
         }
 
         [Authorize, HttpGet, Route("~/")]
@@ -240,37 +456,10 @@ namespace AdvanceCRM.Common.Pages
                             // Campaign Performance is MIS-only: each team's tiles, its trend and its
                             // Account Wise Report are built from that team's MIS module, nothing else.
                             // MIS stores only the account key, so its number is looked up here.
-                            var accFields = Masters.DemandayMasterAccountRow.Fields;
-                            var accountNames = connection.List<Masters.DemandayMasterAccountRow>(q => q
-                                    .Select(accFields.Id)
-                                    .Select(accFields.AccountNumber))
-                                .Where(a => a.Id != null)
-                                .GroupBy(a => a.Id.Value)
-                                .ToDictionary(g => g.Key, g => g.First().AccountNumber);
+                            var accountNames = ReadMisAccountNames(connection);
 
-                            var etMis = connection.List<DemandayMisRow>(q => q
-                                .Select(DemandayMisRow.Fields.QaStatus)
-                                .Select(DemandayMisRow.Fields.Comments)
-                                .Select(DemandayMisRow.Fields.MasterAccountId)
-                                .Select(DemandayMisRow.Fields.Date)
-                                .Select(DemandayMisRow.Fields.DateAudited)
-                                .Select(DemandayMisRow.Fields.CallDate)
-                            );
-                            model.EmailTeamMis = BuildMisStats(etMis.Select(r =>
-                                (r.QaStatus, r.Comments, r.Date ?? r.DateAudited ?? r.CallDate, r.MasterAccountId)),
-                                accountNames);
-
-                            var tmMis = connection.List<DemandayTeleMarketingMISRow>(q => q
-                                .Select(DemandayTeleMarketingMISRow.Fields.QaStatus)
-                                .Select(DemandayTeleMarketingMISRow.Fields.Comments)
-                                .Select(DemandayTeleMarketingMISRow.Fields.MasterAccountId)
-                                .Select(DemandayTeleMarketingMISRow.Fields.Date)
-                                .Select(DemandayTeleMarketingMISRow.Fields.DateAudited)
-                                .Select(DemandayTeleMarketingMISRow.Fields.CallDate)
-                            );
-                            model.TeleMarketingMis = BuildMisStats(tmMis.Select(r =>
-                                (r.QaStatus, r.Comments, r.Date ?? r.DateAudited ?? r.CallDate, r.MasterAccountId)),
-                                accountNames);
+                            model.EmailTeamMis = BuildMisStats(ReadMisRows(connection, "et"), accountNames);
+                            model.TeleMarketingMis = BuildMisStats(ReadMisRows(connection, "tm"), accountNames);
                         }
                         catch { }
 

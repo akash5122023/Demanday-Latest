@@ -249,7 +249,13 @@ namespace AdvanceCRM.Demanday.Endpoints
                 }
             }
 
-            var bytes = AdvanceCRM.Web.Modules.Common.AppServices.DemandayTeleMarketingQualityExcelExporter.ExportToExcel(data);
+            // QA Details (the campaign questions and the answers given) are detail rows, so the
+            // list response never carries them - load them for the exported records and let the
+            // exporter spread each question across its own column.
+            var qaDetails = QADetailsExportHelper.LoadByRecordId(connection,
+                data.Where(x => x.Id.HasValue).Select(x => x.Id.Value));
+
+            var bytes = AdvanceCRM.Web.Modules.Common.AppServices.DemandayTeleMarketingQualityExcelExporter.ExportToExcel(data, qaDetails);
             var fileName = "TeleMarketingQualityList_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".xlsx";
             return Serenity.Web.ExcelContentResult.Create(bytes, fileName);
         }
@@ -269,6 +275,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
+                    // Account Number -> id, read once so the per-row lookup below costs nothing.
+                    var accounts = ExcelImportHelper.LoadMasterAccountMap(uow.Connection);
 
                     // Build a username -> UserId lookup so the exported "Created By"
                     // (which is a username string) can be resolved back to OwnerId
@@ -286,10 +294,23 @@ namespace AdvanceCRM.Demanday.Endpoints
                     {
                         try
                         {
+                            // The export writes QA Details as child rows under their record,
+                            // carrying only QUESTION / ANSWER. They belong to the row above, so
+                            // re-importing the sheet must skip them instead of turning each one
+                            // into an empty Quality record.
+                            if (ExcelImportHelper.IsDetailOnlyRow(ws, row, map, "Question", "Answer"))
+                            {
+                                skipped++; continue;
+                            }
+
                             var demandaytmquality = new DemandayTeleMarketingQualiltyRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
-                                MasterAccountId = ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
+                                // Prefer the readable "Master Account No" that the template and the export now
+                                // carry; fall back to a raw id column so older files still import.
+                                MasterAccountId = ExcelImportHelper.GetMasterAccountId(ws, row, map, accounts,
+                                        "Master Account No", "Account Number", "Account No")
+                                    ?? ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),

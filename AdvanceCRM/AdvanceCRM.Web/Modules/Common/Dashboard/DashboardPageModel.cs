@@ -114,19 +114,31 @@ namespace AdvanceCRM.Common
         public int QualifiedLeads { get; set; }
         /// <summary>Rows whose QA Status is exactly "Disqualified".</summary>
         public int DisqualifiedLeads { get; set; }
-        /// <summary>Rows whose Comments carry "EBB" (matched case-sensitively).</summary>
-        public int EbbCount { get; set; }
         /// <summary>Qualified rows as a percentage of the window's rows.</summary>
         public decimal QualifiedRate { get; set; }
-        /// <summary>EBB rows as a percentage of the window's rows.</summary>
-        public decimal EbbRatio { get; set; }
+        /// <summary>Disqualified rows as a percentage of the window's rows.</summary>
+        public decimal DisqualifiedRate { get; set; }
         /// <summary>This window's rows as a percentage of every row in the MIS module.</summary>
         public decimal ShareOfAll { get; set; }
+
+        /// <summary>
+        /// Why the disqualified rows were disqualified: one entry per distinct Comment, with how
+        /// many of them carry it. Biggest first. These add up to <see cref="DisqualifiedLeads"/>.
+        /// </summary>
+        public List<MisReasonCount> DisqualifiedReasons { get; set; } = new List<MisReasonCount>();
 
         public List<QualityChartDataPoint> ChartData { get; set; } = new List<QualityChartDataPoint>();
 
         /// <summary>Per Master Account breakdown for this window, biggest Grand Total first.</summary>
         public List<MisAccountRow> Accounts { get; set; } = new List<MisAccountRow>();
+    }
+
+    /// <summary>One line of the Disqualified tile's breakdown.</summary>
+    public class MisReasonCount
+    {
+        /// <summary>The Comment as written on the record, or a placeholder when it is blank.</summary>
+        public string Reason { get; set; }
+        public int Count { get; set; }
     }
 
     /// <summary>One Master Account's line in the Account Wise Report.</summary>

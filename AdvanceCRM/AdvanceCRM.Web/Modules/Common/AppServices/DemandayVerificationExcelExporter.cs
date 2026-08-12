@@ -13,7 +13,9 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             // Headers
             string[] headers = new[]
             {
-            "Id","SrNo","AgentName","CdqaComments","Date", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "Email", "WORKPHONE", "Alternate01", "Alternate02", "PROFILE LINK","CREATED BY"
+            // Account / campaign go out as their readable numbers, not the internal keys, so the
+            // sheet can be read - and imported back - without knowing any ids.
+            "Id","SrNo","AgentName","CdqaComments","MASTER ACCOUNT NO","CAMPAIGN ID","Date", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "Email", "WORKPHONE", "Alternate01", "Alternate02", "PROFILE LINK","CREATED BY"
         };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
@@ -25,7 +27,8 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.SrNo;
                 ws.Cells[row, col++].Value = en.AgentName;
                 ws.Cells[row, col++].Value = en.CdqaComments;
-                ws.Cells[row, col++].Value = en.CampaignId;
+                ws.Cells[row, col++].Value = en.MasterAccountNo;
+                ws.Cells[row, col++].Value = en.CampaignCode;
                 ws.Cells[row, col++].Value = en.Date?.ToString("MM-dd-yyyy");
                 ws.Cells[row, col++].Value = en.CompanyName;
                 ws.Cells[row, col++].Value = en.FirstName;

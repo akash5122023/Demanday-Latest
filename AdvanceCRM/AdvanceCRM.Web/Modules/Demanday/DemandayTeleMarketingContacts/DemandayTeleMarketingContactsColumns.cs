@@ -66,6 +66,7 @@ namespace AdvanceCRM.Demanday.Columns
         [EditLink, DisplayName("Db.Shared.RecordId"), AlignRight]
         public Int32 Id { get; set; }
         public Int32? MasterAccountId { get; set; }
+        public String MasterAccountNo { get; set; }
         [QuickFilter]
         public String CampaignId { get; set; }
         //public String AgentsName { get; set; }

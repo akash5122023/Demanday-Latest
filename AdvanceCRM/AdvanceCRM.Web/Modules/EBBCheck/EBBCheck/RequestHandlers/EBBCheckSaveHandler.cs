@@ -43,12 +43,24 @@ namespace AdvanceCRM.EBBCheck
                 // New rows always start as "Waiting"; only Quality controls status afterwards.
                 Row.Status = EbbStatus.Waiting;
             }
-            else if (Row.IsAssigned(EBBCheckRow.Fields.Status) && !canChangeStatus)
+            else
             {
-                // A non-Quality user tried to change the Status – block it.
-                if (Old != null && Row.Status != Old.Status)
-                    throw new ValidationError("PermissionDenied", null,
-                        "Only the Quality team is allowed to change the Status.");
+                if (Row.IsAssigned(EBBCheckRow.Fields.Status) && !canChangeStatus)
+                {
+                    // A non-Quality user tried to change the Status – block it.
+                    if (Old != null && Row.Status != Old.Status)
+                        throw new ValidationError("PermissionDenied", null,
+                            "Only the Quality team is allowed to change the Status.");
+                }
+
+                // First Name / Email / Date are insert-only – keep whatever was saved
+                // when the record was created, no matter what the request contains.
+                if (Old != null)
+                {
+                    Row.FirstName = Old.FirstName;
+                    Row.Email = Old.Email;
+                    Row.Date = Old.Date;
+                }
             }
         }
     }

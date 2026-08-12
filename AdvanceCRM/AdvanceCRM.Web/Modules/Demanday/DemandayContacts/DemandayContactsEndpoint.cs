@@ -101,6 +101,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
+                    // Account Number -> id, read once so the per-row lookup below costs nothing.
+                    var accounts = ExcelImportHelper.LoadMasterAccountMap(uow.Connection);
 
                     for (int row = 2; row <= rowCount; row++)
                     {
@@ -109,7 +111,11 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var demandaycontacts = new DemandayContactsRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
-                                MasterAccountId = ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
+                                // Prefer the readable "Master Account No" that the template and the export now
+                                // carry; fall back to a raw id column so older files still import.
+                                MasterAccountId = ExcelImportHelper.GetMasterAccountId(ws, row, map, accounts,
+                                        "Master Account No", "Account Number", "Account No")
+                                    ?? ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
@@ -216,6 +222,10 @@ namespace AdvanceCRM.Demanday.Endpoints
             string[] headers = new[]
             {
                 "Id",
+                // Both of these are read by ImportExcel below but used to be absent here, so a
+                // file filled in from this template always imported without account or campaign.
+                "Master Account No",
+                "Campaign Id",
                 "SLOT",
                 "Company Name",
                 "First Name",

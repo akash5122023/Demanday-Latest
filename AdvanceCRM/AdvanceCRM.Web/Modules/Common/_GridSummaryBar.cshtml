@@ -29,6 +29,17 @@
         box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
         padding: 14px 18px; margin-bottom: 12px;
     }
+
+    /* The bar shares the grid's own column inside the filter-panel layout, so collapsing or
+       expanding it never changes the height of the page - the column just redistributes the
+       height it already owns between the bar and the grid, and the footer below stays put. */
+    .dv-flt-layout > .dv-sum-col {
+        flex: 1 1 auto; min-width: 0; height: 100%;
+        display: flex; flex-direction: column;
+    }
+    /* A long summary scrolls inside the bar rather than squeezing the grid away. */
+    .dv-sum-col > .dv-sum { flex: 0 0 auto; max-height: 55%; overflow-y: auto; }
+    .dv-sum-col > .dv-grid-el { flex: 1 1 auto; min-height: 0; height: auto; }
     .dv-sum-head {
         display: flex; align-items: center; gap: 12px; cursor: pointer;
         -webkit-user-select: none; user-select: none;
@@ -135,11 +146,21 @@ window.attachGridSummaryBar = function (grid, options) {
     );
     $panel.find('.dv-sum-title').text(options.title || '');
 
-    // Sits above whatever wrapper the grid ended up in (e.g. the filter panel layout),
-    // so the bar stays above the module title however the page is composed.
-    var $anchor = grid.element.closest('.dv-flt-layout');
-    if (!$anchor.length) $anchor = grid.element;
-    $anchor.before($panel);
+    // The bar goes INSIDE the grid's column of the filter-panel layout, directly above the grid
+    // - not above the layout as a whole. Sitting outside it, every change to the bar's height
+    // (collapse, expand, rows arriving) changed how tall the page was, and the full-height math
+    // that Serenity ran once at startup was left stale: the grid either fell short of the
+    // footer or pushed it off the bottom of the screen. Inside the column the page height is
+    // fixed - the column just splits it between the bar and the grid.
+    var $layout = grid.element.closest('.dv-flt-layout');
+    if ($layout.length) {
+        var $col = $('<div class="dv-sum-col"></div>');
+        grid.element.before($col);
+        $col.append($panel).append(grid.element);
+    }
+    else {
+        grid.element.before($panel);   // page without the filter-panel layout
+    }
 
     var $body = $panel.find('.dv-sum-body');
     var $more = $panel.find('.dv-sum-foot a');
@@ -153,11 +174,23 @@ window.attachGridSummaryBar = function (grid, options) {
             $panel.addClass('dv-sum-collapsed');
     } catch (e) { }
 
+    // The bar and the grid share one fixed-height column now, so nothing here can move the
+    // page: the only thing left to do when the bar's height changes is let Slick re-measure
+    // its canvas inside the space the column left for the grid.
+    function relayoutGrid() {
+        try {
+            grid.element.triggerHandler('layout');
+            if (grid.slickGrid && grid.slickGrid.resizeCanvas)
+                grid.slickGrid.resizeCanvas();
+        } catch (e) { }
+    }
+
     $panel.on('click', '.dv-sum-head', function () {
         var collapsed = $panel.toggleClass('dv-sum-collapsed').hasClass('dv-sum-collapsed');
         try {
             if (window.localStorage) localStorage.setItem(stateKey, collapsed ? '1' : '0');
         } catch (e) { }
+        relayoutGrid();
     });
 
     // "N records" tracks what the grid is actually showing right now.
@@ -273,6 +306,7 @@ window.attachGridSummaryBar = function (grid, options) {
         e.preventDefault();
         expanded = !expanded;
         renderTable(lastData);
+        relayoutGrid();
     });
 
     // ---- Loading ----
@@ -280,12 +314,16 @@ window.attachGridSummaryBar = function (grid, options) {
         lastData = data;
         if (mode === 'table') renderTable(data);
         else renderChips(data);
+        // The bar starts empty and grows once its rows arrive, so the grid has to be
+        // remeasured here too - not just when the user collapses it by hand.
+        relayoutGrid();
     }
 
     var loadTimer = null;
     function load() {
         Q.serviceRequest(options.url, {}, function (response) { render(response); },
-            { blockUI: false, onError: function () { $panel.hide(); } });
+            // Hiding the bar hands its space back, so the grid has to be remeasured here as well.
+            { blockUI: false, onError: function () { $panel.hide(); relayoutGrid(); } });
     }
 
     // Recounted whenever the grid reloads, so editing or deleting a record updates the bar
@@ -300,6 +338,9 @@ window.attachGridSummaryBar = function (grid, options) {
     }
 
     updateRecordCount();
+    // The grid was measured before it was moved into the column, so re-measure it there
+    // straight away rather than waiting for the summary rows to arrive.
+    relayoutGrid();
     load();
 };
 </script>

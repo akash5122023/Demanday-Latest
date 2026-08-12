@@ -18,6 +18,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String Slot { get; set; }
         public String AgentsName { get; set; }
         public Int32? MasterAccountId { get; set; }
+        public String MasterAccountNo { get; set; }
         public String CampaignId { get; set; }
         [QuickFilter]
         public String CompanyName { get; set; }

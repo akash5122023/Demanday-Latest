@@ -22,6 +22,13 @@ namespace AdvanceCRM.EBBCheck {
             // sees it read-only (the server enforces this too – EBBCheckSaveHandler).
             var canChangeStatus = Q.Authorization.hasPermission("EBBCheck:ChangeStatus");
             Serenity.EditorUtils.setReadOnly(this.form.Status, !canChangeStatus);
+
+            // First Name / Email / Date can only be entered while creating the record.
+            // Once saved they are locked (the server also keeps the old values on update).
+            var isEdit = !this.isNew();
+            Serenity.EditorUtils.setReadOnly(this.form.FirstName, isEdit);
+            Serenity.EditorUtils.setReadOnly(this.form.Email, isEdit);
+            Serenity.EditorUtils.setReadOnly(this.form.Date, isEdit);
         }
     }
 }

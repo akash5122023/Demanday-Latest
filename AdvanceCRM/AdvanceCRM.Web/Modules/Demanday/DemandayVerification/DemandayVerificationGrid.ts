@@ -13,6 +13,35 @@ namespace AdvanceCRM.Demanday {
         constructor(container: JQuery) {
             super(container);
         }
+
+        protected getQuickFilters() {
+            var filters = super.getQuickFilters();
+            var fld = DemandayVerificationRow.Fields;
+
+            filters.push({
+                type: Serenity.LookupEditor,
+                options: {
+                    lookupKey: "Masters.DemandayMasterAccount"
+                },
+                field: fld.MasterAccountId,
+                title: 'Master Account'
+            });
+
+            // Campaign list follows the Master Account picked above.
+            filters.push({
+                type: Serenity.LookupEditor,
+                options: {
+                    lookupKey: "Masters.DemandayCampaignId",
+                    cascadeFrom: fld.MasterAccountId,
+                    cascadeField: "DemandayMasterAccountId"
+                },
+                field: fld.CampaignId,
+                title: 'Campaign'
+            });
+
+            return this.orderQuickFilters(filters);
+        }
+
         protected getButtons(): Serenity.ToolButton[] {
             let buttons = super.getButtons();
 
@@ -35,6 +64,23 @@ namespace AdvanceCRM.Demanday {
                         title: 'Exporting to Excel',
                         preparingText: 'Building the Excel file on the server…',
                         fileName: 'DemandayVerification.xlsx'
+                    });
+                }
+            });
+            // An empty sheet carrying exactly the headers the import understands - the fields the
+            // Verification form itself offers. Built on the server so it can never drift from
+            // what ImportExcel actually reads.
+            buttons.push({
+                title: 'Download Template',
+                cssClass: 'download-template-button',
+                icon: 'fa-download',
+                onClick: () => {
+                    AdvanceCRM.Common.TransferProgress.download({
+                        url: '/Services/Demanday/DemandayVerification/DownloadTemplate',
+                        method: 'POST',
+                        title: 'Preparing template',
+                        preparingText: 'Building the template on the server…',
+                        fileName: 'DemandayVerification_Template.xlsx'
                     });
                 }
             });

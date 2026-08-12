@@ -2,6 +2,8 @@
     export interface DemandayVerificationForm {
         AgentName: Serenity.StringEditor;
         CdqaComments: _Ext.HardCodedLookupEditor;
+        MasterAccountId: Serenity.LookupEditor;
+        CampaignId: Serenity.LookupEditor;
         CompanyName: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
@@ -28,24 +30,26 @@
                 var s = Serenity;
                 var w0 = s.StringEditor;
                 var w1 = _Ext.HardCodedLookupEditor;
-                var w2 = s.EmailEditor;
-                var w3 = s.DateTimeEditor;
-                var w4 = s.LookupEditor;
+                var w2 = s.LookupEditor;
+                var w3 = s.EmailEditor;
+                var w4 = s.DateTimeEditor;
 
                 Q.initFormType(DemandayVerificationForm, [
                     'AgentName', w0,
                     'CdqaComments', w1,
+                    'MasterAccountId', w2,
+                    'CampaignId', w2,
                     'CompanyName', w0,
                     'FirstName', w0,
                     'LastName', w0,
                     'Title', w0,
-                    'Email', w2,
-                    'Date', w3,
+                    'Email', w3,
+                    'Date', w4,
                     'WorkPhone', w0,
                     'Alternate01', w0,
                     'Alternate02', w0,
                     'ProfileLink', w0,
-                    'OwnerId', w4
+                    'OwnerId', w2
                 ]);
             }
         }

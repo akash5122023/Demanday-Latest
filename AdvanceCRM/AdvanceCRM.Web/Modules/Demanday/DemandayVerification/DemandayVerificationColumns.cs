@@ -18,7 +18,10 @@ namespace AdvanceCRM.Demanday.Columns
         [EditLink]
         public String AgentName { get; set; }
         public String CdqaComments { get; set; }
-        public Int32 CampaignId { get; set; }
+        [DisplayName("Master Account")]
+        public String MasterAccountNo { get; set; }
+        [DisplayName("Campaign Id")]
+        public String CampaignCode { get; set; }
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }

@@ -8,15 +8,15 @@ namespace AdvanceCRM.EBBCheck.Forms
     [BasedOnRow(typeof(EBBCheckRow), CheckNames = true)]
     public class EBBCheckForm
     {
+        // FirstName / Email / Date are entered once on insert and locked afterwards –
+        // the dialog makes them read-only in edit mode (EBBCheckDialog.ts) and the
+        // server keeps the original values on update (EBBCheckSaveHandler).
         [Category("EBB Check")]
         [HalfWidth]
-        [ReadOnly(true)]
         public String FirstName { get; set; }
         [HalfWidth]
-        [ReadOnly(true)]
         public String Email { get; set; }
         [HalfWidth, DateTimeEditor]
-        [ReadOnly(true)]
         public DateTime Date { get; set; }
         // Editable only by the Quality team – disabled on the client for others
         // (see EBBCheckDialog.ts) and enforced on the server (EBBCheckSaveHandler).

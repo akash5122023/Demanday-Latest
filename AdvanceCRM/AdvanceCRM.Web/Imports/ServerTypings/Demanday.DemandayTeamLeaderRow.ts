@@ -99,6 +99,7 @@
         OwnerPlan?: string;
         Attachments?: string;
         MasterAccountId?: number;
+        MasterAccountNo?: string;
         CampaignId?: string;
     }
 
@@ -216,6 +217,7 @@
             OwnerPlan = "OwnerPlan",
             Attachments = "Attachments",
             MasterAccountId = "MasterAccountId",
+            MasterAccountNo = "MasterAccountNo",
             CampaignId = "CampaignId"
         }
     }

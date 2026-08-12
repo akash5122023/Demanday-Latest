@@ -17,5 +17,15 @@ namespace AdvanceCRM.Demanday
              : base(context)
         {
         }
+
+        protected override void OnBeforeDelete()
+        {
+            base.OnBeforeDelete();
+
+            // Same reason as the Move to Quality path: a toolkit copy still referencing this
+            // record would otherwise block the delete on FK_ToolkitTMEnquiry_TeamLeaderId.
+            if (Row.Id.HasValue)
+                TMEnquirySyncHandler.UnlinkTeamLeader(Connection, Row.Id.Value);
+        }
     }
 }

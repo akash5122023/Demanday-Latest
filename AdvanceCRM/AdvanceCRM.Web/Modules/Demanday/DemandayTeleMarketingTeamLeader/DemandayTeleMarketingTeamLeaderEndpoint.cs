@@ -237,6 +237,11 @@ namespace AdvanceCRM.Demanday.Endpoints
                     demandaytelemarketingteamleaderConn.DeleteById<DemandayTeleMarketingEnquiryQADetailsRow>(qa.Id.Value);
                 }
 
+                // The toolkit copy written when this record arrived from Enquiry still points at
+                // it. Let it go before the delete, or FK_ToolkitTMEnquiry_TeamLeaderId blocks the
+                // move; the toolkit row itself keeps its data.
+                TMEnquirySyncHandler.UnlinkTeamLeader(demandaytelemarketingteamleaderConn, id);
+
                 demandaytelemarketingteamleaderConn.DeleteById<DemandayTeleMarketingTeamLeaderRow>(id);
 
                 response.Id = demandaytelemarketingqualilty.Id ?? 0; // optional: return the new Quality record ID
@@ -268,7 +273,7 @@ namespace AdvanceCRM.Demanday.Endpoints
         {
             var headers = new[]
             {
-                "Slot", "Campaign Id", "First Name", "Last Name", "Title", "Email",
+                "Slot", "Master Account No", "Campaign Id", "First Name", "Last Name", "Title", "Email",
                 "Work Phone", "Alternative Number", "Company Name", "Industry", "Revenue",
                 "Company Employee Size", "ZoomInfo Industry", "Sub Industry", "ZoomInfo Employee Size",
                 "Asset", "Call Status", "Street", "City", "State", "Zip Code", "Country",
@@ -314,6 +319,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
+                    // Account Number -> id, read once so the per-row lookup below costs nothing.
+                    var accounts = ExcelImportHelper.LoadMasterAccountMap(uow.Connection);
 
                     // Build a username -> UserId lookup so the exported "Created By"
                     // (which is a username string) can be resolved back to OwnerId.
@@ -333,7 +340,11 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var teamLeader = new MyRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
-                                MasterAccountId = ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
+                                // Prefer the readable "Master Account No" that the template and the export now
+                                // carry; fall back to a raw id column so older files still import.
+                                MasterAccountId = ExcelImportHelper.GetMasterAccountId(ws, row, map, accounts,
+                                        "Master Account No", "Account Number", "Account No")
+                                    ?? ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),

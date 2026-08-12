@@ -6,6 +6,7 @@
         Slot?: string;
         AgentsName?: string;
         MasterAccountId?: number;
+        MasterAccountNo?: string;
         CampaignId?: string;
         CompanyName?: string;
         FirstName?: string;
@@ -117,6 +118,7 @@
             Slot = "Slot",
             AgentsName = "AgentsName",
             MasterAccountId = "MasterAccountId",
+            MasterAccountNo = "MasterAccountNo",
             CampaignId = "CampaignId",
             CompanyName = "CompanyName",
             FirstName = "FirstName",

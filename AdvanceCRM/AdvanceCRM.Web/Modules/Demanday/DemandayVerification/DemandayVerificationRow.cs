@@ -46,11 +46,39 @@ namespace AdvanceCRM.Demanday
             set => fields.CdqaComments[this] = value;
         }
 
-        [DisplayName("Campaign Id"), Column("CampaignID")]
+        [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LeftJoin("jMasterAccount"), TextualField("MasterAccountNo")]
+        [LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
+        public Int32? MasterAccountId
+        {
+            get => fields.MasterAccountId[this];
+            set => fields.MasterAccountId[this] = value;
+        }
+
+        // Keyed on DemandayCampaignId (not the bare campaign number it used to hold), so the
+        // Account -> Campaign cascade has something to filter on - see the migration
+        // DefaultDB_20261109_000000_DemandayVerificationAccountCampaign.
+        [DisplayName("Campaign"), ForeignKey("[dbo].[DemandayCampaignId]", "Id"), LeftJoin("jCampaign"), TextualField("CampaignCode")]
+        [LookupEditor(typeof(Masters.DemandayCampaignIdRow), CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
         public Int32? CampaignId
         {
             get => fields.CampaignId[this];
             set => fields.CampaignId[this] = value;
+        }
+
+        // The readable Account Number / Campaign ID behind the two keys above, joined in so the
+        // grid, the export and the import template can carry them instead of internal ids.
+        [DisplayName("Master Account No"), Expression("jMasterAccount.[AccountNumber]"), QuickSearch]
+        public String MasterAccountNo
+        {
+            get => fields.MasterAccountNo[this];
+            set => fields.MasterAccountNo[this] = value;
+        }
+
+        [DisplayName("Campaign Id"), Expression("jCampaign.[CampaignId]"), QuickSearch]
+        public String CampaignCode
+        {
+            get => fields.CampaignCode[this];
+            set => fields.CampaignCode[this] = value;
         }
 
         [DisplayName("Company Name"), Column("Company Name"), Size(200)]
@@ -418,7 +446,10 @@ namespace AdvanceCRM.Demanday
             public Int32Field SrNo;
             public StringField AgentName;
             public StringField CdqaComments;
+            public Int32Field MasterAccountId;
             public Int32Field CampaignId;
+            public StringField MasterAccountNo;
+            public StringField CampaignCode;
             public StringField CompanyName;
             public StringField FirstName;
             public StringField LastName;

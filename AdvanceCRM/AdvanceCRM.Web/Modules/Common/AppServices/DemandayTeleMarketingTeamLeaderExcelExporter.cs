@@ -13,7 +13,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             // Headers
             string[] headers = new[]
             {
-                "CAMPAIGN ID", "SLOT", "Id", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "DATE", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY", "COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "ASSET", "CALL STATUS", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "Adress link", "EMAIL FORMAT", "TENURITY", "CODE", "LINK", "MD5", "Attachments", "CREATED BY"
+                "MASTER ACCOUNT NO","CAMPAIGN ID", "SLOT", "Id", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "DATE", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY", "COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "ASSET", "CALL STATUS", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "Adress link", "EMAIL FORMAT", "TENURITY", "CODE", "LINK", "MD5", "Attachments", "CREATED BY"
             };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
@@ -21,6 +21,7 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             foreach (var en in demandaytelemarketingteamLeaderRows)
             {
                 int col = 1;
+                ws.Cells[row, col++].Value = en.MasterAccountNo;
                 ws.Cells[row, col++].Value = en.CampaignId;
                 ws.Cells[row, col++].Value = en.Slot;
                 ws.Cells[row, col++].Value = en.Id;

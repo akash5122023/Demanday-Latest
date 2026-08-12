@@ -35,6 +35,10 @@ namespace AdvanceCRM.Toolkit {
         permission?: string;
         permissionAlt?: string;
         directPermission?: string;
+        /** This sheet's own Import key, e.g. 'Toolkit:VerifySheets:MasterSuppression:Import'. */
+        importPermission?: string;
+        /** The sub-module's own Import key, e.g. 'MasterSupression:Import'. */
+        importPermissionDirect?: string;
     }
 
     function canViewSheet(s: VsSheet): boolean {
@@ -43,6 +47,26 @@ namespace AdvanceCRM.Toolkit {
         if (s.permissionAlt && Q.Authorization.hasPermission(s.permissionAlt))
             return true;
         if (s.directPermission && Q.Authorization.hasPermission(s.directPermission))
+            return true;
+        return false;
+    }
+
+    /**
+     * Whether this user may upload into one sheet. Import is granted per sheet - the same way
+     * every module has its own <Module>:Import - so a role can be given (say) Master Suppression
+     * imports without being handed every other sheet with it. Three keys open a sheet: the
+     * blanket 'Toolkit:VerifySheets:Import' (kept so existing roles are unaffected), the sheet's
+     * own key, or the sub-module's own Import key. VerifySheetsPage.ImportExcel enforces the same
+     * rule - this only decides whether the icon is drawn.
+     */
+    function canImportSheet(s: VsSheet): boolean {
+        if (s.exportOnly)
+            return false;
+        if (Q.Authorization.hasPermission('Toolkit:VerifySheets:Import'))
+            return true;
+        if (s.importPermission && Q.Authorization.hasPermission(s.importPermission))
+            return true;
+        if (s.importPermissionDirect && Q.Authorization.hasPermission(s.importPermissionDirect))
             return true;
         return false;
     }
@@ -152,6 +176,8 @@ namespace AdvanceCRM.Toolkit {
                     newDialog: () => new DemandaySpecsDialog(),
                     permission: 'Toolkit:VerifySheets:Specification',
                     directPermission: 'DemandaySpecs:Read',
+                    importPermission: 'Toolkit:VerifySheets:Specification:Import',
+                    importPermissionDirect: 'DemandaySpecs:Import',
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
                         { field: 'OrderId', title: 'Order ID' },
@@ -177,6 +203,8 @@ namespace AdvanceCRM.Toolkit {
                     newDialog: () => new ClientSupressionDialog(),
                     permission: 'Toolkit:VerifySheets:EmailSuppression',
                     directPermission: 'ClientSupression:Read',
+                    importPermission: 'Toolkit:VerifySheets:EmailSuppression:Import',
+                    importPermissionDirect: 'ClientSupression:Import',
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
                         { field: 'CompanyName', title: 'Company Name' },
@@ -191,6 +219,8 @@ namespace AdvanceCRM.Toolkit {
                     newDialog: () => new DemandayCompetitorDialog(),
                     permission: 'Toolkit:VerifySheets:Competitor',
                     directPermission: 'DemandayCompetitor:Read',
+                    importPermission: 'Toolkit:VerifySheets:Competitor:Import',
+                    importPermissionDirect: 'DemandayCompetitor:Import',
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
                         { field: 'CompanyName', title: 'Company Name' },
@@ -205,6 +235,8 @@ namespace AdvanceCRM.Toolkit {
                     newDialog: () => new TalCampaignDialog(),
                     permissionAlt: 'Toolkit:VerifySheets:TalList',
                     directPermission: 'TalCampaign:Read',
+                    importPermission: 'Toolkit:VerifySheets:TalList:Import',
+                    importPermissionDirect: 'TalCampaign:Import',
                     includeColumns: ['AgentDisplayName'],
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
@@ -221,6 +253,8 @@ namespace AdvanceCRM.Toolkit {
                     newDialog: () => new MasterSupressionDialog(),
                     permission: 'Toolkit:VerifySheets:MasterSuppression',
                     directPermission: 'MasterSupression:Read',
+                    importPermission: 'Toolkit:VerifySheets:MasterSuppression:Import',
+                    importPermissionDirect: 'MasterSupression:Import',
                     scope: 'account',
                     // CampaignId / CampaignCampaignId / Date drive this sheet's own Campaign + Date filter.
                     includeColumns: ['CampaignId', 'CampaignCampaignId', 'Date'],
@@ -241,6 +275,8 @@ namespace AdvanceCRM.Toolkit {
                     newDialog: () => new OpenCampaignDialog(),
                     permission: 'Toolkit:VerifySheets:OpenCampaign',
                     directPermission: 'OpenCampaign:Read',
+                    importPermission: 'Toolkit:VerifySheets:OpenCampaign:Import',
+                    importPermissionDirect: 'OpenCampaign:Import',
                     quickAddDomain: true,
                     includeColumns: ['DemandayUserDisplayName', 'CampaignIdValue'],
                     columns: [
@@ -257,6 +293,8 @@ namespace AdvanceCRM.Toolkit {
                     newDialog: () => new DNCContact.DncContactsDialog(),
                     permission: 'Toolkit:VerifySheets:DNCContact',
                     directPermission: 'DNCContacts:Read',
+                    importPermission: 'Toolkit:VerifySheets:DNCContact:Import',
+                    importPermissionDirect: 'DNCContacts:Import',
                     columns: [
                         { field: 'SrNo', title: 'Sr No' },
                         { field: 'FirstName', title: 'First Name' },
@@ -299,7 +337,6 @@ namespace AdvanceCRM.Toolkit {
             // Adding rows on this page is gated by its own permission; without it the "+ Add"
             // buttons (and Open Campaign's quick "Add domain" box) are not rendered at all.
             var canAdd = Q.Authorization.hasPermission('Toolkit:VerifySheets:Add');
-            var canImport = Q.Authorization.hasPermission('Toolkit:VerifySheets:Import');
 
             var toolbar = $('<div class="vs-toolbar"></div>').appendTo(el);
             $('<div class="vs-account-holder"></div>').appendTo(toolbar);
@@ -316,7 +353,7 @@ namespace AdvanceCRM.Toolkit {
                 var lbl = $('<label class="vs-verify-label"></label>').appendTo(item);
                 $('<input type="checkbox" checked>').attr('data-key', s.key).appendTo(lbl);
                 $('<span></span>').text(' ' + s.title).appendTo(lbl);
-                if (canImport && !s.exportOnly) {
+                if (canImportSheet(s)) {
                     $('<button type="button" class="vs-item-upload"><i class="fa fa-upload"></i></button>')
                         .attr('title', 'Import Excel into ' + s.title)
                         .appendTo(item)

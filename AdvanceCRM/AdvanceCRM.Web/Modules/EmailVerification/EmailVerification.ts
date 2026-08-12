@@ -339,14 +339,13 @@ namespace AdvanceCRM.EmailVerification {
                 html += '<div class="ev-grid-note">' + Q.htmlEncode(res.Message) + '</div>';
 
             html += '<div class="ev-grid-scroll"><table class="ev-grid"><thead><tr>' +
-                '<th>Module</th><th>First Name</th><th>Last Name</th><th>Email</th>' +
+                '<th>Company Name</th><th>First Name</th><th>Last Name</th><th>Email</th>' +
                 '</tr></thead><tbody>';
 
             for (var i = 0; i < items.length; i++) {
                 var it = items[i];
-                var badge = it.Source === 'TM ETContact' ? 'ev-badge-tm' : 'ev-badge-dd';
                 html += '<tr>' +
-                    '<td><span class="ev-badge ' + badge + '">' + Q.htmlEncode(it.Source || '') + '</span></td>' +
+                    '<td>' + Q.htmlEncode(it.CompanyName || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.FirstName || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.LastName || '') + '</td>' +
                     '<td>' + Q.htmlEncode(it.Email || '') + '</td>' +

@@ -72,6 +72,7 @@
         OwnerPlan?: string;
         EmailFormat?: string;
         MasterAccountId?: number;
+        MasterAccountNo?: string;
         CampaignId?: string;
     }
 
@@ -162,6 +163,7 @@
             OwnerPlan = "OwnerPlan",
             EmailFormat = "EmailFormat",
             MasterAccountId = "MasterAccountId",
+            MasterAccountNo = "MasterAccountNo",
             CampaignId = "CampaignId"
         }
     }

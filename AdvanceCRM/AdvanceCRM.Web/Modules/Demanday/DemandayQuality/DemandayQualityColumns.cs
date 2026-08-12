@@ -71,6 +71,7 @@ namespace AdvanceCRM.Demanday.Columns
         public string AlternativeNumber { get; set; }
 
         public Int32? MasterAccountId { get; set; }
+        public String MasterAccountNo { get; set; }
         public string CampaignId { get; set; }
         public string Street { get; set; }
         public string City { get; set; }

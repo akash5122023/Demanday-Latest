@@ -11,7 +11,8 @@ namespace AdvanceCRM.EmailTeam.Forms
         [Category("Email Team")]
         [HalfWidth, LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
         public Int32 MasterAccountId { get; set; }
-        [HalfWidth, LookupEditor(typeof(Masters.DemandayCampaignIdRow))]
+        // Campaign list is limited to the campaigns of the selected Master Account.
+        [HalfWidth, LookupEditor(typeof(Masters.DemandayCampaignIdRow), CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
         public Int32 CampaignId { get; set; }
         [HalfWidth]
         public String FirstName { get; set; }

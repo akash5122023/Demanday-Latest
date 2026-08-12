@@ -72,6 +72,7 @@ namespace AdvanceCRM.Demanday.Columns
         [QuickFilter]
         public string Title { get; set; }
         public Int32? MasterAccountId { get; set; }
+        public String MasterAccountNo { get; set; }
         [QuickFilter]
         public string CampaignId { get; set; }
         public string Email { get; set; }

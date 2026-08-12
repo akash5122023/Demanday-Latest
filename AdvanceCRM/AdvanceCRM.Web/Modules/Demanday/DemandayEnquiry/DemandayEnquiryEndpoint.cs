@@ -143,7 +143,7 @@ namespace AdvanceCRM.Demanday.Endpoints
         {
             var headers = new[]
             {
-                "Campaign Id", "First Name", "Last Name", "Title", "Email",
+                "Master Account No", "Campaign Id", "First Name", "Last Name", "Title", "Email",
                 "Work Phone", "Alternative Number", "Company Name", "Industry", "Revenue",
                 "Company Employee Size", "ZoomInfo Industry", "Sub Industry", "ZoomInfo Employee Size",
                 "Street", "City", "State", "Zip Code", "Country",
@@ -189,6 +189,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
+                    // Account Number -> id, read once so the per-row lookup below costs nothing.
+                    var accounts = ExcelImportHelper.LoadMasterAccountMap(uow.Connection);
 
                     // Build a username -> UserId lookup so the exported "Created By"
                     // (which is a username string) can be resolved back to OwnerId.
@@ -208,7 +210,11 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var demandayenquiry = new DemandayEnquiryRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
-                                MasterAccountId = ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
+                                // Prefer the readable "Master Account No" that the template and the export now
+                                // carry; fall back to a raw id column so older files still import.
+                                MasterAccountId = ExcelImportHelper.GetMasterAccountId(ws, row, map, accounts,
+                                        "Master Account No", "Account Number", "Account No")
+                                    ?? ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
                                 LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),

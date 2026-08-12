@@ -60,6 +60,27 @@ namespace AdvanceCRM.Demanday
         }
 
         /// <summary>
+        /// Clears the Team Leader link on the toolkit copies of a Team Leader record that is
+        /// about to disappear - moved on to Quality, or deleted outright. The copy itself is the
+        /// toolkit's own data and stays; only the back-reference goes.
+        ///
+        /// Without this the delete fails on FK_ToolkitTMEnquiry_TeamLeaderId. The link only ever
+        /// existed so that re-running the same move refreshes the copy instead of duplicating it
+        /// (see SyncToTMEnquiry), and that meaning ends with the Team Leader record.
+        /// </summary>
+        public static void UnlinkTeamLeader(IDbConnection connection, int teamLeaderId)
+        {
+            if (connection == null || teamLeaderId <= 0)
+                return;
+
+            var fld = ToolkitTMEnquiryRow.Fields;
+            new SqlUpdate(fld.TableName)
+                .SetNull(fld.TeamLeaderId.Name)
+                .Where(fld.TeamLeaderId == teamLeaderId)
+                .Execute(connection, ExpectedRows.Ignore);
+        }
+
+        /// <summary>
         /// Maps a Campaign ID text ("79580") to its DemandayCampaignId key. Scoped to the
         /// enquiry's Master Account - the same Campaign ID text may exist under more than one
         /// account, and a copied row must never point at another account's campaign.

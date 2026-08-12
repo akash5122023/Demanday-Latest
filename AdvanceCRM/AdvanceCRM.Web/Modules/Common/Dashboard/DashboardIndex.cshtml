@@ -149,6 +149,19 @@
                     }
                 </div>
 
+                <!-- Or a range of your own. Unlike the buttons above this one is not already on
+                     the page, so it goes back to the server for that team's figures. -->
+                <div class="mis-date-filter">
+                    <span class="mis-date-box">
+                        <i class="fa fa-calendar"></i>
+                        <input type="text" autocomplete="off" placeholder="Custom date range"
+                               data-mis="range-input" data-team="@team.Key" title="Pick your own date range" />
+                        <i class="fa fa-spinner fa-spin mis-date-busy" data-mis="range-busy" data-team="@team.Key"></i>
+                    </span>
+                    <button type="button" class="mis-date-clear" data-mis="range-clear" data-team="@team.Key"
+                            title="Clear the date range">&times;</button>
+                </div>
+
                 <!-- Slide to the other team -->
                 <div class="mis-slide-nav">
                     <button type="button" class="mis-slide-btn" data-mis-slide="-1" title="Previous team"><i class="fa fa-chevron-left"></i></button>
@@ -188,14 +201,36 @@
         <div class="col-md-4 col-xs-12">
             <div class="mis-tile">
                 <div class="mis-tile-head">
-                    <span class="mis-tile-label">EBB Ratio</span>
-                    <span class="mis-tile-icon" style="background: #eff6ff; color: #1d4ed8;"><i class="fa fa-envelope-o"></i></span>
+                    <span class="mis-tile-label">Disqualified Leads</span>
+                    <span class="mis-tile-icon" style="background: #fef2f2; color: #b91c1c;"><i class="fa fa-times-circle"></i></span>
                 </div>
                 <div class="mis-tile-figure">
-                    <span class="mis-tile-value" data-mis="ebb" data-team="@team.Key">@s.EbbCount.ToString("N0")</span>
-                    <span class="mis-tile-pct" data-mis="ebbPct" data-team="@team.Key" title="EBB as a share of Total Leads">@s.EbbRatio.ToString("0.#")%</span>
+                    <span class="mis-tile-value" data-mis="disqualified" data-team="@team.Key">@s.DisqualifiedLeads.ToString("N0")</span>
+                    <span class="mis-tile-pct" data-mis="disqualifiedPct" data-team="@team.Key" title="Disqualified as a share of Total Leads">@s.DisqualifiedRate.ToString("0.#")%</span>
                 </div>
-                <span class="mis-tile-badge" data-mis="ebbBadge" data-team="@team.Key">Comments containing &ldquo;EBB&rdquo;</span>
+                <!-- Why they were disqualified: the Comment on each record, grouped. Collapsed by
+                     default so the tile keeps the same height as the two beside it. -->
+                <div class="mis-reasons" data-mis="reasonsWrap" data-team="@team.Key">
+                    <button type="button" class="mis-reasons-toggle" data-mis="reasonsToggle" data-team="@team.Key">
+                        <span data-mis="reasonsCount" data-team="@team.Key">@s.DisqualifiedReasons.Count</span> reasons <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="mis-reasons-list" data-mis="reasons" data-team="@team.Key">
+                        @if (s.DisqualifiedReasons.Count == 0)
+                        {
+                            <div class="mis-reasons-empty">No disqualified records in this window.</div>
+                        }
+                        else
+                        {
+                            foreach (var reason in s.DisqualifiedReasons)
+                            {
+                                <div class="mis-reason @(reason.Count == 0 ? "zero" : "")">
+                                    <span class="mis-reason-name">@reason.Reason</span>
+                                    <span class="mis-reason-count">: @reason.Count.ToString("N0")</span>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -305,6 +340,31 @@
         background: #ecfdf5; border-radius: 20px; padding: 3px 10px;
     }
 
+    /* Disqualified tile: the reasons behind the count, opened from the pill under the figure. */
+    .mis-reasons { position: relative; }
+    .mis-reasons-toggle {
+        border: none; background: #fef2f2; color: #b91c1c; border-radius: 20px;
+        font-size: 11px; font-weight: 600; padding: 3px 10px; cursor: pointer;
+    }
+    .mis-reasons-toggle:hover { background: #fee2e2; }
+    .mis-reasons-list {
+        display: none; position: absolute; right: 0; top: 26px; z-index: 30;
+        min-width: 230px; max-height: 260px; overflow-y: auto;
+        background: #ffffff; border: 1px solid #e7e9f0; border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, .12); padding: 4px 0;
+    }
+    .mis-reasons.open .mis-reasons-list { display: block; }
+    .mis-reason {
+        display: flex; justify-content: space-between; gap: 16px; padding: 8px 14px; font-size: 12px;
+    }
+    .mis-reason + .mis-reason { border-top: 1px solid #f6f8fb; }
+    .mis-reason-name { color: #1d4ed8; font-weight: 600; }
+    .mis-reason-count { color: #0f172a; font-weight: 700; white-space: nowrap; }
+    /* A reason with nothing in this window still shows, just muted. */
+    .mis-reason.zero .mis-reason-name { color: #94a3b8; font-weight: 500; }
+    .mis-reason.zero .mis-reason-count { color: #94a3b8; font-weight: 600; }
+    .mis-reasons-empty { padding: 10px 14px; font-size: 12px; color: #94a3b8; }
+
     /* Daily / Weekly / Monthly / Yearly segmented control */
     .mis-period-switch {
         display: inline-flex; background: #f1f5f9; border-radius: 10px; padding: 3px; gap: 2px;
@@ -318,6 +378,35 @@
     .mis-period-btn.active {
         background: #ffffff; color: #1e3a8a; box-shadow: 0 1px 3px rgba(15,23,42,.12);
     }
+
+    /* Custom date range, sitting beside the segmented control */
+    .mis-date-filter { display: inline-flex; align-items: center; gap: 6px; }
+    .mis-date-box {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #f1f5f9; border: 1px solid transparent; border-radius: 10px; padding: 4px 12px;
+        transition: background .15s ease, border-color .15s ease;
+    }
+    .mis-date-box:hover, .mis-date-box.focused { background: #ffffff; border-color: #bfdbfe; }
+    .mis-date-box > .fa-calendar { color: #64748b; font-size: 13px; }
+    .mis-date-box input {
+        border: none; background: transparent; outline: none; box-shadow: none;
+        font-size: 12px; font-weight: 600; color: #1e3a8a; width: 168px; cursor: pointer;
+    }
+    .mis-date-box input::placeholder { color: #94a3b8; font-weight: 600; }
+    /* Only on screen while the range is being fetched. */
+    .mis-date-busy { display: none; color: #64748b; font-size: 12px; }
+    .mis-date-filter.loading .mis-date-busy { display: inline-block; }
+    /* Only on screen once a range is actually applied. */
+    .mis-date-clear {
+        display: none; width: 26px; height: 26px; line-height: 1; border-radius: 50%; cursor: pointer;
+        border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 16px; font-weight: 700;
+        align-items: center; justify-content: center;
+        transition: background .15s ease, color .15s ease, border-color .15s ease;
+    }
+    .mis-date-filter.active .mis-date-clear { display: inline-flex; }
+    .mis-date-clear:hover { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+    /* The picker is appended to the page body, so it must clear the slider's overflow: hidden. */
+    .daterangepicker { z-index: 1100; }
 
     /* One team per slide. The row's -15px margins overhang into the hidden overflow,
        but that strip is only column padding, so nothing visible is clipped. */
@@ -407,6 +496,46 @@
                 if (el) el.textContent = text;
             }
 
+            // The Disqualified tile's breakdown: one line per distinct comment carried by the
+            // window's disqualified records. Rebuilt with the window, so switching Daily/Weekly/
+            // Monthly/Yearly (or picking dates) re-counts the reasons along with the figure.
+            function renderReasons(teamKey, p) {
+                var list = document.querySelector('[data-mis="reasons"][data-team="' + teamKey + '"]');
+                var count = document.querySelector('[data-mis="reasonsCount"][data-team="' + teamKey + '"]');
+                var reasons = (p && p.DisqualifiedReasons) || [];
+
+                if (count) count.textContent = reasons.length;
+                if (!list) return;
+
+                if (!reasons.length) {
+                    list.innerHTML = '<div class="mis-reasons-empty">No disqualified records in this window.</div>';
+                    return;
+                }
+
+                var html = '';
+                for (var i = 0; i < reasons.length; i++) {
+                    html += '<div class="mis-reason' + (reasons[i].Count ? '' : ' zero') + '">' +
+                        '<span class="mis-reason-name">' + esc(reasons[i].Reason) + '</span>' +
+                        '<span class="mis-reason-count">: ' + num(reasons[i].Count) + '</span>' +
+                        '</div>';
+                }
+                list.innerHTML = html;
+            }
+
+            // One handler for every team's tile: the pill opens its own list, a click anywhere
+            // else closes whatever is open.
+            document.addEventListener('click', function (e) {
+                var toggle = e.target.closest ? e.target.closest('.mis-reasons-toggle') : null;
+                var wraps = document.querySelectorAll('.mis-reasons');
+                var mine = toggle ? toggle.parentNode : null;
+                for (var i = 0; i < wraps.length; i++) {
+                    if (wraps[i] === mine)
+                        wraps[i].classList.toggle('open');
+                    else if (!wraps[i].contains(e.target))
+                        wraps[i].classList.remove('open');
+                }
+            });
+
             function renderAccounts(teamKey, p) {
                 var body = document.querySelector('[data-mis="accounts"][data-team="' + teamKey + '"]');
                 var toggle = document.querySelector('[data-mis="accountsToggle"][data-team="' + teamKey + '"]');
@@ -449,12 +578,9 @@
                 }
             }
 
-            function applyPeriod(teamKey, periodKey) {
-                var periods = periodsByTeam[teamKey] || [];
-                var p = null;
-                for (var i = 0; i < periods.length; i++) {
-                    if (periods[i].Key === periodKey) { p = periods[i]; break; }
-                }
+            // Puts one window on screen. It does not care where the window came from, so the
+            // Daily/Weekly/Monthly/Yearly buttons and the date filter share the same rendering.
+            function renderPeriod(teamKey, p) {
                 if (!p) return;
                 currentPeriod[teamKey] = p;
 
@@ -464,9 +590,9 @@
                 setText(teamKey, 'qualified', num(p.QualifiedLeads));
                 setText(teamKey, 'qualifiedPct', p.QualifiedRate + '%');
                 setText(teamKey, 'qualifiedBadge', num(p.DisqualifiedLeads) + ' disqualified');
-                setText(teamKey, 'ebb', num(p.EbbCount));
-                setText(teamKey, 'ebbPct', p.EbbRatio + '%');
-                setText(teamKey, 'ebbBadge', 'Comments containing “EBB”');
+                setText(teamKey, 'disqualified', num(p.DisqualifiedLeads));
+                setText(teamKey, 'disqualifiedPct', p.DisqualifiedRate + '%');
+                renderReasons(teamKey, p);
 
                 var rangeEl = document.querySelector('[data-mis="range"][data-team="' + teamKey + '"]');
                 if (rangeEl) {
@@ -483,14 +609,107 @@
                     chart.update();
                 }
 
+                // A custom range carries Key "custom", which matches no button - so picking dates
+                // leaves the whole segmented control unlit, and it is clear neither preset is on.
                 var buttons = document.querySelectorAll('.mis-period-btn[data-team="' + teamKey + '"]');
                 for (var b = 0; b < buttons.length; b++)
-                    buttons[b].classList.toggle('active', buttons[b].getAttribute('data-period') === periodKey);
+                    buttons[b].classList.toggle('active', buttons[b].getAttribute('data-period') === p.Key);
 
                 // A new window means a different set of accounts, so start back at the preview.
                 accountsExpanded[teamKey] = false;
                 renderAccounts(teamKey, p);
             }
+
+            function applyPeriod(teamKey, periodKey) {
+                var periods = periodsByTeam[teamKey] || [];
+                for (var i = 0; i < periods.length; i++) {
+                    if (periods[i].Key === periodKey) { renderPeriod(teamKey, periods[i]); return; }
+                }
+            }
+
+            // ---- Custom date range ----
+            // The four preset windows ship with the page; a range the user picks does not, so it
+            // is fetched for that team alone and then rendered through renderPeriod like any other.
+            var MIS_DATA_URL = '@Url.Action("MisData", "Dashboard")';
+
+            function dateFilterOf(teamKey) {
+                var input = document.querySelector('[data-mis="range-input"][data-team="' + teamKey + '"]');
+                return input ? input.closest('.mis-date-filter') : null;
+            }
+
+            // Drops back to the window the page opened on and empties the picker.
+            function clearRange(teamKey, rerender) {
+                var filter = dateFilterOf(teamKey);
+                if (filter) {
+                    filter.classList.remove('active', 'loading');
+                    var input = filter.querySelector('[data-mis="range-input"]');
+                    if (input) input.value = '';
+                }
+                if (rerender) applyPeriod(teamKey, MIS_DEFAULT_PERIOD);
+            }
+
+            function loadRange(teamKey, startDate, endDate) {
+                var filter = dateFilterOf(teamKey);
+                if (filter) filter.classList.add('loading');
+
+                $.ajax({
+                    url: MIS_DATA_URL,
+                    type: 'GET',
+                    dataType: 'json',
+                    // The server reads these as en-US, the same as the other dashboards.
+                    data: {
+                        team: teamKey,
+                        StartDate: startDate.format('MM/DD/YYYY'),
+                        EndDate: endDate.format('MM/DD/YYYY')
+                    }
+                })
+                .done(function (res) {
+                    if (!res || !res.Success || !res.Period) {
+                        toastr.error((res && res.Error) || 'Could not load MIS data for the selected dates.');
+                        clearRange(teamKey, true);
+                        return;
+                    }
+                    if (filter) filter.classList.add('active');
+                    renderPeriod(teamKey, res.Period);
+                })
+                .fail(function () {
+                    toastr.error('Could not load MIS data for the selected dates.');
+                    clearRange(teamKey, true);
+                })
+                .always(function () {
+                    if (filter) filter.classList.remove('loading');
+                });
+            }
+
+            $('[data-mis="range-input"]').each(function () {
+                var input = $(this);
+                var teamKey = input.attr('data-team');
+
+                input.daterangepicker({
+                    // Opens on the last 30 days, but nothing is applied until Apply is clicked.
+                    startDate: moment().subtract(29, 'days'),
+                    endDate: moment(),
+                    maxDate: moment(),
+                    format: 'DD MMM YYYY',
+                    opens: 'left',
+                    buttonClasses: ['btn btn-sm'],
+                    applyClass: 'btn-primary',
+                    cancelClass: 'btn-default',
+                    locale: { cancelLabel: 'Clear', firstDay: 1 }
+                });
+
+                input.on('apply.daterangepicker', function (ev, picker) {
+                    loadRange(teamKey, picker.startDate, picker.endDate);
+                });
+
+                // "Clear" in the picker behaves like the × beside it.
+                input.on('cancel.daterangepicker', function () {
+                    clearRange(teamKey, true);
+                });
+
+                input.on('show.daterangepicker', function () { input.parent().addClass('focused'); });
+                input.on('hide.daterangepicker', function () { input.parent().removeClass('focused'); });
+            });
 
             // ---- Team slider: one team on screen at a time, wrapping at both ends ----
             var slideIndex = 0;
@@ -513,7 +732,18 @@
                 var periodBtn = e.target.closest('.mis-period-btn');
                 if (periodBtn) {
                     e.preventDefault();
-                    applyPeriod(periodBtn.getAttribute('data-team'), periodBtn.getAttribute('data-period'));
+                    var btnTeam = periodBtn.getAttribute('data-team');
+                    // Picking a preset drops any range, so the picker never shows dates the
+                    // figures beside it no longer describe.
+                    clearRange(btnTeam, false);
+                    applyPeriod(btnTeam, periodBtn.getAttribute('data-period'));
+                    return;
+                }
+
+                var rangeClear = e.target.closest('[data-mis="range-clear"]');
+                if (rangeClear) {
+                    e.preventDefault();
+                    clearRange(rangeClear.getAttribute('data-team'), true);
                     return;
                 }
 

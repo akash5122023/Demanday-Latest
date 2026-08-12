@@ -4,7 +4,10 @@
         SrNo?: number;
         AgentName?: string;
         CdqaComments?: string;
+        MasterAccountId?: number;
         CampaignId?: number;
+        MasterAccountNo?: string;
+        CampaignCode?: string;
         CompanyName?: string;
         FirstName?: string;
         LastName?: string;
@@ -76,7 +79,10 @@
             SrNo = "SrNo",
             AgentName = "AgentName",
             CdqaComments = "CdqaComments",
+            MasterAccountId = "MasterAccountId",
             CampaignId = "CampaignId",
+            MasterAccountNo = "MasterAccountNo",
+            CampaignCode = "CampaignCode",
             CompanyName = "CompanyName",
             FirstName = "FirstName",
             LastName = "LastName",

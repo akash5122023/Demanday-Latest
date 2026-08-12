@@ -93,6 +93,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
+                    // Account Number -> id, read once so the per-row lookup below costs nothing.
+                    var accounts = ExcelImportHelper.LoadMasterAccountMap(uow.Connection);
                     for (int row = 2; row <= rowCount; row++)
                     {
                         try
@@ -100,7 +102,11 @@ namespace AdvanceCRM.Demanday.Endpoints
                             var demandaytelemarketingmis = new DemandayTeleMarketingMISRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
-                                MasterAccountId = ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
+                                // Prefer the readable "Master Account No" that the template and the export now
+                                // carry; fall back to a raw id column so older files still import.
+                                MasterAccountId = ExcelImportHelper.GetMasterAccountId(ws, row, map, accounts,
+                                        "Master Account No", "Account Number", "Account No")
+                                    ?? ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 Slot = ExcelImportHelper.GetText(ws, row, map, "Slot"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),

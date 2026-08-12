@@ -21,8 +21,12 @@ namespace AdvanceCRM.Demanday.Forms
         [EditorOption("sourceCSV", "Company Confirm,Voice Mail,Ringing,Not Found,Not Working,Invalid Number")]
         public String CdqaComments { get; set; }
 
-        //[HalfWidth, LookupEditor(typeof(CampaignRow))]
-        //public Int32 CampaignId { get; set; }
+        [HalfWidth, LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
+        public Int32 MasterAccountId { get; set; }
+
+        // Campaign list is limited to the campaigns of the selected Master Account.
+        [HalfWidth, LookupEditor(typeof(Masters.DemandayCampaignIdRow), CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
+        public Int32 CampaignId { get; set; }
 
         [HalfWidth]
         public String CompanyName { get; set; }

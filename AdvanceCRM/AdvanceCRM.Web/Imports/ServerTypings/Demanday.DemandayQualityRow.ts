@@ -4,6 +4,7 @@
         AgentsName?: string;
         TlName?: string;
         MasterAccountId?: number;
+        MasterAccountNo?: string;
         CampaignId?: string;
         CompanyName?: string;
         FirstName?: string;
@@ -110,6 +111,7 @@
             AgentsName = "AgentsName",
             TlName = "TlName",
             MasterAccountId = "MasterAccountId",
+            MasterAccountNo = "MasterAccountNo",
             CampaignId = "CampaignId",
             CompanyName = "CompanyName",
             FirstName = "FirstName",

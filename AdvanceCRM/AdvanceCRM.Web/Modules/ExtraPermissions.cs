@@ -88,7 +88,19 @@
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:Import")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:Export")]
 // Toolkit sub-modules: Import permissions
+// Blanket key - a role holding this may import into every Verify Sheets sheet.
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Import")]
+// ...and one key per sheet, so a role can be allowed to import into a single sheet the way
+// each module has its own <Module>:Import. Any of the three opens a sheet's upload: the
+// blanket key above, the sheet's own key here, or the sub-module's own Import key
+// (e.g. "MasterSupression:Import") - so existing roles keep working unchanged.
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Specification:Import")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:EmailSuppression:Import")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Competitor:Import")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:TalList:Import")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:MasterSuppression:Import")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:OpenCampaign:Import")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:DNCContact:Import")]
 // Toolkit sub-modules permissions inside VerifySheets
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Specification")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:EmailSuppression")]

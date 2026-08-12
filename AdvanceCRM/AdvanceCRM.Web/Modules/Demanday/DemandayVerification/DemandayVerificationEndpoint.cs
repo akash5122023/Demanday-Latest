@@ -62,6 +62,13 @@ namespace AdvanceCRM.Demanday.Endpoints
          [FromServices] IDemandayVerificationListHandler handler)
         {
             request ??= new ListRequest { Take = 0 }; // Defensive: always have a request
+
+            // Account Number and Campaign ID live on joins, which a bare export request does not
+            // select - ask for them explicitly or the sheet's two new columns come back empty.
+            request.IncludeColumns ??= new HashSet<string>();
+            request.IncludeColumns.Add(MyRow.Fields.MasterAccountNo.PropertyName);
+            request.IncludeColumns.Add(MyRow.Fields.CampaignCode.PropertyName);
+
             var data = List(connection, request, handler).Entities.ToList();
             if (!string.IsNullOrWhiteSpace(Ids))
             {
@@ -76,6 +83,44 @@ namespace AdvanceCRM.Demanday.Endpoints
             var fileName = "VerificationList_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".xlsx";
             return Serenity.Web.ExcelContentResult.Create(bytes, fileName);
         }
+        /// <summary>
+        /// An empty sheet carrying exactly the columns ImportExcel below understands - one per
+        /// field the Verification form offers. Built here rather than shipped as a file so it can
+        /// never drift from what the import actually reads.
+        ///
+        /// Master Account and Campaign are asked for by their readable numbers, not the internal
+        /// keys: the campaign is resolved inside the account on its row, so both must be filled in
+        /// for a campaign to be linked.
+        /// </summary>
+        [HttpPost, IgnoreAntiforgeryToken, AuthorizeList(typeof(DemandayVerificationRow))]
+        public FileContentResult DownloadTemplate()
+        {
+            string[] headers = new[]
+            {
+                "Agent Name", "CDQA Comments", "Master Account No", "Campaign Id", "Company Name",
+                "First Name", "Last Name", "Title", "Email", "Date",
+                "Work Phone", "Alternate 01", "Alternate 02", "Profile Link", "Created By"
+            };
+
+            using var package = new ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("DemandayVerification");
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cells[1, i + 1];
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            }
+
+            ws.Cells[1, 1, 1, headers.Length].AutoFitColumns(12, 30);
+            ws.View.FreezePanes(2, 1);
+
+            return Serenity.Web.ExcelContentResult.Create(package.GetAsByteArray(),
+                "DemandayVerification_Template.xlsx");
+        }
+
         [HttpPost, IgnoreAntiforgeryToken]
         [RequestSizeLimit(52428800)]
         [RequestFormLimits(MultipartBodyLengthLimit = 52428800)]
@@ -111,6 +156,12 @@ namespace AdvanceCRM.Demanday.Endpoints
                     var ws = package.Workbook.Worksheets[0];
                     int rowCount = ws.Dimension.End.Row;
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
+
+                    // Account Number -> id and (account, campaign code) -> id, read once so the
+                    // per-row lookups below cost nothing.
+                    var accounts = ExcelImportHelper.LoadMasterAccountMap(uow.Connection);
+                    var campaigns = ExcelImportHelper.LoadCampaignMap(uow.Connection);
+
                     for (int row = 2; row <= rowCount; row++)
                     {
                         try
@@ -129,13 +180,23 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 }
                             }
 
+                            // The sheet carries the readable Account Number, and the Campaign ID
+                            // is only meaningful inside it - so the account is resolved first and
+                            // the campaign looked up within it.
+                            var masterAccountId = ExcelImportHelper.GetMasterAccountId(ws, row, map, accounts,
+                                    "Master Account No", "Master Account", "Account Number", "Account No")
+                                ?? ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id");
+
                             var demandayverification = new DemandayVerificationRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),
                                 SrNo = ExcelImportHelper.GetInt(ws, row, map, "SrNo", "Sr No"),
                                 AgentName = resolvedAgentName,
                                 CdqaComments = ExcelImportHelper.GetText(ws, row, map, "CdqaComments", "Cdqa Comments", "CDQA Comments"),
-                                CampaignId = ExcelImportHelper.GetInt(ws, row, map, "CampaignId", "Campaign Id"),
+                                MasterAccountId = masterAccountId,
+                                CampaignId = ExcelImportHelper.GetCampaignId(ws, row, map, campaigns, masterAccountId,
+                                    "CampaignId", "Campaign Id", "Campaign"),
+                                Date = ExcelImportHelper.GetDate(ws, row, map, "Date"),
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
                                 FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
                                 LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),

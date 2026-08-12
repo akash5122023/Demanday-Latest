@@ -72,6 +72,42 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             return false;
         }
 
+        /// <summary>
+        /// True when a row carries values only in the given "detail" columns. That is the shape
+        /// an export uses for child rows - QA Details under a Quality record, sub contacts under
+        /// a contact - where the record's own columns are left empty. Such a row describes the
+        /// record above it, not a record of its own, so an import must skip it instead of
+        /// creating an empty record out of it.
+        /// </summary>
+        public static bool IsDetailOnlyRow(ExcelWorksheet ws, int row, Dictionary<string, int> map,
+            params string[] detailHeaders)
+        {
+            if (ws == null || map == null || detailHeaders == null || detailHeaders.Length == 0)
+                return false;
+
+            var detailCols = new HashSet<int>();
+            foreach (var name in detailHeaders)
+            {
+                if (TryGetCol(map, new[] { name }, out int c))
+                    detailCols.Add(c);
+            }
+
+            if (detailCols.Count == 0)
+                return false;      // sheet has no detail columns at all - nothing to recognise
+
+            bool hasDetail = false;
+            foreach (var col in map.Values)
+            {
+                if (string.IsNullOrWhiteSpace(ws.Cells[row, col].Text))
+                    continue;
+                if (!detailCols.Contains(col))
+                    return false;  // something outside the detail columns - this is a record row
+                hasDetail = true;
+            }
+
+            return hasDetail;
+        }
+
         public static string GetText(ExcelWorksheet ws, int row, Dictionary<string, int> map, params string[] names)
         {
             if (!TryGetCol(map, names, out int col)) return null;
@@ -114,6 +150,91 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 .Select(u.UserId)
                 .Where((u.Username == s) | (u.DisplayName == s)));
             return user?.UserId;
+        }
+
+        /// <summary>
+        /// Case-insensitive Account Number to DemandayMasterAccount.Id map. Read once per import
+        /// so a file with thousands of rows does not issue one lookup query per row.
+        /// </summary>
+        public static Dictionary<string, int> LoadMasterAccountMap(IDbConnection connection)
+        {
+            var accounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            if (connection == null)
+                return accounts;
+
+            var a = Masters.DemandayMasterAccountRow.Fields;
+            foreach (var acc in connection.List<Masters.DemandayMasterAccountRow>(q => q
+                .Select(a.Id)
+                .Select(a.AccountNumber)))
+            {
+                if (acc.Id.HasValue && !string.IsNullOrWhiteSpace(acc.AccountNumber))
+                    accounts[acc.AccountNumber.Trim()] = acc.Id.Value;
+            }
+            return accounts;
+        }
+
+        /// <summary>
+        /// Resolves a "Master Account No" column to a DemandayMasterAccount.Id by looking the cell
+        /// up as an Account Number. Deliberately does NOT fall back to reading the cell as an id:
+        /// account numbers can themselves be numeric, so a numeric fallback would happily link the
+        /// wrong account. Callers keep a separate GetInt on the "Master Account Id" column for that.
+        /// Returns null for a blank or unknown account, leaving the row's account unset.
+        /// </summary>
+        public static int? GetMasterAccountId(ExcelWorksheet ws, int row, Dictionary<string, int> map,
+            Dictionary<string, int> accounts, params string[] names)
+        {
+            if (accounts == null || accounts.Count == 0) return null;
+            if (!TryGetCol(map, names, out int col)) return null;
+            var v = ws.Cells[row, col].Value;
+            if (v == null) return null;
+            var s = v.ToString()?.Trim();
+            if (string.IsNullOrWhiteSpace(s)) return null;
+
+            return accounts.TryGetValue(s, out int id) ? id : (int?)null;
+        }
+
+        /// <summary>
+        /// Campaign code ("79580") -> DemandayCampaignId.Id, keyed by account. The same code may
+        /// exist under more than one Master Account, so it only identifies a campaign together
+        /// with its account - the key here is "accountId|code".
+        /// </summary>
+        public static Dictionary<string, int> LoadCampaignMap(IDbConnection connection)
+        {
+            var campaigns = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            if (connection == null)
+                return campaigns;
+
+            var c = Masters.DemandayCampaignIdRow.Fields;
+            foreach (var cam in connection.List<Masters.DemandayCampaignIdRow>(q => q
+                .Select(c.Id)
+                .Select(c.CampaignId)
+                .Select(c.DemandayMasterAccountId)))
+            {
+                if (!cam.Id.HasValue || !cam.DemandayMasterAccountId.HasValue ||
+                    string.IsNullOrWhiteSpace(cam.CampaignId))
+                    continue;
+
+                var key = cam.DemandayMasterAccountId.Value + "|" + cam.CampaignId.Trim();
+                if (!campaigns.ContainsKey(key))
+                    campaigns[key] = cam.Id.Value;
+            }
+            return campaigns;
+        }
+
+        /// <summary>
+        /// Resolves a "Campaign Id" column to a DemandayCampaignId.Id within the row's own Master
+        /// Account. Returns null when the account is unknown or the code does not belong to it,
+        /// which leaves the campaign unset rather than pointing at another account's campaign.
+        /// </summary>
+        public static int? GetCampaignId(ExcelWorksheet ws, int row, Dictionary<string, int> map,
+            Dictionary<string, int> campaigns, int? masterAccountId, params string[] names)
+        {
+            if (campaigns == null || campaigns.Count == 0 || masterAccountId == null) return null;
+            if (!TryGetCol(map, names, out int col)) return null;
+            var s = ws.Cells[row, col].Text?.Trim();
+            if (string.IsNullOrWhiteSpace(s)) return null;
+
+            return campaigns.TryGetValue(masterAccountId.Value + "|" + s, out int id) ? id : (int?)null;
         }
 
         public static decimal? GetDecimal(ExcelWorksheet ws, int row, Dictionary<string, int> map, params string[] names)
