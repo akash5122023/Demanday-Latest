@@ -73,7 +73,13 @@ namespace AdvanceCRM.Demanday.Endpoints
                 if (idList.Count > 0)
                     data = data.Where(x => x.Id.HasValue && idList.Contains(x.Id.Value)).ToList();
             }
-            var bytes = AdvanceCRM.Web.Modules.Common.AppServices.DemandayTeleMarketingContactsExcelExporter.ExportToExcel(data);
+            // QA Details (the campaign questions and the answers given) are detail rows, so the
+            // list response never carries them - load them for the exported records and let the
+            // exporter write them out under the record they belong to.
+            var qaDetails = QADetailsExportHelper.LoadByRecordId(connection,
+                data.Where(x => x.Id.HasValue).Select(x => x.Id.Value));
+
+            var bytes = AdvanceCRM.Web.Modules.Common.AppServices.DemandayTeleMarketingContactsExcelExporter.ExportToExcel(data, qaDetails);
             var fileName = "DemandayContactsList_" + DateTime.Now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture) + ".xlsx";
             return Serenity.Web.ExcelContentResult.Create(bytes, fileName);
         }
@@ -100,6 +106,15 @@ namespace AdvanceCRM.Demanday.Endpoints
                     {
                         try
                         {
+                            // The export writes QA Details as child rows under their record,
+                            // carrying only QUESTION / ANSWER. They belong to the row above, so
+                            // re-importing the sheet must skip them instead of turning each one
+                            // into an empty record.
+                            if (ExcelImportHelper.IsDetailOnlyRow(ws, row, map, "Question", "Answer"))
+                            {
+                                skipped++; continue;
+                            }
+
                             var demandaytelemarketingcontacts = new DemandayTeleMarketingContactsRow
                             {
                                 Id = ExcelImportHelper.GetInt(ws, row, map, "Id"),

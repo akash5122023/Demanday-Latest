@@ -6,17 +6,29 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
 {
     public class DemandayTeleMarketingTeamLeaderExcelExporter
     {
-        public static byte[] ExportToExcel(List<DemandayTeleMarketingTeamLeaderRow> demandaytelemarketingteamLeaderRows)
+        /// <param name="qaByRecordId">
+        /// QA Details of the exported records, keyed by record id (see QADetailsExportHelper).
+        /// They are written the way the Contacts export writes sub contacts: as child rows
+        /// directly under the record they belong to, with the record's own columns left empty
+        /// and only QUESTION / ANSWER filled in. Pass null to export without them.
+        /// </param>
+        public static byte[] ExportToExcel(List<DemandayTeleMarketingTeamLeaderRow> demandaytelemarketingteamLeaderRows,
+            Dictionary<int, List<QADetailsExportHelper.QaEntry>> qaByRecordId = null)
         {
             using var package = new ExcelPackage();
             var ws = package.Workbook.Worksheets.Add("TeleMarketingTeamLeader");
             // Headers
             string[] headers = new[]
             {
-                "MASTER ACCOUNT NO","CAMPAIGN ID", "SLOT", "Id", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "DATE", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY", "COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "ASSET", "CALL STATUS", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "Adress link", "EMAIL FORMAT", "TENURITY", "CODE", "LINK", "MD5", "Attachments", "CREATED BY"
+                "MASTER ACCOUNT NO","CAMPAIGN ID", "SLOT", "Id", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE", "DATE", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY", "COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "ASSET", "CALL STATUS", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "Adress link", "EMAIL FORMAT", "TENURITY", "CODE", "LINK", "MD5", "Attachments", "CREATED BY", "QUESTION", "ANSWER"
             };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
+
+            // The two trailing columns the QA child rows write into.
+            int questionCol = headers.Length - 1;
+            int answerCol = headers.Length;
+
             int row = 2;
             foreach (var en in demandaytelemarketingteamLeaderRows)
             {
@@ -58,6 +70,20 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.Attachments;
                 ws.Cells[row, col++].Value = en.OwnerUsername;
                 row++;
+
+                // One child row per question this record answered, sitting right under it -
+                // the record's own columns stay empty there, exactly like a sub contact row in
+                // the Contacts export.
+                if (qaByRecordId != null && en.Id.HasValue &&
+                    qaByRecordId.TryGetValue(en.Id.Value, out var qaEntries) && qaEntries != null)
+                {
+                    foreach (var qa in qaEntries)
+                    {
+                        ws.Cells[row, questionCol].Value = qa.Question;
+                        ws.Cells[row, answerCol].Value = qa.Answer;
+                        row++;
+                    }
+                }
             }
             ws.Cells.AutoFitColumns();
             return package.GetAsByteArray();

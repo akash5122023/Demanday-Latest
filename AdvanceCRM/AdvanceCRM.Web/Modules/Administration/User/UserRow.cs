@@ -145,6 +145,17 @@ namespace AdvanceCRM.Administration
         }
         #endregion
 
+        #region DateOfBirth
+        // Only the day and month are read by the Attendance calendar's birthday list; the year is
+        // kept so an age can be worked out from it.
+        [DisplayName("Date Of Birth"), DateEditor, LookupInclude]
+        public DateTime? DateOfBirth
+        {
+            get { return Fields.DateOfBirth[this]; }
+            set { Fields.DateOfBirth[this] = value; }
+        }
+        #endregion
+
         [DisplayName("User Image"), Size(100)]
         [ImageUploadEditor(FilenameFormat = "UserImage/~", CopyToHistory = true)]
         public String UserImage
@@ -518,6 +529,7 @@ namespace AdvanceCRM.Administration
 
             public Int32Field Gender;
             public DateTimeField DateOfJoining;
+            public DateTimeField DateOfBirth;
 
             public RowFields()
                 : base("Users")

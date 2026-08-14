@@ -34,6 +34,8 @@ namespace AdvanceCRM.Administration.Forms
         public Masters.GenderMaster Gender { get; set; }
         [HalfWidth, DateEditor]
         public DateTime DateOfJoining { get; set; }
+        [HalfWidth, DateEditor]
+        public DateTime DateOfBirth { get; set; }
 
         [DisplayName("Active"), BooleanSwitchEditor]
         public Boolean IsActive { get; set; }

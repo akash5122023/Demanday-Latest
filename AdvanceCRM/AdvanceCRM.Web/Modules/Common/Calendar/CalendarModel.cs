@@ -28,6 +28,19 @@ namespace AdvanceCRM.Common.Calendar
         public string Severity { get; set; } // "error", "warning"
     }
 
+    /// <summary>One person whose birthday falls on the day the calendar is showing.</summary>
+    public class BirthdayItem
+    {
+        public int UserId { get; set; }
+        public string Name { get; set; }
+        /// <summary>One or two letters for the avatar circle.</summary>
+        public string Initials { get; set; }
+        /// <summary>Their team, when they have one - the same label the header shows.</summary>
+        public string Department { get; set; }
+        /// <summary>The age they turn today, or null when the birth year is not known.</summary>
+        public int? Age { get; set; }
+    }
+
     public class CalendarModel
     {
         public UserRow User { get; set; }
@@ -62,12 +75,19 @@ namespace AdvanceCRM.Common.Calendar
         public int TargetUserId { get; set; }
         public List<UserRow> UserList { get; set; }
 
+        /// <summary>
+        /// Everyone whose birthday is today, whichever user's attendance is on screen - the card
+        /// is about the team, not about the selected person.
+        /// </summary>
+        public List<BirthdayItem> TodaysBirthdays { get; set; }
+
         public CalendarModel()
         {
             UserList = new List<UserRow>();
             DayDetails = new Dictionary<int, AttendanceDayDetail>();
             NeedsAttentionList = new List<NeedsAttentionItem>();
             AttendanceRecords = new List<AttendanceRow>();
+            TodaysBirthdays = new List<BirthdayItem>();
         }
     }
 }

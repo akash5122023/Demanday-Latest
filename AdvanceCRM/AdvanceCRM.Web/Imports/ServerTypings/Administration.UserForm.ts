@@ -13,6 +13,7 @@
         BranchId: Serenity.LookupEditor;
         Gender: Serenity.EnumEditor;
         DateOfJoining: Serenity.DateEditor;
+        DateOfBirth: Serenity.DateEditor;
         IsActive: BooleanSwitchEditor;
         Host: Serenity.StringEditor;
         Port: Serenity.IntegerEditor;
@@ -74,6 +75,7 @@
                     'BranchId', w0,
                     'Gender', w7,
                     'DateOfJoining', w8,
+                    'DateOfBirth', w8,
                     'IsActive', w9,
                     'Host', w1,
                     'Port', w10,

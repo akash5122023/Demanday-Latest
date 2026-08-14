@@ -60,6 +60,7 @@
         TenantName?: string;
         Gender?: Masters.GenderMaster;
         DateOfJoining?: string;
+        DateOfBirth?: string;
         InsertUserId?: number;
         InsertDate?: string;
         UpdateUserId?: number;
@@ -141,6 +142,7 @@
             TenantName = "TenantName",
             Gender = "Gender",
             DateOfJoining = "DateOfJoining",
+            DateOfBirth = "DateOfBirth",
             InsertUserId = "InsertUserId",
             InsertDate = "InsertDate",
             UpdateUserId = "UpdateUserId",

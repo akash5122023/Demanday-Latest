@@ -499,6 +499,46 @@
         }
 
         .attention-item:last-child { border-bottom: none; }
+
+        /* Today's Birthdays */
+        .birthday-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .birthday-item:last-child { border-bottom: none; }
+
+        .birthday-avatar {
+            width: 32px;
+            height: 32px;
+            flex: 0 0 32px;
+            border-radius: 50%;
+            background: #fce7f3;
+            color: #be185d;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* min-width:0 lets a long name ellipsize instead of pushing the age off the card. */
+        .birthday-meta { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+        .birthday-name {
+            font-size: 13px; font-weight: 700; color: #334155;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .birthday-sub {
+            font-size: 11px; color: #94a3b8;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .birthday-age {
+            font-size: 11px; font-weight: 700; color: #be185d;
+            background: #fce7f3; border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+        }
     </style>
 }
 
@@ -767,6 +807,44 @@
             </div>
 
 
+
+            <!-- Today's Birthdays: everyone in the company whose Date of Birth falls today,
+                 whichever user's attendance is being viewed. -->
+            <div class="sidebar-card">
+                <h4 class="sidebar-card-title"><i class="fa fa-birthday-cake" style="color: #db2777;"></i> Today&rsquo;s Birthdays</h4>
+                @if (Model.TodaysBirthdays != null && Model.TodaysBirthdays.Any())
+                {
+                    <div class="birthday-list">
+                        @foreach (var b in Model.TodaysBirthdays)
+                        {
+                            <div class="birthday-item">
+                                <span class="birthday-avatar">@b.Initials</span>
+                                <span class="birthday-meta">
+                                    <span class="birthday-name">@b.Name</span>
+                                    <span class="birthday-sub">
+                                        @if (!string.IsNullOrWhiteSpace(b.Department))
+                                        {
+                                            @b.Department
+                                        }
+                                        else
+                                        {
+                                            <text>Wish them a happy birthday</text>
+                                        }
+                                    </span>
+                                </span>
+                                @if (b.Age.HasValue)
+                                {
+                                    <span class="birthday-age">@b.Age</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div style="font-size: 12px; color: #94a3b8;">No birthdays today.</div>
+                }
+            </div>
 
             <!-- Needs Attention -->
             <div class="sidebar-card">

@@ -196,8 +196,29 @@ namespace AdvanceCRM.Administration.Repositories
                 return username;
             }
 
+            // "View All Records" switches for modules that are no longer part of the deployment.
+            // They were dropped from the form (see UserForm) but stayed on the row as NotNull, so
+            // a new user carried no value for them and the required-field check refused the save
+            // with "Enquiry field is required!". The database defaults each of them to false, so
+            // that is what an unanswered switch means here too.
+            private static readonly Field[] DroppedPermissionFlags =
+            {
+                fld.Enquiry, fld.Quotation, fld.Tasks, fld.Contacts,
+                fld.Purchase, fld.Sales, fld.Cms
+            };
+
             protected override void ValidateRequest()
             {
+                // Before the base runs its required-field check, not after: it throws.
+                if (IsCreate)
+                {
+                    foreach (var flag in DroppedPermissionFlags)
+                    {
+                        if (!Row.IsAssigned(flag))
+                            ((BooleanField)flag)[Row] = false;
+                    }
+                }
+
                 base.ValidateRequest();
 
                 if (IsUpdate)

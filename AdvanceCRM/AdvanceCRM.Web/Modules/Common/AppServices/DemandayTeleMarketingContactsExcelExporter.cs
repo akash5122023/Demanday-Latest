@@ -6,7 +6,14 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
 {
     public class DemandayTeleMarketingContactsExcelExporter
     {
-        public static byte[] ExportToExcel(List<DemandayTeleMarketingContactsRow> demandaytelemarketingcontactsRows)
+        /// <param name="qaByRecordId">
+        /// QA Details of the exported records, keyed by record id (see QADetailsExportHelper).
+        /// They are written the way the Contacts export writes sub contacts: as child rows
+        /// directly under the record they belong to, with the record's own columns left empty
+        /// and only QUESTION / ANSWER filled in. Pass null to export without them.
+        /// </param>
+        public static byte[] ExportToExcel(List<DemandayTeleMarketingContactsRow> demandaytelemarketingcontactsRows,
+            Dictionary<int, List<QADetailsExportHelper.QaEntry>> qaByRecordId = null)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using var package = new ExcelPackage();
@@ -14,10 +21,15 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
             // Headers
             string[] headers = new[]
             {
-                "MASTER ACCOUNT NO","CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE","Date","Additional Notes", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "DOMAIN", "JOB LEVEL", "JOB FUNCTION ROLE", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","ASSET","CALL STATUS","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY"
+                "MASTER ACCOUNT NO","CAMPAIGN ID","Id","SLOT", "Company Name", "FIRSTNAME", "LASTNAME", "TITLE","Date","Additional Notes", "Email", "WORKPHONE", "ALTERNATIVENUMBER", "DOMAIN", "JOB LEVEL", "JOB FUNCTION ROLE", "STREET", "CITY", "STATE", "ZIP CODE", "COUNTRY","COMPANY EMPLOYEE SIZE", "INDUSTRY", "SUB INDUSTRY", "ZOOMINFO INDUSTRY", "ZOOMINFO EMPLOYEE SIZE", "REVENUE", "PROFILE LINK", "Company link", "REVENUE LINK", "EMAIL FORMAT","Adress link","PRIMARY REASON","CATEGORY","COMMENTS","QA STATUS","DELIVERY STATUS","AGENT NAME","QA NAME","CALL DATE","DATE AUDITED","DELIVERY DATE","SOURCE","VERIFICATION MODE","ASSET 1","ASSET 2","ASSET","CALL STATUS","TL NAME", "TENURITY", "CODE", "LINK", "MD5","CREATED BY","QUESTION","ANSWER"
             };
             for (int i = 0; i < headers.Length; i++)
                 ws.Cells[1, i + 1].Value = headers[i];
+
+            // The two trailing columns the QA child rows write into.
+            int questionCol = headers.Length - 1;
+            int answerCol = headers.Length;
+
             int row = 2;
             foreach (var en in demandaytelemarketingcontactsRows)
             {
@@ -77,6 +89,20 @@ namespace AdvanceCRM.Web.Modules.Common.AppServices
                 ws.Cells[row, col++].Value = en.Md5;
                 ws.Cells[row, col++].Value = en.OwnerUsername;
                 row++;
+
+                // One child row per question this record answered, sitting right under it -
+                // the record's own columns stay empty there, exactly like a sub contact row in
+                // the Contacts export.
+                if (qaByRecordId != null && en.Id.HasValue &&
+                    qaByRecordId.TryGetValue(en.Id.Value, out var qaEntries) && qaEntries != null)
+                {
+                    foreach (var qa in qaEntries)
+                    {
+                        ws.Cells[row, questionCol].Value = qa.Question;
+                        ws.Cells[row, answerCol].Value = qa.Answer;
+                        row++;
+                    }
+                }
             }
             ws.Cells.AutoFitColumns();
             return package.GetAsByteArray();

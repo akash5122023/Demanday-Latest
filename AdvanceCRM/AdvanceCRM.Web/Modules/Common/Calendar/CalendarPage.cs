@@ -63,6 +63,7 @@ namespace AdvanceCRM.Common.Calendar
                     .OrderBy(u.DisplayName));
 
                 model.UserList = userList;
+                model.TodaysBirthdays = BuildTodaysBirthdays(userList, now);
 
                 int targetUserId = (userId.HasValue && userId.Value > 0) ? userId.Value : loggedInUserId;
                 model.TargetUserId = targetUserId;
@@ -285,6 +286,76 @@ namespace AdvanceCRM.Common.Calendar
             }
 
             return View(MVC.Views.Common.Calendar.CalendarIndex, model);
+        }
+
+        /// <summary>
+        /// Everyone from the same active-user list the page already loaded whose birthday falls on
+        /// <paramref name="today"/>. Only the day and month are compared - the birth year is used
+        /// for the age, and is ignored when it is missing or in the future.
+        /// </summary>
+        private static List<BirthdayItem> BuildTodaysBirthdays(List<UserRow> users, DateTime today)
+        {
+            var result = new List<BirthdayItem>();
+            if (users == null)
+                return result;
+
+            foreach (var user in users)
+            {
+                if (!user.DateOfBirth.HasValue)
+                    continue;
+
+                if (!IsBirthdayOn(user.DateOfBirth.Value, today))
+                    continue;
+
+                int? age = null;
+                if (user.DateOfBirth.Value.Year > 1 && user.DateOfBirth.Value.Year <= today.Year)
+                    age = today.Year - user.DateOfBirth.Value.Year;
+
+                var name = !string.IsNullOrWhiteSpace(user.DisplayName)
+                    ? user.DisplayName.Trim()
+                    : (user.Username ?? "").Trim();
+
+                result.Add(new BirthdayItem
+                {
+                    UserId = user.UserId ?? 0,
+                    Name = name,
+                    Initials = InitialsOf(name),
+                    Department = user.TeamsTeamName,
+                    Age = age
+                });
+            }
+
+            return result
+                .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Whether a date of birth lands on the given day. Someone born on 29 February has no
+        /// birthday at all in an ordinary year, so theirs is kept on 28 February rather than
+        /// disappearing for three years out of four.
+        /// </summary>
+        private static bool IsBirthdayOn(DateTime dateOfBirth, DateTime today)
+        {
+            if (dateOfBirth.Month == today.Month && dateOfBirth.Day == today.Day)
+                return true;
+
+            return dateOfBirth.Month == 2 && dateOfBirth.Day == 29 &&
+                   today.Month == 2 && today.Day == 28 &&
+                   !DateTime.IsLeapYear(today.Year);
+        }
+
+        /// <summary>Up to two letters for the avatar circle, e.g. "Akash Dudhe" -> "AD".</summary>
+        private static string InitialsOf(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "?";
+
+            var parts = name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1)
+                return parts[0].Substring(0, 1).ToUpperInvariant();
+
+            return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpperInvariant();
         }
     }
 }
