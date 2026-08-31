@@ -28,7 +28,7 @@ namespace AdvanceCRM.Common.Calendar
         public string Severity { get; set; } // "error", "warning"
     }
 
-    /// <summary>One person whose birthday falls on the day the calendar is showing.</summary>
+    /// <summary>One person whose birthday falls within the month the calendar is currently showing.</summary>
     public class BirthdayItem
     {
         public int UserId { get; set; }
@@ -37,8 +37,14 @@ namespace AdvanceCRM.Common.Calendar
         public string Initials { get; set; }
         /// <summary>Their team, when they have one - the same label the header shows.</summary>
         public string Department { get; set; }
-        /// <summary>The age they turn today, or null when the birth year is not known.</summary>
+        /// <summary>The age they turn that year, or null when the birth year is not known.</summary>
         public int? Age { get; set; }
+        /// <summary>Day of the displayed month (1-31) this birthday lands on.</summary>
+        public int Day { get; set; }
+        /// <summary>Formatted date within the displayed month, e.g. "Sep 1".</summary>
+        public string DateText { get; set; }
+        /// <summary>Whether this lands on the real, current calendar date (not just the month/day being browsed).</summary>
+        public bool IsToday { get; set; }
     }
 
     public class CalendarModel
@@ -76,10 +82,11 @@ namespace AdvanceCRM.Common.Calendar
         public List<UserRow> UserList { get; set; }
 
         /// <summary>
-        /// Everyone whose birthday is today, whichever user's attendance is on screen - the card
-        /// is about the team, not about the selected person.
+        /// Everyone whose birthday falls within the month currently on screen (Year/Month), not
+        /// just today - so browsing to September still surfaces whoever's birthday lands there,
+        /// whichever user's attendance is on screen (the card is about the team, not the person).
         /// </summary>
-        public List<BirthdayItem> TodaysBirthdays { get; set; }
+        public List<BirthdayItem> MonthBirthdays { get; set; }
 
         public CalendarModel()
         {
@@ -87,7 +94,7 @@ namespace AdvanceCRM.Common.Calendar
             DayDetails = new Dictionary<int, AttendanceDayDetail>();
             NeedsAttentionList = new List<NeedsAttentionItem>();
             AttendanceRecords = new List<AttendanceRow>();
-            TodaysBirthdays = new List<BirthdayItem>();
+            MonthBirthdays = new List<BirthdayItem>();
         }
     }
 }

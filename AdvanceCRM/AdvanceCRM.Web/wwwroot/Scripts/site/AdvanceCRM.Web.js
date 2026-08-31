@@ -61950,8 +61950,12 @@ var AdvanceCRM;
         // Open Campaign is added to by several users at once, so its section refreshes itself on this
         // interval — a domain added by anyone shows up for everyone without pressing anything.
         var VsLivePollMs = 10000;
-        // Wait for typing to settle before re-querying the server for a filter.
-        var VsFilterDebounceMs = 350;
+        // Wait for typing to settle before re-querying the server for the search box.
+        var VsSearchDebounceMs = 350;
+        // Row fields that are numeric/date rather than text — searching them with a "contains" match
+        // server-side either means nothing (Cpc) or the database may reject a LIKE against them, so
+        // the search box skips these columns per sheet.
+        var VsNonSearchableFields = ['SrNo', 'Cpc', 'Date', 'TimeStamp', 'Timestamp'];
         // Formats a date/time value as "hh:mm:ss AM/PM DD/MM/YYYY" (e.g. "01:24:27 AM 15/07/2026").
         // Falls back to the raw text if the value isn't a parseable date.
         function vsFormatTimeStamp(value) {
@@ -62001,8 +62005,6 @@ var AdvanceCRM;
                 this.msCampaignFilter = null;
                 this.msDateFrom = '';
                 this.msDateTo = '';
-                /** Master Suppression company-name filter (contains match, applied server-side). */
-                this.msCompany = '';
                 /** Sr No sort direction per sheet — descending (newest first) until the header is clicked. */
                 this.sortDesc = {};
                 this.element = element;
@@ -62179,6 +62181,7 @@ var AdvanceCRM;
                 // buttons (and Open Campaign's quick "Add domain" box) are not rendered at all.
                 var canAdd = Q.Authorization.hasPermission('Toolkit:VerifySheets:Add');
                 var toolbar = $('<div class="vs-toolbar"></div>').appendTo(el);
+                this.toolbarEl = toolbar;
                 $('<div class="vs-account-holder"></div>').appendTo(toolbar);
                 $('<div class="vs-campaign-holder"></div>').appendTo(toolbar);
                 // One dropdown drives both jobs: the checkbox shows/hides a sheet's section, and the
@@ -62223,14 +62226,21 @@ var AdvanceCRM;
                             _this.loadSheet(shown);
                     }
                 });
-                // Search box: filters the already-loaded rows of every visible sheet, matching
-                // the term anywhere inside any displayed column.
+                // Search box: re-queries every visible sheet on the server, matching the term against
+                // any of its text columns — so a hit further down a big sheet than the loaded page
+                // is still found, not just the rows already sitting in the browser.
                 var searchWrap = $('<div class="vs-search"></div>').appendTo(toolbar);
                 this.searchInput = $('<input type="text" class="vs-search-input" placeholder="Search all sheets…">')
                     .appendTo(searchWrap)
                     .on('input', function () {
-                    _this.searchTerm = String(_this.searchInput.val() || '').trim().toLowerCase();
-                    _this.renderAllLoaded();
+                    // Debounced so a re-query fires once the user stops typing.
+                    var v = String(_this.searchInput.val() || '').trim().toLowerCase();
+                    if (_this.searchTimer)
+                        clearTimeout(_this.searchTimer);
+                    _this.searchTimer = setTimeout(function () {
+                        _this.searchTerm = v;
+                        _this.loadAll();
+                    }, VsSearchDebounceMs);
                 });
                 $('<button type="button" class="vs-export-btn"><i class="fa fa-download"></i> Export to Excel</button>')
                     .appendTo(toolbar)
@@ -62285,18 +62295,6 @@ var AdvanceCRM;
                     // later, once the account editor exists to cascade from.
                     if (s.key === 'MasterSuppression') {
                         var msFilter = $('<div class="vs-ms-filter"></div>').appendTo(head);
-                        $('<span class="vs-ms-label">Company</span>').appendTo(msFilter);
-                        $('<input type="text" class="vs-ms-company" placeholder="Contains…">').appendTo(msFilter)
-                            .on('input', function (e) {
-                            // Debounced so a re-query fires once the user stops typing.
-                            var v = String($(e.target).val() || '');
-                            if (_this.msCompanyTimer)
-                                clearTimeout(_this.msCompanyTimer);
-                            _this.msCompanyTimer = setTimeout(function () {
-                                _this.msCompany = v.trim();
-                                _this.loadSheet(s);
-                            }, VsFilterDebounceMs);
-                        });
                         $('<span class="vs-ms-label">Campaign</span>').appendTo(msFilter);
                         _this.msCampaignHolder = $('<span class="vs-ms-campaign"></span>').appendTo(msFilter);
                         $('<span class="vs-ms-label">Date</span>').appendTo(msFilter);
@@ -62380,31 +62378,37 @@ var AdvanceCRM;
                 }
                 // Seed each section with its own "what's missing" message.
                 this.loadAll();
+                // The sticky toolbar must sit just below the site's own fixed top navbar, not at the
+                // very top of the scroll area (which is where that navbar already sits, on top of
+                // everything else) - measured live rather than a guessed pixel value, since the navbar's
+                // real height here includes the Punch In / Break buttons and varies by screen width.
+                this.syncToolbarOffset();
+                $(window).on('resize', function () { return _this.syncToolbarOffset(); });
+            };
+            /** Pins the toolbar's sticky offset to the fixed header's actual rendered height. */
+            VerifySheetsPage.prototype.syncToolbarOffset = function () {
+                if (!this.toolbarEl)
+                    return;
+                var header = document.querySelector('.main-header');
+                var height = header ? header.getBoundingClientRect().height : 0;
+                this.toolbarEl.css('top', height + 'px');
             };
             /** Resets the Master Suppression Campaign + Date filters back to "all". */
             VerifySheetsPage.prototype.clearMsFilter = function (sheet) {
                 this.msCampaignFilter = null;
                 this.msDateFrom = '';
                 this.msDateTo = '';
-                this.msCompany = '';
-                if (this.msCompanyTimer)
-                    clearTimeout(this.msCompanyTimer);
                 if (this.msCampaignEditor)
                     this.msCampaignEditor.value = null;
                 this.element.find('.vs-ms-date').val('');
-                this.element.find('.vs-ms-company').val('');
                 this.loadSheet(sheet);
             };
             /**
-             * Server-side criteria for the Master Suppression Company + Date filters. The date "to"
-             * bound is exclusive on the next day so the whole selected day is included regardless of
-             * its time part.
+             * Server-side criteria for the Master Suppression Date filter. The "to" bound is exclusive
+             * on the next day so the whole selected day is included regardless of its time part.
              */
             VerifySheetsPage.prototype.msDateCriteria = function () {
                 var crit = null;
-                // Company name is a "contains" match, so it filters the whole table server-side.
-                if (this.msCompany)
-                    crit = [Serenity.Criteria('CompanyName'), 'like', '%' + this.msCompany + '%'];
                 if (this.msDateFrom) {
                     var from = [Serenity.Criteria('Date'), '>=', this.msDateFrom];
                     crit = crit ? Serenity.Criteria.and(crit, from) : from;
@@ -62417,6 +62421,24 @@ var AdvanceCRM;
                     var upper = [Serenity.Criteria('Date'), '<', next];
                     crit = crit ? Serenity.Criteria.and(crit, upper) : upper;
                 }
+                return crit;
+            };
+            /**
+             * Server-side "contains" criteria for the search box, OR-ed across every text column the
+             * sheet displays — so a match is found no matter where in the full table it sits, not just
+             * within the bounded page already loaded into the browser.
+             */
+            VerifySheetsPage.prototype.searchCriteria = function (sheet) {
+                var _this = this;
+                if (!this.searchTerm)
+                    return null;
+                var crit = null;
+                sheet.columns.forEach(function (c) {
+                    if (VsNonSearchableFields.indexOf(c.field) >= 0)
+                        return;
+                    var term = [Serenity.Criteria(c.field), 'like', '%' + _this.searchTerm + '%'];
+                    crit = crit ? Serenity.Criteria.or(crit, term) : term;
+                });
                 return crit;
             };
             /** Collapses/expands one section's body; the header (with its count) stays visible. */
@@ -62558,14 +62580,6 @@ var AdvanceCRM;
                 }
                 return false;
             };
-            /** Re-renders from the cache — the search box never re-queries the server. */
-            VerifySheetsPage.prototype.renderAllLoaded = function () {
-                var _this = this;
-                this.sheets.forEach(function (s) {
-                    if (_this.visible[s.key] && _this.loaded[s.key])
-                        _this.renderSheet(s);
-                });
-            };
             /**
              * Account-scoped sheets (Master Suppression) only need a Master Account, so they load as
              * soon as one is picked — no Campaign required. Campaign-scoped sheets still wait for a
@@ -62659,11 +62673,21 @@ var AdvanceCRM;
                 // Ask for joined view columns (usernames, account numbers) — omitted by default.
                 if (sheet.includeColumns)
                     request.IncludeColumns = sheet.includeColumns;
+                // Combine the sheet's own filters (Master Suppression's Date range) with the search
+                // box's criteria — both run on the server against the whole table.
+                var critParts = [];
                 if (sheet.key === 'MasterSuppression') {
-                    var crit = this.msDateCriteria();
-                    if (crit)
-                        request.Criteria = crit;
+                    var msCrit = this.msDateCriteria();
+                    if (msCrit)
+                        critParts.push(msCrit);
                 }
+                var searchCrit = this.searchCriteria(sheet);
+                if (searchCrit)
+                    critParts.push(searchCrit);
+                if (critParts.length === 1)
+                    request.Criteria = critParts[0];
+                else if (critParts.length > 1)
+                    request.Criteria = Serenity.Criteria.and.apply(Serenity.Criteria, critParts);
                 sheet.list(request, function (response) {
                     _this.loaded[sheet.key] = response.Entities || [];
                     // TotalCount is the real row count on the server (we only fetched a page of it).
@@ -62694,6 +62718,9 @@ var AdvanceCRM;
                 // The server's real row count — the loaded page may be only a slice of it.
                 var total = this.totals[sheet.key] != null ? this.totals[sheet.key] : all.length;
                 var sec = this.element.find('.vs-section[data-key="' + sheet.key + '"]');
+                // While searching, only the modules that actually contain a match stay on screen —
+                // the rest hide themselves until the search box is cleared.
+                sec.toggle(!this.searchTerm || entities.length > 0);
                 // While searching, show how much of the loaded page is being hidden.
                 sec.find('.vs-count').text(this.searchTerm
                     ? entities.length + ' / ' + total

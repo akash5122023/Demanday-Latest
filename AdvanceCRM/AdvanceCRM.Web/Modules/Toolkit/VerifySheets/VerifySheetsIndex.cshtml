@@ -7,7 +7,14 @@
     .verify-sheets-page { padding: 18px 22px; }
 
     .verify-sheets-page .vs-toolbar {
-        display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 22px;
+        display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 -22px 22px;
+        padding: 12px 22px; position: sticky; z-index: 30; background: #fff;
+        box-shadow: 0 2px 8px rgba(20,40,80,.06);
+        /* The page's own top navbar is position:fixed with a much higher z-index, so sticking at
+           top:0 would tuck this bar underneath it instead of below it. VerifySheets.ts measures the
+           navbar's real rendered height (it varies - Punch In/Break buttons, responsive wrapping)
+           and overrides this with an inline style; 50px here is only the fallback before that runs. */
+        top: 50px;
     }
     .verify-sheets-page .vs-campaign-holder .select2-container { min-width: 240px; }
     .verify-sheets-page .vs-campaign-holder input { min-width: 240px; }

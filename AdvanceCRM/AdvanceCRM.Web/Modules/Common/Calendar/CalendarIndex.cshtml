@@ -305,6 +305,16 @@
             transform: translateX(-50%);
         }
 
+        /* Marks a date within the displayed month whose birthday falls there, whichever month
+           is being browsed - not only the real, current day. */
+        .day-birthday-badge {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            font-size: 13px;
+            line-height: 1;
+        }
+
         /* Cell Types */
         .cell-present { background: #dcfce7; border: 1px solid #bbf7d0; }
         .cell-present .day-dot { background: #16a34a; }
@@ -539,6 +549,11 @@
             font-size: 11px; font-weight: 700; color: #be185d;
             background: #fce7f3; border-radius: 20px; padding: 2px 9px; white-space: nowrap;
         }
+        .birthday-today-tag {
+            font-size: 10px; font-weight: 700; color: #16a34a;
+            background: #dcfce7; border-radius: 20px; padding: 1px 8px; white-space: nowrap;
+            margin-left: 6px;
+        }
     </style>
 }
 
@@ -687,6 +702,9 @@
                             int daysInMonth = DateTime.DaysInMonth(Model.Year, Model.Month);
                             int dayCounter = 1;
                             int totalCells = (int)Math.Ceiling((startDayOfWeek + daysInMonth) / 7.0) * 7;
+                            var birthdaysByDay = Model.MonthBirthdays
+                                .GroupBy(b => b.Day)
+                                .ToDictionary(g => g.Key, g => g.ToList());
                         }
 
                         @for (int cell = 0; cell < totalCells; cell++)
@@ -704,8 +722,9 @@
                             {
                                 var detail = Model.DayDetails.ContainsKey(dayCounter) ? Model.DayDetails[dayCounter] : null;
                                 var cellClass = detail != null ? $"cell-{detail.StatusCssClass}" : "cell-none";
+                                var dayBirthdays = birthdaysByDay.ContainsKey(dayCounter) ? birthdaysByDay[dayCounter] : null;
 
-                                <td class="day-cell @cellClass" 
+                                <td class="day-cell @cellClass"
                                     data-day="@dayCounter"
                                     data-date="@(detail?.DateFormatted ?? "")"
                                     data-status="@(detail?.Status ?? "")"
@@ -717,6 +736,10 @@
                                     data-earlyexit="@(detail?.EarlyExit ?? "--")"
                                     onclick="showDayDetail(this, event)">
                                     <span class="day-number">@dayCounter</span>
+                                    @if (dayBirthdays != null)
+                                    {
+                                        <span class="day-birthday-badge" title="@("🎂 " + string.Join(", ", dayBirthdays.Select(b => b.Name)))">🎂</span>
+                                    }
                                     <span class="day-dot"></span>
                                 </td>
                                 dayCounter++;
@@ -808,27 +831,28 @@
 
 
 
-            <!-- Today's Birthdays: everyone in the company whose Date of Birth falls today,
-                 whichever user's attendance is being viewed. -->
+            <!-- Birthdays: everyone in the company whose Date of Birth falls within the month
+                 currently on screen (not just today), whichever user's attendance is being viewed. -->
             <div class="sidebar-card">
-                <h4 class="sidebar-card-title"><i class="fa fa-birthday-cake" style="color: #db2777;"></i> Today&rsquo;s Birthdays</h4>
-                @if (Model.TodaysBirthdays != null && Model.TodaysBirthdays.Any())
+                <h4 class="sidebar-card-title"><i class="fa fa-birthday-cake" style="color: #db2777;"></i> Birthdays in @Model.MonthName</h4>
+                @if (Model.MonthBirthdays != null && Model.MonthBirthdays.Any())
                 {
                     <div class="birthday-list">
-                        @foreach (var b in Model.TodaysBirthdays)
+                        @foreach (var b in Model.MonthBirthdays)
                         {
                             <div class="birthday-item">
                                 <span class="birthday-avatar">@b.Initials</span>
                                 <span class="birthday-meta">
                                     <span class="birthday-name">@b.Name</span>
                                     <span class="birthday-sub">
+                                        @b.DateText
                                         @if (!string.IsNullOrWhiteSpace(b.Department))
                                         {
-                                            @b.Department
+                                            @:• @b.Department
                                         }
-                                        else
+                                        @if (b.IsToday)
                                         {
-                                            <text>Wish them a happy birthday</text>
+                                            <span class="birthday-today-tag">Today</span>
                                         }
                                     </span>
                                 </span>
@@ -842,7 +866,7 @@
                 }
                 else
                 {
-                    <div style="font-size: 12px; color: #94a3b8;">No birthdays today.</div>
+                    <div style="font-size: 12px; color: #94a3b8;">No birthdays this month.</div>
                 }
             </div>
 

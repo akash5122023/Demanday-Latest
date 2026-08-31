@@ -1,9 +1,9 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface DemandayVerificationForm {
-        AgentName: Serenity.StringEditor;
-        CdqaComments: _Ext.HardCodedLookupEditor;
         MasterAccountId: Serenity.LookupEditor;
         CampaignId: Serenity.LookupEditor;
+        AgentName: Serenity.StringEditor;
+        CdqaComments: _Ext.HardCodedLookupEditor;
         CompanyName: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
@@ -28,28 +28,28 @@
                 DemandayVerificationForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.StringEditor;
-                var w1 = _Ext.HardCodedLookupEditor;
-                var w2 = s.LookupEditor;
+                var w0 = s.LookupEditor;
+                var w1 = s.StringEditor;
+                var w2 = _Ext.HardCodedLookupEditor;
                 var w3 = s.EmailEditor;
                 var w4 = s.DateTimeEditor;
 
                 Q.initFormType(DemandayVerificationForm, [
-                    'AgentName', w0,
-                    'CdqaComments', w1,
-                    'MasterAccountId', w2,
-                    'CampaignId', w2,
-                    'CompanyName', w0,
-                    'FirstName', w0,
-                    'LastName', w0,
-                    'Title', w0,
+                    'MasterAccountId', w0,
+                    'CampaignId', w0,
+                    'AgentName', w1,
+                    'CdqaComments', w2,
+                    'CompanyName', w1,
+                    'FirstName', w1,
+                    'LastName', w1,
+                    'Title', w1,
                     'Email', w3,
                     'Date', w4,
-                    'WorkPhone', w0,
-                    'Alternate01', w0,
-                    'Alternate02', w0,
-                    'ProfileLink', w0,
-                    'OwnerId', w2
+                    'WorkPhone', w1,
+                    'Alternate01', w1,
+                    'Alternate02', w1,
+                    'ProfileLink', w1,
+                    'OwnerId', w0
                 ]);
             }
         }

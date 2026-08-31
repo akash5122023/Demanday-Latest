@@ -63,7 +63,7 @@ namespace AdvanceCRM.Common.Calendar
                     .OrderBy(u.DisplayName));
 
                 model.UserList = userList;
-                model.TodaysBirthdays = BuildTodaysBirthdays(userList, now);
+                model.MonthBirthdays = BuildMonthBirthdays(userList, targetYear, targetMonth, now);
 
                 int targetUserId = (userId.HasValue && userId.Value > 0) ? userId.Value : loggedInUserId;
                 model.TargetUserId = targetUserId;
@@ -289,27 +289,33 @@ namespace AdvanceCRM.Common.Calendar
         }
 
         /// <summary>
-        /// Everyone from the same active-user list the page already loaded whose birthday falls on
-        /// <paramref name="today"/>. Only the day and month are compared - the birth year is used
-        /// for the age, and is ignored when it is missing or in the future.
+        /// Everyone from the same active-user list the page already loaded whose birthday falls
+        /// somewhere within <paramref name="year"/>/<paramref name="month"/> - the month currently
+        /// on screen, not necessarily the real "today". The birth year is used for the age, and is
+        /// ignored when it is missing or in the future relative to the displayed year.
         /// </summary>
-        private static List<BirthdayItem> BuildTodaysBirthdays(List<UserRow> users, DateTime today)
+        private static List<BirthdayItem> BuildMonthBirthdays(List<UserRow> users, int year, int month, DateTime now)
         {
             var result = new List<BirthdayItem>();
             if (users == null)
                 return result;
+
+            int daysInMonth = DateTime.DaysInMonth(year, month);
 
             foreach (var user in users)
             {
                 if (!user.DateOfBirth.HasValue)
                     continue;
 
-                if (!IsBirthdayOn(user.DateOfBirth.Value, today))
+                var birthDay = BirthdayDayInMonth(user.DateOfBirth.Value, month, daysInMonth);
+                if (!birthDay.HasValue)
                     continue;
 
+                var birthdayDate = new DateTime(year, month, birthDay.Value);
+
                 int? age = null;
-                if (user.DateOfBirth.Value.Year > 1 && user.DateOfBirth.Value.Year <= today.Year)
-                    age = today.Year - user.DateOfBirth.Value.Year;
+                if (user.DateOfBirth.Value.Year > 1 && user.DateOfBirth.Value.Year <= year)
+                    age = year - user.DateOfBirth.Value.Year;
 
                 var name = !string.IsNullOrWhiteSpace(user.DisplayName)
                     ? user.DisplayName.Trim()
@@ -321,28 +327,36 @@ namespace AdvanceCRM.Common.Calendar
                     Name = name,
                     Initials = InitialsOf(name),
                     Department = user.TeamsTeamName,
-                    Age = age
+                    Age = age,
+                    Day = birthDay.Value,
+                    DateText = birthdayDate.ToString("MMM d", CultureInfo.InvariantCulture),
+                    IsToday = birthdayDate.Date == now.Date
                 });
             }
 
             return result
-                .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x.Day)
+                .ThenBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
 
         /// <summary>
-        /// Whether a date of birth lands on the given day. Someone born on 29 February has no
-        /// birthday at all in an ordinary year, so theirs is kept on 28 February rather than
-        /// disappearing for three years out of four.
+        /// Which day of the given month this birth date lands on, or null when it doesn't occur in
+        /// that month at all. Someone born on 29 February has no birthday in a non-leap February,
+        /// so theirs is kept on the 28th rather than disappearing three years out of four.
         /// </summary>
-        private static bool IsBirthdayOn(DateTime dateOfBirth, DateTime today)
+        private static int? BirthdayDayInMonth(DateTime dateOfBirth, int month, int daysInMonth)
         {
-            if (dateOfBirth.Month == today.Month && dateOfBirth.Day == today.Day)
-                return true;
+            if (dateOfBirth.Month != month)
+                return null;
 
-            return dateOfBirth.Month == 2 && dateOfBirth.Day == 29 &&
-                   today.Month == 2 && today.Day == 28 &&
-                   !DateTime.IsLeapYear(today.Year);
+            if (dateOfBirth.Day <= daysInMonth)
+                return dateOfBirth.Day;
+
+            if (dateOfBirth.Day == 29 && month == 2)
+                return 28;
+
+            return null;
         }
 
         /// <summary>Up to two letters for the avatar circle, e.g. "Akash Dudhe" -> "AD".</summary>
