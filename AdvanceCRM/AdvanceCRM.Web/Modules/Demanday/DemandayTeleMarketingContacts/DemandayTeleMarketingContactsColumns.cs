@@ -92,6 +92,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String ZipCode { get; set; }
         [QuickFilter]
         public String Country { get; set; }
+        [QuickFilter]
         public string CompanyEmployeeSize { get; set; }
         [QuickFilter]
         public String Industry { get; set; }

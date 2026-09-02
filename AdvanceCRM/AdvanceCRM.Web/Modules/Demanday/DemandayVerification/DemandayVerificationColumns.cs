@@ -25,6 +25,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }
+        [QuickFilter]
         public String Title { get; set; }
         public String Email { get; set; }
         public String WorkPhone { get; set; }

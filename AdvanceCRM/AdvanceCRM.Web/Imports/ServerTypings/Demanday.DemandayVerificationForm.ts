@@ -3,7 +3,7 @@
         MasterAccountId: Serenity.LookupEditor;
         CampaignId: Serenity.LookupEditor;
         AgentName: Serenity.StringEditor;
-        CdqaComments: _Ext.HardCodedLookupEditor;
+        CdqaComments: Serenity.StringEditor;
         CompanyName: Serenity.StringEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
@@ -30,21 +30,20 @@
                 var s = Serenity;
                 var w0 = s.LookupEditor;
                 var w1 = s.StringEditor;
-                var w2 = _Ext.HardCodedLookupEditor;
-                var w3 = s.EmailEditor;
-                var w4 = s.DateTimeEditor;
+                var w2 = s.EmailEditor;
+                var w3 = s.DateTimeEditor;
 
                 Q.initFormType(DemandayVerificationForm, [
                     'MasterAccountId', w0,
                     'CampaignId', w0,
                     'AgentName', w1,
-                    'CdqaComments', w2,
+                    'CdqaComments', w1,
                     'CompanyName', w1,
                     'FirstName', w1,
                     'LastName', w1,
                     'Title', w1,
-                    'Email', w3,
-                    'Date', w4,
+                    'Email', w2,
+                    'Date', w3,
                     'WorkPhone', w1,
                     'Alternate01', w1,
                     'Alternate02', w1,

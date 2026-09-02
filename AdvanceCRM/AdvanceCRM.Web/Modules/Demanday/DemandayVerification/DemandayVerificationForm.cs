@@ -23,8 +23,6 @@ namespace AdvanceCRM.Demanday.Forms
         public String AgentName { get; set; }
 
         [HalfWidth]
-        [EditorType("_Ext.HardCodedLookupEditor")]
-        [EditorOption("sourceCSV", "Company Confirm,Voice Mail,Ringing,Not Found,Not Working,Invalid Number")]
         public String CdqaComments { get; set; }
 
         

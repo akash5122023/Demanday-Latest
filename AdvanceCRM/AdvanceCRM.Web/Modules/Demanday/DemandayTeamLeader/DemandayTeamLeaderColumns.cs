@@ -21,6 +21,7 @@ namespace AdvanceCRM.Demanday.Columns
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
         public String LastName { get; set; }
+        [QuickFilter]
         public String Title { get; set; }
         [QuickFilter]
         public String Email { get; set; }
@@ -36,11 +37,13 @@ namespace AdvanceCRM.Demanday.Columns
         public String ZipCode { get; set; }
         [QuickFilter]
         public String Country { get; set; }
+        [QuickFilter]
         public String Industry { get; set; }
         public String SubIndustry { get; set; }
         public string ZoomInfoIndustry { get; set; }
         public string ZoomInfoEmployeeSize { get; set; }
         public String Revenue { get; set; }
+        [QuickFilter]
         public String CompanyEmployeeSize { get; set; }
         public String ProfileLink { get; set; }
         public String CompanyLink { get; set; }

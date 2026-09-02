@@ -102,6 +102,7 @@ namespace AdvanceCRM.Demanday.Columns
         public string CompanyLink { get; set; }
         public string RevenueLink { get; set; }
 
+        [QuickFilter]
         public string CompanyEmployeeSize { get; set; }
         public string EmailFormat { get; set; }
         public string AdressLink { get; set; }
