@@ -3,8 +3,9 @@ using System;
 
 namespace AdvanceCRM.Toolkit
 {
-    // The user picks a Campaign in the dialog and uploads a file of suppression rows;
-    // every imported row is tagged with that Campaign (and its parent Master Account).
+    // The user can pick a Campaign in the dialog as the default every row falls back to; a row
+    // may instead (or also) name its own Master Account Id / Campaign Id column, created
+    // automatically if it doesn't already exist.
     public class ClientSupressionExcelImportRequest : ServiceRequest
     {
         public String FileName { get; set; }

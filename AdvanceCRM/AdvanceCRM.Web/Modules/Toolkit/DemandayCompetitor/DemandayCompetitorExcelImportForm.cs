@@ -8,7 +8,9 @@ namespace AdvanceCRM.Toolkit.Forms
     [FormScript("Toolkit.DemandayCompetitorExcelImport")]
     public class DemandayCompetitorExcelImportForm
     {
-        [LookupEditor("Masters.DemandayCampaignId"), Required]
+        // Optional: a row can instead name its own Campaign Id / Master Account Id column,
+        // which is created automatically if it doesn't already exist.
+        [LookupEditor("Masters.DemandayCampaignId")]
         public Int32? CampaignId { get; set; }
 
         [FileUploadEditor(DisplayFileName = true), Required]

@@ -31,25 +31,29 @@ namespace AdvanceCRM.Toolkit
                 {
                     var worksheet = package.Workbook.Worksheets.Add("DemandaySpecs");
 
-                    // Sr No is the upsert key on import; the rest are the ExcelImportable fields.
+                    // Sr No is the upsert key on import; Master Account Id / Campaign Id are
+                    // optional per-row overrides of the dialog's Campaign; the rest are the
+                    // ExcelImportable fields.
                     var headers = new string[]
                     {
                         "Sr No",                       // 1
-                        "Order ID",                    // 2
-                        "Job Title",                   // 3
-                        "Job Level",                   // 4
-                        "Job Function",                // 5
-                        "Industry",                    // 6
-                        "Company Employee Size",       // 7
-                        "Annual Revenue",              // 8
-                        "Exclude Company",             // 9
-                        "Address",                     // 10
-                        "City",                        // 11
-                        "State",                       // 12
-                        "Zip Code",                    // 13
-                        "Country",                     // 14
-                        "Comments",                    // 15
-                        "Additional Notes"             // 16
+                        "Master Account Id",           // 2
+                        "Campaign Id",                 // 3
+                        "Order ID",                    // 4
+                        "Job Title",                   // 5
+                        "Job Level",                   // 6
+                        "Job Function",                // 7
+                        "Industry",                    // 8
+                        "Company Employee Size",       // 9
+                        "Annual Revenue",              // 10
+                        "Exclude Company",             // 11
+                        "Address",                     // 12
+                        "City",                        // 13
+                        "State",                       // 14
+                        "Zip Code",                    // 15
+                        "Country",                     // 16
+                        "Comments",                    // 17
+                        "Additional Notes"             // 18
                     };
 
                     for (int col = 1; col <= headers.Length; col++)
@@ -60,21 +64,23 @@ namespace AdvanceCRM.Toolkit
 
                     // Set column widths for readability
                     worksheet.Column(1).Width = 12;
-                    worksheet.Column(2).Width = 20;
-                    worksheet.Column(3).Width = 12;
-                    worksheet.Column(4).Width = 18;
-                    worksheet.Column(5).Width = 15;
-                    worksheet.Column(6).Width = 22;
+                    worksheet.Column(2).Width = 16;
+                    worksheet.Column(3).Width = 14;
+                    worksheet.Column(4).Width = 20;
+                    worksheet.Column(5).Width = 12;
+                    worksheet.Column(6).Width = 18;
                     worksheet.Column(7).Width = 15;
-                    worksheet.Column(8).Width = 20;
-                    worksheet.Column(9).Width = 22;
-                    worksheet.Column(10).Width = 12;
-                    worksheet.Column(11).Width = 12;
-                    worksheet.Column(12).Width = 10;
+                    worksheet.Column(8).Width = 22;
+                    worksheet.Column(9).Width = 15;
+                    worksheet.Column(10).Width = 20;
+                    worksheet.Column(11).Width = 22;
+                    worksheet.Column(12).Width = 12;
                     worksheet.Column(13).Width = 12;
-                    worksheet.Column(14).Width = 20;
-                    worksheet.Column(15).Width = 20;
+                    worksheet.Column(14).Width = 10;
+                    worksheet.Column(15).Width = 12;
                     worksheet.Column(16).Width = 20;
+                    worksheet.Column(17).Width = 20;
+                    worksheet.Column(18).Width = 20;
 
                     // Ensure directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(templatePath));
@@ -92,8 +98,8 @@ namespace AdvanceCRM.Toolkit
         }
 
         // True when the template already matches the current layout: cell A1 reads "Sr No" and
-        // the "Exclude Company" column (I1) is present. An older template fails the second check
-        // and gets regenerated with the new column.
+        // the "Campaign Id" (C1) and "Exclude Company" (K1) columns are present. An older
+        // template fails one of these checks and gets regenerated with the new columns.
         private static bool TemplateIsCurrent(string templatePath)
         {
             try
@@ -102,8 +108,10 @@ namespace AdvanceCRM.Toolkit
                 {
                     var ws = package.Workbook.Worksheets.Count > 0 ? package.Workbook.Worksheets[0] : null;
                     var first = ws?.Cells[1, 1].Value?.ToString()?.Trim();
-                    var excludeCompany = ws?.Cells[1, 9].Value?.ToString()?.Trim();
+                    var campaignId = ws?.Cells[1, 3].Value?.ToString()?.Trim();
+                    var excludeCompany = ws?.Cells[1, 11].Value?.ToString()?.Trim();
                     return string.Equals(first, "Sr No", StringComparison.OrdinalIgnoreCase) &&
+                           string.Equals(campaignId, "Campaign Id", StringComparison.OrdinalIgnoreCase) &&
                            string.Equals(excludeCompany, "Exclude Company", StringComparison.OrdinalIgnoreCase);
                 }
             }

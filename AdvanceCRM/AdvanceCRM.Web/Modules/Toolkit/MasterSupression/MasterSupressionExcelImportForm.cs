@@ -8,7 +8,9 @@ namespace AdvanceCRM.Toolkit.Forms
     [FormScript("Toolkit.MasterSupressionExcelImport")]
     public class MasterSupressionExcelImportForm
     {
-        [LookupEditor("Masters.DemandayMasterAccount"), Required]
+        // Optional: a row can instead name its own Account Number column, which is created
+        // automatically if it doesn't already exist.
+        [LookupEditor("Masters.DemandayMasterAccount")]
         [DisplayName("Master Account")]
         public Int32? MasterAccountId { get; set; }
 

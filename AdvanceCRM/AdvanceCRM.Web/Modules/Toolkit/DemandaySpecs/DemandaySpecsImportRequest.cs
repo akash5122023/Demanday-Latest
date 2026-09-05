@@ -3,8 +3,9 @@ using System;
 
 namespace AdvanceCRM.Toolkit
 {
-    // The Team Leader picks a Campaign in the dialog and uploads a file of specification rows;
-    // every imported row is tagged with that Campaign (and its parent Master Account).
+    // The Team Leader can pick a Campaign in the dialog as the default every row falls back to;
+    // a row may instead (or also) name its own Master Account Id / Campaign Id column, created
+    // automatically if it doesn't already exist.
     public class DemandaySpecsExcelImportRequest : ServiceRequest
     {
         public String FileName { get; set; }

@@ -33,11 +33,8 @@ namespace AdvanceCRM.Toolkit {
                         if (!this.validateBeforeSave())
                             return;
 
-                        if (this.form.CampaignId.value == null || Q.isEmptyOrNull(this.form.CampaignId.value)) {
-                            Q.notifyError("Please select a Campaign!");
-                            return;
-                        }
-
+                        // Campaign is optional here - a row without one can instead name its own
+                        // Master Account Id / Campaign Id column in the sheet.
                         if (this.form.FileName.value == null ||
                             Q.isEmptyOrNull(this.form.FileName.value.Filename)) {
                             Q.notifyError("Please select a file!");

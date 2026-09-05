@@ -133,19 +133,22 @@ namespace AdvanceCRM.Toolkit.Endpoints
                 throw new ArgumentNullException(nameof(request));
             if (string.IsNullOrWhiteSpace(request.FileName))
                 throw new ArgumentNullException(nameof(request.FileName));
-            if (request.MasterAccountId == null)
-                throw new ValidationError("Please select a Master Account before importing");
 
             UploadHelper.CheckFileNameSecurity(request.FileName);
 
             if (!request.FileName.StartsWith("temporary/", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentOutOfRangeException("filename");
 
-            // The Master Account picked in the dialog is the fallback for rows that leave the
-            // Account Number cell blank.
-            var defaultAccount = uow.Connection.TryById<DemandayMasterAccountRow>(request.MasterAccountId.Value);
-            if (defaultAccount == null)
-                throw new ValidationError("Selected master account was not found");
+            // The Master Account in the dialog is optional: when picked, it is the fallback for
+            // rows that leave the Account Number cell blank; a row with neither is rejected below
+            // instead of crashing the whole import.
+            DemandayMasterAccountRow defaultAccount = null;
+            if (request.MasterAccountId != null)
+            {
+                defaultAccount = uow.Connection.TryById<DemandayMasterAccountRow>(request.MasterAccountId.Value);
+                if (defaultAccount == null)
+                    throw new ValidationError("Selected master account was not found");
+            }
 
             // A row may name a different account, so one file can span several of them.
             var accountLookup = uow.Connection.List<DemandayMasterAccountRow>()
@@ -191,35 +194,75 @@ namespace AdvanceCRM.Toolkit.Endpoints
                 .GroupBy(r => r.MasterAccountId.Value)
                 .ToDictionary(g => g.Key, g => g.Max(r => r.SrNo.Value));
 
+            // Campaign Id is an optional link (this import is account-wise, not campaign-wise),
+            // keyed by (Master Account, Campaign Id text) since the same Campaign Id can be reused
+            // across different accounts (see UX_DemandayCampaignId_Account_CampaignId).
+            var campaignLookup = uow.Connection.List<DemandayCampaignIdRow>()
+                .Where(c => c.Id.HasValue && c.DemandayMasterAccountId.HasValue && !string.IsNullOrWhiteSpace(c.CampaignId))
+                .GroupBy(c => (AccountId: c.DemandayMasterAccountId.Value, CampaignId: c.CampaignId.Trim().ToUpperInvariant()))
+                .ToDictionary(g => g.Key, g => g.First().Id.Value);
+
+            // Neither Account Number nor Campaign Id has to already exist - a row naming one that
+            // doesn't is created on the fly (Campaign cascades under its resolved Master Account).
+            int ResolveOrCreateAccount(string accountNumber)
+            {
+                var key = accountNumber.Trim();
+                if (accountLookup.TryGetValue(key, out var existingId))
+                    return existingId;
+                var newId = (int)uow.Connection.InsertAndGetID(new DemandayMasterAccountRow { AccountNumber = key });
+                accountLookup[key] = newId;
+                return newId;
+            }
+
+            int ResolveOrCreateCampaign(int accountId, string campaignIdText)
+            {
+                var key = (AccountId: accountId, CampaignId: campaignIdText.Trim().ToUpperInvariant());
+                if (campaignLookup.TryGetValue(key, out var existingId))
+                    return existingId;
+                var newId = (int)uow.Connection.InsertAndGetID(new DemandayCampaignIdRow
+                {
+                    CampaignId = campaignIdText.Trim(),
+                    DemandayMasterAccountId = accountId
+                });
+                campaignLookup[key] = newId;
+                return newId;
+            }
+
             for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
             {
                 try
                 {
                     var srNoStr = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
                     var accountNumber = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
-                    var companyName = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
-                    var firstName = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
-                    var lastName = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
-                    var email = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
-                    var domain = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
-                    var dateStr = Convert.ToString(worksheet.Cells[row, 8].Value ?? "").Trim();
+                    var campaignIdStr = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
+                    var companyName = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
+                    var firstName = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
+                    var lastName = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
+                    var email = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
+                    var domain = Convert.ToString(worksheet.Cells[row, 8].Value ?? "").Trim();
+                    var dateStr = Convert.ToString(worksheet.Cells[row, 9].Value ?? "").Trim();
 
                     if (string.IsNullOrEmpty(accountNumber) && string.IsNullOrEmpty(companyName) &&
                         string.IsNullOrEmpty(email))
                         continue;
 
-                    // Blank Account Number falls back to the dialog's Master Account; a named one
-                    // must resolve, otherwise the row would silently land under the wrong account.
-                    var masterAccountId = defaultAccount.Id.Value;
+                    // Blank Account Number falls back to the dialog's Master Account (if one was
+                    // picked); a named one that doesn't exist yet is created automatically.
+                    int? masterAccountId = defaultAccount?.Id;
                     if (!string.IsNullOrEmpty(accountNumber))
+                        masterAccountId = ResolveOrCreateAccount(accountNumber);
+
+                    if (!masterAccountId.HasValue)
                     {
-                        if (!accountLookup.TryGetValue(accountNumber, out var resolved))
-                        {
-                            response.ErrorList.Add($"Row {row}: Account Number '{accountNumber}' not found");
-                            continue;
-                        }
-                        masterAccountId = resolved;
+                        response.ErrorList.Add($"Row {row}: Select a Master Account in the dialog, or fill in the Account Number column");
+                        continue;
                     }
+
+                    // Campaign Id is optional; when present it is created under the row's Master
+                    // Account if it doesn't already exist there.
+                    int? campaignId = null;
+                    if (!string.IsNullOrEmpty(campaignIdStr))
+                        campaignId = ResolveOrCreateCampaign(masterAccountId.Value, campaignIdStr);
 
                     int? srNo = null;
                     if (!string.IsNullOrEmpty(srNoStr))
@@ -234,13 +277,13 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
                     // Numbering is tracked per account, so account B's blank cells start at 1 even
                     // when account A already runs into the thousands.
-                    maxSrNoByAccount.TryGetValue(masterAccountId, out var accountMaxSrNo);
+                    maxSrNoByAccount.TryGetValue(masterAccountId.Value, out var accountMaxSrNo);
 
                     if (!srNo.HasValue)
                         srNo = accountMaxSrNo + 1;
 
                     if (srNo.Value > accountMaxSrNo)
-                        maxSrNoByAccount[masterAccountId] = srNo.Value;
+                        maxSrNoByAccount[masterAccountId.Value] = srNo.Value;
 
                     DateTime? date = null;
                     if (!string.IsNullOrEmpty(dateStr))
@@ -251,9 +294,10 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
                     var data = new MyRow
                     {
-                        // Account-wise import: no campaign is involved.
+                        // Account-wise import: Campaign is an optional per-row link.
                         SrNo = srNo,
                         MasterAccountId = masterAccountId,
+                        CampaignId = campaignId,
                         CompanyName = companyName,
                         FirstName = firstName,
                         LastName = lastName,
@@ -262,7 +306,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
                         Date = date
                     };
 
-                    var upsertKey = (AccountId: masterAccountId, SrNo: srNo.Value);
+                    var upsertKey = (AccountId: masterAccountId.Value, SrNo: srNo.Value);
 
                     if (idByAccountAndSrNo.TryGetValue(upsertKey, out var existingId))
                     {

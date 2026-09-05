@@ -3,8 +3,9 @@ using System;
 
 namespace AdvanceCRM.Toolkit
 {
-    // Master Suppression is uploaded account-wise. The user picks a Master Account in the dialog,
-    // which every row falls back to; a row may name its own Account Number to override it, so one
+    // Master Suppression is uploaded account-wise. The user can pick a Master Account in the
+    // dialog as the default every row falls back to; a row may instead (or also) name its own
+    // Account Number / Campaign Id, created automatically if it doesn't already exist, so one
     // file can carry data for several accounts.
     public class MasterSupressionExcelImportRequest : ServiceRequest
     {

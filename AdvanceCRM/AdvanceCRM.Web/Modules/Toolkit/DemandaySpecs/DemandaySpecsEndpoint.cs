@@ -117,19 +117,22 @@ namespace AdvanceCRM.Toolkit.Endpoints
                 throw new ArgumentNullException(nameof(request));
             if (string.IsNullOrWhiteSpace(request.FileName))
                 throw new ArgumentNullException(nameof(request.FileName));
-            if (request.CampaignId == null)
-                throw new ValidationError("Please select a Campaign before importing");
 
             UploadHelper.CheckFileNameSecurity(request.FileName);
 
             if (!request.FileName.StartsWith("temporary/", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentOutOfRangeException("filename");
 
-            // The Team Leader selects the Campaign in the dialog; every imported row is tagged with it
-            // (and its parent Master Account).
-            var campaign = uow.Connection.TryById<DemandayCampaignIdRow>(request.CampaignId.Value);
-            if (campaign == null)
-                throw new ValidationError("Selected campaign was not found");
+            // The Campaign in the dialog is optional: when picked, it is the default every row
+            // without its own Master Account Id / Campaign Id column falls back to; a row that
+            // has neither is rejected below instead of crashing the whole import.
+            DemandayCampaignIdRow campaign = null;
+            if (request.CampaignId != null)
+            {
+                campaign = uow.Connection.TryById<DemandayCampaignIdRow>(request.CampaignId.Value);
+                if (campaign == null)
+                    throw new ValidationError("Selected campaign was not found");
+            }
 
             string physicalPath = UploadHelper.DbFilePath(request.FileName);
 
@@ -150,40 +153,121 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
             int ownerId = Convert.ToInt32(Context.User.GetIdentifier());
 
-            // SrNo (column 1) is the upsert key: a row whose SrNo already exists is updated, not
-            // duplicated. Preload the existing SrNo -> Id map once so the loop stays a single query each.
-            var idBySrNo = uow.Connection.List<MyRow>(q => q
-                    .Select(MyRow.Fields.Id).Select(MyRow.Fields.SrNo)
-                    .Where(new Criteria(MyRow.Fields.SrNo).IsNotNull()))
-                .Where(r => r.SrNo.HasValue)
-                .GroupBy(r => r.SrNo.Value)
+            // A row may name a different campaign / account than the one picked in the dialog;
+            // neither has to already exist - a name that doesn't resolve is created on the fly
+            // (Campaign cascades under its resolved Master Account).
+            var accountLookup = uow.Connection.List<DemandayMasterAccountRow>()
+                .Where(a => !string.IsNullOrWhiteSpace(a.AccountNumber) && a.Id.HasValue)
+                .GroupBy(a => a.AccountNumber.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().Id.Value, StringComparer.OrdinalIgnoreCase);
+
+            var campaignLookup = uow.Connection.List<DemandayCampaignIdRow>()
+                .Where(c => c.Id.HasValue && c.DemandayMasterAccountId.HasValue && !string.IsNullOrWhiteSpace(c.CampaignId))
+                .GroupBy(c => (AccountId: c.DemandayMasterAccountId.Value, CampaignId: c.CampaignId.Trim().ToUpperInvariant()))
                 .ToDictionary(g => g.Key, g => g.First().Id.Value);
-            int maxSrNo = idBySrNo.Count == 0 ? 0 : idBySrNo.Keys.Max();
+
+            int ResolveOrCreateAccount(string accountNumber)
+            {
+                var key = accountNumber.Trim();
+                if (accountLookup.TryGetValue(key, out var existingId))
+                    return existingId;
+                var newId = (int)uow.Connection.InsertAndGetID(new DemandayMasterAccountRow { AccountNumber = key });
+                accountLookup[key] = newId;
+                return newId;
+            }
+
+            int ResolveOrCreateCampaign(int accountId, string campaignIdText)
+            {
+                var key = (AccountId: accountId, CampaignId: campaignIdText.Trim().ToUpperInvariant());
+                if (campaignLookup.TryGetValue(key, out var existingId))
+                    return existingId;
+                var newId = (int)uow.Connection.InsertAndGetID(new DemandayCampaignIdRow
+                {
+                    CampaignId = campaignIdText.Trim(),
+                    DemandayMasterAccountId = accountId
+                });
+                campaignLookup[key] = newId;
+                return newId;
+            }
+
+            // SrNo (column 1) is the upsert key, but only within the same Master Account +
+            // Campaign: two campaigns may legitimately reuse the same SrNo, so the key is
+            // (MasterAccountId, CampaignId, SrNo), not SrNo alone. That also lets every
+            // campaign restart its own numbering at 1.
+            var existingRows = uow.Connection.List<MyRow>(q => q
+                    .Select(MyRow.Fields.Id).Select(MyRow.Fields.SrNo)
+                    .Select(MyRow.Fields.MasterAccountId).Select(MyRow.Fields.CampaignId)
+                    .Where(new Criteria(MyRow.Fields.SrNo).IsNotNull()))
+                .Where(r => r.SrNo.HasValue && r.MasterAccountId.HasValue && r.CampaignId.HasValue)
+                .ToList();
+
+            var idByScopeAndSrNo = existingRows
+                .GroupBy(r => (AccountId: r.MasterAccountId.Value, CampaignId: r.CampaignId.Value, SrNo: r.SrNo.Value))
+                .ToDictionary(g => g.Key, g => g.First().Id.Value);
+
+            // Highest SrNo per campaign, so a blank SrNo cell continues that campaign's own run.
+            var maxSrNoByScope = existingRows
+                .GroupBy(r => (AccountId: r.MasterAccountId.Value, CampaignId: r.CampaignId.Value))
+                .ToDictionary(g => g.Key, g => g.Max(r => r.SrNo.Value));
 
             for (var row = 2; row <= worksheet.Dimension.End.Row; row++)
             {
                 try
                 {
                     var srNoStr = Convert.ToString(worksheet.Cells[row, 1].Value ?? "").Trim();
-                    var orderId = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
-                    var jobTitle = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
-                    var jobLevel = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
-                    var jobFunction = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
-                    var industry = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
-                    var companyEmployeeSize = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
-                    var annualRevenue = Convert.ToString(worksheet.Cells[row, 8].Value ?? "").Trim();
-                    var excludeCompany = Convert.ToString(worksheet.Cells[row, 9].Value ?? "").Trim();
-                    var address = Convert.ToString(worksheet.Cells[row, 10].Value ?? "").Trim();
-                    var city = Convert.ToString(worksheet.Cells[row, 11].Value ?? "").Trim();
-                    var state = Convert.ToString(worksheet.Cells[row, 12].Value ?? "").Trim();
-                    var zipCode = Convert.ToString(worksheet.Cells[row, 13].Value ?? "").Trim();
-                    var country = Convert.ToString(worksheet.Cells[row, 14].Value ?? "").Trim();
-                    var comments = Convert.ToString(worksheet.Cells[row, 15].Value ?? "").Trim();
-                    var additionalNotes = Convert.ToString(worksheet.Cells[row, 16].Value ?? "").Trim();
+                    var masterAccountIdStr = Convert.ToString(worksheet.Cells[row, 2].Value ?? "").Trim();
+                    var campaignIdStr = Convert.ToString(worksheet.Cells[row, 3].Value ?? "").Trim();
+                    var orderId = Convert.ToString(worksheet.Cells[row, 4].Value ?? "").Trim();
+                    var jobTitle = Convert.ToString(worksheet.Cells[row, 5].Value ?? "").Trim();
+                    var jobLevel = Convert.ToString(worksheet.Cells[row, 6].Value ?? "").Trim();
+                    var jobFunction = Convert.ToString(worksheet.Cells[row, 7].Value ?? "").Trim();
+                    var industry = Convert.ToString(worksheet.Cells[row, 8].Value ?? "").Trim();
+                    var companyEmployeeSize = Convert.ToString(worksheet.Cells[row, 9].Value ?? "").Trim();
+                    var annualRevenue = Convert.ToString(worksheet.Cells[row, 10].Value ?? "").Trim();
+                    var excludeCompany = Convert.ToString(worksheet.Cells[row, 11].Value ?? "").Trim();
+                    var address = Convert.ToString(worksheet.Cells[row, 12].Value ?? "").Trim();
+                    var city = Convert.ToString(worksheet.Cells[row, 13].Value ?? "").Trim();
+                    var state = Convert.ToString(worksheet.Cells[row, 14].Value ?? "").Trim();
+                    var zipCode = Convert.ToString(worksheet.Cells[row, 15].Value ?? "").Trim();
+                    var country = Convert.ToString(worksheet.Cells[row, 16].Value ?? "").Trim();
+                    var comments = Convert.ToString(worksheet.Cells[row, 17].Value ?? "").Trim();
+                    var additionalNotes = Convert.ToString(worksheet.Cells[row, 18].Value ?? "").Trim();
 
                     // Skip empty rows (at least JobTitle or OrderId should have a value)
                     if (string.IsNullOrEmpty(jobTitle) && string.IsNullOrEmpty(orderId))
                         continue;
+
+                    // Blank Campaign Id falls back to the dialog's Campaign (if one was picked); a
+                    // named one that doesn't exist yet is created automatically under its Master
+                    // Account (also created automatically when the Master Account Id cell names a
+                    // new one).
+                    var rowCampaignId = campaign?.Id;
+                    var rowMasterAccountId = campaign?.DemandayMasterAccountId;
+                    if (!string.IsNullOrEmpty(campaignIdStr))
+                    {
+                        int? scopeAccountId = string.IsNullOrEmpty(masterAccountIdStr)
+                            ? rowMasterAccountId
+                            : ResolveOrCreateAccount(masterAccountIdStr);
+                        if (!scopeAccountId.HasValue)
+                        {
+                            response.ErrorList.Add($"Row {row}: Campaign Id '{campaignIdStr}' needs a Master Account Id (no Campaign was selected in the dialog either)");
+                            continue;
+                        }
+                        rowMasterAccountId = scopeAccountId;
+                        rowCampaignId = ResolveOrCreateCampaign(scopeAccountId.Value, campaignIdStr);
+                    }
+                    else if (!string.IsNullOrEmpty(masterAccountIdStr))
+                    {
+                        rowMasterAccountId = ResolveOrCreateAccount(masterAccountIdStr);
+                    }
+
+                    if (!rowCampaignId.HasValue || !rowMasterAccountId.HasValue)
+                    {
+                        response.ErrorList.Add($"Row {row}: Select a Campaign in the dialog, or fill in the Master Account Id / Campaign Id columns");
+                        continue;
+                    }
+
+                    var scopeKey = (AccountId: rowMasterAccountId.Value, CampaignId: rowCampaignId.Value);
 
                     int? srNo = null;
                     if (!string.IsNullOrEmpty(srNoStr))
@@ -196,11 +280,15 @@ namespace AdvanceCRM.Toolkit.Endpoints
                         srNo = parsedSrNo;
                     }
 
-                    // Blank SrNo => a brand-new row gets the next free number.
+                    // Numbering is tracked per campaign, so a different campaign's blank cells
+                    // start at 1 even when another campaign already runs into the thousands.
+                    maxSrNoByScope.TryGetValue(scopeKey, out var scopeMaxSrNo);
+
                     if (!srNo.HasValue)
-                        srNo = ++maxSrNo;
-                    else if (srNo.Value > maxSrNo)
-                        maxSrNo = srNo.Value;
+                        srNo = scopeMaxSrNo + 1;
+
+                    if (srNo.Value > scopeMaxSrNo)
+                        maxSrNoByScope[scopeKey] = srNo.Value;
 
                     var data = new MyRow
                     {
@@ -220,11 +308,13 @@ namespace AdvanceCRM.Toolkit.Endpoints
                         Country = country,
                         Comments = comments,
                         AdditionalNotes = additionalNotes,
-                        CampaignId = campaign.Id,
-                        MasterAccountId = campaign.DemandayMasterAccountId
+                        CampaignId = rowCampaignId,
+                        MasterAccountId = rowMasterAccountId
                     };
 
-                    if (idBySrNo.TryGetValue(srNo.Value, out var existingId))
+                    var upsertKey = (AccountId: scopeKey.AccountId, CampaignId: scopeKey.CampaignId, SrNo: srNo.Value);
+
+                    if (idByScopeAndSrNo.TryGetValue(upsertKey, out var existingId))
                     {
                         // UpdateById only writes assigned fields, so OwnerId (creator) is preserved.
                         data.Id = existingId;
@@ -235,7 +325,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
                     {
                         data.OwnerId = ownerId;
                         var newId = (int)uow.Connection.InsertAndGetID(data);
-                        idBySrNo[srNo.Value] = newId;
+                        idByScopeAndSrNo[upsertKey] = newId;
                         response.Inserted++;
                     }
                 }

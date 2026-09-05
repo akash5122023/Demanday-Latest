@@ -37,11 +37,8 @@ namespace AdvanceCRM.Toolkit {
                         if (!this.validateBeforeSave())
                             return;
 
-                        if (this.form.MasterAccountId.value == null || Q.isEmptyOrNull(this.form.MasterAccountId.value)) {
-                            Q.notifyError("Please select a Master Account!");
-                            return;
-                        }
-
+                        // Master Account is optional here - a row without one can instead name
+                        // its own Account Number column in the sheet.
                         if (this.form.FileName.value == null ||
                             Q.isEmptyOrNull(this.form.FileName.value.Filename)) {
                             Q.notifyError("Please select a file!");

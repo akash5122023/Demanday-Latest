@@ -23,23 +23,26 @@ namespace AdvanceCRM.Toolkit
         {
             "Sr No",          // 1 – upsert key; blank gets the next number
             "Account Number", // 2 – blank falls back to the dialog's Master Account
-            "Company Name",   // 3
-            "First Name",     // 4
-            "Last Name",      // 5
-            "Email",          // 6
-            "Domain",         // 7
-            "Date"            // 8
+            "Campaign Id",    // 3 – optional; blank leaves the row unlinked to a Campaign
+            "Company Name",   // 4
+            "First Name",     // 5
+            "Last Name",      // 6
+            "Email",          // 7
+            "Domain",         // 8
+            "Date"            // 9
         };
 
         public static readonly string[] ClientSupressionHeaders =
         {
-            "Sr No",          // 1 – upsert key; blank gets the next number
-            "Company Name",   // 2
-            "First Name",     // 3
-            "Last Name",      // 4
-            "Email",          // 5
-            "Domain",         // 6
-            "Date"            // 7
+            "Sr No",              // 1 – upsert key; blank gets the next number
+            "Master Account Id",  // 2 – blank falls back to the dialog's Campaign
+            "Campaign Id",        // 3 – blank falls back to the dialog's Campaign
+            "Company Name",       // 4
+            "First Name",         // 5
+            "Last Name",          // 6
+            "Email",              // 7
+            "Domain",             // 8
+            "Date"                // 9
         };
 
         public static void EnsureTemplateExists(string templatePath, string sheetName, string[] headers)
