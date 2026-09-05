@@ -254,7 +254,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
                     if (!masterAccountId.HasValue)
                     {
-                        response.ErrorList.Add($"Row {row}: Select a Master Account in the dialog, or fill in the Account Number column");
+                        response.ErrorList.Add($"Row {row}: Select a Master Account in the dialog, or fill in the Master Account ID column");
                         continue;
                     }
 

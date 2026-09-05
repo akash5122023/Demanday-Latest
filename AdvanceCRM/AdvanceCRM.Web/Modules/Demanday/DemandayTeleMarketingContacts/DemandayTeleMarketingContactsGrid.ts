@@ -26,7 +26,7 @@ namespace AdvanceCRM.Demanday {
         protected getPagerOptions() {
             let opt = super.getPagerOptions();
             opt.rowsPerPage = 100000;
-            opt.rowsPerPageOptions = [20, 100, 500, 2500, 100000];
+            opt.rowsPerPageOptions = [2500, 5000, 10000, 50000, 100000];
             return opt;
         }
 

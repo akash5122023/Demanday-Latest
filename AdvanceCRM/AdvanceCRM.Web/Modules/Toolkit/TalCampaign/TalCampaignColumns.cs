@@ -22,7 +22,9 @@ namespace AdvanceCRM.Toolkit.Columns
         public String Cpc { get; set; }
         public String AgentDisplayName { get; set; }
         public String Reason { get; set; }
+        [DisplayName("Master Account ID")]
         public String MasterAccountAccountNumber { get; set; }
+        [DisplayName("Campaign ID")]
         public String CampaignIdValue { get; set; }
         public String OwnerUsername { get; set; }
     }

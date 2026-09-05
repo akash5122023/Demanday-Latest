@@ -37,8 +37,8 @@ namespace AdvanceCRM.Toolkit
                     var headers = new string[]
                     {
                         "Sr No",                       // 1
-                        "Master Account Id",           // 2
-                        "Campaign Id",                 // 3
+                        "Master Account ID",           // 2
+                        "Campaign ID",                 // 3
                         "Order ID",                    // 4
                         "Job Title",                   // 5
                         "Job Level",                   // 6
@@ -98,7 +98,7 @@ namespace AdvanceCRM.Toolkit
         }
 
         // True when the template already matches the current layout: cell A1 reads "Sr No" and
-        // the "Campaign Id" (C1) and "Exclude Company" (K1) columns are present. An older
+        // the "Campaign ID" (C1) and "Exclude Company" (K1) columns are present. An older
         // template fails one of these checks and gets regenerated with the new columns.
         private static bool TemplateIsCurrent(string templatePath)
         {
@@ -111,7 +111,7 @@ namespace AdvanceCRM.Toolkit
                     var campaignId = ws?.Cells[1, 3].Value?.ToString()?.Trim();
                     var excludeCompany = ws?.Cells[1, 11].Value?.ToString()?.Trim();
                     return string.Equals(first, "Sr No", StringComparison.OrdinalIgnoreCase) &&
-                           string.Equals(campaignId, "Campaign Id", StringComparison.OrdinalIgnoreCase) &&
+                           string.Equals(campaignId, "Campaign ID", StringComparison.OrdinalIgnoreCase) &&
                            string.Equals(excludeCompany, "Exclude Company", StringComparison.OrdinalIgnoreCase);
                 }
             }

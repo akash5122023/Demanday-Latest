@@ -125,36 +125,41 @@ namespace AdvanceCRM.Toolkit.Pages
             // Only export modules that the current user has permission to access.
             var modules = new List<(string Name, string[] Headers, IEnumerable<object[]> Rows)>();
 
+            // Specification / EmailSuppression / CompetitorList / TALList / OpenCampaign / DNCContact
+            // are all single-campaign exports, so every row of theirs carries the same Master
+            // Account Id / Campaign Id - purely informational (and round-trippable on import), not
+            // a per-row value like Master Suppression's own Campaign ID column below.
             if (HasSubmodulePermission("Toolkit:VerifySheets:Specification", "DemandaySpecs:Read"))
             {
                 modules.Add(("Specification",
-                    new[] { "Sr No", "Order ID", "Job Title", "Job Level", "Job Function", "Industry",
-                        "Company Employee Size", "Annual Revenue", "Exclude Company", "Address", "City", "State",
-                        "Zip Code", "Country", "Comments", "Additional Notes" },
-                    specs.Select(r => new object[] { r.SrNo, r.OrderId, r.JobTitle, r.JobLevel, r.JobFunction,
-                        r.Industry, r.CompanyEmployeeSize, r.AnnualRevenue, r.ExcludeCompany, r.Address, r.City, r.State,
-                        r.ZipCode, r.Country, r.Comments, r.AdditionalNotes })));
+                    new[] { "Sr No", "Master Account ID", "Campaign ID", "Order ID", "Job Title", "Job Level",
+                        "Job Function", "Industry", "Company Employee Size", "Annual Revenue", "Exclude Company",
+                        "Address", "City", "State", "Zip Code", "Country", "Comments", "Additional Notes" },
+                    specs.Select(r => new object[] { r.SrNo, masterAccountNo, campaignText, r.OrderId, r.JobTitle, r.JobLevel,
+                        r.JobFunction, r.Industry, r.CompanyEmployeeSize, r.AnnualRevenue, r.ExcludeCompany, r.Address, r.City,
+                        r.State, r.ZipCode, r.Country, r.Comments, r.AdditionalNotes })));
             }
 
             if (HasSubmodulePermission("Toolkit:VerifySheets:EmailSuppression", "ClientSupression:Read"))
             {
                 modules.Add(("EmailSuppression",
-                    new[] { "Sr No", "Company Name", "First Name", "Last Name", "Email", "Domain" },
-                    emailSupp.Select(r => new object[] { r.SrNo, r.CompanyName, r.FirstName, r.LastName, r.Email, r.Domain })));
+                    new[] { "Sr No", "Master Account ID", "Campaign ID", "Company Name", "First Name", "Last Name", "Email", "Domain", "Date" },
+                    emailSupp.Select(r => new object[] { r.SrNo, masterAccountNo, campaignText, r.CompanyName, r.FirstName, r.LastName, r.Email, r.Domain,
+                        r.Date?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) })));
             }
 
             if (HasSubmodulePermission("Toolkit:VerifySheets:Competitor", "DemandayCompetitor:Read"))
             {
                 modules.Add(("CompetitorList",
-                    new[] { "Sr No", "Company Name", "Domain", "Email", "CPC" },
-                    competitors.Select(r => new object[] { r.SrNo, r.CompanyName, r.Domain, r.Email, r.Cpc })));
+                    new[] { "Sr No", "Master Account ID", "Campaign ID", "Company Name", "Domain", "Email", "CPC" },
+                    competitors.Select(r => new object[] { r.SrNo, masterAccountNo, campaignText, r.CompanyName, r.Domain, r.Email, r.Cpc })));
             }
 
             if (HasSubmodulePermission("TalCampaign:Read", "Toolkit:VerifySheets:TalList"))
             {
                 modules.Add(("TALList",
-                    new[] { "Sr No", "Company Name", "Domain", "Agent", "Reason", "CPC" },
-                    tal.Select(r => new object[] { r.SrNo, r.CompanyName, r.Domain,
+                    new[] { "Sr No", "Master Account ID", "Campaign ID", "Company Name", "Domain", "Agent", "Reason", "CPC" },
+                    tal.Select(r => new object[] { r.SrNo, masterAccountNo, campaignText, r.CompanyName, r.Domain,
                         r.AgentsName != null && userNames.ContainsKey(r.AgentsName.Value) ? userNames[r.AgentsName.Value] : null,
                         r.Reason, r.Cpc })));
             }
@@ -162,8 +167,8 @@ namespace AdvanceCRM.Toolkit.Pages
             if (HasSubmodulePermission("Toolkit:VerifySheets:MasterSuppression", "MasterSupression:Read"))
             {
                 modules.Add(("MasterSuppression",
-                    new[] { "Sr No", "Campaign ID", "Company Name", "First Name", "Last Name", "Email", "Domain", "Date" },
-                    masterSupp.Select(r => new object[] { r.SrNo,
+                    new[] { "Sr No", "Master Account ID", "Campaign ID", "Company Name", "First Name", "Last Name", "Email", "Domain", "Date" },
+                    masterSupp.Select(r => new object[] { r.SrNo, masterAccountNo,
                         r.CampaignId != null && campaignTexts.ContainsKey(r.CampaignId.Value) ? campaignTexts[r.CampaignId.Value] : null,
                         r.CompanyName, r.FirstName, r.LastName, r.Email, r.Domain,
                         r.Date?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) })));
@@ -172,8 +177,8 @@ namespace AdvanceCRM.Toolkit.Pages
             if (HasSubmodulePermission("Toolkit:VerifySheets:OpenCampaign", "OpenCampaign:Read"))
             {
                 modules.Add(("OpenCampaign",
-                    new[] { "Sr No", "Domain", "Demanday User", "Time Stamp" },
-                    openCampaign.Select(r => new object[] { r.SrNo, r.Domain,
+                    new[] { "Sr No", "Master Account ID", "Campaign ID", "Domain", "Demanday User", "Time Stamp" },
+                    openCampaign.Select(r => new object[] { r.SrNo, masterAccountNo, campaignText, r.Domain,
                         r.DemandayUserId != null && userNames.ContainsKey(r.DemandayUserId.Value) ? userNames[r.DemandayUserId.Value] : null,
                         r.TimeStamp })));
             }
@@ -181,8 +186,8 @@ namespace AdvanceCRM.Toolkit.Pages
             if (HasSubmodulePermission("Toolkit:VerifySheets:DNCContact", "DNCContacts:Read"))
             {
                 modules.Add(("DNCContact",
-                    new[] { "Sr No", "First Name", "Last Name", "Email", "DNC Status", "Number" },
-                    dncContacts.Select(r => new object[] { r.SrNo, r.FirstName, r.LastName, r.Email, r.DncStatus, r.Number })));
+                    new[] { "Sr No", "Master Account ID", "Campaign ID", "First Name", "Last Name", "Email", "DNC Status", "Number" },
+                    dncContacts.Select(r => new object[] { r.SrNo, masterAccountNo, campaignText, r.FirstName, r.LastName, r.Email, r.DncStatus, r.Number })));
             }
 
             // TM Enquiry mirrors the TM Enquiry module and is export-only — there is no import
@@ -305,6 +310,104 @@ namespace AdvanceCRM.Toolkit.Pages
 
         // DemandayCampaignId.CampaignId is nvarchar(15).
         private const int CampaignIdSize = 15;
+
+        // DemandayMasterAccount.AccountNumber is nvarchar(15).
+        private const int AccountNumberSize = 15;
+
+        // Loads every Master Account's Account Number -> Id, so a sheet's own Master Account Id
+        // column can resolve to an existing account without a lookup per row.
+        private static Dictionary<string, int> LoadAccountMap(SqlConnection sqlConn)
+        {
+            var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            using var cmd = NewCommand(sqlConn,
+                "SELECT [Id], [AccountNumber] FROM [dbo].[DemandayMasterAccount] " +
+                "WHERE [AccountNumber] IS NOT NULL AND LTRIM(RTRIM([AccountNumber])) <> ''");
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var text = reader.IsDBNull(1) ? null : reader.GetString(1).Trim();
+                if (!string.IsNullOrEmpty(text) && !map.ContainsKey(text))
+                    map[text] = reader.GetInt32(0);
+            }
+            return map;
+        }
+
+        // Registers an Account Number the sheet references but that doesn't exist yet, and returns
+        // its key. Re-checked inside the statement (not trusted from a map read earlier) so a
+        // second import running at the same time can never create the same Account Number twice.
+        private static int CreateAccount(SqlConnection sqlConn, string accountNumber, out bool created)
+        {
+            using var cmd = NewCommand(sqlConn, @"
+SET @created = 0;
+DECLARE @id INT = (SELECT TOP 1 [Id] FROM [dbo].[DemandayMasterAccount] WITH (UPDLOCK, HOLDLOCK)
+                   WHERE LTRIM(RTRIM([AccountNumber])) = @num);
+IF @id IS NULL
+BEGIN
+    INSERT INTO [dbo].[DemandayMasterAccount] ([AccountNumber]) VALUES (@num);
+    SET @id = CAST(SCOPE_IDENTITY() AS INT);
+    SET @created = 1;
+END
+SELECT @id;");
+            cmd.Parameters.AddWithValue("@num", accountNumber);
+            var createdParam = cmd.Parameters.Add("@created", SqlDbType.Bit);
+            createdParam.Direction = ParameterDirection.Output;
+            var id = Convert.ToInt32(cmd.ExecuteScalar());
+            created = createdParam.Value != DBNull.Value && Convert.ToBoolean(createdParam.Value);
+            return id;
+        }
+
+        // The Master Account a Campaign belongs to (0 if the campaign can't be found), used as the
+        // fallback default for sheets that only take a Campaign from the toolbar.
+        private static int GetCampaignMasterAccountId(SqlConnection sqlConn, int campaignId)
+        {
+            using var cmd = NewCommand(sqlConn,
+                "SELECT [DemandayMasterAccountId] FROM [dbo].[DemandayCampaignId] WHERE [Id] = @id");
+            cmd.Parameters.AddWithValue("@id", campaignId);
+            var v = cmd.ExecuteScalar();
+            return (v == null || v == DBNull.Value) ? 0 : Convert.ToInt32(v);
+        }
+
+        // Every sheet is single-scope: one import call is treated as belonging to one Master
+        // Account / Campaign, exactly like one export is. If the file carries its own "Master
+        // Account Id" / "Campaign Id" column with a value on the first data row, that overrides
+        // the toolbar's selection and is created automatically when it doesn't exist yet (Campaign
+        // cascades under its Master Account) - every row after that still shares this single
+        // resolved pair, so Sr No numbering/duplicate detection stays scoped exactly as before.
+        private static (int AccountId, int CampaignId, bool AccountCreated, bool CampaignCreated) ResolveImportScope(
+            SqlConnection sqlConn, ExcelWorksheet ws, Dictionary<string, int> map,
+            int defaultAccountId, int defaultCampaignId)
+        {
+            bool accountCreated = false, campaignCreated = false;
+            int accountId = defaultAccountId;
+
+            var accountText = ExcelImportHelper.GetText(ws, 2, map, "MasterAccountId", "Master Account ID", "Master Account Id");
+            if (!string.IsNullOrWhiteSpace(accountText))
+            {
+                var num = accountText.Trim();
+                if (num.Length > AccountNumberSize)
+                    num = num.Substring(0, AccountNumberSize);
+                var accountMap = LoadAccountMap(sqlConn);
+                if (!accountMap.TryGetValue(num, out accountId))
+                    accountId = CreateAccount(sqlConn, num, out accountCreated);
+            }
+
+            int campaignId = defaultCampaignId;
+            var campaignText = CleanCampaignText(ExcelImportHelper.GetText(
+                ws, 2, map, "CampaignId", "Campaign ID", "Campaign Id", "Campaign", "CampaignID", "Camp ID"));
+            if (!string.IsNullOrEmpty(campaignText))
+            {
+                if (campaignText.Length > CampaignIdSize)
+                    campaignText = campaignText.Substring(0, CampaignIdSize);
+                if (accountId > 0)
+                {
+                    var campaignMap = LoadCampaignMap(sqlConn, accountId);
+                    if (!campaignMap.TryGetValue(campaignText, out campaignId))
+                        campaignId = CreateCampaign(sqlConn, accountId, campaignText, out campaignCreated);
+                }
+            }
+
+            return (accountId, campaignId, accountCreated, campaignCreated);
+        }
 
         // Mirrors ExcelImportHelper's header normalisation so we can tell whether a column is
         // present at all (its own matcher is private).
@@ -520,7 +623,7 @@ SELECT @id;");
             if (!CanImportSheet(sheet))
                 return Content("You do not have permission to import into sheet: " + sheet, "text/plain");
 
-            int imported = 0, updated = 0, skipped = 0, campaignsCreated = 0, campaignsMatched = 0;
+            int imported = 0, updated = 0, skipped = 0, campaignsCreated = 0, campaignsMatched = 0, accountsCreated = 0;
             bool campaignHeaderFound = false, dateHeaderFound = false;
             try
             {
@@ -543,7 +646,12 @@ SELECT @id;");
                 if (sheet == "Specification")
                 {
                     const string table = "[dbo].[DemandaySpecs]";
+                    var scope = ResolveImportScope(sqlConn, ws, map, GetCampaignMasterAccountId(sqlConn, campaignId), campaignId);
+                    if (scope.AccountCreated) accountsCreated++;
+                    if (scope.CampaignCreated) campaignsCreated++;
+
                     batch.Columns.Add("SrNo", typeof(int));
+                    batch.Columns.Add("MasterAccountId", typeof(int));
                     batch.Columns.Add("CampaignId", typeof(int));
                     batch.Columns.Add("OrderId", typeof(long));
                     batch.Columns.Add("JobTitle", typeof(string));
@@ -573,7 +681,8 @@ SELECT @id;");
                         if (!hasSrNo && orderId == null && string.IsNullOrWhiteSpace(jobTitle)) { skipped++; continue; }
                         batch.Rows.Add(
                             BulkSrNo(ws, row, map, ref maxSrNo, seen),
-                            campaignId,
+                            scope.AccountId > 0 ? (object)scope.AccountId : DBNull.Value,
+                            scope.CampaignId > 0 ? (object)scope.CampaignId : DBNull.Value,
                             (object)orderId ?? DBNull.Value,
                             Clip(jobTitle, 500),
                             Clip(ExcelImportHelper.GetText(ws, row, map, "JobLevel", "Job Level"), 500),
@@ -597,13 +706,19 @@ SELECT @id;");
                 else if (sheet == "EmailSuppression")
                 {
                     const string table = "[dbo].[ClientSupression]";
+                    var scope = ResolveImportScope(sqlConn, ws, map, GetCampaignMasterAccountId(sqlConn, campaignId), campaignId);
+                    if (scope.AccountCreated) accountsCreated++;
+                    if (scope.CampaignCreated) campaignsCreated++;
+
                     batch.Columns.Add("SrNo", typeof(int));
+                    batch.Columns.Add("MasterAccountId", typeof(int));
                     batch.Columns.Add("CampaignId", typeof(int));
                     batch.Columns.Add("CompanyName", typeof(string));
                     batch.Columns.Add("FirstName", typeof(string));
                     batch.Columns.Add("LastName", typeof(string));
                     batch.Columns.Add("Email", typeof(string));
                     batch.Columns.Add("Domain", typeof(string));
+                    batch.Columns.Add("Date", typeof(DateTime));
 
                     int maxSrNo = GetMaxSrNo(sqlConn, table);
                     CreateStaging(sqlConn, table, batch);
@@ -615,14 +730,17 @@ SELECT @id;");
                         var company = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name");
                         var domain = ExcelImportHelper.GetText(ws, row, map, "Domain");
                         if (!hasSrNo && string.IsNullOrWhiteSpace(email) && string.IsNullOrWhiteSpace(company) && string.IsNullOrWhiteSpace(domain)) { skipped++; continue; }
+                        var date = ExcelImportHelper.GetDate(ws, row, map, "Date");
                         batch.Rows.Add(
                             BulkSrNo(ws, row, map, ref maxSrNo, seen),
-                            campaignId,
+                            scope.AccountId > 0 ? (object)scope.AccountId : DBNull.Value,
+                            scope.CampaignId > 0 ? (object)scope.CampaignId : DBNull.Value,
                             Clip(company, 200),
                             Clip(ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"), 100),
                             Clip(ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"), 100),
                             Clip(email, 200),
-                            Clip(domain, 50));
+                            Clip(domain, 50),
+                            (object)date ?? DBNull.Value);
                         if (batch.Rows.Count >= BulkBatchSize) FlushBatch(sqlConn, batch);
                     }
                     FlushBatch(sqlConn, batch);
@@ -631,7 +749,12 @@ SELECT @id;");
                 else if (sheet == "CompetitorList")
                 {
                     const string table = "[dbo].[DemandayCompetitor]";
+                    var scope = ResolveImportScope(sqlConn, ws, map, GetCampaignMasterAccountId(sqlConn, campaignId), campaignId);
+                    if (scope.AccountCreated) accountsCreated++;
+                    if (scope.CampaignCreated) campaignsCreated++;
+
                     batch.Columns.Add("SrNo", typeof(int));
+                    batch.Columns.Add("MasterAccountId", typeof(int));
                     batch.Columns.Add("CampaignId", typeof(int));
                     batch.Columns.Add("CompanyName", typeof(string));
                     batch.Columns.Add("Domain", typeof(string));
@@ -649,7 +772,8 @@ SELECT @id;");
                         if (!hasSrNo && string.IsNullOrWhiteSpace(domain) && string.IsNullOrWhiteSpace(company)) { skipped++; continue; }
                         batch.Rows.Add(
                             BulkSrNo(ws, row, map, ref maxSrNo, seen),
-                            campaignId,
+                            scope.AccountId > 0 ? (object)scope.AccountId : DBNull.Value,
+                            scope.CampaignId > 0 ? (object)scope.CampaignId : DBNull.Value,
                             Clip(company, 200),
                             Clip(domain, 50),
                             Clip(ExcelImportHelper.GetText(ws, row, map, "Email"), 200),
@@ -663,7 +787,12 @@ SELECT @id;");
                 else if (sheet == "TALList")
                 {
                     const string table = "[dbo].[TalCampaign]";
+                    var scope = ResolveImportScope(sqlConn, ws, map, GetCampaignMasterAccountId(sqlConn, campaignId), campaignId);
+                    if (scope.AccountCreated) accountsCreated++;
+                    if (scope.CampaignCreated) campaignsCreated++;
+
                     batch.Columns.Add("SrNo", typeof(int));
+                    batch.Columns.Add("MasterAccountId", typeof(int));
                     batch.Columns.Add("CampaignId", typeof(int));
                     batch.Columns.Add("CompanyName", typeof(string));
                     batch.Columns.Add("Domain", typeof(string));
@@ -684,7 +813,8 @@ SELECT @id;");
                         var agent = ExcelImportHelper.GetUserId(ws, row, map, connection, "Agent", "AgentsName", "Agent Name");
                         batch.Rows.Add(
                             BulkSrNo(ws, row, map, ref maxSrNo, seen),
-                            campaignId,
+                            scope.AccountId > 0 ? (object)scope.AccountId : DBNull.Value,
+                            scope.CampaignId > 0 ? (object)scope.CampaignId : DBNull.Value,
                             Clip(company, 200),
                             Clip(domain, 100),
                             (object)agent ?? DBNull.Value,
@@ -710,6 +840,26 @@ SELECT @id;");
                     batch.Columns.Add("Email", typeof(string));
                     batch.Columns.Add("Domain", typeof(string));
                     batch.Columns.Add("Date", typeof(DateTime));
+
+                    // The sheet carries its own "Master Account ID" on the first data row, which
+                    // overrides the toolbar's selection for the whole import (single-scope, like
+                    // the export it round-trips) and is created automatically when it doesn't
+                    // already exist.
+                    var accountIdText = ExcelImportHelper.GetText(ws, 2, map, "MasterAccountId", "Master Account ID", "Master Account Id");
+                    if (!string.IsNullOrWhiteSpace(accountIdText))
+                    {
+                        var num = accountIdText.Trim();
+                        if (num.Length > AccountNumberSize)
+                            num = num.Substring(0, AccountNumberSize);
+                        var accountMap = LoadAccountMap(sqlConn);
+                        if (accountMap.TryGetValue(num, out var resolvedAccountId))
+                            masterAccountId = resolvedAccountId;
+                        else
+                        {
+                            masterAccountId = CreateAccount(sqlConn, num, out var accountCreated);
+                            if (accountCreated) accountsCreated++;
+                        }
+                    }
 
                     // The sheet carries a Campaign ID per row (this sheet is account-wise, so it is
                     // not fixed by the toolbar). Resolve it once up front; it drives the section's
@@ -773,7 +923,12 @@ SELECT @id;");
                 else if (sheet == "OpenCampaign")
                 {
                     const string table = "[dbo].[OpenCampaign]";
+                    var scope = ResolveImportScope(sqlConn, ws, map, GetCampaignMasterAccountId(sqlConn, campaignId), campaignId);
+                    if (scope.AccountCreated) accountsCreated++;
+                    if (scope.CampaignCreated) campaignsCreated++;
+
                     batch.Columns.Add("SrNo", typeof(int));
+                    batch.Columns.Add("MasterAccountId", typeof(int));
                     batch.Columns.Add("CampaignId", typeof(int));
                     batch.Columns.Add("Domain", typeof(string));
 
@@ -787,7 +942,8 @@ SELECT @id;");
                         if (!hasSrNo && string.IsNullOrWhiteSpace(domain)) { skipped++; continue; }
                         batch.Rows.Add(
                             BulkSrNo(ws, row, map, ref maxSrNo, seen),
-                            campaignId,
+                            scope.AccountId > 0 ? (object)scope.AccountId : DBNull.Value,
+                            scope.CampaignId > 0 ? (object)scope.CampaignId : DBNull.Value,
                             Clip(domain, 100));
                         if (batch.Rows.Count >= BulkBatchSize) FlushBatch(sqlConn, batch);
                     }
@@ -797,6 +953,11 @@ SELECT @id;");
                 else if (sheet == "DNCContact")
                 {
                     const string table = "[dbo].[DNCContacts]";
+                    var scope = ResolveImportScope(sqlConn, ws, map,
+                        masterAccountId > 0 ? masterAccountId : GetCampaignMasterAccountId(sqlConn, campaignId), campaignId);
+                    if (scope.AccountCreated) accountsCreated++;
+                    if (scope.CampaignCreated) campaignsCreated++;
+
                     batch.Columns.Add("SrNo", typeof(int));
                     batch.Columns.Add("CampaignId", typeof(int));
                     batch.Columns.Add("MasterAccountId", typeof(int));
@@ -809,7 +970,7 @@ SELECT @id;");
                     // Sr No is scoped to the selected Campaign — two campaigns may each have Sr No 1,
                     // they are independent rows. Importing under a different campaign always inserts new
                     // rows; re-importing under the same campaign updates existing ones.
-                    int maxSrNo = GetMaxSrNo(sqlConn, table, "CampaignId", campaignId);
+                    int maxSrNo = GetMaxSrNo(sqlConn, table, "CampaignId", scope.CampaignId);
                     CreateStaging(sqlConn, table, batch);
                     for (int row = 2; row <= rowCount; row++)
                     {
@@ -822,8 +983,8 @@ SELECT @id;");
 
                         batch.Rows.Add(
                             BulkSrNo(ws, row, map, ref maxSrNo, seen),
-                            campaignId,
-                            masterAccountId > 0 ? (object)masterAccountId : DBNull.Value,
+                            scope.CampaignId > 0 ? (object)scope.CampaignId : DBNull.Value,
+                            scope.AccountId > 0 ? (object)scope.AccountId : DBNull.Value,
                             Clip(firstName, 100),
                             Clip(lastName, 100),
                             Clip(email, 200),
@@ -846,9 +1007,12 @@ SELECT @id;");
                 return Content("Import failed: " + ex.Message, "text/plain");
             }
 
-            // Campaigns were inserted with raw SQL, which bypasses Serenity's save pipeline — expire
-            // the row's cache group so the "Masters.DemandayCampaignId" lookup (and therefore the
-            // Campaign dropdowns) picks the new entries up straight away.
+            // Master Accounts / Campaigns were inserted with raw SQL, which bypasses Serenity's
+            // save pipeline — expire their cache groups so the "Masters.DemandayMasterAccount" /
+            // "Masters.DemandayCampaignId" lookups (and therefore their dropdowns) pick the new
+            // entries up straight away.
+            if (accountsCreated > 0)
+                cache?.ExpireGroupItems(Masters.DemandayMasterAccountRow.Fields.GenerationKey);
             if (campaignsCreated > 0)
                 cache?.ExpireGroupItems(DemandayCampaignIdRow.Fields.GenerationKey);
 
@@ -867,6 +1031,8 @@ SELECT @id;");
             }
             else if (campaignsCreated > 0)
                 summary += $" Created {campaignsCreated} new Campaign ID(s) under this Master Account.";
+            if (accountsCreated > 0)
+                summary += " Created a new Master Account for this import.";
             return Content(summary, "text/plain");
         }
 

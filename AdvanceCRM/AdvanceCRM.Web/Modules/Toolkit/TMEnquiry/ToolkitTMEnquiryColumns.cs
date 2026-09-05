@@ -20,6 +20,7 @@ namespace AdvanceCRM.Toolkit.Columns
         public String CompanyName { get; set; }
         [DisplayName("Campaign ID")]
         public String CampaignCampaignId { get; set; }
+        [DisplayName("Master Account ID")]
         public String MasterAccountAccountNumber { get; set; }
         [DisplayName("Team Leader")]
         public String TeamLeaderFirstName { get; set; }

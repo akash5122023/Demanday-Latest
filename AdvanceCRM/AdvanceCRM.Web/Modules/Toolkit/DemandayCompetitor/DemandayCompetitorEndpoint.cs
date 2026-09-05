@@ -96,7 +96,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
         [HttpPost, ServiceAuthorize("DemandayCompetitor:Import")]
         public ActionResult DownloadTemplate(IDbConnection connection, RetrieveRequest request)
         {
-            string[] headers = { "Sr No", "Master Account Id", "Campaign Id", "Company Name", "Domain", "Email", "CPC" };
+            string[] headers = { "Sr No", "Master Account ID", "Campaign ID", "Company Name", "Domain", "Email", "CPC" };
 
             using (var package = new ExcelPackage())
             {
@@ -251,7 +251,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
                             : ResolveOrCreateAccount(masterAccountIdStr);
                         if (!scopeAccountId.HasValue)
                         {
-                            response.ErrorList.Add($"Row {row}: Campaign Id '{campaignIdStr}' needs a Master Account Id (no Campaign was selected in the dialog either)");
+                            response.ErrorList.Add($"Row {row}: Campaign ID '{campaignIdStr}' needs a Master Account ID (no Campaign was selected in the dialog either)");
                             continue;
                         }
                         rowMasterAccountId = scopeAccountId;
@@ -264,7 +264,7 @@ namespace AdvanceCRM.Toolkit.Endpoints
 
                     if (!rowCampaignId.HasValue || !rowMasterAccountId.HasValue)
                     {
-                        response.ErrorList.Add($"Row {row}: Select a Campaign in the dialog, or fill in the Master Account Id / Campaign Id columns");
+                        response.ErrorList.Add($"Row {row}: Select a Campaign in the dialog, or fill in the Master Account ID / Campaign ID columns");
                         continue;
                     }
 

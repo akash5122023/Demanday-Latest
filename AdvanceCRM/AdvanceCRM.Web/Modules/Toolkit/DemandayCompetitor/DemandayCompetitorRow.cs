@@ -86,14 +86,14 @@ namespace AdvanceCRM.Toolkit
             set { Fields.OwnerId[this] = value; }
         }
 
-        [DisplayName("Master Account Account Number"), Expression("jMasterAccount.[AccountNumber]")]
+        [DisplayName("Master AccountID"), Expression("jMasterAccount.[AccountNumber]")]
         public String MasterAccountAccountNumber
         {
             get => fields.MasterAccountAccountNumber[this];
             set => fields.MasterAccountAccountNumber[this] = value;
         }
 
-        [DisplayName("Campaign Campaign Id"), Expression("jCampaign.[CampaignId]")]
+        [DisplayName("CampaignId"), Expression("jCampaign.[CampaignId]")]
         public String CampaignCampaignId
         {
             get => fields.CampaignCampaignId[this];

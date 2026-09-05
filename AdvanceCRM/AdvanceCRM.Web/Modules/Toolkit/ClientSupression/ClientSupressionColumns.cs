@@ -16,9 +16,9 @@ namespace AdvanceCRM.Toolkit.Columns
         public Int32 Id { get; set; }
         [DisplayName("Sr No"), AlignRight]
         public Int32 SrNo { get; set; }
-        [EditLink, DisplayName("Campaign Id")]
+        [EditLink, DisplayName("Campaign ID")]
         public String CampaignCampaignId { get; set; }
-        [DisplayName("Account Number")]
+        [DisplayName("Master Account ID")]
         public String MasterAccountAccountNumber { get; set; }
         public String CompanyName { get; set; }
         public String FirstName { get; set; }
