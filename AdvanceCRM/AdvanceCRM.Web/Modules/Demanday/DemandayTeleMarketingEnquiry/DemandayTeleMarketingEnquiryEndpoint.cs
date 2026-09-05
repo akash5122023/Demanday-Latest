@@ -72,7 +72,7 @@ namespace AdvanceCRM.Demanday.Endpoints
         }
 
         // Move the selected TM Enquiry records to the Team Leader module
-        // (copies the same fields and the QA details, then removes the original enquiry).
+        // (copies the same fields and the QA details; the original enquiry record is kept).
         [HttpPost, AuthorizeUpdate(typeof(MyRow))]
         public StandardResponse MoveToTeamLeader(IUnitOfWork uow, MoveToTeamLeaderRequest request,
             [FromServices] ITMEnquirySyncHandler tmEnquirySyncHandler)
@@ -141,9 +141,8 @@ namespace AdvanceCRM.Demanday.Endpoints
                         teamLeader.Id = Convert.ToInt32(newId);
                 }
 
-                // The enquiry now lives on as a Team Leader record, so this is the point at which
-                // it is copied into ToolkitTMEnquiry - keyed on the Team Leader row, because the
-                // enquiry itself is deleted a few lines below.
+                // The enquiry now also lives on as a Team Leader record, so this is the point at
+                // which it is copied into ToolkitTMEnquiry, keyed on the Team Leader row.
                 tmEnquirySyncHandler.SyncToTMEnquiry(enquiryConn, enquiry, teamLeader.Id ?? 0);
 
                 // Move QADetails from the enquiry to the new Team Leader record.
@@ -163,7 +162,6 @@ namespace AdvanceCRM.Demanday.Endpoints
                     enquiryConn.DeleteById<DemandayTeleMarketingEnquiryQADetailsRow>(qa.Id.Value);
                 }
 
-                enquiryConn.DeleteById<DemandayTeleMarketingEnquiryRow>(id);
                 response.Id = teamLeader.Id ?? 0;
             }
             response.Status = "Enquiry successfully moved to Team Leader!";
