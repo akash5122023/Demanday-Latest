@@ -28,6 +28,8 @@ namespace AdvanceCRM.Demanday.Columns
         [QuickFilter]
         public String Title { get; set; }
         public String Email { get; set; }
+        [QuickFilter]
+        public String Country { get; set; }
         public String WorkPhone { get; set; }
         public String Alternate01 { get; set; }
         public String Alternate02 { get; set; }

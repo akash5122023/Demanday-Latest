@@ -69,6 +69,20 @@
         MasterAccountId?: number;
         MasterAccountNo?: string;
         CampaignId?: string;
+        AccountTypeId?: number;
+        AccountTypeName?: string;
+        AccountStatusId?: number;
+        AccountStatusName?: string;
+        DispositionId?: number;
+        DispositionName?: string;
+        Comments?: string;
+        L1Meeting?: string;
+        OutreachModeId?: number;
+        OutreachModeName?: string;
+        MeetingModeId?: number;
+        MeetingModeName?: string;
+        MeetingStatus?: string;
+        FollowUpDate?: string;
     }
 
     export namespace EnquiryContactsRow {
@@ -154,7 +168,21 @@
             OwnerPlan = "OwnerPlan",
             MasterAccountId = "MasterAccountId",
             MasterAccountNo = "MasterAccountNo",
-            CampaignId = "CampaignId"
+            CampaignId = "CampaignId",
+            AccountTypeId = "AccountTypeId",
+            AccountTypeName = "AccountTypeName",
+            AccountStatusId = "AccountStatusId",
+            AccountStatusName = "AccountStatusName",
+            DispositionId = "DispositionId",
+            DispositionName = "DispositionName",
+            Comments = "Comments",
+            L1Meeting = "L1Meeting",
+            OutreachModeId = "OutreachModeId",
+            OutreachModeName = "OutreachModeName",
+            MeetingModeId = "MeetingModeId",
+            MeetingModeName = "MeetingModeName",
+            MeetingStatus = "MeetingStatus",
+            FollowUpDate = "FollowUpDate"
         }
     }
 }

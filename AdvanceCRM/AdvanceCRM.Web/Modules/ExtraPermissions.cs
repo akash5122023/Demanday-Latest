@@ -87,6 +87,8 @@
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("DemandayVerification:Export")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:Import")]
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:Export")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:Employee")]
+[assembly: Serenity.ComponentModel.RegisterPermissionKey("EnquiryContacts:TeamLeader")]
 // Toolkit sub-modules: Import permissions
 // Blanket key - a role holding this may import into every Verify Sheets sheet.
 [assembly: Serenity.ComponentModel.RegisterPermissionKey("Toolkit:VerifySheets:Import")]

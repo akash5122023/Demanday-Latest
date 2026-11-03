@@ -98,7 +98,7 @@ namespace AdvanceCRM.Demanday.Endpoints
             string[] headers = new[]
             {
                 "Agent Name", "CDQA Comments", "Master Account No", "Campaign Id", "Company Name",
-                "First Name", "Last Name", "Title", "Email", "Date",
+                "First Name", "Last Name", "Title", "Email", "Country", "Date",
                 "Work Phone", "Alternate 01", "Alternate 02", "Profile Link", "Created By"
             };
 
@@ -202,6 +202,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),
                                 Title = ExcelImportHelper.GetText(ws, row, map, "Title"),
                                 Email = ExcelImportHelper.GetText(ws, row, map, "Email"),
+                                Country = ExcelImportHelper.GetText(ws, row, map, "Country"),
                                 WorkPhone = ExcelImportHelper.GetText(ws, row, map, "WorkPhone", "Work Phone"),
                                 Alternate01 = ExcelImportHelper.GetText(ws, row, map, "Alternate01", "Alternate 01", "Alternate1"),
                                 Alternate02 = ExcelImportHelper.GetText(ws, row, map, "Alternate02", "Alternate 02", "Alternate2"),

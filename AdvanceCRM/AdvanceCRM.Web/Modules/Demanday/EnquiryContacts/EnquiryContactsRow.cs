@@ -59,14 +59,14 @@ namespace AdvanceCRM.Demanday
             set => fields.Email[this] = value;
         }
 
-        [DisplayName("Work Phone"), Size(50)]
+        [DisplayName("Direct Phone Number"), Size(50)]
         public String WorkPhone
         {
             get => fields.WorkPhone[this];
             set => fields.WorkPhone[this] = value;
         }
 
-        [DisplayName("Alternative Number"), Size(50)]
+        [DisplayName("Business Phone Number"), Size(50)]
         public String AlternativeNumber
         {
             get => fields.AlternativeNumber[this];
@@ -129,7 +129,7 @@ namespace AdvanceCRM.Demanday
             set => fields.Revenue[this] = value;
         }
 
-        [DisplayName("Company Employee Size"), Size(100)]
+        [DisplayName("Employee Size"), Size(100)]
         public String CompanyEmployeeSize
         {
             get => fields.CompanyEmployeeSize[this];
@@ -199,6 +199,109 @@ namespace AdvanceCRM.Demanday
             set => fields.Md5[this] = value;
         }
 
+        [DisplayName("Account Type"), ForeignKey("[dbo].[ContactAccountTypeMaster]", "Id"), LeftJoin("jAccountType"), TextualField("AccountTypeName"), LookupInclude]
+        [LookupEditor(typeof(Masters.ContactAccountTypeMasterRow))]
+        public Int32? AccountTypeId
+        {
+            get => fields.AccountTypeId[this];
+            set => fields.AccountTypeId[this] = value;
+        }
+
+        [DisplayName("Account Type"), Expression("jAccountType.[Name]")]
+        public String AccountTypeName
+        {
+            get => fields.AccountTypeName[this];
+            set => fields.AccountTypeName[this] = value;
+        }
+
+        [DisplayName("Status"), ForeignKey("[dbo].[ContactAccountStatusMaster]", "Id"), LeftJoin("jAccountStatus"), TextualField("AccountStatusName"), LookupInclude]
+        [LookupEditor(typeof(Masters.ContactAccountStatusMasterRow))]
+        public Int32? AccountStatusId
+        {
+            get => fields.AccountStatusId[this];
+            set => fields.AccountStatusId[this] = value;
+        }
+
+        [DisplayName("Status"), Expression("jAccountStatus.[Name]")]
+        public String AccountStatusName
+        {
+            get => fields.AccountStatusName[this];
+            set => fields.AccountStatusName[this] = value;
+        }
+
+        [DisplayName("Disposition"), ForeignKey("[dbo].[ContactDispositionMaster]", "Id"), LeftJoin("jDisposition"), TextualField("DispositionName"), LookupInclude]
+        [LookupEditor(typeof(Masters.ContactDispositionMasterRow))]
+        public Int32? DispositionId
+        {
+            get => fields.DispositionId[this];
+            set => fields.DispositionId[this] = value;
+        }
+
+        [DisplayName("Disposition"), Expression("jDisposition.[Name]")]
+        public String DispositionName
+        {
+            get => fields.DispositionName[this];
+            set => fields.DispositionName[this] = value;
+        }
+
+        [DisplayName("Mode of Outreach"), ForeignKey("[dbo].[ContactOutreachModeMaster]", "Id"), LeftJoin("jOutreachMode"), TextualField("OutreachModeName"), LookupInclude]
+        [LookupEditor(typeof(Masters.ContactOutreachModeMasterRow))]
+        public Int32? OutreachModeId
+        {
+            get => fields.OutreachModeId[this];
+            set => fields.OutreachModeId[this] = value;
+        }
+
+        [DisplayName("Mode of Outreach"), Expression("jOutreachMode.[Name]")]
+        public String OutreachModeName
+        {
+            get => fields.OutreachModeName[this];
+            set => fields.OutreachModeName[this] = value;
+        }
+
+        [DisplayName("Meeting Mode"), ForeignKey("[dbo].[ContactMeetingModeMaster]", "Id"), LeftJoin("jMeetingMode"), TextualField("MeetingModeName"), LookupInclude]
+        [LookupEditor(typeof(Masters.ContactMeetingModeMasterRow))]
+        public Int32? MeetingModeId
+        {
+            get => fields.MeetingModeId[this];
+            set => fields.MeetingModeId[this] = value;
+        }
+
+        [DisplayName("Meeting Mode"), Expression("jMeetingMode.[Name]")]
+        public String MeetingModeName
+        {
+            get => fields.MeetingModeName[this];
+            set => fields.MeetingModeName[this] = value;
+        }
+
+        [DisplayName("Status (Comments)"), Size(2000)]
+        public String MeetingStatus
+        {
+            get => fields.MeetingStatus[this];
+            set => fields.MeetingStatus[this] = value;
+        }
+
+        [DisplayName("Follow-up Date")]
+        public DateTime? FollowUpDate
+        {
+            get => fields.FollowUpDate[this];
+            set => fields.FollowUpDate[this] = value;
+        }
+
+        [DisplayName("Comments"), Size(2000)]
+        public String Comments
+        {
+            get => fields.Comments[this];
+            set => fields.Comments[this] = value;
+        }
+
+        [DisplayName("Date of Meeting")]
+        public DateTime? L1Meeting
+        {
+            get => fields.L1Meeting[this];
+            set => fields.L1Meeting[this] = value;
+        }
+
         [DisplayName("Master Account"), ForeignKey("[dbo].[DemandayMasterAccount]", "Id"), LeftJoin("jMasterAccount"), LookupInclude]
         [LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
         public Int32? MasterAccountId
@@ -230,7 +333,7 @@ namespace AdvanceCRM.Demanday
             get { return Fields.OwnerId[this]; }
             set { Fields.OwnerId[this] = value; }
         }
-        [DisplayName("Owner Username"), Expression("jOwner.[Username]")]
+        [DisplayName("Owner Username"), Expression("jOwner.[DisplayName]")]
         public String OwnerUsername
         {
             get => fields.OwnerUsername[this];
@@ -585,6 +688,20 @@ namespace AdvanceCRM.Demanday
             public Int32Field MasterAccountId;
             public StringField MasterAccountNo;
             public StringField CampaignId;
+            public Int32Field AccountTypeId;
+            public StringField AccountTypeName;
+            public Int32Field AccountStatusId;
+            public StringField AccountStatusName;
+            public Int32Field DispositionId;
+            public StringField DispositionName;
+            public StringField Comments;
+            public DateTimeField L1Meeting;
+            public Int32Field OutreachModeId;
+            public StringField OutreachModeName;
+            public Int32Field MeetingModeId;
+            public StringField MeetingModeName;
+            public StringField MeetingStatus;
+            public DateTimeField FollowUpDate;
         }
     }
 }

@@ -544,6 +544,31 @@ namespace MVC
                 public const string ComplaintTypeIndex = "~/Modules/Masters/ComplaintType/ComplaintTypeIndex.cshtml";
             }
 
+            public static class ContactAccountStatusMaster
+            {
+                public const string ContactAccountStatusMasterIndex = "~/Modules/Masters/ContactAccountStatusMaster/ContactAccountStatusMasterIndex.cshtml";
+            }
+
+            public static class ContactAccountTypeMaster
+            {
+                public const string ContactAccountTypeMasterIndex = "~/Modules/Masters/ContactAccountTypeMaster/ContactAccountTypeMasterIndex.cshtml";
+            }
+
+            public static class ContactDispositionMaster
+            {
+                public const string ContactDispositionMasterIndex = "~/Modules/Masters/ContactDispositionMaster/ContactDispositionMasterIndex.cshtml";
+            }
+
+            public static class ContactMeetingModeMaster
+            {
+                public const string ContactMeetingModeMasterIndex = "~/Modules/Masters/ContactMeetingModeMaster/ContactMeetingModeMasterIndex.cshtml";
+            }
+
+            public static class ContactOutreachModeMaster
+            {
+                public const string ContactOutreachModeMasterIndex = "~/Modules/Masters/ContactOutreachModeMaster/ContactOutreachModeMasterIndex.cshtml";
+            }
+
             public static class Days
             {
                 public const string DaysIndex = "~/Modules/Masters/Days/DaysIndex.cshtml";

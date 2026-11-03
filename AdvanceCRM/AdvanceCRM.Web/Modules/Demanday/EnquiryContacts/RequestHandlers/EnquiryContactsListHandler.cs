@@ -22,16 +22,12 @@ namespace AdvanceCRM.Demanday
         {
             base.ApplyFilters(query);
 
-            if (Context.Permissions.HasPermission(AdvanceCRM.Administration.PermissionKeys.Security))
-            {
+            if (EnquiryContactsAccess.SeesAll(Context))
                 return;
-            }
 
-            var userIdStr = Context.User.GetIdentifier();
-            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
-            {
-                query.Where(MyRow.Fields.OwnerId == userId);
-            }
+            // A regular employee: only their own records. No identifiable user -> nothing.
+            var userId = EnquiryContactsAccess.CurrentUserId(Context);
+            query.Where(MyRow.Fields.OwnerId == (userId ?? -1));
         }
     }
 }

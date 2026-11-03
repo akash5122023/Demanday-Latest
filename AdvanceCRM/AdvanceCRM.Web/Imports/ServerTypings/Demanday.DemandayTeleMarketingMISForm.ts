@@ -53,7 +53,7 @@
         Date: Serenity.DateTimeEditor;
         AdditionalNotes: Serenity.StringEditor;
         QADetails: DemandayTeleMarketingEnquiryQADetailsEditor;
-        OwnerId: Serenity.LookupEditor;
+        OwnerId: Administration.UserEditor;
     }
 
     export class DemandayTeleMarketingMISForm extends Serenity.PrefixedContext {
@@ -72,6 +72,7 @@
                 var w2 = s.DateTimeEditor;
                 var w3 = s.TextAreaEditor;
                 var w4 = DemandayTeleMarketingEnquiryQADetailsEditor;
+                var w5 = Administration.UserEditor;
 
                 Q.initFormType(DemandayTeleMarketingMISForm, [
                     'MasterAccountId', w0,
@@ -127,7 +128,7 @@
                     'Date', w2,
                     'AdditionalNotes', w1,
                     'QADetails', w4,
-                    'OwnerId', w0
+                    'OwnerId', w5
                 ]);
             }
         }

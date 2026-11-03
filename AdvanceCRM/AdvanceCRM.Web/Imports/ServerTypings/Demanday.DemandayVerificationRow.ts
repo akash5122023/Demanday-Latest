@@ -13,6 +13,7 @@
         LastName?: string;
         Title?: string;
         Email?: string;
+        Country?: string;
         WorkPhone?: string;
         Alternate01?: string;
         Alternate02?: string;
@@ -88,6 +89,7 @@
             LastName = "LastName",
             Title = "Title",
             Email = "Email",
+            Country = "Country",
             WorkPhone = "WorkPhone",
             Alternate01 = "Alternate01",
             Alternate02 = "Alternate02",

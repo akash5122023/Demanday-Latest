@@ -9,12 +9,13 @@
         LastName: Serenity.StringEditor;
         Title: Serenity.StringEditor;
         Email: Serenity.EmailEditor;
+        Country: Serenity.StringEditor;
         Date: Serenity.DateTimeEditor;
         WorkPhone: Serenity.StringEditor;
         Alternate01: Serenity.StringEditor;
         Alternate02: Serenity.StringEditor;
         ProfileLink: Serenity.StringEditor;
-        OwnerId: Serenity.LookupEditor;
+        OwnerId: Administration.UserEditor;
     }
 
     export class DemandayVerificationForm extends Serenity.PrefixedContext {
@@ -32,6 +33,7 @@
                 var w1 = s.StringEditor;
                 var w2 = s.EmailEditor;
                 var w3 = s.DateTimeEditor;
+                var w4 = Administration.UserEditor;
 
                 Q.initFormType(DemandayVerificationForm, [
                     'MasterAccountId', w0,
@@ -43,12 +45,13 @@
                     'LastName', w1,
                     'Title', w1,
                     'Email', w2,
+                    'Country', w1,
                     'Date', w3,
                     'WorkPhone', w1,
                     'Alternate01', w1,
                     'Alternate02', w1,
                     'ProfileLink', w1,
-                    'OwnerId', w0
+                    'OwnerId', w4
                 ]);
             }
         }

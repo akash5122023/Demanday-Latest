@@ -263,7 +263,7 @@ public String EmailFormat
             set { Fields.OwnerId[this] = value; }
         }
 
-        [DisplayName("Created By"), Expression("jOwner.[Username]")]
+        [DisplayName("Created By"), Expression("jOwner.[DisplayName]")]
         public String OwnerUsername
         {
             get => fields.OwnerUsername[this];

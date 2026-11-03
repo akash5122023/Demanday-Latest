@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Data;
 using Serenity.Services;
 using System;
@@ -16,6 +16,13 @@ namespace AdvanceCRM.Demanday
         public EnquiryContactsDeleteHandler(IRequestContext context)
              : base(context)
         {
+        }
+
+        protected override void OnBeforeDelete()
+        {
+            base.OnBeforeDelete();
+            var stored = Connection.TryById<MyRow>(Request.EntityId, q => q.Select(MyRow.Fields.OwnerId));
+            EnquiryContactsAccess.EnsureCanAccess(Context, stored?.OwnerId);
         }
     }
 }

@@ -1,30 +1,26 @@
 ﻿namespace AdvanceCRM.Demanday {
     export interface EnquiryContactsForm {
-        MasterAccountId: Serenity.LookupEditor;
-        CampaignId: Serenity.LookupEditor;
+        CompanyName: Serenity.StringEditor;
+        AccountTypeId: Serenity.LookupEditor;
+        Country: Serenity.StringEditor;
+        AccountStatusId: Serenity.LookupEditor;
         FirstName: Serenity.StringEditor;
         LastName: Serenity.StringEditor;
         Title: Serenity.StringEditor;
         Email: Serenity.StringEditor;
         WorkPhone: Serenity.StringEditor;
         AlternativeNumber: Serenity.StringEditor;
-        CompanyName: Serenity.StringEditor;
         Industry: Serenity.StringEditor;
-        SubIndustry: Serenity.StringEditor;
-        Revenue: Serenity.StringEditor;
         CompanyEmployeeSize: Serenity.StringEditor;
-        Street: Serenity.StringEditor;
-        City: Serenity.StringEditor;
-        State: Serenity.StringEditor;
-        ZipCode: Serenity.StringEditor;
-        Country: Serenity.StringEditor;
         ProfileLink: Serenity.StringEditor;
         CompanyLink: Serenity.StringEditor;
-        RevenueLink: Serenity.StringEditor;
-        AdressLink: Serenity.StringEditor;
-        Tenurity: Serenity.StringEditor;
-        Code: Serenity.StringEditor;
-        Md5: Serenity.StringEditor;
+        OutreachModeId: Serenity.LookupEditor;
+        DispositionId: Serenity.LookupEditor;
+        Comments: Serenity.TextAreaEditor;
+        L1Meeting: Serenity.DateTimeEditor;
+        MeetingModeId: Serenity.LookupEditor;
+        MeetingStatus: Serenity.TextAreaEditor;
+        FollowUpDate: Serenity.DateTimeEditor;
         OwnerId: Administration.UserEditor;
     }
 
@@ -39,37 +35,35 @@
                 EnquiryContactsForm.init = true;
 
                 var s = Serenity;
-                var w0 = s.LookupEditor;
-                var w1 = s.StringEditor;
-                var w2 = Administration.UserEditor;
+                var w0 = s.StringEditor;
+                var w1 = s.LookupEditor;
+                var w2 = s.TextAreaEditor;
+                var w3 = s.DateTimeEditor;
+                var w4 = Administration.UserEditor;
 
                 Q.initFormType(EnquiryContactsForm, [
-                    'MasterAccountId', w0,
-                    'CampaignId', w0,
-                    'FirstName', w1,
-                    'LastName', w1,
-                    'Title', w1,
-                    'Email', w1,
-                    'WorkPhone', w1,
-                    'AlternativeNumber', w1,
-                    'CompanyName', w1,
-                    'Industry', w1,
-                    'SubIndustry', w1,
-                    'Revenue', w1,
-                    'CompanyEmployeeSize', w1,
-                    'Street', w1,
-                    'City', w1,
-                    'State', w1,
-                    'ZipCode', w1,
-                    'Country', w1,
-                    'ProfileLink', w1,
-                    'CompanyLink', w1,
-                    'RevenueLink', w1,
-                    'AdressLink', w1,
-                    'Tenurity', w1,
-                    'Code', w1,
-                    'Md5', w1,
-                    'OwnerId', w2
+                    'CompanyName', w0,
+                    'AccountTypeId', w1,
+                    'Country', w0,
+                    'AccountStatusId', w1,
+                    'FirstName', w0,
+                    'LastName', w0,
+                    'Title', w0,
+                    'Email', w0,
+                    'WorkPhone', w0,
+                    'AlternativeNumber', w0,
+                    'Industry', w0,
+                    'CompanyEmployeeSize', w0,
+                    'ProfileLink', w0,
+                    'CompanyLink', w0,
+                    'OutreachModeId', w1,
+                    'DispositionId', w1,
+                    'Comments', w2,
+                    'L1Meeting', w3,
+                    'MeetingModeId', w1,
+                    'MeetingStatus', w2,
+                    'FollowUpDate', w3,
+                    'OwnerId', w4
                 ]);
             }
         }

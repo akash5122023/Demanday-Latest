@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.ComponentModel;
 using Serenity.Data;
 using System;
@@ -12,15 +12,17 @@ namespace AdvanceCRM.Demanday.Forms
     [BasedOnRow(typeof(EnquiryContactsRow), CheckNames = true)]
     public class EnquiryContactsForm
     {
-        [Category("Campaign Information")]
+        [Category("Accounts")]
         [HalfWidth]
-        [LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
-        public Int32? MasterAccountId { get; set; }
+        public string CompanyName { get; set; }
+        [HalfWidth]
+        public Int32? AccountTypeId { get; set; }
+        [HalfWidth]
+        public string Country { get; set; }
+        [HalfWidth]
+        public Int32? AccountStatusId { get; set; }
 
-        [HalfWidth]
-        [LookupEditor("Masters.DemandayCampaignIdByText", CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
-        public string CampaignId { get; set; }
-        [Category("Contact Information")]
+        [Category("RPC Contacts")]
         [HalfWidth]
         public string FirstName { get; set; }
         [HalfWidth]
@@ -33,75 +35,63 @@ namespace AdvanceCRM.Demanday.Forms
         public string WorkPhone { get; set; }
         [HalfWidth]
         public string AlternativeNumber { get; set; }
-
-        [Category("Company Information")]
-        [HalfWidth]
-        public string CompanyName { get; set; }
         [HalfWidth]
         public string Industry { get; set; }
         [HalfWidth]
-        public string SubIndustry { get; set; }
-        [HalfWidth]
-        public string Revenue { get; set; }
-        [HalfWidth, DisplayName("Employee Size")]
         public string CompanyEmployeeSize { get; set; }
-
-        [Category("Address Information")]
-        [FullWidth]
-        public string Street { get; set; }
-        [OneThirdWidth]
-        public string City { get; set; }
-        [OneThirdWidth]
-        public string State { get; set; }
-        [OneThirdWidth]
-        public string ZipCode { get; set; }
-        [HalfWidth]
-        public string Country { get; set; }
-
-        [Category("Links & References")]
         [HalfWidth]
         public string ProfileLink { get; set; }
         [HalfWidth]
         public string CompanyLink { get; set; }
         [HalfWidth]
-        public string RevenueLink { get; set; }
+        public Int32? OutreachModeId { get; set; }
         [HalfWidth]
-        public string AdressLink { get; set; }
+        public Int32? DispositionId { get; set; }
+        [FullWidth, TextAreaEditor(Rows = 3)]
+        public string Comments { get; set; }
 
+        [Category("L1 Meeting")]
+        [HalfWidth, DateTimeEditor]
+        public DateTime? L1Meeting { get; set; }
+        [HalfWidth]
+        public Int32? MeetingModeId { get; set; }
+        [FullWidth, TextAreaEditor(Rows = 3)]
+        public string MeetingStatus { get; set; }
+        [HalfWidth, DateTimeEditor]
+        public DateTime? FollowUpDate { get; set; }
 
-        [Category("Additional Details")]
-        public string Tenurity { get; set; }
-        [HalfWidth]
-        public string Code { get; set; }
-        [HalfWidth]
-        public string Md5 { get; set; }
         [Category("Representatives")]
         [HalfWidth]
         public Int32 OwnerId { get; set; }
-        //public String CompanyName { get; set; }
-        //public String FirstName { get; set; }
-        //public String LastName { get; set; }
-        //public String Title { get; set; }
-        //public String Email { get; set; }
-        //public String WorkPhone { get; set; }
-        //public String AlternativeNumber { get; set; }
-        //public String Street { get; set; }
-        //public String City { get; set; }
-        //public String State { get; set; }
-        //public String ZipCode { get; set; }
-        //public String Country { get; set; }
-        //public String Industry { get; set; }
-        //public Decimal Revenue { get; set; }
-        //public Int32 CompanyEmployeeSize { get; set; }
-        //public String ProfileLink { get; set; }
-        //public String CompanyLink { get; set; }
-        //public String RevenueLink { get; set; }
-        //public String EmailFormat { get; set; }
-        //public String AdressLink { get; set; }
-        //public String Tenurity { get; set; }
-        //public String Code { get; set; }
-        //public String Link { get; set; }
-        //public String Md5 { get; set; }
-        //public Int32 OwnerId { get; set; }
+
+        // Not part of the Accounts / RPC Contacts layout - kept for reference, can be switched back on.
+        //[Category("Campaign Information")]
+        //[HalfWidth]
+        //[LookupEditor(typeof(Masters.DemandayMasterAccountRow))]
+        //public Int32? MasterAccountId { get; set; }
+        //[HalfWidth]
+        //[LookupEditor("Masters.DemandayCampaignIdByText", CascadeFrom = "MasterAccountId", CascadeField = "DemandayMasterAccountId")]
+        //public string CampaignId { get; set; }
+        //[HalfWidth]
+        //public string SubIndustry { get; set; }
+        //[HalfWidth]
+        //public string Revenue { get; set; }
+        //[FullWidth]
+        //public string Street { get; set; }
+        //[OneThirdWidth]
+        //public string City { get; set; }
+        //[OneThirdWidth]
+        //public string State { get; set; }
+        //[OneThirdWidth]
+        //public string ZipCode { get; set; }
+        //[HalfWidth]
+        //public string RevenueLink { get; set; }
+        //[HalfWidth]
+        //public string AdressLink { get; set; }
+        //public string Tenurity { get; set; }
+        //[HalfWidth]
+        //public string Code { get; set; }
+        //[HalfWidth]
+        //public string Md5 { get; set; }
     }
 }

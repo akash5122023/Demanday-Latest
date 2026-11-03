@@ -52,7 +52,7 @@
         AdditionalNotes: Serenity.StringEditor;
         Attachments: Serenity.ImageUploadEditor;
         QADetails: DemandayTeleMarketingEnquiryQADetailsEditor;
-        OwnerId: Serenity.LookupEditor;
+        OwnerId: Administration.UserEditor;
     }
 
     export class DemandayTeleMarketingQualiltyForm extends Serenity.PrefixedContext {
@@ -73,6 +73,7 @@
                 var w4 = s.TextAreaEditor;
                 var w5 = s.ImageUploadEditor;
                 var w6 = DemandayTeleMarketingEnquiryQADetailsEditor;
+                var w7 = Administration.UserEditor;
 
                 Q.initFormType(DemandayTeleMarketingQualiltyForm, [
                     'MasterAccountId', w0,
@@ -127,7 +128,7 @@
                     'AdditionalNotes', w1,
                     'Attachments', w5,
                     'QADetails', w6,
-                    'OwnerId', w0
+                    'OwnerId', w7
                 ]);
             }
         }

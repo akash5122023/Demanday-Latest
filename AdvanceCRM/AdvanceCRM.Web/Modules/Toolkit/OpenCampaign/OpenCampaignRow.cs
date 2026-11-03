@@ -372,7 +372,7 @@ namespace AdvanceCRM.Toolkit
             set => fields.CampaignIdValue[this] = value;
         }
 
-        [DisplayName("Owner Username"), Expression("jOwner.[Username]")]
+        [DisplayName("Owner Username"), Expression("jOwner.[DisplayName]")]
         public String OwnerUsername
         {
             get => fields.OwnerUsername[this];

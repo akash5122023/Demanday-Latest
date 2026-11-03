@@ -42,7 +42,10 @@ namespace AdvanceCRM.Demanday.Forms
 
         [HalfWidth, EmailEditor]
         public String Email { get; set; }
-        
+
+        [HalfWidth]
+        public String Country { get; set; }
+
         [HalfWidth, DateTimeEditor]
         public DateTime Date { get; set; }
 

@@ -85,7 +85,7 @@ namespace AdvanceCRM.TeleMarketingEmailTeam
             set => fields.DemandayTeleMarketingQualiltyId[this] = value;
         }
 
-        [DisplayName("Owner Username"), Expression("jOwner.[Username]")]
+        [DisplayName("Owner Username"), Expression("jOwner.[DisplayName]")]
         public String OwnerUsername
         {
             get => fields.OwnerUsername[this];

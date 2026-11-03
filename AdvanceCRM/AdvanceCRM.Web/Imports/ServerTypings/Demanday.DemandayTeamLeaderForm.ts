@@ -31,7 +31,7 @@
         Md5: Serenity.StringEditor;
         Date: Serenity.DateTimeEditor;
         Attachments: Serenity.ImageUploadEditor;
-        OwnerId: Serenity.LookupEditor;
+        OwnerId: Administration.UserEditor;
     }
 
     export class DemandayTeamLeaderForm extends Serenity.PrefixedContext {
@@ -49,6 +49,7 @@
                 var w1 = s.StringEditor;
                 var w2 = s.DateTimeEditor;
                 var w3 = s.ImageUploadEditor;
+                var w4 = Administration.UserEditor;
 
                 Q.initFormType(DemandayTeamLeaderForm, [
                     'MasterAccountId', w0,
@@ -82,7 +83,7 @@
                     'Md5', w1,
                     'Date', w2,
                     'Attachments', w3,
-                    'OwnerId', w0
+                    'OwnerId', w4
                 ]);
             }
         }

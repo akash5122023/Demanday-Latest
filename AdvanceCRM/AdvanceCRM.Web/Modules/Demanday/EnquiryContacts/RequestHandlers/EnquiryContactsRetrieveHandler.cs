@@ -1,4 +1,4 @@
-﻿using Serenity;
+using Serenity;
 using Serenity.Data;
 using Serenity.Services;
 using System;
@@ -16,6 +16,16 @@ namespace AdvanceCRM.Demanday
         public EnquiryContactsRetrieveHandler(IRequestContext context)
              : base(context)
         {
+        }
+
+        protected override void PrepareQuery(SqlQuery query)
+        {
+            base.PrepareQuery(query);
+
+            if (EnquiryContactsAccess.SeesAll(Context))
+                return;
+
+            query.Where(MyRow.Fields.OwnerId == (EnquiryContactsAccess.CurrentUserId(Context) ?? -1));
         }
     }
 }

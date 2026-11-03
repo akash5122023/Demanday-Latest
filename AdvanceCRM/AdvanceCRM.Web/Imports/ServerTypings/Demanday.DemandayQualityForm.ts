@@ -47,7 +47,7 @@
         Code: Serenity.StringEditor;
         Md5: Serenity.StringEditor;
         Date: Serenity.DateTimeEditor;
-        OwnerId: Serenity.LookupEditor;
+        OwnerId: Administration.UserEditor;
     }
 
     export class DemandayQualityForm extends Serenity.PrefixedContext {
@@ -66,6 +66,7 @@
                 var w2 = s.EnumEditor;
                 var w3 = s.DateTimeEditor;
                 var w4 = s.TextAreaEditor;
+                var w5 = Administration.UserEditor;
 
                 Q.initFormType(DemandayQualityForm, [
                     'MasterAccountId', w0,
@@ -115,7 +116,7 @@
                     'Code', w1,
                     'Md5', w1,
                     'Date', w3,
-                    'OwnerId', w0
+                    'OwnerId', w5
                 ]);
             }
         }

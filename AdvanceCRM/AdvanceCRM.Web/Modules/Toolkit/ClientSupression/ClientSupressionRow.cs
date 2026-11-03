@@ -182,7 +182,7 @@ namespace AdvanceCRM.Toolkit
         //    set => fields.MasterAccountOwnerId[this] = value;
         //}
 
-        [DisplayName("Owner Username"), Expression("jOwner.[Username]")]
+        [DisplayName("Owner Username"), Expression("jOwner.[DisplayName]")]
         public String OwnerUsername
         {
             get => fields.OwnerUsername[this];

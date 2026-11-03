@@ -121,6 +121,13 @@ namespace AdvanceCRM.Demanday
             set => fields.Email[this] = value;
         }
 
+        [DisplayName("Country"), Size(100)]
+        public String Country
+        {
+            get => fields.Country[this];
+            set => fields.Country[this] = value;
+        }
+
         [DisplayName("Work Phone"), Size(50)]
         public String WorkPhone
         {
@@ -150,14 +157,14 @@ namespace AdvanceCRM.Demanday
         }
 
         [DisplayName("Created By"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jOwner"), TextualField("OwnerUsername"), ReadOnly(true)]
-        [LookupEditor(typeof(UserRow))]
+        [Administration.UserEditor]
         public Int32? OwnerId
         {
             get { return Fields.OwnerId[this]; }
             set { Fields.OwnerId[this] = value; }
         }
 
-        [DisplayName("Owner Username"), Expression("jOwner.[Username]")]
+        [DisplayName("Owner Username"), Expression("jOwner.[DisplayName]")]
         public String OwnerUsername
         {
             get => fields.OwnerUsername[this];
@@ -455,6 +462,7 @@ namespace AdvanceCRM.Demanday
             public StringField LastName;
             public StringField Title;
             public StringField Email;
+            public StringField Country;
             public StringField WorkPhone;
             public StringField Alternate01;
             public StringField Alternate02;

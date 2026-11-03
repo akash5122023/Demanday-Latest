@@ -96,6 +96,12 @@ namespace AdvanceCRM.Demanday.Endpoints
                     var map = ExcelImportHelper.BuildHeaderMap(ws);
                     // Account Number -> id, read once so the per-row lookup below costs nothing.
                     var accounts = ExcelImportHelper.LoadMasterAccountMap(uow.Connection);
+                    // Dropdown masters are matched by name (case-insensitive), as typed in the sheet.
+                    var accountTypes = LoadMasterMap<Masters.ContactAccountTypeMasterRow>(uow.Connection, Masters.ContactAccountTypeMasterRow.Fields.Id, Masters.ContactAccountTypeMasterRow.Fields.Name);
+                    var accountStatuses = LoadMasterMap<Masters.ContactAccountStatusMasterRow>(uow.Connection, Masters.ContactAccountStatusMasterRow.Fields.Id, Masters.ContactAccountStatusMasterRow.Fields.Name);
+                    var dispositions = LoadMasterMap<Masters.ContactDispositionMasterRow>(uow.Connection, Masters.ContactDispositionMasterRow.Fields.Id, Masters.ContactDispositionMasterRow.Fields.Name);
+                    var meetingModes = LoadMasterMap<Masters.ContactMeetingModeMasterRow>(uow.Connection, Masters.ContactMeetingModeMasterRow.Fields.Id, Masters.ContactMeetingModeMasterRow.Fields.Name);
+                    var outreachModes = LoadMasterMap<Masters.ContactOutreachModeMasterRow>(uow.Connection, Masters.ContactOutreachModeMasterRow.Fields.Id, Masters.ContactOutreachModeMasterRow.Fields.Name);
                     for (int row = 2; row <= rowCount; row++)
                     {
                         try
@@ -110,12 +116,21 @@ namespace AdvanceCRM.Demanday.Endpoints
                                     ?? ExcelImportHelper.GetInt(ws, row, map, "MasterAccountId", "Master Account Id"),
                                 CampaignId = ExcelImportHelper.GetText(ws, row, map, "CampaignId", "Campaign Id"),
                                 CompanyName = ExcelImportHelper.GetText(ws, row, map, "CompanyName", "Company Name"),
+                                AccountTypeId = ResolveMaster(ws, row, map, accountTypes, "Account Type", "AccountType", "Vertical"),
+                                AccountStatusId = ResolveMaster(ws, row, map, accountStatuses, "Status", "Account Status", "AccountStatus"),
+                                DispositionId = ResolveMaster(ws, row, map, dispositions, "Disposition"),
+                                Comments = ExcelImportHelper.GetText(ws, row, map, "Comments"),
+                                L1Meeting = ExcelImportHelper.GetDate(ws, row, map, "Date of Meeting", "L1 Meeting", "L1Meeting"),
+                                MeetingModeId = ResolveMaster(ws, row, map, meetingModes, "Meeting Mode", "MeetingMode"),
+                                MeetingStatus = ExcelImportHelper.GetText(ws, row, map, "Status (Comments)", "Meeting Status", "MeetingStatus"),
+                                FollowUpDate = ExcelImportHelper.GetDate(ws, row, map, "Follow-up Date", "Follow Up Date", "FollowUpDate"),
+                                OutreachModeId = ResolveMaster(ws, row, map, outreachModes, "Mode of Outreach", "Outreach Mode"),
                                 FirstName = ExcelImportHelper.GetText(ws, row, map, "FirstName", "First Name"),
                                 LastName = ExcelImportHelper.GetText(ws, row, map, "LastName", "Last Name"),
                                 Title = ExcelImportHelper.GetText(ws, row, map, "Title"),
                                 Email = ExcelImportHelper.GetText(ws, row, map, "Email"),
-                                WorkPhone = ExcelImportHelper.GetText(ws, row, map, "WorkPhone", "Work Phone"),
-                                AlternativeNumber = ExcelImportHelper.GetText(ws, row, map, "AlternativeNumber", "Alternative Number"),
+                                WorkPhone = ExcelImportHelper.GetText(ws, row, map, "WorkPhone", "Work Phone", "Direct Phone Number", "Direct Phone"),
+                                AlternativeNumber = ExcelImportHelper.GetText(ws, row, map, "AlternativeNumber", "Alternative Number", "Business Phone Number", "Business Phone"),
                                 Street = ExcelImportHelper.GetText(ws, row, map, "Street"),
                                 City = ExcelImportHelper.GetText(ws, row, map, "City"),
                                 State = ExcelImportHelper.GetText(ws, row, map, "State"),
@@ -160,6 +175,32 @@ namespace AdvanceCRM.Demanday.Endpoints
                 return Content("Import failed: " + ex.Message + "\n" + ex.StackTrace, "text/plain");
             }
         }
+        // Name -> Id of a dropdown master, matched case-insensitively.
+        private static Dictionary<string, int> LoadMasterMap<TRow>(IDbConnection connection, Int32Field idField, StringField nameField)
+            where TRow : class, IRow, new()
+        {
+            var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var r in connection.List<TRow>(q => q.Select(idField).Select(nameField)))
+            {
+                var name = nameField[r]?.Trim();
+                if (!string.IsNullOrEmpty(name) && idField[r].HasValue)
+                    map[name] = idField[r].Value;
+            }
+            return map;
+        }
+
+        // Blank cell -> no value; a name that is not in the master is a row error, not a silent skip.
+        private static int? ResolveMaster(ExcelWorksheet ws, int row, Dictionary<string, int> map,
+            Dictionary<string, int> master, params string[] headerNames)
+        {
+            var text = ExcelImportHelper.GetText(ws, row, map, headerNames)?.Trim();
+            if (string.IsNullOrEmpty(text))
+                return null;
+            if (!master.TryGetValue(text, out var id))
+                throw new Exception($"'{text}' is not in the {headerNames[0]} master.");
+            return id;
+        }
+
         private static int? GetInt(object val) { if (val == null) return null; int i; return int.TryParse(val.ToString(), out i) ? i : null; }
         private static decimal? GetDecimal(object val) { if (val == null) return null; decimal d; return decimal.TryParse(val.ToString(), out d) ? d : null; }
         private static DateTime? GetDate(object val) { if (val == null) return null; DateTime dt; return DateTime.TryParse(val.ToString(), out dt) ? dt : null; }

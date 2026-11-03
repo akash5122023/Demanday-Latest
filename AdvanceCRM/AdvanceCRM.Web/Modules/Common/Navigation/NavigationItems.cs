@@ -59,7 +59,6 @@ using Serenity.Navigation;
 [assembly: NavigationLink(1454, "Demanday/Quality", typeof(DemandayQualityController), icon: "fa-mail-bulk", Permission = "DemandayQuality:Read", Title = "Quality")]
 [assembly: NavigationLink(1455, "Demanday/MIS", typeof(DemandayMisController), icon: "fa-mail-bulk", Permission = "DemandayMIS:Read", Title = "MIS")]
 //[assembly: NavigationLink(1456, "Demanday/EMailTeam", typeof(EMailTeamController), icon: "fa-mail-bulk", Permission = "EMailTeam:Read", Title = "EMailTeam")]
-[assembly: NavigationLink(1457, "Demanday/Enquiry Contacts", typeof(EnquiryContactsController), icon: "fa-mail-bulk", Permission = "EnquiryContacts:Read", Title = "Enquiry Contacts")]
 
 
 [assembly: NavigationLink(1461, "Demanday/TM Enquiry", typeof(DemandayTeleMarketingEnquiryController), icon: "fa-phone", Permission = "DemandayTeleMarketingEnquiry:Read", Title = "TM Enquiry")]
@@ -369,3 +368,6 @@ using Serenity.Navigation;
 //[assembly: NavigationLink(9122, "Settings/Default Features", typeof(DefaultFeaturesPage), icon: "fa-star", Permission = "Settings:ProductPlans")]
 //[assembly: NavigationLink(9123, "Settings/Module Pricing", typeof(ModulePricingController), icon: "fa-tags", Permission = "Settings:ProductPlans")]
 //[assembly: NavigationLink(9124, "Settings/Coupon Codes", typeof(CouponCodesController), icon: "fa-ticket", Permission = "Settings:ProductPlans")]
+
+// Enquiry Contacts used to live under the Demanday menu; it now has a menu of its own.
+[assembly: NavigationLink(1600, "Enquiry Contacts", typeof(EnquiryContactsController), icon: "fa-address-book", Permission = "EnquiryContacts:Read", Title = "Enquiry Contacts")]

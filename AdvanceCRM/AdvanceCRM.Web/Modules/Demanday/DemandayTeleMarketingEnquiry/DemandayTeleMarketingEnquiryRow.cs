@@ -230,14 +230,14 @@ namespace AdvanceCRM.Demanday
         }
 
         [DisplayName("Owner"), ForeignKey("[dbo].[Users]", "UserId"), LeftJoin("jOwner"), TextualField("OwnerUsername"),ReadOnly(true)]
-        [LookupEditor(typeof(UserRow))]
+        [Administration.UserEditor]
         public Int32? OwnerId
         {
             get => fields.OwnerId[this];
             set => fields.OwnerId[this] = value;
         }
 
-        [DisplayName("Owner Username"), Expression("jOwner.[Username]")]
+        [DisplayName("Owner Username"), Expression("jOwner.[DisplayName]")]
         public String OwnerUsername
         {
             get => fields.OwnerUsername[this];

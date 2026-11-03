@@ -723,7 +723,7 @@ namespace AdvanceCRM.Enquiry
             set { Fields.BranchCountry[this] = value; }
         }
 
-        [DisplayName("Created By"), Expression("jOwner.[Username]")]
+        [DisplayName("Created By"), Expression("jOwner.[DisplayName]")]
         public String OwnerUsername
         {
             get { return Fields.OwnerUsername[this]; }
