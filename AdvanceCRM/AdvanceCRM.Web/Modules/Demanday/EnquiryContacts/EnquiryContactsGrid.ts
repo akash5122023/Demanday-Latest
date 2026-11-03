@@ -53,6 +53,20 @@ namespace AdvanceCRM.Demanday {
                 }
             });
             buttons.push({
+                title: 'Download Template',
+                cssClass: 'download-template-button',
+                icon: 'fa-download',
+                onClick: () => {
+                    AdvanceCRM.Common.TransferProgress.download({
+                        url: '/Services/Demanday/EnquiryContacts/DownloadTemplate',
+                        method: 'POST',
+                        title: 'Preparing template',
+                        preparingText: 'Building the template on the server…',
+                        fileName: 'EnquiryContacts_Template.xlsx'
+                    });
+                }
+            });
+            buttons.push({
                 title: 'Import from Excel',
                 cssClass: 'import-excel-button',
                 icon: 'fa-file-import',

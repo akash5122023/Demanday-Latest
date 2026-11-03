@@ -78,6 +78,69 @@ namespace AdvanceCRM.Demanday.Endpoints
             return ExcelContentResult.Create(bytes, "EnquiryContactsList_" +
                 DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture) + ".xlsx");
         }
+        /// <summary>
+        /// Blank import sheet with exactly the form's fields, in form order, under the header names
+        /// ImportExcel reads. The dropdown columns carry a pick-list of the master values.
+        /// Created By is left out: it is stamped from the signed-in user.
+        /// </summary>
+        [HttpPost, IgnoreAntiforgeryToken, AuthorizeList(typeof(EnquiryContactsRow))]
+        public FileContentResult DownloadTemplate(IDbConnection connection)
+        {
+            string[] headers = new[]
+            {
+                "Company Name", "Account Type", "Country", "Status",
+                "First Name", "Last Name", "Title", "Email", "Direct Phone Number", "Business Phone Number",
+                "Industry", "Employee Size", "Profile Link", "Company Link", "Mode of Outreach", "Disposition", "Comments",
+                "Date of Meeting", "Meeting Mode", "Status (Comments)", "Follow-up Date"
+            };
+
+            using var package = new ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("EnquiryContacts");
+            var lists = package.Workbook.Worksheets.Add("Lists");
+            lists.Hidden = eWorkSheetHidden.Hidden;
+
+            for (int i = 0; i < headers.Length; i++)
+            {
+                var cell = ws.Cells[1, i + 1];
+                cell.Value = headers[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            }
+
+            int listCol = 1;
+            void PickList(string header, IEnumerable<string> values)
+            {
+                var items = values.Where(v => !string.IsNullOrWhiteSpace(v)).ToList();
+                if (items.Count == 0)
+                    return;
+                for (int i = 0; i < items.Count; i++)
+                    lists.Cells[i + 1, listCol].Value = items[i];
+                var source = lists.Cells[1, listCol, items.Count, listCol];
+                var target = ws.Cells[2, Array.IndexOf(headers, header) + 1, 5000, Array.IndexOf(headers, header) + 1];
+                var validation = ws.DataValidations.AddListValidation(target.Address);
+                validation.Formula.ExcelFormula = "Lists!" + source.Address;
+                validation.ShowErrorMessage = true;
+                validation.Error = "Pick a value from the list.";
+                listCol++;
+            }
+
+            PickList("Account Type", connection.List<Masters.ContactAccountTypeMasterRow>(q => q.Select(Masters.ContactAccountTypeMasterRow.Fields.Name).OrderBy(Masters.ContactAccountTypeMasterRow.Fields.Name)).Select(r => r.Name));
+            PickList("Status", connection.List<Masters.ContactAccountStatusMasterRow>(q => q.Select(Masters.ContactAccountStatusMasterRow.Fields.Name).OrderBy(Masters.ContactAccountStatusMasterRow.Fields.Name)).Select(r => r.Name));
+            PickList("Mode of Outreach", connection.List<Masters.ContactOutreachModeMasterRow>(q => q.Select(Masters.ContactOutreachModeMasterRow.Fields.Name).OrderBy(Masters.ContactOutreachModeMasterRow.Fields.Name)).Select(r => r.Name));
+            PickList("Disposition", connection.List<Masters.ContactDispositionMasterRow>(q => q.Select(Masters.ContactDispositionMasterRow.Fields.Name).OrderBy(Masters.ContactDispositionMasterRow.Fields.Name)).Select(r => r.Name));
+            PickList("Meeting Mode", connection.List<Masters.ContactMeetingModeMasterRow>(q => q.Select(Masters.ContactMeetingModeMasterRow.Fields.Name).OrderBy(Masters.ContactMeetingModeMasterRow.Fields.Name)).Select(r => r.Name));
+
+            foreach (var dateHeader in new[] { "Date of Meeting", "Follow-up Date" })
+                ws.Column(Array.IndexOf(headers, dateHeader) + 1).Style.Numberformat.Format = "dd-mmm-yyyy";
+
+            ws.Cells[1, 1, 1, headers.Length].AutoFitColumns(14, 30);
+            ws.View.FreezePanes(2, 1);
+
+            return Serenity.Web.ExcelContentResult.Create(package.GetAsByteArray(),
+                "EnquiryContacts_Template.xlsx");
+        }
+
         [HttpPost, IgnoreAntiforgeryToken]
         [RequestSizeLimit(52428800)]
         [RequestFormLimits(MultipartBodyLengthLimit = 52428800)]
@@ -136,7 +199,7 @@ namespace AdvanceCRM.Demanday.Endpoints
                                 State = ExcelImportHelper.GetText(ws, row, map, "State"),
                                 ZipCode = ExcelImportHelper.GetText(ws, row, map, "ZipCode", "Zip Code"),
                                 Country = ExcelImportHelper.GetText(ws, row, map, "Country"),
-                                CompanyEmployeeSize = ExcelImportHelper.GetText(ws, row, map, "CompanyEmployeeSize", "Company Employee Size"),
+                                CompanyEmployeeSize = ExcelImportHelper.GetText(ws, row, map, "CompanyEmployeeSize", "Company Employee Size", "Employee Size"),
                                 Industry = ExcelImportHelper.GetText(ws, row, map, "Industry"),
                                 SubIndustry = ExcelImportHelper.GetText(ws, row, map, "SubIndustry", "Sub Industry"),
                                 Revenue = ExcelImportHelper.GetText(ws, row, map, "Revenue"),
